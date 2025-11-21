@@ -1,0 +1,56 @@
+name: Project Board Automation
+
+on:
+  issues:
+    types: [opened, closed, reopened]
+  pull_request:
+    types: [opened, closed, reopened, ready_for_review]
+
+jobs:
+  auto-add-to-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add issues to MVP project
+        uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/${{ github.repository }}/projects/1
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
+  update-status-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add planning status to new issue
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['status:planning']
+            })
+
+  mark-done-on-merge:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Update related issue to done
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const closeIssue = (body) => {
+              const match = body.match(/(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s#(\d+)/i);
+              return match ? match[1] : null;
+            };
+            
+            const issueNum = closeIssue(pr.body);
+            if (issueNum) {
+              github.rest.issues.addLabels({
+                issue_number: issueNum,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['status:done']
+              });
+            }

@@ -227,6 +227,13 @@ Each component will have its own dedicated repository:
 
 ## 📖 Documentation
 
+### Planning & Project Management
+- [Planning Stack](.github/PLANNING.md) - Planning organization and workflows
+- [Implementation Roadmap](.github/IMPLEMENTATION_ROADMAP.md) - Detailed phase-by-phase roadmap
+- [Project Board](.github/PROJECT_BOARD.md) - GitHub Projects board workflow
+- [Quick Reference](.github/QUICK_REFERENCE.md) - Quick reference guide for getting started
+- [Labels Guide](.github/LABELS.md) - Issue labeling scheme
+
 ### Architecture & Design
 - [System Overview](docs/architecture/system-overview.md) - High-level architecture
 - [Data Flow](docs/architecture/data-flow.md) - Data flow and API patterns
