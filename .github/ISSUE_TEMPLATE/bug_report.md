@@ -2,9 +2,16 @@
 name: Bug Report
 about: Report a bug or unexpected behavior in PrintShop OS
 title: '[BUG] '
-labels: bug, needs-triage
+labels: bug, needs-triage, type:bug
 assignees: ''
 ---
+
+## 🏷️ Classification
+<!-- Please add these labels manually after creating the issue -->
+**Priority:** `priority:medium` (Update: critical/high/medium/low)
+**Effort:** `effort:m` (Update: s/m/l/xl)
+**Sector:** (Add: sector:sales, sector:production, sector:crm, sector:finance, sector:automation, etc.)
+**Milestone:** (Link to appropriate milestone)
 
 ## Bug Description
 <!-- Provide a clear and concise description of the bug -->
@@ -65,6 +72,13 @@ Paste logs here
 <!-- Describe how this affects the print shop operations -->
 
 
+
+## Related Issues
+<!-- Link to related issues or dependencies -->
+- Related to #
+- Blocks #
+- Blocked by #
+- Duplicate of #
 
 ## Additional Context
 <!-- Add any other context about the problem -->

@@ -2,9 +2,16 @@
 name: Feature Request
 about: Suggest a new feature or enhancement for PrintShop OS
 title: '[FEATURE] '
-labels: enhancement, needs-review
+labels: enhancement, needs-review, type:feature
 assignees: ''
 ---
+
+## 🏷️ Classification
+<!-- Please add these labels manually after creating the issue -->
+**Priority:** `priority:medium` (Update: critical/high/medium/low)
+**Effort:** `effort:m` (Update: s/m/l/xl based on complexity)
+**Sector:** (Add: sector:sales, sector:production, sector:crm, sector:finance, sector:automation, sector:marketing, sector:supplier, sector:portal, sector:ai)
+**Milestone:** (Link to appropriate milestone: Sales & Quoting, Production & Operations, CRM & Client Management, Finance & Invoicing, etc.)
 
 ## Feature Description
 <!-- Provide a clear and concise description of the feature -->
@@ -119,6 +126,8 @@ assignees: ''
 - Related to #
 - Depends on #
 - Blocks #
+- Part of milestone: [Milestone Name](#)
+- Contributes to roadmap phase: (Phase 1/2/3/4)
 
 ---
 **For Maintainers:**
