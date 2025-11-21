@@ -521,21 +521,57 @@ Once MVP is complete and stable, layer in deeper capabilities:
 - Supplier ordering automation
 - Cost tracking per job
 
-### Month 2-3: CRM Module
-- Customer profiles and history
-- Repeat order workflows
+### Month 2: Workflow Automation (Level 2)
+**Features**:
+- Quote-to-approval pipeline with status tracking (Draft → Sent → Feedback → Approved)
+- Automated email reminders for unapproved quotes (3-day reminder)
+- Production gatekeeping system (prevent job start without all required assets)
+- Team role assignment and job ownership per role (Sales Rep, Production Lead, Press Op, Finishing)
+- Automated email/SMS follow-ups (unapproved quotes, post-job feedback, reorder suggestions)
+
+### Month 2-3: CRM Module (Level 3)
+**Features**:
+- Customer profiles with lifetime spend, avg order size, first/last order dates
+- Customer tags (monthly, nonprofit, VIP, etc.)
+- Repeat order workflows and job duplication (reuse assets, quick reorder)
 - Email/SMS communications
 - Loyalty programs
 
-### Month 3: Automation Framework
-- Payment processing (Stripe)
-- Shipping integration
-- Email notifications
-- Accounting integration (QuickBooks)
+### Month 3: Invoicing & Quoting (Level 4)
+**Features**:
+- Visual quote & invoice generator with PDF export
+- Mockup preview integration
+- Cost per item + total cost calculation
+- Client approval via email link or portal
+- Invoice branding and customization
 
-### Month 3: Frontend UX
-- Customer self-service portal
-- Native mobile apps
+### Month 3: Customer Portal (Level 4)
+**Features**:
+- Customer self-service portal (order history, tracking, reorders, approvals)
+- Secure authentication (token/email login)
+- Upload area for new orders
+- Reorder button from past jobs
+- Invoice download area
+
+### Month 3: Time Tracking Enhancement (Level 3)
+**Features**:
+- Per-job time tracking for press operators
+- Separate tracking for setup, printing, cleanup
+- Export time logs as CSV
+- Mobile-friendly pressroom interface
+
+### Month 3: Automation Framework (Level 5)
+**Features**:
+- n8n/Make integration for advanced workflows
+- Payment processing (Stripe, PayPal)
+- Shipping label generation and carrier integration
+- Accounting integration (QuickBooks)
+- Email notifications (order status, delivery)
+
+### Month 3: Frontend UX (Level 5)
+**Features**:
+- Customer self-service portal (already listed under Level 4)
+- Native mobile apps (iOS/Android)
 - Advanced analytics dashboards
 - Designer collaboration tools
 

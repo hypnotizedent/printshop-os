@@ -10,7 +10,17 @@ The GitHub Projects board provides a visual workflow for organizing and tracking
 
 ---
 
-## Board Columns (Workflow)
+## Board Structure
+
+### MVP Board (Phase 1-3)
+Focus on core workflows: Order intake, Job management, Time tracking
+
+### Level 2-5 Board (Post-MVP Features)
+Focus on quote automation, CRM, invoicing, customer portal, and advanced features
+
+---
+
+## MVP Board Columns (Workflow)
 
 ### 1. 📋 Backlog
 **Status**: `status:planning`  
@@ -413,6 +423,43 @@ Example:
 # Add labels
 @github-actions add-labels #15 phase:1-strapi component:strapi
 ```
+
+---
+
+## Level 2-5 Post-MVP Board (Optional Separate Board)
+
+For post-MVP development, consider creating a separate project board focused on Level 2-5 features.
+
+### Suggested Columns
+1. 📋 **Backlog** — Planning/definition phase
+2. 🎯 **Level 2: Workflow Automation** — Quote pipelines, gatekeeping, follow-ups
+3. 🎯 **Level 3: CRM & Time Tracking** — Customer tracking, job duplication
+4. 🎯 **Level 4: Invoicing & Portal** — Quotes/invoices, customer portal
+5. 🎯 **Level 5: Advanced Features** — Analytics, integrations, mobile apps
+6. ✅ **Testing & Validation** — Integration & performance testing
+7. 🚀 **Done** — Shipped features
+
+### Level 2-5 Issues by Milestone
+
+**Level 2: Workflow Automation**
+- Quote-to-Approval Pipeline with Status Tracking
+- Production Gatekeeping: Prevent Jobs Without Required Assets
+- Assign Team Roles and Ownership Per Job
+- Automated Email/Text Follow-Ups for Key Statuses
+
+**Level 3: Production & CRM**
+- Time Tracking: Per-Job Clock-In System for Press Operators
+- Job Duplication: Enable Easy Job Reordering
+- CRM Module: Track Client Value, Repeat Orders, and Tags
+
+**Level 4: Invoicing + Client Portal**
+- Visual Quote & Invoice Generator with Mockups
+- Customer Portal for Orders, Approvals, and Reorders
+
+**Level 5: Reporting & Finance**
+- Advanced Analytics Dashboards
+- Accounting Integrations (QuickBooks, etc.)
+- Payment Processing (Stripe, PayPal)
 
 ---
 

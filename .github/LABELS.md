@@ -167,6 +167,55 @@
   color: "cccccc"
   description: "Issue is planned for post-MVP development"
 
+- name: level:2-workflow
+  color: "ff7f00"
+  description: "Level 2: Workflow Automation (quote pipeline, gatekeeping, roles)"
+
+- name: level:3-crm
+  color: "ff6b6b"
+  description: "Level 3: CRM & Time Tracking (customers, reorders, analytics)"
+
+- name: level:4-invoicing
+  color: "ffd700"
+  description: "Level 4: Invoicing & Portal (quotes, invoices, customer portal)"
+
+- name: level:5-advanced
+  color: "9370db"
+  description: "Level 5: Advanced Features (integrations, payments, analytics)"
+
+---
+
+## FEATURE LABELS
+## Specific feature areas for Level 2-5
+
+- name: feature:quoting
+  color: "ff7f00"
+  description: "Quote-to-approval pipeline and quote management"
+
+- name: feature:invoicing
+  color: "ffd700"
+  description: "Invoice generation and payment tracking"
+
+- name: feature:gatekeeping
+  color: "ff6b6b"
+  description: "Production gatekeeping and asset validation"
+
+- name: feature:reorder
+  color: "90ee90"
+  description: "Job duplication and reorder workflows"
+
+- name: feature:customer-portal
+  color: "87ceeb"
+  description: "Customer-facing portal and self-service"
+
+- name: feature:crm
+  color: "ff6b6b"
+  description: "CRM tracking and customer analytics"
+
+- name: feature:automation
+  color: "ffb6c1"
+  description: "Workflow automation and integrations (n8n, Make, etc.)"
+
 ---
 
 ## SIZE LABELS

@@ -175,21 +175,35 @@ This document organizes the PrintShop OS project planning layer, connecting GitH
 **Goal**: Customer relationship and repeat order management
 
 **Epics**:
-- Customer segmentation and profiles
+- Customer segmentation and profiles (lifetime spend, avg order size, tags)
 - Order history and repeat order functionality
+- Job duplication/reorder workflow (reuse assets, quick reorder)
 - Customer communication (email, SMS)
 - Loyalty and discount programs
 
 ---
 
+### Workflow Automation (Month 2)
+**Goal**: Quote-to-approval and production gatekeeping workflows
+
+**Epics**:
+- Quote-to-approval pipeline (Draft → Sent → Feedback → Approved)
+- Automated email reminders for unapproved quotes
+- Production gatekeeping (block job start until assets complete)
+- Team role assignment and job ownership per role
+- Automated follow-ups (unapproved quotes, post-job feedback, reorder suggestions)
+
+---
+
 ### Automation Framework (Month 3)
-**Goal**: Workflow automation and integrations
+**Goal**: Advanced workflow automation and integrations
 
 **Epics**:
 - Email notifications (order status, delivery)
 - Payment processing integration (Stripe)
 - Shipping label generation and carrier integration
 - Accounting software integration (QuickBooks)
+- n8n/Make integration for scheduled workflows
 
 ---
 
@@ -197,7 +211,9 @@ This document organizes the PrintShop OS project planning layer, connecting GitH
 **Goal**: Customer-facing portal and enhanced interfaces
 
 **Epics**:
-- Customer self-service portal (order history, tracking)
+- Customer self-service portal (order history, tracking, reorders, approvals)
+- Visual quote & invoice generator (PDF with mockups, branding, costs)
+- Per-job time tracking dashboard (setup, printing, cleanup tracking)
 - Mobile app (iOS/Android native)
 - Advanced dashboard analytics and reporting
 - Designer collaboration tools
