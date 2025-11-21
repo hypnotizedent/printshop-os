@@ -7,29 +7,25 @@ on:
     types: [opened, closed, reopened, ready_for_review]
 
 jobs:
-  auto-add-to-project:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Add issues to MVP project
-        uses: actions/add-to-project@v0.5.0
-        with:
-          project-url: https://github.com/${{ github.repository }}/projects/1
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          
   update-status-label:
     runs-on: ubuntu-latest
     steps:
       - name: Add planning status to new issue
         if: github.event.action == 'opened'
         uses: actions/github-script@v7
+        continue-on-error: true
         with:
           script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ['status:planning']
-            })
+            try {
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['status:planning']
+              });
+            } catch (error) {
+              console.log('Label addition skipped:', error.message);
+            }
 
   mark-done-on-merge:
     runs-on: ubuntu-latest
