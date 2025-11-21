@@ -159,8 +159,8 @@ For Docker, add these to docker-compose.yml:
 
 ```yaml
 environment:
-  - STRAPI_URL=http://host.docker.internal:1337
-  - STRAPI_API_TOKEN=your_api_token_here
+  STRAPI_URL: http://host.docker.internal:1337
+  STRAPI_API_TOKEN: your_api_token_here
 ```
 
 ---
