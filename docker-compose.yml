@@ -1,0 +1,254 @@
+version: '3.8'
+
+# =============================================================================
+# PrintShop OS - Docker Compose Configuration
+# =============================================================================
+# This file provides a reference configuration for local development
+# All components run together in a shared Docker network
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database - Shared by Strapi and Botpress
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: printshop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-strapi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_password_change_this}
+      POSTGRES_DB: ${POSTGRES_DB:-printshop}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - printshop_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-strapi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis - For caching and session management
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: printshop-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - printshop_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # MongoDB - For Appsmith
+  # ---------------------------------------------------------------------------
+  mongo:
+    image: mongo:6
+    container_name: printshop-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-appsmith}
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - printshop_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Strapi - Central API & Headless CMS
+  # ---------------------------------------------------------------------------
+  strapi:
+    image: strapi/strapi:latest
+    container_name: printshop-strapi
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_CLIENT: ${DATABASE_CLIENT:-postgres}
+      DATABASE_HOST: postgres
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_NAME: ${DATABASE_NAME:-printshop}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-strapi}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-secure_password_change_this}
+      DATABASE_SSL: ${DATABASE_SSL:-false}
+      JWT_SECRET: ${STRAPI_JWT_SECRET:-your-jwt-secret-change-this}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-your-admin-jwt-secret-change-this}
+      APP_KEYS: ${STRAPI_APP_KEYS:-your-app-key-1,your-app-key-2}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-your-api-token-salt-change-this}
+    volumes:
+      - strapi_data:/srv/app
+    ports:
+      - "1337:1337"
+    networks:
+      - printshop_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:1337/_health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # Appsmith - Internal Production Dashboard
+  # ---------------------------------------------------------------------------
+  appsmith:
+    image: appsmith/appsmith-ce:latest
+    container_name: printshop-appsmith
+    restart: unless-stopped
+    environment:
+      APPSMITH_INSTANCE_NAME: ${APPSMITH_INSTANCE_NAME:-PrintShop Production Dashboard}
+      APPSMITH_ENCRYPTION_PASSWORD: ${APPSMITH_ENCRYPTION_PASSWORD:-your-encryption-password-change-this}
+      APPSMITH_ENCRYPTION_SALT: ${APPSMITH_ENCRYPTION_SALT:-your-encryption-salt-change-this}
+      APPSMITH_MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}@mongo:27017/appsmith
+      APPSMITH_REDIS_URL: redis://redis:6379
+      APPSMITH_MAIL_ENABLED: ${APPSMITH_MAIL_ENABLED:-false}
+    volumes:
+      - appsmith_data:/appsmith-stacks
+    ports:
+      - "8080:80"
+      - "8443:443"
+    networks:
+      - printshop_network
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      strapi:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  # ---------------------------------------------------------------------------
+  # Botpress - Customer-Facing Order Intake Bot
+  # ---------------------------------------------------------------------------
+  botpress:
+    image: botpress/server:latest
+    container_name: printshop-botpress
+    restart: unless-stopped
+    environment:
+      BP_HOST: ${BOTPRESS_HOST:-0.0.0.0}
+      BP_PORT: ${BOTPRESS_PORT:-3000}
+      DATABASE_URL: postgres://${DATABASE_USERNAME:-strapi}:${DATABASE_PASSWORD:-secure_password_change_this}@postgres:5432/botpress
+      BP_PRODUCTION: ${NODE_ENV:-development}
+      EXTERNAL_URL: ${BOTPRESS_URL:-http://localhost:3000}
+      BP_MODULE_NLU_LANGUAGESOURCES: '[{"endpoint":"https://lang-01.botpress.com"}]'
+    volumes:
+      - botpress_data:/botpress/data
+    ports:
+      - "3000:3000"
+    networks:
+      - printshop_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      strapi:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # Nginx Reverse Proxy (Optional - for production-like setup)
+  # ---------------------------------------------------------------------------
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: printshop-nginx
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/ssl:/etc/nginx/ssl:ro
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   networks:
+  #     - printshop_network
+  #   depends_on:
+  #     - strapi
+  #     - appsmith
+  #     - botpress
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  printshop_network:
+    driver: bridge
+    name: printshop_network
+
+# =============================================================================
+# Volumes - Persistent data storage
+# =============================================================================
+volumes:
+  postgres_data:
+    name: printshop_postgres_data
+    driver: local
+  
+  redis_data:
+    name: printshop_redis_data
+    driver: local
+  
+  mongo_data:
+    name: printshop_mongo_data
+    driver: local
+  
+  strapi_data:
+    name: printshop_strapi_data
+    driver: local
+  
+  appsmith_data:
+    name: printshop_appsmith_data
+    driver: local
+  
+  botpress_data:
+    name: printshop_botpress_data
+    driver: local
+
+# =============================================================================
+# Usage Instructions
+# =============================================================================
+# 1. Copy .env.example to .env and update with your values
+# 2. Start all services: docker-compose up -d
+# 3. View logs: docker-compose logs -f [service-name]
+# 4. Stop all services: docker-compose down
+# 5. Remove all data: docker-compose down -v
+#
+# Service URLs (default):
+# - Strapi Admin: http://localhost:1337/admin
+# - Strapi API: http://localhost:1337/api
+# - Appsmith: http://localhost:8080
+# - Botpress: http://localhost:3000
+#
+# For detailed setup instructions, see /docs/deployment/docker-setup.md
+# =============================================================================
