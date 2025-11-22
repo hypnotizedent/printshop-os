@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "time-clock-entries",
+  "info": {
+    "singularName": "time-clock-entry",
+    "pluralName": "time-clock-entries",
+    "displayName": "Time Clock Entry"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "employee": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::employee.employee"
+    },
+    "clockIn": {
+      "type": "datetime",
+      "required": true
+    },
+    "clockOut": {
+      "type": "datetime"
+    }
+  }
+}

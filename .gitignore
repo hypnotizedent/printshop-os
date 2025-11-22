@@ -86,9 +86,13 @@ temp/
 *.cert
 *.crt
 
-# Strapi
-printshop-strapi/
-.tmp/
+# Strapi specific ignores
+printshop-strapi/.tmp/
+printshop-strapi/.cache/
+printshop-strapi/build/
+printshop-strapi/dist/
+printshop-strapi/node_modules/
+printshop-strapi/public/uploads/
 .strapi/
 
 # MongoDB keyfile
