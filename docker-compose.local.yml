@@ -1,0 +1,83 @@
+version: '3.8'
+
+# =============================================================================
+# PrintShop OS - Local Development (Appsmith Only)
+# =============================================================================
+# This simplified setup runs only Appsmith in Docker
+# Connects to locally running Strapi at http://host.docker.internal:1337
+# =============================================================================
+
+services:
+  # MongoDB for Appsmith  
+  mongo:
+    image: mongo:6
+    container_name: printshop-mongo
+    restart: unless-stopped
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--keyFile", "/etc/mongo-keyfile"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_DATABASE: appsmith
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts/mongo-keyfile:/etc/mongo-keyfile:ro
+      - ./scripts/init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh:ro
+    ports:
+      - "27017:27017"
+    networks:
+      - printshop_network
+
+  # Redis for Appsmith
+  redis:
+    image: redis:7-alpine
+    container_name: printshop-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - printshop_network
+
+  # Appsmith - Internal Production Dashboard
+  appsmith:
+    image: appsmith/appsmith-ce:latest
+    container_name: printshop-appsmith
+    restart: unless-stopped
+    environment:
+      APPSMITH_INSTANCE_NAME: PrintShop Local Dashboard
+      APPSMITH_MONGODB_URI: mongodb://root:rootpassword@mongo:27017/appsmith?authSource=admin
+      APPSMITH_REDIS_URL: redis://redis:6379
+      APPSMITH_MAIL_ENABLED: false
+      APPSMITH_DISABLE_TELEMETRY: true
+    volumes:
+      - appsmith_data:/appsmith-stacks
+    ports:
+      - "8080:80"
+    networks:
+      - printshop_network
+    depends_on:
+      - mongo
+      - redis
+
+networks:
+  printshop_network:
+    driver: bridge
+    name: printshop_network
+
+volumes:
+  mongo_data:
+    name: printshop_mongo_data
+  redis_data:
+    name: printshop_redis_data
+  appsmith_data:
+    name: printshop_appsmith_data
+
+# =============================================================================
+# Usage:
+# 1. Start: docker-compose -f docker-compose.local.yml up -d
+# 2. Access Appsmith: http://localhost:8080
+# 3. Connect to local Strapi at: http://host.docker.internal:1337
+# 4. Stop: docker-compose -f docker-compose.local.yml down
+# =============================================================================

@@ -85,3 +85,17 @@ temp/
 *.key
 *.cert
 *.crt
+
+# Strapi
+printshop-strapi/
+.tmp/
+.strapi/
+
+# MongoDB keyfile
+scripts/mongo-keyfile
+
+# CSV exports
+*.csv
+
+# Action items (temporary)
+ACTION-IMMEDIATE.md
