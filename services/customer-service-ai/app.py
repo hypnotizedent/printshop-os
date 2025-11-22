@@ -259,8 +259,13 @@ Response:"""
                     }
                 }
             )
+            # Validate HTTP status before parsing JSON
+            response.raise_for_status()
             result = response.json()
             return result.get('response', '').strip()
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error from LLM service: {e.response.status_code} - {str(e)}")
+        return "I apologize, but I'm having trouble generating a response right now. A human agent will assist you shortly."
     except Exception as e:
         logger.error(f"Error generating response: {str(e)}")
         return "I apologize, but I'm having trouble generating a response right now. A human agent will assist you shortly."

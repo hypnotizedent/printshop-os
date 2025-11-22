@@ -88,7 +88,7 @@ def test_escalation_on_negative_sentiment():
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["should_escalate"] == True
+    assert data["should_escalate"] is True
     assert data["escalation_reason"] is not None
 
 def test_inquiry_missing_text():
