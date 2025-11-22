@@ -8,8 +8,8 @@ import os
 # Paths
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-PRINTAVO_EXPORTS_DIR = DATA_DIR / "printavo-exports"
-STRAPI_IMPORTS_DIR = DATA_DIR / "strapi-imports"
+PRINTAVO_EXPORTS_DIR = DATA_DIR / "raw" / "printavo-exports"
+STRAPI_IMPORTS_DIR = DATA_DIR / "processed" / "strapi-imports"
 
 # Ensure directories exist
 STRAPI_IMPORTS_DIR.mkdir(parents=True, exist_ok=True)
