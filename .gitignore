@@ -100,5 +100,8 @@ scripts/mongo-keyfile
 # Printavo data exports (contains sensitive business data)
 data/printavo-exports/
 
+# Strapi import data (transformed but still sensitive)
+data/strapi-imports/
+
 # Action items (temporary)
 ACTION-IMMEDIATE.md
