@@ -223,6 +223,33 @@ Each component will have its own dedicated repository:
 - `printshop-appsmith` - Appsmith application exports
 - `printshop-botpress` - Botpress bot configurations and flows
 
+### Python Integrations
+
+The `printshop_os/` directory contains Python-based integrations:
+
+```
+printshop_os/
+├── shipping/                  # Shipping integrations
+│   ├── easypost_client.py    # EasyPost API integration
+│   └── __init__.py
+├── __init__.py
+└── README.md                  # Python module documentation
+```
+
+**Quick Start:**
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Configure API keys in .env
+EASYPOST_API_KEY=your_key_here
+
+# Use the integrations
+python examples/easypost_example.py
+```
+
+📚 **See:** [EasyPost Integration Guide](docs/api/easypost-integration.md)
+
 ---
 
 ## 📖 Documentation
