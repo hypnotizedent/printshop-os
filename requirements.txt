@@ -1,0 +1,11 @@
+# PrintShop OS - Python Dependencies
+# EasyPost Integration for Shipping Label Creation
+
+# EasyPost Python library for shipping label creation
+# Documentation: https://github.com/EasyPost/easypost-python
+# API Docs: https://www.easypost.com/docs/api
+easypost>=9.0.0
+
+# Testing dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0

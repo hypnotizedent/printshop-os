@@ -69,6 +69,15 @@ lib-cov
 .lock-wscript
 .tsbuildinfo
 
+# Python testing and coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Temporary files
 tmp/
 temp/
