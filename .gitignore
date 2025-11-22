@@ -97,5 +97,8 @@ scripts/mongo-keyfile
 # CSV exports
 *.csv
 
+# Printavo data exports (contains sensitive business data)
+data/printavo-exports/
+
 # Action items (temporary)
 ACTION-IMMEDIATE.md
