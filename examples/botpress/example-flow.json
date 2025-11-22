@@ -1,0 +1,234 @@
+{
+  "version": "1.0",
+  "name": "Customer Support Flow with AI",
+  "description": "Example conversation flow using AI customer service assistant",
+  "nodes": [
+    {
+      "id": "entry",
+      "type": "standard",
+      "name": "Entry Point",
+      "next": [
+        {
+          "condition": "true",
+          "node": "greeting"
+        }
+      ]
+    },
+    {
+      "id": "greeting",
+      "type": "say_something",
+      "name": "Greeting",
+      "onEnter": [
+        "say #!builtin_text-BmCUwB"
+      ],
+      "next": [
+        {
+          "condition": "true",
+          "node": "wait_for_inquiry"
+        }
+      ]
+    },
+    {
+      "id": "wait_for_inquiry",
+      "type": "listen",
+      "name": "Wait for Customer Inquiry",
+      "next": [
+        {
+          "condition": "true",
+          "node": "process_with_ai"
+        }
+      ]
+    },
+    {
+      "id": "process_with_ai",
+      "type": "execute",
+      "name": "Process with AI",
+      "onEnter": [
+        "ai-customer-response"
+      ],
+      "next": [
+        {
+          "condition": "temp.shouldEscalate === true",
+          "node": "escalate_to_human"
+        },
+        {
+          "condition": "temp.aiConfidence >= 0.7",
+          "node": "send_ai_response"
+        },
+        {
+          "condition": "temp.aiConfidence < 0.7",
+          "node": "ask_clarification"
+        }
+      ]
+    },
+    {
+      "id": "send_ai_response",
+      "type": "say_something",
+      "name": "Send AI Response",
+      "onEnter": [
+        "say #!text-{{temp.aiResponse}}"
+      ],
+      "next": [
+        {
+          "condition": "true",
+          "node": "ask_if_helpful"
+        }
+      ]
+    },
+    {
+      "id": "ask_if_helpful",
+      "type": "single_choice",
+      "name": "Was This Helpful?",
+      "onEnter": [
+        "say #!builtin_text-WasThisHelpful"
+      ],
+      "choices": [
+        {
+          "value": "yes",
+          "title": "Yes, that helped!"
+        },
+        {
+          "value": "no",
+          "title": "No, I need more help"
+        }
+      ],
+      "next": [
+        {
+          "condition": "event.payload.text === 'yes'",
+          "node": "thank_you"
+        },
+        {
+          "condition": "event.payload.text === 'no'",
+          "node": "escalate_to_human"
+        }
+      ]
+    },
+    {
+      "id": "ask_clarification",
+      "type": "say_something",
+      "name": "Ask for Clarification",
+      "onEnter": [
+        "say #!builtin_text-Clarification"
+      ],
+      "next": [
+        {
+          "condition": "true",
+          "node": "wait_for_inquiry"
+        }
+      ]
+    },
+    {
+      "id": "escalate_to_human",
+      "type": "say_something",
+      "name": "Escalate to Human",
+      "onEnter": [
+        "say #!builtin_text-Escalation",
+        "create_support_ticket"
+      ],
+      "next": [
+        {
+          "condition": "true",
+          "node": "end"
+        }
+      ]
+    },
+    {
+      "id": "thank_you",
+      "type": "say_something",
+      "name": "Thank You",
+      "onEnter": [
+        "say #!builtin_text-ThankYou"
+      ],
+      "next": [
+        {
+          "condition": "true",
+          "node": "ask_anything_else"
+        }
+      ]
+    },
+    {
+      "id": "ask_anything_else",
+      "type": "single_choice",
+      "name": "Anything Else?",
+      "onEnter": [
+        "say #!builtin_text-AnythingElse"
+      ],
+      "choices": [
+        {
+          "value": "yes",
+          "title": "Yes, I have another question"
+        },
+        {
+          "value": "no",
+          "title": "No, I'm all set"
+        }
+      ],
+      "next": [
+        {
+          "condition": "event.payload.text === 'yes'",
+          "node": "wait_for_inquiry"
+        },
+        {
+          "condition": "event.payload.text === 'no'",
+          "node": "goodbye"
+        }
+      ]
+    },
+    {
+      "id": "goodbye",
+      "type": "say_something",
+      "name": "Goodbye",
+      "onEnter": [
+        "say #!builtin_text-Goodbye"
+      ],
+      "next": [
+        {
+          "condition": "true",
+          "node": "end"
+        }
+      ]
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "name": "End"
+    }
+  ],
+  "content": {
+    "builtin_text-BmCUwB": {
+      "variations": [
+        "Hi! I'm here to help answer your questions about PrintShop OS. What can I help you with today?"
+      ]
+    },
+    "builtin_text-WasThisHelpful": {
+      "variations": [
+        "Did that answer your question?"
+      ]
+    },
+    "builtin_text-Clarification": {
+      "variations": [
+        "I want to make sure I understand your question correctly. Could you provide a bit more detail?"
+      ]
+    },
+    "builtin_text-Escalation": {
+      "variations": [
+        "I'll connect you with a team member who can better assist you. One moment please..."
+      ]
+    },
+    "builtin_text-ThankYou": {
+      "variations": [
+        "Great! I'm glad I could help!"
+      ]
+    },
+    "builtin_text-AnythingElse": {
+      "variations": [
+        "Is there anything else I can help you with?"
+      ]
+    },
+    "builtin_text-Goodbye": {
+      "variations": [
+        "Thank you for chatting with us! Have a great day!"
+      ]
+    }
+  }
+}
