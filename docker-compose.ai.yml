@@ -1,0 +1,199 @@
+version: '3.8'
+
+# =============================================================================
+# PrintShop OS - AI Services Docker Compose Configuration
+# =============================================================================
+# AI Assistant services for customer service automation, marketing, and finance
+# Phase 4: Week 12-15
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # LLM Service (Ollama)
+  # ---------------------------------------------------------------------------
+  llm-service:
+    image: ollama/ollama:latest
+    container_name: printshop-llm
+    restart: unless-stopped
+    volumes:
+      - ollama_models:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - printshop_network
+    deploy:
+      resources:
+        reservations:
+          memory: 8G
+        limits:
+          memory: 12G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_MODELS=/root/.ollama/models
+
+  # ---------------------------------------------------------------------------
+  # Vector Database (ChromaDB)
+  # ---------------------------------------------------------------------------
+  vector-db:
+    image: chromadb/chroma:latest
+    container_name: printshop-vector-db
+    restart: unless-stopped
+    volumes:
+      - chroma_data:/chroma/chroma
+    ports:
+      - "8000:8000"
+    networks:
+      - printshop_network
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=FALSE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # Customer Service AI API
+  # ---------------------------------------------------------------------------
+  cs-ai-api:
+    build:
+      context: ./services/customer-service-ai
+      dockerfile: Dockerfile
+    container_name: printshop-cs-ai
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - printshop_network
+    environment:
+      - LLM_API_URL=http://llm-service:11434
+      - VECTOR_DB_URL=http://vector-db:8000
+      - STRAPI_API_URL=http://strapi:1337/api
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+    depends_on:
+      llm-service:
+        condition: service_healthy
+      vector-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  # ---------------------------------------------------------------------------
+  # Prometheus (Metrics Collection)
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: printshop-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - printshop_network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    depends_on:
+      - cs-ai-api
+
+  # ---------------------------------------------------------------------------
+  # Grafana (Metrics Visualization)
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: printshop-grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3001:3000"
+    networks:
+      - printshop_network
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=
+    depends_on:
+      - prometheus
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  printshop_network:
+    external: true
+    name: printshop_network
+
+# =============================================================================
+# Volumes - Persistent data storage
+# =============================================================================
+volumes:
+  ollama_models:
+    name: printshop_ollama_models
+    driver: local
+  
+  chroma_data:
+    name: printshop_chroma_data
+    driver: local
+  
+  prometheus_data:
+    name: printshop_prometheus_data
+    driver: local
+  
+  grafana_data:
+    name: printshop_grafana_data
+    driver: local
+
+# =============================================================================
+# Usage Instructions
+# =============================================================================
+# 1. Start main PrintShop OS services first:
+#    docker-compose up -d
+#
+# 2. Start AI services:
+#    docker-compose -f docker-compose.ai.yml up -d
+#
+# 3. Pull required LLM models:
+#    docker exec -it printshop-llm ollama pull mistral:7b
+#    docker exec -it printshop-llm ollama pull all-minilm:l6-v2
+#
+# 4. Initialize knowledge base:
+#    docker exec -it printshop-cs-ai python scripts/init_knowledge_base.py
+#
+# 5. Access services:
+#    - Customer Service AI API: http://localhost:5000/docs
+#    - Vector Database: http://localhost:8000
+#    - LLM Service: http://localhost:11434
+#    - Prometheus: http://localhost:9090
+#    - Grafana: http://localhost:3001
+#
+# 6. View logs:
+#    docker-compose -f docker-compose.ai.yml logs -f [service-name]
+#
+# 7. Stop all AI services:
+#    docker-compose -f docker-compose.ai.yml down
+#
+# For detailed setup instructions, see /docs/phases/phase-4-customer-service-assistant.md
+# =============================================================================
