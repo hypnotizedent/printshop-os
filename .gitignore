@@ -80,6 +80,13 @@ temp/
 *.sqlite3
 *.db
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
 # Secrets and certificates
 *.pem
 *.key
@@ -96,6 +103,9 @@ scripts/mongo-keyfile
 
 # CSV exports
 *.csv
+
+# Printavo API exports (may contain sensitive data)
+printavo_*.json
 
 # Action items (temporary)
 ACTION-IMMEDIATE.md
