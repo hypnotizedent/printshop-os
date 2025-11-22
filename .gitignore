@@ -6,6 +6,13 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
 # Environment files
 .env
 .env.local
@@ -74,6 +81,7 @@ tmp/
 temp/
 *.tmp
 .cache
+ACTION-IMMEDIATE.md
 
 # Database
 *.sqlite
@@ -85,3 +93,22 @@ temp/
 *.key
 *.cert
 *.crt
+scripts/mongo-keyfile
+
+# Strapi
+printshop-strapi/.tmp/
+printshop-strapi/.cache/
+printshop-strapi/build/
+printshop-strapi/dist/
+printshop-strapi/node_modules/
+printshop-strapi/.strapi/
+.strapi/
+
+# Data (Sensitive)
+data/raw/
+data/processed/
+data/intelligence/
+data/printavo-exports/
+data/strapi-imports/
+issues.csv
+*.csv
