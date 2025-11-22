@@ -86,9 +86,35 @@ class APIClient:
             return response.json()
         except requests.exceptions.RequestException as e:
             print(f"Error making request to {url}: {e}")
-            if hasattr(e.response, 'text'):
-                print(f"Response: {e.response.text}")
+            if hasattr(e, 'response') and e.response and hasattr(e.response, 'text'):
+                # Note: Be cautious as response text may contain sensitive information
+                print(f"Response status: {e.response.status_code if hasattr(e.response, 'status_code') else 'unknown'}")
             raise
+    
+    def _parse_response_data(self, response: Any, data_type: str = "items") -> List[Dict[str, Any]]:
+        """
+        Parse API response data into a consistent list format.
+        
+        Args:
+            response: Raw API response (list, dict, or single item)
+            data_type: Type of data being parsed (for logging/debugging)
+            
+        Returns:
+            List of dictionaries
+        """
+        if isinstance(response, list):
+            return response
+        elif isinstance(response, dict) and 'data' in response:
+            data = response['data']
+            # Log if using fallback parsing
+            if not isinstance(data, list):
+                print(f"Warning: Unexpected response format for {data_type}, wrapping in list")
+                return [data]
+            return data
+        else:
+            # Fallback: wrap single item in list
+            print(f"Warning: Unexpected response format for {data_type}, using fallback parsing")
+            return [response]
     
     def fetch_customers(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
         """
@@ -113,14 +139,7 @@ class APIClient:
         }
         
         response = self._make_request('/customers', params=params)
-        
-        # The actual response structure may vary - adjust based on API documentation
-        if isinstance(response, list):
-            return response
-        elif isinstance(response, dict) and 'data' in response:
-            return response['data']
-        else:
-            return [response]
+        return self._parse_response_data(response, "customers")
     
     def fetch_invoices(self, limit: int = 100, offset: int = 0, 
                        status: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -150,14 +169,7 @@ class APIClient:
             params['status'] = status
         
         response = self._make_request('/invoices', params=params)
-        
-        # The actual response structure may vary - adjust based on API documentation
-        if isinstance(response, list):
-            return response
-        elif isinstance(response, dict) and 'data' in response:
-            return response['data']
-        else:
-            return [response]
+        return self._parse_response_data(response, "invoices")
     
     def fetch_all_customers(self) -> List[Dict[str, Any]]:
         """
