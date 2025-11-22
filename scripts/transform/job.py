@@ -74,6 +74,37 @@ def transform_job(printavo_order: Dict, customer_id_map: Dict[int, str]) -> Dict
     lineitems = safe_get(printavo_order, 'lineitems_attributes', [])
     ink_colors = extract_ink_colors(lineitems)
     
+    # Calculate total quantity
+    # Printavo uses 'total_quantities' for line items
+    quantity = sum(int(safe_get(item, 'total_quantities', 0) or safe_get(item, 'quantity', 0) or 0) for item in lineitems)
+
+    # Extract Mockups and Art Files (take first available for now)
+    mockup_url = None
+    art_file_url = None
+    
+    for item in lineitems:
+        # Check mockups
+        mockups = safe_get(item, 'mockups', [])
+        if mockups and not mockup_url:
+            mockup_url = safe_get(mockups[0], 'url')
+            
+        # Check designs (art files)
+        designs = safe_get(item, 'designs', [])
+        if designs and not art_file_url:
+            art_file_url = safe_get(designs[0], 'url')
+            
+        if mockup_url and art_file_url:
+            break
+            
+    # Extract Notes
+    production_notes = safe_get(printavo_order, 'production_notes')
+    customer_notes = safe_get(printavo_order, 'notes')
+    
+    # Payment Status
+    stats = safe_get(printavo_order, 'stats', {})
+    is_paid = safe_get(stats, 'paid', False)
+    payment_status = "Paid" if is_paid else "Unpaid"
+    
     # Build JobID with prefix
     job_id = f"P-{visual_id}" if visual_id else f"P-{order_id}"
     
@@ -84,6 +115,12 @@ def transform_job(printavo_order: Dict, customer_id_map: Dict[int, str]) -> Dict
             'Status': strapi_status,
             'InkColors': ink_colors if ink_colors else None,
             'Customer': strapi_customer_id,
+            'Quantity': quantity,
+            'MockupImageURL': mockup_url,
+            'ArtFileURL': art_file_url,
+            'ProductionNotes': production_notes,
+            'Notes': customer_notes,
+            'PaymentStatus': payment_status
         }
     }
     

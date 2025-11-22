@@ -1,90 +1,82 @@
-# Project Roadmap: Print Shop Operations Hub (Level 1 MVP)
+# Project Roadmap: Print Shop Operations Hub (Data-First Evolution)
 
-This document outlines the step-by-step technical plan for building the Level 1 Minimum Viable Product (MVP) for a custom digital operations hub.
+This document outlines the technical plan for building a custom digital operations hub.
+**Status:** Pivot to "Data-First" Strategy (November 2025).
+**Core Philosophy:** Import Data → Analyze/Enrich → Build App around Insights.
 
 ## Core Architecture
 
-The architecture will consist of three main open-source components:
-1.  **A Headless CMS (Strapi)** to act as the central database and API.
-2.  **An Internal Tool Builder (Appsmith)** for the production team’s dashboard.
-3.  **A Conversational AI Framework (Botpress)** for the customer-facing order intake.
+1.  **Data Lake (FileSystem/Git)**: Raw and Processed JSON data from Printavo.
+2.  **Intelligence Layer (Python/LLM)**: Scripts to generate summaries, financial reports, and vector embeddings.
+3.  **Headless CMS (Strapi)**: The structured database for the application.
+4.  **Internal Tool (Appsmith)**: Insight-driven dashboards.
+5.  **Automation (Botpress)**: Context-aware agents.
 
 ---
 
-## Phase 1: Setup the Central Brain (Strapi)
+## Phase 1: Data Foundation (COMPLETED ✅)
 
-**Objective:** Create the foundational data structure for the entire application.
+**Objective:** Secure and structure historical data to power the system.
 
-*   **Step 1.1: Setup Strapi Project**
-    *   Initialize a new Strapi project following the official documentation.
-    *   Configure the database (e.g., SQLite for development, PostgreSQL for production).
+*   **Step 1.1: Data Extraction** (Done)
+    *   ✅ Connect to Printavo API.
+    *   ✅ Export 12k+ orders and customer records.
+    *   ✅ Establish "Raw" data layer (`data/raw`).
 
-*   **Step 1.2: Define Collection Types (Data Models)**
-    *   Using the Strapi Content-Type Builder, create the following collections:
-    *   **Job**:
-        *   `JobID` (Text, Required, Unique) - Can be auto-generated.
-        *   `Status` (Enumeration: "Pending Artwork", "In Production", "Complete", "Archived") - Default to "Pending Artwork".
-        *   `MockupImageURL` (Text)
-        *   `ArtFileURL` (Text)
-        *   `InkColors` (JSON)
-        *   `ImprintLocations` (JSON)
-        *   `Quantity` (Integer)
-        *   `Customer` (Relation - `Job` has one `Customer`)
-    *   **Customer**:
-        *   `Name` (Text, Required)
-        *   `Email` (Email, Required, Unique)
-        *   `Jobs` (Relation - `Customer` has many `Jobs`)
-    *   **Employee**:
-        *   `EmployeeID` (Text, Required, Unique)
-        *   `Name` (Text, Required)
-    *   **TimeClockEntry**:
-        *   `Timestamp` (DateTime, Required)
-        *   `EntryType` (Enumeration: "Clock In", "Clock Out")
-        *   `Employee` (Relation - `TimeClockEntry` belongs to one `Employee`)
+*   **Step 1.2: Transformation Pipeline** (Done)
+    *   ✅ Map Printavo statuses to Strapi workflow.
+    *   ✅ Create ETL scripts (`scripts/transform/`).
+    *   ✅ Establish "Processed" data layer (`data/processed`).
 
-*   **Step 1.3: Set API Permissions**
-    *   Enable public `find` and `findOne` permissions for necessary collections.
-    *   Enable authenticated `create`, `update` permissions for the API tokens that Appsmith and Botpress will use.
+*   **Step 1.3: Initial Intelligence** (Done)
+    *   ✅ Generate Financial Summaries (`data/intelligence/context/financial_summary.md`).
+    *   ✅ Identify Top Customers (`data/intelligence/context/top_customers.csv`).
 
 ---
 
-## Phase 2: Build the Internal Production Dashboard (Appsmith)
+## Phase 2: The Intelligence Engine (CURRENT FOCUS 🚧)
 
-**Objective:** Create a simple, functional mobile interface for the production team.
+**Objective:** Refine data quality and prepare it for AI/LLM consumption.
 
-*   **Step 2.1: Setup Appsmith and Connect to Strapi**
-    *   Create a new application in Appsmith.
-    *   Create a new Datasource, connecting to the Strapi API using its base URL and an API token.
+*   **Step 2.1: Schema Refinement**
+    *   Audit `data/processed` JSON against Strapi Content Types.
+    *   Update Strapi schema to include rich fields (Production Notes, Tags, Payment Status).
+    *   **Goal:** Ensure no data loss during import.
 
-*   **Step 2.2: Create the Main Job List View**
-    *   Add a Table or List widget to the canvas.
-    *   Set its data source to query the `Job` collection from the Strapi API, filtering for jobs where `Status` is "In Production."
-    *   Prioritize displaying the `MockupImageURL` (as an image), `JobID`, and `Customer.Name` in the list view.
+*   **Step 2.2: Customer Unification (Golden Record)**
+    *   Analyze `top_customers.csv` for duplicates.
+    *   Implement a deduplication strategy (merge by email/name).
+    *   **Goal:** Single view of the customer.
 
-*   **Step 2.3: Build the Job Details Page**
-    *   Create a second page or a modal for viewing job details.
-    *   When a job is selected from the list, navigate to this page and pass the `JobID`.
-    *   Display all relevant job information, ordered by the priority you specified: Mockup, Art File, Colors, Locations, etc.
-
-*   **Step 2.4: Implement Actions**
-    *   Add a "Mark as Complete" button that triggers an `update` query to the Strapi API, changing the `Status` of the current job to "Complete".
-    *   Create a separate, simple page for "Time Clock" with "Clock In" and "Clock Out" buttons that create a new `TimeClockEntry` in Strapi, linking to the logged-in employee.
+*   **Step 2.3: Vector Context Store**
+    *   Implement a vector database (e.g., Pinecone or local pgvector).
+    *   Ingest `data/intelligence` summaries and recent order history.
+    *   **Goal:** Enable Chatbots to answer "How much did Customer X spend last year?".
 
 ---
 
-## Phase 3: Create a Proof-of-Concept for Customer Order Intake (Botpress)
+## Phase 3: The Active Dashboard (Appsmith)
 
-**Objective:** Validate the concept of a conversational intake flow that feeds data into the central system.
+**Objective:** Build interfaces that show *insights*, not just rows of data.
 
-*   **Step 3.1: Setup Botpress Project**
-    *   Initialize a new Botpress project.
+*   **Step 3.1: Admin/Sales Dashboard**
+    *   Display "Projected Revenue" vs "Actual".
+    *   Show "At-Risk Customers" (from Intelligence layer).
+    *   View Order History with calculated Lifetime Value.
 
-*   **Step 3.2: Design the Conversational Flow**
-    *   Use the Botpress flow editor to create a simple, guided conversation.
-    *   Create nodes to ask for the user's Name, Email, and desired Quantity.
-    *   Store these values as variables.
+*   **Step 3.2: Production Dashboard**
+    *   (Original Scope) Kanban/List view for "In Production" jobs.
+    *   Enrich with "Customer Frequency" (e.g., "This is a VIP customer").
 
-*   **Step 3.3: Implement the API Call**
-    *   At the end of the flow, create an action that makes a POST request to your Strapi API.
-    *   The action should first create a `Customer` (or find an existing one by email).
-    *   Then, it should create a new `Job`, associating it with the customer and populating the `Quantity`. The `Status` should be set to "Pending Artwork".
+---
+
+## Phase 4: Context-Aware Automation (Botpress)
+
+**Objective:** Agents that know the business context.
+
+*   **Step 4.1: Contextual FAQ**
+    *   Bot can query the Vector Store for company policies or past order details.
+
+*   **Step 4.2: Proactive Sales**
+    *   Agent identifies customers due for re-orders (based on Phase 2 analysis).
+    *   Drafts outreach messages for human review.

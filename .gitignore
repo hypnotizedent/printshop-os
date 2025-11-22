@@ -99,9 +99,21 @@ scripts/mongo-keyfile
 
 # Printavo data exports (contains sensitive business data)
 data/printavo-exports/
+data/raw/
+data/processed/
+data/intelligence/
 
 # Strapi import data (transformed but still sensitive)
 data/strapi-imports/
+
+# Large Asset Storage (if downloaded later)
+data/assets/
+data/downloads/
+*.zip
+*.tar.gz
+
+# Scraper checkpoints
+data/processed/orders_with_images.json
 
 # Action items (temporary)
 ACTION-IMMEDIATE.md
