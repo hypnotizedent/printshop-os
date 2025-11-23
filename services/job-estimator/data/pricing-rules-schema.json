@@ -1,0 +1,15 @@
+{
+  "sheetName": "Screen Printed Apparel",
+  "headerRow": 2,
+  "startRow": 3,
+  "stopOnBlank": true,
+  "mappings": {
+    "Quantity": "quantity",
+    "Size": "size",
+    "Colors": "colors",
+    "Unit Price": "unit_price",
+    "Total Price": "total_price",
+    "Notes": "notes"
+  },
+  "notes": "Edit header names to match the exact column titles in PLATINUM PRICELIST 35.xlsx page 3. This file is a manual mapping (Tier C) used by the parser to normalize rows."
+}
