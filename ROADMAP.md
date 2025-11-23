@@ -48,9 +48,11 @@ The architecture will consist of three main open-source components:
 
 ---
 
-## Phase 2: Build the Internal Production Dashboard (Appsmith)
+## Phase 2: Build the Internal Production Dashboard (Appsmith) + Customer Portal
 
-**Objective:** Create a simple, functional mobile interface for the production team.
+**Objective:** Create a simple, functional mobile interface for the production team AND a customer-facing design portal for artwork/mockups.
+
+### Part 2A: Internal Production Dashboard (Appsmith)
 
 *   **Step 2.1: Setup Appsmith and Connect to Strapi**
     *   Create a new application in Appsmith.
@@ -69,6 +71,41 @@ The architecture will consist of three main open-source components:
 *   **Step 2.4: Implement Actions**
     *   Add a "Mark as Complete" button that triggers an `update` query to the Strapi API, changing the `Status` of the current job to "Complete".
     *   Create a separate, simple page for "Time Clock" with "Clock In" and "Clock Out" buttons that create a new `TimeClockEntry` in Strapi, linking to the logged-in employee.
+
+### Part 2B: Customer Portal & Design System (New)
+
+**Objective:** Build customer-facing design/mockup portal with interactive canvas and quote generation.
+
+*   **Step 2B.1: Setup Customer Portal Service** 
+    *   Create new service: `services/customer-portal/`
+    *   Integrate design canvas library (Fabric.js) for interactive mockups
+    *   Implement shadcn-ui component library for consistent UI
+    *   **Source**: Migrated from `custom-studio-app` repository
+    *   **See**: `docs/CUSTOM_STUDIO_APP_INTEGRATION_STRATEGY.md`
+
+*   **Step 2B.2: Create Design Canvas Component**
+    *   Garment silhouette rendering (t-shirt, hoodie, tank-top, etc.)
+    *   Interactive design placement and manipulation
+    *   Real-time mockup preview
+    *   Mobile-responsive interface
+
+*   **Step 2B.3: Integrate with Pricing Engine**
+    *   Connect `services/job-estimator/lib/pricing-engine.ts`
+    *   Real-time price updates as design changes
+    *   Quantity selector with volume discounts
+    *   Add-ons and special services pricing
+
+*   **Step 2B.4: Connect to Quote System**
+    *   Design canvas → Strapi Job record (MockupImageURL)
+    *   Quote generation with embedded mockups
+    *   Approval workflow integration
+    *   PDF export with mockup preview
+
+*   **Step 2B.5: Authentication Integration**
+    *   Strapi JWT authentication
+    *   Customer login/signup flow
+    *   Session persistence
+    *   Account profile management
 
 ---
 

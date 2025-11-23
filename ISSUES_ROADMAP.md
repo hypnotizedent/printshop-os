@@ -12,7 +12,22 @@
 
 ---
 
-## Phase 2: Supplier Integration (Blocking Phase 1)
+## Phase 2: Customer Portal + Quote System (Parallel with Phase 1)
+
+### ★ NEW: Architecture Update
+**From**: custom-studio-app repository consolidation  
+**Service**: services/customer-portal/ (new)  
+**Details**: See docs/CUSTOM_STUDIO_APP_INTEGRATION_STRATEGY.md  
+
+Key integrated issues:
+- #40: Visual quote format with mockups ← DesignCanvas component
+- #42: Mobile-friendly quote approval ← Responsive UI components
+- #54: Customer login portal ← Auth integration
+- #55: Client job history + reorder ← Design history tracking
+
+---
+
+## Phase 3: Supplier Integration (Parallel with Phase 2)
 
 ### Issue #64: Supplier Data Normalization Layer (HIGH)
 - **Status:** Not Started
