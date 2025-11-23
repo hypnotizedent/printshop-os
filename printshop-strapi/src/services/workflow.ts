@@ -12,24 +12,26 @@ import {
 
 /**
  * Generate order number
+ * Uses timestamp for better uniqueness in high-volume scenarios
  */
 function generateOrderNumber(): string {
   const date = new Date();
   const year = date.getFullYear().toString().slice(-2);
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `ORD-${year}${month}-${random}`;
+  const timestamp = Date.now().toString().slice(-6);
+  return `ORD-${year}${month}-${timestamp}`;
 }
 
 /**
  * Generate job number
+ * Uses timestamp for better uniqueness in high-volume scenarios
  */
 function generateJobNumber(): string {
   const date = new Date();
   const year = date.getFullYear().toString().slice(-2);
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `JOB-${year}${month}-${random}`;
+  const timestamp = Date.now().toString().slice(-6);
+  return `JOB-${year}${month}-${timestamp}`;
 }
 
 /**

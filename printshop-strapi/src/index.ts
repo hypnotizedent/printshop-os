@@ -62,11 +62,14 @@ export default {
     strapi.log.info('✅ WebSocket server started');
     strapi.log.info('✅ Queue processor started');
 
-    // Graceful shutdown handler
-    process.on('SIGTERM', async () => {
-      strapi.log.info('SIGTERM received, shutting down gracefully...');
+    // Graceful shutdown handlers
+    const shutdownHandler = async (signal: string) => {
+      strapi.log.info(`${signal} received, shutting down gracefully...`);
       await shutdownQueueProcessor(strapi);
       process.exit(0);
-    });
+    };
+
+    process.on('SIGTERM', () => shutdownHandler('SIGTERM'));
+    process.on('SIGINT', () => shutdownHandler('SIGINT'));
   },
 };

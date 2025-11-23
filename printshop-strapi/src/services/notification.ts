@@ -99,6 +99,20 @@ export async function sendWebSocketNotification(
 }
 
 /**
+ * HTML escape utility to prevent XSS
+ */
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
+/**
  * Send customer order confirmation email
  */
 export async function sendOrderConfirmationEmail(
@@ -108,17 +122,17 @@ export async function sendOrderConfirmationEmail(
   strapi?: Core.Strapi
 ): Promise<boolean> {
   const html = `
-    <h1>Order Confirmation - ${orderNumber}</h1>
+    <h1>Order Confirmation - ${escapeHtml(orderNumber)}</h1>
     <p>Thank you for your order! Your order has been received and is being processed.</p>
     
     <h2>Order Details:</h2>
-    <p><strong>Order Number:</strong> ${orderNumber}</p>
-    <p><strong>Total Amount:</strong> $${orderDetails.totalAmount}</p>
+    <p><strong>Order Number:</strong> ${escapeHtml(orderNumber)}</p>
+    <p><strong>Total Amount:</strong> $${escapeHtml(String(orderDetails.totalAmount))}</p>
     
     <h3>Items:</h3>
     <ul>
       ${orderDetails.items.map((item: any) => `
-        <li>${item.description} - Quantity: ${item.quantity} - $${item.price}</li>
+        <li>${escapeHtml(item.description)} - Quantity: ${escapeHtml(String(item.quantity))} - $${escapeHtml(String(item.price))}</li>
       `).join('')}
     </ul>
     
@@ -146,23 +160,23 @@ export async function sendProductionNotificationEmail(
   const productionEmail = process.env.PRODUCTION_TEAM_EMAIL || 'production@printshop.com';
   
   const html = `
-    <h1>New Production Job - ${jobNumber}</h1>
+    <h1>New Production Job - ${escapeHtml(jobNumber)}</h1>
     <p>A new job is ready for production.</p>
     
     <h2>Job Details:</h2>
-    <p><strong>Job Number:</strong> ${jobNumber}</p>
-    <p><strong>Customer:</strong> ${jobDetails.customerName}</p>
-    <p><strong>Due Date:</strong> ${jobDetails.dueDate}</p>
-    <p><strong>Status:</strong> ${jobDetails.status}</p>
+    <p><strong>Job Number:</strong> ${escapeHtml(jobNumber)}</p>
+    <p><strong>Customer:</strong> ${escapeHtml(jobDetails.customerName)}</p>
+    <p><strong>Due Date:</strong> ${escapeHtml(jobDetails.dueDate)}</p>
+    <p><strong>Status:</strong> ${escapeHtml(jobDetails.status)}</p>
     
     <h3>Items:</h3>
     <ul>
       ${jobDetails.items.map((item: any) => `
-        <li>${item.description} - Quantity: ${item.quantity}</li>
+        <li>${escapeHtml(item.description)} - Quantity: ${escapeHtml(String(item.quantity))}</li>
       `).join('')}
     </ul>
     
-    ${jobDetails.productionNotes ? `<p><strong>Production Notes:</strong> ${jobDetails.productionNotes}</p>` : ''}
+    ${jobDetails.productionNotes ? `<p><strong>Production Notes:</strong> ${escapeHtml(jobDetails.productionNotes)}</p>` : ''}
     
     <p>Please check the dashboard for full details.</p>
   `;

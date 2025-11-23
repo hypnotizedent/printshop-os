@@ -4,7 +4,6 @@
  */
 
 import Queue from 'bull';
-import Redis from 'ioredis';
 
 // Redis configuration from environment variables
 const redisConfig = {
