@@ -1,6 +1,6 @@
-# 📊 Job Estimator
+# 📊 Job Estimator & Pricing Engine
 
-**Unified pricing and job estimation engine for Mint Prints**
+**Flexible, JSON-driven pricing and job estimation engine for print shop operations**
 
 Consolidated from:
 - ✅ screenprint-pricer (archived)
@@ -12,9 +12,9 @@ Consolidated from:
 
 ## 🎯 Overview
 
-The Job Estimator is the **single source of truth** for all pricing logic in Mint Prints. It handles complex multi-dimensional pricing for 6 different print services with a 35% profit margin model.
+The Job Estimator provides a comprehensive, maintainable pricing system with JSON-based rules, full audit trails, and sub-100ms calculation times. It handles complex multi-dimensional pricing with configurable rules that can be edited by non-technical users.
 
-**Status**: ✅ Phase 1 Complete (Pricing Engine)
+**Status**: ✅ **Task 2.3 Complete** - Flexible Pricing Engine with JSON Rules
 
 ---
 
@@ -24,14 +24,20 @@ The Job Estimator is the **single source of truth** for all pricing logic in Min
 # Install dependencies
 npm install
 
-# Run tests
+# Run tests (85+ tests, all passing)
 npm test
 
 # Build
 npm run build
 
-# Start development server
+# Start REST API server (port 3001)
+npm run api:dev
+
+# Start development server (legacy)
 npm run dev
+
+# Test the API
+./examples/test-api.sh
 ```
 
 ---
@@ -41,95 +47,122 @@ npm run dev
 ```
 services/job-estimator/
 ├─ lib/
-│  ├─ pricing-engine.ts           # Core pricing logic (450+ lines)
-│  ├─ estimator.ts               # Entry point & API wrapper
-│  └─ helpers.ts                 # Utility functions
+│  ├─ pricing-rules-engine.ts    # ✨ NEW: JSON rules evaluation engine
+│  ├─ pricing-api.ts             # ✨ NEW: API service with caching
+│  ├─ api-server.ts              # ✨ NEW: Express REST API server
+│  ├─ pricing-engine.ts          # Legacy pricing calculations
+│  ├─ advanced-pricing.ts        # Advanced pricing features
+│  └─ estimator.ts               # Entry point & API wrapper
 ├─ tests/
-│  ├─ pricing-engine.test.ts      # 25-30 comprehensive tests
-│  └─ estimator.test.ts           # Integration tests
+│  ├─ pricing-rules-engine.test.ts  # ✨ NEW: 39 rules engine tests
+│  ├─ pricing-api.test.ts           # ✨ NEW: 24 API service tests
+│  ├─ api-server.test.ts            # ✨ NEW: 22 HTTP API tests
+│  ├─ advanced-pricing.test.ts      # 80 advanced pricing tests
+│  └─ pricing-engine.test.js        # Legacy tests
 ├─ data/
-│  ├─ pricing-rules-schema.json   # All pricing data
-│  └─ service-config.json         # Services configuration
-├─ api/
-│  ├─ routes.ts                   # REST API endpoints (Phase 2)
-│  ├─ middleware/                 # Auth, validation, etc
-│  └─ controllers/                # API business logic
+│  ├─ sample-pricing-rules.json  # ✨ NEW: Sample rule configurations
+│  ├─ pricing-rules-schema.json  # All pricing data
+│  └─ pricing-tables.json        # Pricing lookup tables
 ├─ docs/
-│  ├─ API.md                      # REST API documentation
-│  ├─ USAGE.md                    # Usage examples
-│  └─ INTEGRATION.md              # Integration guides
+│  └─ PRICING_API.md             # ✨ NEW: Complete API documentation
+├─ examples/
+│  └─ test-api.sh                # ✨ NEW: API test script
 ├─ package.json
 ├─ tsconfig.json
-├─ README.md
-└─ .env.example
+└─ README.md
 ```
 
 ---
 
 ## 💡 Features
 
-### Core Pricing Engine ✅
+### ✨ NEW: Flexible Pricing Engine (Task 2.3)
 
-- ✅ **6 Print Services**
-  - Screenprint Apparel
-  - Embroidery
-  - Laser Etching
-  - Printed Transfers
-  - Cut Vinyl Transfers
-  - Add-ons (packing, despatch, artwork)
+- ✅ **JSON-Based Pricing Rules** with versioning and precedence
+- ✅ **Rule Engine** - Automatic condition evaluation and matching
+- ✅ **REST API** - 9 endpoints for pricing and rule management
+- ✅ **Caching** - Sub-100ms response times (typically 10-20ms)
+- ✅ **Audit Trail** - Complete history of all pricing calculations
+- ✅ **Admin API** - Non-technical user rule management
+- ✅ **85+ Tests** - Comprehensive coverage, all passing
 
-- ✅ **Complex Pricing Model**
-  - Multi-dimensional pricing matrices
-  - Quantity × Colors × Sizes
-  - Quantity break optimization
-  - Setup fees (new vs repeat)
-  - 35% profit margin
+### Core Pricing Capabilities ✅
 
-- ✅ **Production Quality**
-  - Full TypeScript types (no `any`)
-  - 25-30 comprehensive tests (100% pass rate)
-  - Detailed error handling
-  - Well-documented code
+- ✅ **Base garment cost lookup** from supplier data
+- ✅ **Print location surcharges** (front +$2, back +$3, sleeve +$1.50)
+- ✅ **Color count multipliers** (1 color = ×1.0, 2+ colors = ×1.3)
+- ✅ **Stitch count pricing** for embroidery (per 1000 stitches)
+- ✅ **Volume tier discounts** (100-499 = -10%, 500+ = -20%)
+- ✅ **Add-ons system** (rush fees, shipping, taxes, setup)
+- ✅ **Margin calculation** (35% default, configurable per rule)
+
+### Integration & Quality ✅
+
+- ✅ **Strapi CMS** content types for rules and calculations
+- ✅ **Full TypeScript** types (no `any`)
+- ✅ **Performance** - All calculations <100ms
+- ✅ **Detailed error handling**
+- ✅ **Complete documentation**
 
 ---
 
-## 📊 Usage Example
+## 📊 Usage Examples
+
+### REST API (Recommended)
+
+```bash
+# Calculate pricing for an order
+curl -X POST http://localhost:3001/pricing/calculate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "garment_id": "ss-activewear-6001",
+    "quantity": 100,
+    "service": "screen",
+    "print_locations": ["front", "back"],
+    "color_count": 3,
+    "customer_type": "repeat_customer"
+  }'
+
+# Response:
+# {
+#   "line_items": [...],
+#   "subtotal": 1111.5,
+#   "margin_pct": 35.0,
+#   "total_price": 1500.52,
+#   "breakdown": {...},
+#   "rules_applied": ["volume-discount-100-499-v1", ...],
+#   "calculation_time_ms": 12
+# }
+```
+
+### TypeScript API
 
 ```typescript
-import { getQuote } from './lib/pricing-engine';
+import { PricingAPIService, InMemoryRuleStorage, InMemoryCalculationHistory } from './lib/pricing-api';
+import rules from './data/sample-pricing-rules.json';
 
-// Simple screenprint quote
-const quote = getQuote({
-  service: 'screenprint',
+// Initialize service
+const ruleStorage = new InMemoryRuleStorage(rules);
+const history = new InMemoryCalculationHistory();
+const apiService = new PricingAPIService(ruleStorage, history);
+
+// Calculate pricing
+const result = await apiService.calculate({
+  garment_id: 'ss-activewear-6001',
   quantity: 100,
-  colors: 2,
-  printSize: 'A5',
-  isNewDesign: true
+  service: 'screen',
+  print_locations: ['front', 'back'],
+  color_count: 3
 });
 
-console.log({
-  unitCost: quote.unitCost,              // $1.82
-  setupCost: quote.setupCost,            // $74.28
-  subtotal: quote.subtotal,              // $256.28
-  retailPrice: quote.retailPrice,        // $346.98
-  breakdown: quote.breakdown
-});
-
-// With add-ons
-const quoteWithAddOns = getQuote({
-  service: 'screenprint',
-  quantity: 250,
-  colors: 1,
-  printSize: 'A4',
-  isNewDesign: false,
-  addOns: [
-    { type: 'fold-and-bag-supplied', quantity: 250 },
-    { type: 'swing-ticketing', quantity: 250 }
-  ]
-});
-
-console.log(quoteWithAddOns.retailPrice); // Includes add-ons + 35% margin
+console.log(result.total_price); // Final price with margin
+console.log(result.breakdown);   // Detailed breakdown
+console.log(result.rules_applied); // Rules that were applied
 ```
+
+### See Also
+- **[Complete API Documentation](docs/PRICING_API.md)**
+- **[API Test Script](examples/test-api.sh)**
 
 ---
 

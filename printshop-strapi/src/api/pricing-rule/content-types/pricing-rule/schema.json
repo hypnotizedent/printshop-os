@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "pricing_rules",
+  "info": {
+    "singularName": "pricing-rule",
+    "pluralName": "pricing-rules",
+    "displayName": "Pricing Rule",
+    "description": "JSON-based pricing rules with versioning"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "rule_id": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "version": {
+      "type": "integer",
+      "required": true,
+      "default": 1
+    },
+    "effective_date": {
+      "type": "date",
+      "required": true
+    },
+    "expiry_date": {
+      "type": "date"
+    },
+    "conditions": {
+      "type": "json",
+      "required": true
+    },
+    "calculations": {
+      "type": "json",
+      "required": true
+    },
+    "priority": {
+      "type": "integer",
+      "required": true,
+      "default": 1
+    },
+    "enabled": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}
