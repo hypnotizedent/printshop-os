@@ -78,7 +78,9 @@ services:
   # Strapi - Central API & Headless CMS
   # ---------------------------------------------------------------------------
   strapi:
-    image: strapi/strapi:latest
+    build:
+      context: ./printshop-strapi
+      dockerfile: Dockerfile
     container_name: printshop-strapi
     restart: unless-stopped
     environment:
@@ -95,7 +97,7 @@ services:
       APP_KEYS: ${STRAPI_APP_KEYS:-your-app-key-1,your-app-key-2}
       API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-your-api-token-salt-change-this}
     volumes:
-      - strapi_data:/srv/app
+      - strapi_app:/srv/app
     ports:
       - "1337:1337"
     networks:
@@ -106,11 +108,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:1337/_health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:1337/admin"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
 
   # ---------------------------------------------------------------------------
   # Appsmith - Internal Production Dashboard
@@ -251,6 +253,10 @@ volumes:
   
   strapi_data:
     name: printshop_strapi_data
+    driver: local
+  
+  strapi_app:
+    name: printshop_strapi_app
     driver: local
   
   appsmith_data:
