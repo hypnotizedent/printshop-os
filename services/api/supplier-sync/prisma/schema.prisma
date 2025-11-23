@@ -1,0 +1,21 @@
+model Product {
+  id          String   @id @default(cuid())
+  supplierId  String
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+
+  styleId     String
+  name        String
+  brand       String
+  category    String
+  material    String?
+  imageUrls   String[] @db.Text[]
+  tags        String[] @db.Text[]
+  sizes       String[] @db.Text[]
+  colors      Json     // ✅ stores full color objects
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([supplierId, styleId], name: "supplierId_styleId")
+}

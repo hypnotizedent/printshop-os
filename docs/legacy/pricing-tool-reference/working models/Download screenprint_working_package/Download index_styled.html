@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Screenprint Pricing Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md space-y-4">
+    <h2 class="text-2xl font-bold text-center text-green-800">Screenprint Pricing Calculator</h2>
+
+    <div>
+      <label for="inkType" class="block font-semibold mb-1">Ink Type</label>
+      <select id="inkType" class="w-full border border-gray-300 rounded px-3 py-2"></select>
+    </div>
+
+    <div>
+      <label for="size" class="block font-semibold mb-1">Size</label>
+      <select id="size" class="w-full border border-gray-300 rounded px-3 py-2"></select>
+    </div>
+
+    <div>
+      <label for="colors" class="block font-semibold mb-1">Number of Colors</label>
+      <select id="colors" class="w-full border border-gray-300 rounded px-3 py-2"></select>
+    </div>
+
+    <div>
+      <label for="setup" class="block font-semibold mb-1">Setup Type</label>
+      <select id="setup" class="w-full border border-gray-300 rounded px-3 py-2">
+        <option value="NEW">New</option>
+        <option value="RESET">Reset</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="quantity" class="block font-semibold mb-1">Quantity</label>
+      <input type="number" id="quantity" value="1" min="1" class="w-full border border-gray-300 rounded px-3 py-2">
+    </div>
+
+    <div class="bg-green-100 text-green-800 p-4 rounded text-center font-semibold">
+      <div id="price" class="text-xl">$0.00</div>
+      <div id="price-detail" class="text-sm mt-1 text-gray-600"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
