@@ -113,12 +113,21 @@ Conversational AI interface for automated customer order collection.
 - **Repository:** Separate repository (to be created)
 - **Documentation:** [Phase 3 Guide](docs/phases/phase-3-botpress.md)
 
+#### 🎨 **Frontend** - Modern React UI
+Customer-facing portal and internal management interface.
+- **Purpose:** Customer portal and operations dashboard
+- **Technology:** React 19 + TypeScript + Tailwind CSS + Vite
+- **Features:** Order management, quote generation, customer portal, real-time updates
+- **Location:** `./frontend` directory
+- **Documentation:** [Frontend README](frontend/README_FRONTEND.md), [Integration Guide](docs/SPARK_FRONTEND_INTEGRATION.md)
+
 ---
 
 ## 🚀 Technology Stack
 
 ### Core Technologies
 - **Backend/API:** Strapi 4.x (Node.js 18+)
+- **Frontend:** React 19 + TypeScript + Tailwind CSS + Vite
 - **Database:** PostgreSQL 15+ (Production), SQLite 3 (Development)
 - **Frontend Dashboard:** Appsmith (Latest)
 - **Conversational AI:** Botpress 12.x+
@@ -179,10 +188,11 @@ docker-compose ps
 
 After startup (allow 2-3 minutes for initialization):
 
+- **Frontend:** http://localhost:3000
 - **Strapi Admin:** http://localhost:1337/admin
 - **Strapi API:** http://localhost:1337/api
 - **Appsmith Dashboard:** http://localhost:8080
-- **Botpress Studio:** http://localhost:3000
+- **Botpress Studio:** http://localhost:3000 (note: Botpress may use same port in some configs)
 
 ### 4. Initial Configuration
 

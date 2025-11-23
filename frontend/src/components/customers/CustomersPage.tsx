@@ -1,0 +1,154 @@
+import { useState } from "react"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { MagnifyingGlass, Plus, EnvelopeSimple, Phone, Buildings, Package, CurrencyDollar } from "@phosphor-icons/react"
+import type { Customer } from "@/lib/types"
+
+interface CustomersPageProps {
+  customers: Customer[]
+}
+
+export function CustomersPage({ customers }: CustomersPageProps) {
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredCustomers = customers.filter(customer =>
+    searchQuery === "" ||
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    customer.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    customer.email.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const totalRevenue = customers.reduce((acc, c) => acc + c.totalRevenue, 0)
+  const activeCustomers = customers.filter(c => c.status === 'active').length
+  const totalOrders = customers.reduce((acc, c) => acc + c.totalOrders, 0)
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Customers</h1>
+          <p className="text-muted-foreground mt-1">Manage your customer relationships and orders</p>
+        </div>
+        <Button className="gap-2">
+          <Plus size={18} weight="bold" />
+          Add Customer
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Total Revenue</p>
+              <p className="text-3xl font-bold text-foreground mt-2">${totalRevenue.toLocaleString()}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-magenta/10">
+              <CurrencyDollar size={24} weight="fill" className="text-magenta" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Active Customers</p>
+              <p className="text-3xl font-bold text-foreground mt-2">{activeCustomers}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-cyan/10">
+              <Buildings size={24} weight="fill" className="text-cyan" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Total Orders</p>
+              <p className="text-3xl font-bold text-foreground mt-2">{totalOrders}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-primary/10">
+              <Package size={24} weight="fill" className="text-primary" />
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="flex gap-4">
+        <div className="flex-1 relative">
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+          <Input
+            placeholder="Search customers by name, company, or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {filteredCustomers.map((customer) => (
+          <Card key={customer.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer group">
+            <div className="space-y-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors truncate">
+                    {customer.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground truncate">{customer.company}</p>
+                </div>
+                <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
+                  {customer.status}
+                </Badge>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <EnvelopeSimple size={16} />
+                  <span className="truncate">{customer.email}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone size={16} />
+                  <span>{customer.phone}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Total Orders</p>
+                  <p className="text-lg font-semibold text-foreground">{customer.totalOrders}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Revenue</p>
+                  <p className="text-lg font-semibold text-foreground">${customer.totalRevenue.toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-border">
+                <p className="text-xs text-muted-foreground">
+                  Last order: {new Date(customer.lastOrderDate).toLocaleDateString()}
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" size="sm" className="flex-1">
+                  View Details
+                </Button>
+                <Button size="sm" className="flex-1">
+                  New Order
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {filteredCustomers.length === 0 && (
+        <Card className="p-12 text-center">
+          <p className="text-muted-foreground">No customers found matching your search.</p>
+        </Card>
+      )}
+    </div>
+  )
+}

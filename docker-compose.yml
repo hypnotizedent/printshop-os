@@ -180,6 +180,32 @@ services:
       start_period: 60s
 
   # ---------------------------------------------------------------------------
+  # Frontend - React UI for PrintShop OS
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: printshop-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://api:3002
+      VITE_STRAPI_URL: http://strapi:1337
+      VITE_WS_URL: ws://localhost:3004
+    ports:
+      - "3000:3000"
+    networks:
+      - printshop_network
+    depends_on:
+      - strapi
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
   # Nginx Reverse Proxy (Optional - for production-like setup)
   # ---------------------------------------------------------------------------
   # nginx:
