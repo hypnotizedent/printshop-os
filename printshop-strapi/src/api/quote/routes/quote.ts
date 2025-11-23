@@ -32,6 +32,16 @@ const myExtraRoutes = [
   },
   {
     method: 'GET',
+    path: '/quotes/verify/:token',
+    handler: 'quote.verify',
+    config: {
+      auth: false,
+      policies: [],
+      middlewares: [],
+    },
+  },
+  {
+    method: 'GET',
     path: '/quotes/approve/:token',
     handler: 'quote.approve',
     config: {

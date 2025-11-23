@@ -121,7 +121,7 @@ export class QuoteEmailService {
   /**
    * Format quote items for email display
    */
-  private formatQuoteItems(items: any[]): Array<{
+  private formatQuoteItems(items: Array<Record<string, any>>): Array<{
     description: string;
     quantity: number;
     unitPrice: number;

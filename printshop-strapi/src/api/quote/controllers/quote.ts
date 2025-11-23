@@ -40,12 +40,21 @@ export default factories.createCoreController('api::quote.quote', ({ strapi }) =
       //   return ctx.badRequest(result.error);
       // }
 
-      // Generate approval token
+      // Generate approval token using the same JWT logic as services/api/utils/jwt-utils.ts
       const jwt = require('jsonwebtoken');
-      const JWT_SECRET = process.env.JWT_SECRET || 'printshop-secret-change-in-production';
+      const JWT_SECRET = process.env.JWT_SECRET;
+      
+      if (!JWT_SECRET) {
+        if (process.env.NODE_ENV === 'production') {
+          strapi.log.error('JWT_SECRET is required in production');
+          return ctx.internalServerError('Configuration error');
+        }
+        strapi.log.warn('Using default JWT_SECRET for development only');
+      }
+      
       const approvalToken = jwt.sign(
         { quoteId: id.toString(), type: 'quote_approval' },
-        JWT_SECRET,
+        JWT_SECRET || 'printshop-secret-DEVELOPMENT-ONLY',
         { expiresIn: '7d' }
       );
 
@@ -173,6 +182,48 @@ export default factories.createCoreController('api::quote.quote', ({ strapi }) =
     } catch (error) {
       strapi.log.error('Error rejecting quote:', error);
       return ctx.internalServerError('Failed to reject quote');
+    }
+  },
+
+  /**
+   * Verify and retrieve quote by token (no authentication required)
+   */
+  async verify(ctx) {
+    try {
+      const { token } = ctx.params;
+
+      if (!token) {
+        return ctx.badRequest('Token is required');
+      }
+
+      // Find quote by token
+      const quotes = await strapi.entityService.findMany('api::quote.quote', {
+        filters: { approvalToken: token },
+        populate: ['customer'],
+      });
+
+      if (!quotes || quotes.length === 0) {
+        return ctx.notFound('Invalid or expired quote link');
+      }
+
+      const quote = quotes[0];
+
+      // Verify token hasn't expired using JWT
+      const jwt = require('jsonwebtoken');
+      const JWT_SECRET = process.env.JWT_SECRET || 'printshop-secret-DEVELOPMENT-ONLY';
+      
+      try {
+        jwt.verify(token, JWT_SECRET);
+      } catch (error) {
+        return ctx.badRequest('Token has expired or is invalid');
+      }
+
+      return ctx.send({
+        data: quote,
+      });
+    } catch (error) {
+      strapi.log.error('Error verifying quote token:', error);
+      return ctx.internalServerError('Failed to verify quote');
     }
   },
 

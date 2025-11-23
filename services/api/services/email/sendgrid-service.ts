@@ -62,7 +62,10 @@ export class SendGridService {
     const key = apiKey || process.env.SENDGRID_API_KEY;
     
     if (!key) {
-      throw new Error('SendGrid API key is required. Set SENDGRID_API_KEY environment variable.');
+      throw new Error(
+        'SendGrid API key is required. Set SENDGRID_API_KEY environment variable. ' +
+        'See EMAIL_DELIVERY_SYSTEM.md for setup instructions.'
+      );
     }
 
     sgMail.setApiKey(key);
