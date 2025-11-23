@@ -27,11 +27,14 @@
     "status": {
       "type": "enumeration",
       "enum": [
-        "Quote",
-        "Approved",
-        "Production",
-        "Completed"
+        "PendingArtwork",
+        "Pending",
+        "Ready",
+        "InProduction",
+        "Complete",
+        "Cancelled"
       ],
+      "default": "PendingArtwork",
       "required": true
     },
     "paymentStatus": {
@@ -72,6 +75,20 @@
     },
     "printavoId": {
       "type": "string"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order",
+      "inversedBy": "job"
+    },
+    "quote": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::quote.quote"
+    },
+    "created_at_timestamp": {
+      "type": "datetime"
     }
   }
 }
