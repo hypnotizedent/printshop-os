@@ -98,7 +98,9 @@ export class SyncLogger {
       if (!fs.existsSync(logDir)) {
         fs.mkdirSync(logDir, { recursive: true });
       }
-      this.logFile = path.join(logDir, `sync-printavo-${Date.now()}.log`);
+      // Use date-based naming to group logs by day instead of creating a new file per restart
+      const dateStr = new Date().toISOString().split('T')[0];
+      this.logFile = path.join(logDir, `sync-printavo-${dateStr}.log`);
     }
   }
 
@@ -190,6 +192,11 @@ export class PrintavoClient {
       }
 
       const response = await this.client.get('/v1/orders', { params });
+      
+      // Handle different response formats from Printavo API:
+      // - response.data.data: Standard paginated response with nested data
+      // - response.data: Direct array response
+      // - []: Fallback for unexpected formats
       const orders = response.data?.data || response.data || [];
 
       this.logger.info(`Fetched ${orders.length} orders from Printavo`);
