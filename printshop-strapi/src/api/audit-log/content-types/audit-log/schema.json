@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log",
+    "description": "Audit trail for all status changes and workflow events"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "entityType": {
+      "type": "enumeration",
+      "enum": [
+        "quote",
+        "order",
+        "job"
+      ],
+      "required": true
+    },
+    "entityId": {
+      "type": "integer",
+      "required": true
+    },
+    "event": {
+      "type": "string",
+      "required": true
+    },
+    "oldStatus": {
+      "type": "string"
+    },
+    "newStatus": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "json"
+    },
+    "userId": {
+      "type": "integer"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "required": true
+    }
+  }
+}

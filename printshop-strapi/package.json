@@ -23,13 +23,19 @@
     "@strapi/plugin-users-permissions": "5.31.2",
     "@strapi/strapi": "5.31.2",
     "better-sqlite3": "12.4.1",
+    "bull": "^4.12.0",
+    "ioredis": "^5.3.0",
+    "nodemailer": "^6.9.0",
+    "socket.io": "^4.6.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",
     "styled-components": "^6.0.0"
   },
   "devDependencies": {
+    "@types/bull": "^4.10.0",
     "@types/node": "^20",
+    "@types/nodemailer": "^6.4.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "typescript": "^5"

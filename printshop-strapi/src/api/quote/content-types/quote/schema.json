@@ -1,0 +1,80 @@
+{
+  "kind": "collectionType",
+  "collectionName": "quotes",
+  "info": {
+    "singularName": "quote",
+    "pluralName": "quotes",
+    "displayName": "Quote",
+    "description": "Customer quotes for print jobs"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "quoteNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "Draft",
+        "Sent",
+        "Approved",
+        "OrderCreated",
+        "Rejected",
+        "Expired"
+      ],
+      "default": "Draft",
+      "required": true
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer",
+      "inversedBy": "quotes"
+    },
+    "items": {
+      "type": "json",
+      "required": true
+    },
+    "totalAmount": {
+      "type": "decimal",
+      "required": true
+    },
+    "notes": {
+      "type": "text"
+    },
+    "validUntil": {
+      "type": "date"
+    },
+    "approved_at": {
+      "type": "datetime"
+    },
+    "order_id": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order",
+      "mappedBy": "quote"
+    },
+    "approval_link_expires_at": {
+      "type": "datetime"
+    },
+    "approvalToken": {
+      "type": "string",
+      "unique": true
+    },
+    "sent_at": {
+      "type": "datetime"
+    },
+    "rejected_at": {
+      "type": "datetime"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "kind": "collectionType",
+  "collectionName": "orders",
+  "info": {
+    "singularName": "order",
+    "pluralName": "orders",
+    "displayName": "Order",
+    "description": "Customer orders created from approved quotes"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "orderNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "Pending",
+        "Ready",
+        "InProduction",
+        "Complete",
+        "Cancelled"
+      ],
+      "default": "Pending",
+      "required": true
+    },
+    "quote": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::quote.quote",
+      "inversedBy": "order_id"
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer",
+      "inversedBy": "orders"
+    },
+    "job": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::job.job",
+      "mappedBy": "order"
+    },
+    "items": {
+      "type": "json",
+      "required": true
+    },
+    "totalAmount": {
+      "type": "decimal",
+      "required": true
+    },
+    "customerInfo": {
+      "type": "json"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "created_at_timestamp": {
+      "type": "datetime"
+    }
+  }
+}
