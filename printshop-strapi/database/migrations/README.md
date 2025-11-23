@@ -56,8 +56,8 @@ npm run migrate:down
 ```bash
 cd printshop-strapi
 
-# First, compile TypeScript to JavaScript
-npx tsc database/migrations/001_create_collections.ts --outDir database/migrations --module commonjs --esModuleInterop --skipLibCheck
+# First, compile TypeScript to JavaScript (or use npm run migrate:compile)
+npm run migrate:compile
 
 # Run the migration
 node database/migrations/001_create_collections.js up
