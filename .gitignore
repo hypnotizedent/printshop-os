@@ -1,3 +1,8 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Node.js dependencies
 node_modules/
 npm-debug.log*
@@ -95,9 +100,13 @@ temp/
 *.cert
 *.crt
 
-# Strapi
-printshop-strapi/
-.tmp/
+# Strapi specific ignores
+printshop-strapi/.tmp/
+printshop-strapi/.cache/
+printshop-strapi/build/
+printshop-strapi/dist/
+printshop-strapi/node_modules/
+printshop-strapi/public/uploads/
 .strapi/
 
 # MongoDB keyfile
@@ -105,6 +114,24 @@ scripts/mongo-keyfile
 
 # CSV exports
 *.csv
+
+# Printavo data exports (contains sensitive business data)
+data/printavo-exports/
+data/raw/
+data/processed/
+data/intelligence/
+
+# Strapi import data (transformed but still sensitive)
+data/strapi-imports/
+
+# Large Asset Storage (if downloaded later)
+data/assets/
+data/downloads/
+*.zip
+*.tar.gz
+
+# Scraper checkpoints
+data/processed/orders_with_images.json
 
 # Action items (temporary)
 ACTION-IMMEDIATE.md

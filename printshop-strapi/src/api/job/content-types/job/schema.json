@@ -1,0 +1,77 @@
+{
+  "kind": "collectionType",
+  "collectionName": "jobs",
+  "info": {
+    "singularName": "job",
+    "pluralName": "jobs",
+    "displayName": "Job"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "jobNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "Quote",
+        "Approved",
+        "Production",
+        "Completed"
+      ],
+      "required": true
+    },
+    "paymentStatus": {
+      "type": "enumeration",
+      "enum": [
+        "Paid",
+        "Unpaid",
+        "Partial"
+      ]
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer",
+      "inversedBy": "jobs"
+    },
+    "dueDate": {
+      "type": "date",
+      "required": true
+    },
+    "productionNotes": {
+      "type": "richtext"
+    },
+    "customerNotes": {
+      "type": "richtext"
+    },
+    "totalAmount": {
+      "type": "decimal"
+    },
+    "amountPaid": {
+      "type": "decimal"
+    },
+    "mockupUrls": {
+      "type": "json"
+    },
+    "artFileUrls": {
+      "type": "json"
+    },
+    "printavoId": {
+      "type": "string"
+    }
+  }
+}
