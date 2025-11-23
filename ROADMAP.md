@@ -112,6 +112,65 @@ This document outlines the technical plan for building a custom digital operatio
 
 ---
 
+## Phase 3B: EPIC - Supplier Integration System (Parallel with Phase 3)
+
+**Status:** Epic #85 - Fully Consolidated & Documented  
+**Timeline:** 3-4 weeks (Weeks 7-10)  
+**Priority:** High  
+**Documentation:** See `SUPPLIER_INTEGRATION_EPIC.md` for complete details
+
+### Overview
+Consolidates all supplier-related work (previously issues #24-68) into a single, executable supplier integration system that syncs product data, pricing, inventory, and handles caching, normalization, and graceful degradation.
+
+### Architecture
+```
+Supplier APIs (S&S, AS Colour, SanMar)
+         ↓
+Normalization Layer (unified schema)
+         ↓
+Caching Layer (Redis - TTL strategy)
+         ↓
+Strapi Database (products, variants, prices, inventory)
+         ↓
+Applications (Quote UI, Pricing Engine, Dashboard)
+```
+
+### Sub-Tasks (11 executable items)
+
+**Infrastructure (Week 1-2):**
+1. Supplier data normalization layer
+2. Data transformation service (S&S, AS Colour, SanMar)
+3. Redis caching strategy (~$500/month savings)
+4. Graceful degradation & error handling
+
+**Integrations (Week 3-4):**
+5. S&S Activewear API integration
+6. AS Colour API integration
+7. SanMar OAuth + API integration
+
+**Features (Week 4):**
+8. Product variants system (size/color/fabric)
+9. Real-time inventory sync strategy
+
+**Deployment (Week 4+):**
+10. Comprehensive testing (unit/integration/load)
+11. Monitoring & alerting setup
+
+### Key Metrics
+| Metric | Target |
+|--------|--------|
+| Sync Reliability | >99% success rate |
+| Cache Hit Rate | >80% |
+| API Response Time | <500ms cached / <2s live |
+| Cost Savings | $500/month reduction |
+| Fallback Success | 100% graceful degradation |
+
+### Dependencies
+- Depends on: Phase 1 (Strapi), Phase 2 (Core Sales)
+- Enables: Accurate quoting, supplier selection, inventory visibility
+
+---
+
 ## Phase 3: The Active Dashboard (Appsmith)
 
 **Objective:** Build interfaces that show *insights*, not just rows of data.

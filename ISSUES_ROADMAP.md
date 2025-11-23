@@ -29,24 +29,31 @@ Key integrated issues:
 
 ## Phase 3: Supplier Integration (Parallel with Phase 2)
 
-### Issue #64: Supplier Data Normalization Layer (HIGH)
-- **Status:** Not Started
-- **Branch:** `feature/supplier-normalization`
-- **Blocked By:** #44
-- **Files:** `services/supplier-sync/`
-- **Description:** Normalize data from multiple supplier APIs into unified schema
+### ⭐ CONSOLIDATED: Epic #85 - Supplier Integration System
+**Status:** Epic Created & Consolidated  
+**Related Issues:** #24-68 (all now marked as duplicates)  
+**Documentation:** `SUPPLIER_INTEGRATION_EPIC.md`  
+**Timeline:** 3-4 weeks  
+**Priority:** High  
 
-### Issue #58: S&S Activewear API Integration (HIGH)
-- **Status:** Not Started
-- **Files:** `services/supplier-sync/clients/sandm.ts`
+**What's Included:**
+- Phase 3.1: Infrastructure (normalization, transformation, caching, error handling)
+- Phase 3.2: Supplier Integrations (S&S, AS Colour, SanMar)
+- Phase 3.3: Product Features (variants, inventory sync)
+- Phase 3.4: Testing & Deployment
 
-### Issue #62: AS Colour API Integration (HIGH)
-- **Status:** Not Started
-- **Files:** `services/supplier-sync/clients/as-colour.ts`
+**Key Sub-Tasks:**
+- Supplier data normalization layer (#27 consolidated)
+- S&S Activewear API integration (#24 consolidated)
+- AS Colour API integration (#25 consolidated)
+- SanMar API integration (#26 consolidated)
+- Redis caching strategy (#30 consolidated)
+- Graceful degradation & error handling (#31 consolidated)
+- Product variants system (#29 consolidated)
+- Inventory sync strategy (#28 consolidated)
+- Comprehensive testing & monitoring
 
-### Issue #63: SanMar API Integration (HIGH)
-- **Status:** Not Started
-- **Files:** `services/supplier-sync/clients/sanmar.ts`
+**Architecture:** See Epic #85 for diagrams, code examples, and full implementation plan.
 
 ---
 
