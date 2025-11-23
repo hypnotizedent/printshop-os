@@ -11,6 +11,10 @@
     "develop": "strapi develop",
     "start": "strapi start",
     "strapi": "strapi",
+    "migrate:compile": "npx tsc database/migrations/001_create_collections.ts --outDir database/migrations --module commonjs --esModuleInterop --skipLibCheck",
+    "migrate:up": "npm run migrate:compile && node database/migrations/001_create_collections.js up",
+    "migrate:down": "npm run migrate:compile && node database/migrations/001_create_collections.js down",
+    "migrate:force": "npm run migrate:compile && node database/migrations/001_create_collections.js up --force",
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
