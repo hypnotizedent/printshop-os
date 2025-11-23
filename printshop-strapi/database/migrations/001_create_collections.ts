@@ -21,17 +21,10 @@
  *   Or import and execute: import { up, down } from './001_create_collections'
  */
 
-// @ts-ignore - Node.js built-in modules
 import * as fs from 'fs';
-// @ts-ignore - Node.js built-in modules
 import * as path from 'path';
 
-// Get the API directory path
-const getApiDir = () => {
-  // @ts-ignore - __dirname is available in Node.js
-  return path.join(__dirname, '../../src/api');
-};
-const API_DIR = getApiDir();
+const API_DIR = path.join(__dirname, '../../src/api');
 
 /**
  * Order Collection Schema
@@ -710,29 +703,22 @@ export async function down(): Promise<void> {
 }
 
 // Allow running as standalone script
-// @ts-ignore - CommonJS require and module
 if (typeof require !== 'undefined' && require.main === module) {
-  // @ts-ignore - process is available in Node.js
   const action = process.argv[2];
-  // @ts-ignore - process is available in Node.js
   const force = process.argv.includes('--force');
 
   if (action === 'up') {
     up({ force })
-      // @ts-ignore - process is available in Node.js
       .then(() => process.exit(0))
       .catch((error: any) => {
         console.error(error);
-        // @ts-ignore - process is available in Node.js
         process.exit(1);
       });
   } else if (action === 'down') {
     down()
-      // @ts-ignore - process is available in Node.js
       .then(() => process.exit(0))
       .catch((error: any) => {
         console.error(error);
-        // @ts-ignore - process is available in Node.js
         process.exit(1);
       });
   } else {
@@ -740,7 +726,6 @@ if (typeof require !== 'undefined' && require.main === module) {
     console.log('  up      - Create collections');
     console.log('  down    - Remove collections (rollback)');
     console.log('  --force - Force update existing schemas');
-    // @ts-ignore - process is available in Node.js
     process.exit(1);
   }
 }
