@@ -69,7 +69,7 @@ node database/migrations/001_create_collections.js up --force
 node database/migrations/001_create_collections.js down
 ```
 
-### Method 2: Import and Execute
+### Method 3: Import and Execute
 
 You can also import the migration in your own scripts:
 
@@ -86,14 +86,19 @@ await up({ force: true });
 await down();
 ```
 
-### Method 3: Manual Execution via Node REPL
+### Method 4: Manual Execution via Node REPL
 
 ```bash
 cd printshop-strapi
+
+# First compile the TypeScript file
+npm run migrate:compile
+
+# Then use Node REPL
 node
 
-# Then in Node REPL:
-const { up, down } = require('./database/migrations/001_create_collections.ts');
+# In Node REPL:
+const { up, down } = require('./database/migrations/001_create_collections.js');
 up().then(() => console.log('Done'));
 ```
 

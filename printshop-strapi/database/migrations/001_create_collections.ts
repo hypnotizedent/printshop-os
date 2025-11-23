@@ -703,7 +703,7 @@ export async function down(): Promise<void> {
 }
 
 // Allow running as standalone script
-if (typeof require !== 'undefined' && require.main === module) {
+if (require.main === module) {
   const action = process.argv[2];
   const force = process.argv.includes('--force');
 
