@@ -1,0 +1,60 @@
+{
+  "kind": "collectionType",
+  "collectionName": "price_calculations",
+  "info": {
+    "singularName": "price-calculation",
+    "pluralName": "price-calculations",
+    "displayName": "Price Calculation",
+    "description": "Pricing history and audit trail"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "input": {
+      "type": "json",
+      "required": true
+    },
+    "output": {
+      "type": "json",
+      "required": true
+    },
+    "rules_applied": {
+      "type": "json"
+    },
+    "garment_id": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer",
+      "required": true
+    },
+    "service": {
+      "type": "string"
+    },
+    "total_price": {
+      "type": "decimal",
+      "required": true
+    },
+    "margin_pct": {
+      "type": "decimal",
+      "required": true
+    },
+    "calculation_time_ms": {
+      "type": "integer"
+    },
+    "customer_type": {
+      "type": "string"
+    },
+    "quote_id": {
+      "type": "string"
+    },
+    "order_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}
