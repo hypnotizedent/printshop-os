@@ -1,0 +1,102 @@
+{
+  "kind": "collectionType",
+  "collectionName": "quotes",
+  "info": {
+    "singularName": "quote",
+    "pluralName": "quotes",
+    "displayName": "Quote",
+    "description": "Customer quotes with email delivery tracking"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "quoteNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "Draft",
+        "Sent",
+        "Approved",
+        "Rejected",
+        "Expired"
+      ],
+      "required": true,
+      "default": "Draft"
+    },
+    "items": {
+      "type": "json",
+      "required": true
+    },
+    "subtotal": {
+      "type": "decimal",
+      "required": true
+    },
+    "tax": {
+      "type": "decimal"
+    },
+    "total": {
+      "type": "decimal",
+      "required": true
+    },
+    "validUntil": {
+      "type": "date"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "emailSentAt": {
+      "type": "datetime"
+    },
+    "emailMessageId": {
+      "type": "string"
+    },
+    "emailDeliveryStatus": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "sent",
+        "delivered",
+        "bounced",
+        "failed",
+        "opened",
+        "clicked"
+      ]
+    },
+    "emailOpenedAt": {
+      "type": "datetime"
+    },
+    "emailClickedAt": {
+      "type": "datetime"
+    },
+    "approvedAt": {
+      "type": "datetime"
+    },
+    "rejectedAt": {
+      "type": "datetime"
+    },
+    "rejectionReason": {
+      "type": "text"
+    },
+    "reminderSentAt": {
+      "type": "datetime"
+    },
+    "approvalToken": {
+      "type": "string"
+    }
+  }
+}
