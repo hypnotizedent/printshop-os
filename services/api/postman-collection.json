@@ -1,0 +1,478 @@
+{
+  "info": {
+    "name": "PrintShop OS API",
+    "description": "Complete API testing collection for PrintShop OS with all endpoints, mock data, and test scripts",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "printshop-os-api",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List All Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is array', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test('Orders have required fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.length > 0) {",
+                  "        pm.expect(jsonData[0]).to.have.property('id');",
+                  "        pm.expect(jsonData[0]).to.have.property('customer');",
+                  "        pm.expect(jsonData[0]).to.have.property('order_total');",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test('Response time is acceptable', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_url}}/api/orders?page=1&limit=25",
+              "host": ["{{api_url}}"],
+              "path": ["api", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Order has required fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('customer');",
+                  "    pm.expect(jsonData).to.have.property('order_total');",
+                  "    pm.expect(jsonData).to.have.property('orderstatus');",
+                  "});",
+                  "",
+                  "pm.test('Order ID matches request', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var requestId = pm.request.url.getPath().split('/').pop();",
+                  "    pm.expect(jsonData.id.toString()).to.equal(requestId);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_url}}/api/orders/21199730",
+              "host": ["{{api_url}}"],
+              "path": ["api", "orders", "21199730"]
+            }
+          }
+        },
+        {
+          "name": "Create New Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response contains order with ID', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.id).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Created order has correct customer', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.customer.email).to.equal(pm.request.body.raw ? JSON.parse(pm.request.body.raw).customer.email : '');",
+                  "});",
+                  "",
+                  "var orderId = pm.response.json().id;",
+                  "pm.environment.set('created_order_id', orderId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": {\n    \"full_name\": \"John Smith\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Smith\",\n    \"email\": \"john.smith@example.com\",\n    \"company\": \"Acme Corp\"\n  },\n  \"order_addresses_attributes\": [\n    {\n      \"name\": \"Customer Shipping\",\n      \"address1\": \"123 Business Ave\",\n      \"address2\": \"Suite 100\",\n      \"city\": \"New York\",\n      \"state\": \"New York\",\n      \"state_iso\": \"NY\",\n      \"zip\": \"10001\",\n      \"country\": \"United States\",\n      \"country_iso\": \"US\"\n    }\n  ],\n  \"lineitems_attributes\": [\n    {\n      \"style_description\": \"100pc Screen Print Shirt\",\n      \"category\": \"Apparel\",\n      \"total_quantities\": 100,\n      \"unit_cost\": 7.52,\n      \"taxable\": true,\n      \"color\": \"Navy\"\n    }\n  ],\n  \"order_total\": 751.78,\n  \"order_subtotal\": 752.0,\n  \"sales_tax\": 60.16,\n  \"orderstatus\": {\n    \"name\": \"QUOTE\"\n  },\n  \"due_date\": \"2025-12-15T17:00:00.000-05:00\",\n  \"order_nickname\": \"Premium Polo Order\",\n  \"production_notes\": \"Use high quality inks. No pilling.\",\n  \"approved\": true\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/orders",
+              "host": ["{{api_url}}"],
+              "path": ["api", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Update Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Order status was updated', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.orderstatus.name).to.equal('IN PRODUCTION');",
+                  "});",
+                  "",
+                  "pm.test('Updated timestamp exists', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('updated_at');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderstatus\": {\n    \"name\": \"IN PRODUCTION\"\n  },\n  \"production_notes\": \"Updated production notes\"\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/orders/21199730",
+              "host": ["{{api_url}}"],
+              "path": ["api", "orders", "21199730"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quotes",
+      "item": [
+        {
+          "name": "Get Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Quote has required fields', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('quoteNumber');",
+                  "    pm.expect(jsonData).to.have.property('total');",
+                  "    pm.expect(jsonData).to.have.property('lineItems');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_url}}/api/quotes/Q001",
+              "host": ["{{api_url}}"],
+              "path": ["api", "quotes", "Q001"]
+            }
+          }
+        },
+        {
+          "name": "Generate Quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Quote contains pricing', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('quoteNumber');",
+                  "    pm.expect(jsonData).to.have.property('subtotal');",
+                  "    pm.expect(jsonData).to.have.property('tax');",
+                  "    pm.expect(jsonData).to.have.property('total');",
+                  "});",
+                  "",
+                  "pm.test('Total calculation is correct', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var expectedTotal = jsonData.subtotal + jsonData.tax;",
+                  "    pm.expect(jsonData.total).to.be.closeTo(expectedTotal, 0.01);",
+                  "});",
+                  "",
+                  "pm.test('100pc screen print example pricing', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.total).to.be.above(700);",
+                  "    pm.expect(jsonData.total).to.be.below(850);",
+                  "});",
+                  "",
+                  "var quoteNumber = pm.response.json().quoteNumber;",
+                  "pm.environment.set('generated_quote_id', quoteNumber);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": {\n    \"name\": \"Demo Customer\",\n    \"email\": \"demo@example.com\"\n  },\n  \"lineItems\": [\n    {\n      \"description\": \"100pc Screen Print, 1-color, left chest\",\n      \"quantity\": 100,\n      \"basePrice\": 7.5,\n      \"colors\": 1,\n      \"locations\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/quotes",
+              "host": ["{{api_url}}"],
+              "path": ["api", "quotes"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sync",
+      "item": [
+        {
+          "name": "Sync from Printavo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Sync response contains statistics', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('totalProcessed');",
+                  "    pm.expect(jsonData).to.have.property('successCount');",
+                  "    pm.expect(jsonData).to.have.property('errorCount');",
+                  "});",
+                  "",
+                  "pm.test('All orders processed', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var total = jsonData.successCount + jsonData.errorCount;",
+                  "    pm.expect(total).to.equal(jsonData.totalProcessed);",
+                  "});",
+                  "",
+                  "pm.test('Response time acceptable for batch', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orders\": [\n    {\n      \"id\": 21199730,\n      \"customer\": {\n        \"full_name\": \"John Smith\",\n        \"email\": \"john.smith@example.com\",\n        \"company\": \"Acme Corp\"\n      },\n      \"order_addresses_attributes\": [\n        {\n          \"name\": \"Customer Shipping\",\n          \"address1\": \"123 Business Ave\",\n          \"address2\": \"Suite 100\",\n          \"city\": \"New York\",\n          \"state\": \"NY\",\n          \"state_iso\": \"NY\",\n          \"zip\": \"10001\",\n          \"country\": \"US\"\n        }\n      ],\n      \"lineitems_attributes\": [\n        {\n          \"id\": 92211045,\n          \"style_description\": \"100pc Screen Print Shirt\",\n          \"total_quantities\": 100,\n          \"unit_cost\": 7.52,\n          \"taxable\": true\n        }\n      ],\n      \"order_total\": 751.78,\n      \"order_subtotal\": 752.0,\n      \"sales_tax\": 60.16,\n      \"orderstatus\": {\n        \"name\": \"COMPLETED\"\n      },\n      \"created_at\": \"2025-11-01T10:30:00.000-05:00\",\n      \"updated_at\": \"2025-11-15T14:22:15.000-05:00\"\n    },\n    {\n      \"id\": 21199731,\n      \"customer\": {\n        \"full_name\": \"Sarah Johnson\",\n        \"email\": \"sarah.j@example.com\",\n        \"company\": \"Tech Innovations Inc\"\n      },\n      \"order_addresses_attributes\": [\n        {\n          \"name\": \"Customer Shipping\",\n          \"address1\": \"456 Tech Drive\",\n          \"city\": \"San Francisco\",\n          \"state\": \"CA\",\n          \"state_iso\": \"CA\",\n          \"zip\": \"94102\",\n          \"country\": \"US\"\n        }\n      ],\n      \"lineitems_attributes\": [\n        {\n          \"id\": 92211046,\n          \"style_description\": \"50pc Embroidered Caps (3-color)\",\n          \"total_quantities\": 50,\n          \"unit_cost\": 12.5,\n          \"taxable\": true\n        }\n      ],\n      \"order_total\": 687.5,\n      \"order_subtotal\": 625.0,\n      \"sales_tax\": 62.5,\n      \"orderstatus\": {\n        \"name\": \"IN PRODUCTION\"\n      },\n      \"created_at\": \"2025-11-10T09:15:00.000-05:00\",\n      \"updated_at\": \"2025-11-20T11:45:30.000-05:00\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/sync/printavo",
+              "host": ["{{api_url}}"],
+              "path": ["api", "sync", "printavo"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Scenarios",
+      "item": [
+        {
+          "name": "Get Non-Existent Order (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Error message provided', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_url}}/api/orders/99999999",
+              "host": ["{{api_url}}"],
+              "path": ["api", "orders", "99999999"]
+            }
+          }
+        },
+        {
+          "name": "Create Order with Invalid Email (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Validation error returned', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData.error).to.include.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": {\n    \"full_name\": \"Test Customer\",\n    \"email\": \"invalid-email\",\n    \"company\": \"Test Co\"\n  },\n  \"order_addresses_attributes\": [],\n  \"lineitems_attributes\": [],\n  \"order_total\": 100.0,\n  \"orderstatus\": {\n    \"name\": \"QUOTE\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_url}}/api/orders",
+              "host": ["{{api_url}}"],
+              "path": ["api", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Unauthorized Request (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 401', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid-token",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{api_url}}/api/orders",
+              "host": ["{{api_url}}"],
+              "path": ["api", "orders"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "api_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "api_token",
+      "value": "your-api-token-here",
+      "type": "string"
+    },
+    {
+      "key": "created_order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "generated_quote_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

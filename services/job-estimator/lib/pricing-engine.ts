@@ -1,12 +1,48 @@
+// ---- Location and Print Placement ----
+export type PrintLocation = 'chest' | 'sleeve' | 'full-back' | 'sleeve-combo' | 'back-neck' | 'front';
+
+export type PrintSize = 'S' | 'M' | 'L' | 'XL' | 'Jumbo';
+
+export type RushType = 'standard' | '2-day' | 'next-day' | 'same-day';
+
+export type AddOnType = 'fold' | 'ticket' | 'relabel' | 'hanger';
+
+export const LOCATION_MULTIPLIERS: Record<PrintLocation, number> = {
+  'chest': 1.0,
+  'sleeve': 1.1,
+  'full-back': 1.2,
+  'sleeve-combo': 1.25,
+  'back-neck': 1.05,
+  'front': 1.0,
+};
+
+export const PRINT_SIZE_MULTIPLIERS: Record<PrintSize, number> = {
+  'S': 0.9,
+  'M': 1.0,
+  'L': 1.1,
+  'XL': 1.2,
+  'Jumbo': 1.35,
+};
+
+export const RUSH_MULTIPLIERS: Record<RushType, number> = {
+  'standard': 1.0,
+  '2-day': 1.1,
+  'next-day': 1.25,
+  'same-day': 1.5,
+};
+
 export type PricingOptions = {
-  service: 'screen' | 'embroidery' | 'laser' | 'transfer';
+  service: 'screen' | 'embroidery' | 'laser' | 'transfer' | 'dtg' | 'sublimation';
   colors?: number;
-  size?: 'S' | 'M' | 'L' | 'XL' | 'Jumbo';
-  // add more fields as required
+  size?: PrintSize;
+  location?: PrintLocation;
+  rush?: RushType;
+  addOns?: AddOnType[];
+  isNewDesign?: boolean;
 };
 
 export function calculateBasePrice(quantity: number, opts: PricingOptions) {
-  // Very simple placeholder logic to be replaced by sheet-driven rules
+  // Service base pricing
   let base = 0;
   switch (opts.service) {
     case 'screen':
@@ -21,16 +57,35 @@ export function calculateBasePrice(quantity: number, opts: PricingOptions) {
     case 'transfer':
       base = 2.5;
       break;
+    case 'dtg':
+      base = 5.0;
+      break;
+    case 'sublimation':
+      base = 4.5;
+      break;
   }
 
-  // color surcharge
+  // Color surcharge
   const colorSurcharge = (opts.colors ?? 1) * 0.5;
 
-  // size multiplier
-  const sizeMultiplier = opts.size === 'Jumbo' ? 1.2 : 1.0;
+  // Size multiplier (applied to unit price)
+  const sizeMultiplier = PRINT_SIZE_MULTIPLIERS[opts.size ?? 'M'];
 
-  const price = (base + colorSurcharge) * sizeMultiplier * quantity;
-  return Number(price.toFixed(2));
+  // Setup fee (design setup or artwork prep)
+  let setupFee = opts.isNewDesign ? 74.28 : 0;
+
+  // Unit price before quantity/location/rush/addons
+  const unitPrice = (base + colorSurcharge) * sizeMultiplier;
+
+  // Subtotal with setup
+  const subtotal = unitPrice * quantity + setupFee;
+
+  return {
+    unitPrice,
+    setupFee,
+    subtotal,
+    quantity,
+  };
 }
 
 // ---- Rule extraction and runtime quoting ----
@@ -103,7 +158,7 @@ export function loadScreenPricingRules(jsonPath: string): PricingRule[] {
   return rules;
 }
 
-export function quoteFromRules(rules: PricingRule[], quantity: number, opts?: Partial<PricingOptions>): { total: number; breakdown: any } {
+export function quoteFromRules(rules: PricingRule[], quantity: number, _opts?: Partial<PricingOptions>): { total: number; breakdown: any } {
   // Find best-matching rule for quantity (highest minQty <= quantity)
   let candidate: PricingRule | undefined;
   for (const r of rules) {

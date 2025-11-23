@@ -1,0 +1,354 @@
+{
+  "services": {
+    "screen": {
+      "name": "Screen Printing",
+      "basePrice": 4.00,
+      "description": "Traditional screen printing for high-volume orders",
+      "minimumQuantity": 12,
+      "colorSurchargePerColor": 0.50,
+      "maxColors": 8,
+      "notes": "Best for designs with limited color palettes"
+    },
+    "embroidery": {
+      "name": "Embroidery",
+      "basePrice": 6.00,
+      "description": "Premium embroidered designs",
+      "minimumQuantity": 5,
+      "colorSurchargePerColor": 0.50,
+      "maxColors": 10,
+      "notes": "Higher quality, longer production time"
+    },
+    "laser": {
+      "name": "Laser Engraving",
+      "basePrice": 3.50,
+      "description": "Laser-cut or engraved designs",
+      "minimumQuantity": 1,
+      "colorSurchargePerColor": 0.50,
+      "maxColors": 1,
+      "notes": "Single color, precise details"
+    },
+    "transfer": {
+      "name": "Heat Transfer",
+      "basePrice": 2.50,
+      "description": "Direct-to-garment style heat transfer",
+      "minimumQuantity": 1,
+      "colorSurchargePerColor": 0.50,
+      "maxColors": 6,
+      "notes": "Ideal for photo-quality, small runs"
+    },
+    "dtg": {
+      "name": "Direct-to-Garment (DTG)",
+      "basePrice": 5.00,
+      "description": "Digital printing directly on garment",
+      "minimumQuantity": 1,
+      "colorSurchargePerColor": 0.50,
+      "maxColors": "unlimited",
+      "notes": "Photo-quality, best for detailed designs"
+    },
+    "sublimation": {
+      "name": "Sublimation Printing",
+      "basePrice": 4.50,
+      "description": "Sublimation printing for polyester garments",
+      "minimumQuantity": 12,
+      "colorSurchargePerColor": 0.50,
+      "maxColors": "unlimited",
+      "notes": "Vibrant colors, polyester-only"
+    }
+  },
+  "locationMultipliers": {
+    "chest": {
+      "multiplier": 1.0,
+      "displayName": "Chest (Left)",
+      "description": "Standard left chest placement",
+      "complexity": "basic",
+      "area": "small"
+    },
+    "sleeve": {
+      "multiplier": 1.1,
+      "displayName": "Sleeve",
+      "description": "Embellishment on sleeve",
+      "complexity": "moderate",
+      "area": "small",
+      "surcharge": "+10%"
+    },
+    "full-back": {
+      "multiplier": 1.2,
+      "displayName": "Full Back",
+      "description": "Large back print covering most of back",
+      "complexity": "high",
+      "area": "large",
+      "surcharge": "+20%"
+    },
+    "sleeve-combo": {
+      "multiplier": 1.25,
+      "displayName": "Sleeve Combo (Both)",
+      "description": "Prints on both sleeves",
+      "complexity": "very-high",
+      "area": "medium",
+      "surcharge": "+25%"
+    },
+    "back-neck": {
+      "multiplier": 1.05,
+      "displayName": "Back Neck",
+      "description": "Small placement on back neckline",
+      "complexity": "moderate",
+      "area": "very-small",
+      "surcharge": "+5%"
+    },
+    "front": {
+      "multiplier": 1.0,
+      "displayName": "Front Center",
+      "description": "Center front placement",
+      "complexity": "basic",
+      "area": "small"
+    }
+  },
+  "printSizeMultipliers": {
+    "S": {
+      "multiplier": 0.9,
+      "displayName": "Small (2x2 - 2x4 inches)",
+      "approximateArea": "4-8 sq in",
+      "surcharge": "-10%",
+      "recommendedFor": ["pocket", "sleeve", "small-logo"]
+    },
+    "M": {
+      "multiplier": 1.0,
+      "displayName": "Medium (4x4 - 6x6 inches)",
+      "approximateArea": "16-36 sq in",
+      "surcharge": "base",
+      "recommendedFor": ["chest", "standard-logo", "back-neck"]
+    },
+    "L": {
+      "multiplier": 1.1,
+      "displayName": "Large (6x8 - 8x10 inches)",
+      "approximateArea": "48-80 sq in",
+      "surcharge": "+10%",
+      "recommendedFor": ["large-chest", "sleeve-print", "front"]
+    },
+    "XL": {
+      "multiplier": 1.2,
+      "displayName": "X-Large (8x10 - 10x12 inches)",
+      "approximateArea": "80-120 sq in",
+      "surcharge": "+20%",
+      "recommendedFor": ["back-print", "large-design"]
+    },
+    "Jumbo": {
+      "multiplier": 1.35,
+      "displayName": "Jumbo (10x12+ inches)",
+      "approximateArea": "120+ sq in",
+      "surcharge": "+35%",
+      "recommendedFor": ["full-back", "large-all-over", "custom"]
+    }
+  },
+  "rushPremiums": {
+    "standard": {
+      "multiplier": 1.0,
+      "displayName": "Standard (5 business days)",
+      "leadTime": "5 business days",
+      "surcharge": "base",
+      "availableFrom": "all-services"
+    },
+    "2-day": {
+      "multiplier": 1.1,
+      "displayName": "2-Day Rush",
+      "leadTime": "2 business days",
+      "surcharge": "+10%",
+      "availableFrom": "all-services"
+    },
+    "next-day": {
+      "multiplier": 1.25,
+      "displayName": "Next-Day Rush",
+      "leadTime": "1 business day",
+      "surcharge": "+25%",
+      "availableFrom": "all-services",
+      "notes": "Must be ordered before 2 PM EST"
+    },
+    "same-day": {
+      "multiplier": 1.5,
+      "displayName": "Same-Day Rush",
+      "leadTime": "4 hours",
+      "surcharge": "+50%",
+      "availableFrom": ["screen", "laser"],
+      "notes": "Pickup only, orders before 10 AM EST"
+    }
+  },
+  "addOns": {
+    "fold": {
+      "pricePerUnit": 0.15,
+      "displayName": "Fold",
+      "description": "Professional folding of finished garments",
+      "leadTime": "1 day additional",
+      "applicableTo": "all"
+    },
+    "ticket": {
+      "pricePerUnit": 0.10,
+      "displayName": "Hanging Ticket",
+      "description": "Attach personalized hang tags",
+      "leadTime": "1 day additional",
+      "applicableTo": "all",
+      "requiresDesign": true
+    },
+    "relabel": {
+      "pricePerUnit": 0.20,
+      "displayName": "Relabel",
+      "description": "Remove original label and apply custom label",
+      "leadTime": "2 days additional",
+      "applicableTo": "all",
+      "requiresDesign": true
+    },
+    "hanger": {
+      "pricePerUnit": 0.25,
+      "displayName": "Plastic Hanger",
+      "description": "Attach garment to plastic hanger",
+      "leadTime": "1 day additional",
+      "applicableTo": ["apparel"]
+    }
+  },
+  "volumeDiscounts": [
+    {
+      "minQuantity": 1,
+      "maxQuantity": 49,
+      "discount": 0.0,
+      "displayName": "1-49 units",
+      "description": "No volume discount"
+    },
+    {
+      "minQuantity": 50,
+      "maxQuantity": 99,
+      "discount": 0.05,
+      "displayName": "50-99 units",
+      "description": "5% volume discount"
+    },
+    {
+      "minQuantity": 100,
+      "maxQuantity": 249,
+      "discount": 0.08,
+      "displayName": "100-249 units",
+      "description": "8% volume discount"
+    },
+    {
+      "minQuantity": 250,
+      "maxQuantity": 499,
+      "discount": 0.10,
+      "displayName": "250-499 units",
+      "description": "10% volume discount"
+    },
+    {
+      "minQuantity": 500,
+      "maxQuantity": 999,
+      "discount": 0.12,
+      "displayName": "500-999 units",
+      "description": "12% volume discount"
+    },
+    {
+      "minQuantity": 1000,
+      "maxQuantity": 999999,
+      "discount": 0.15,
+      "displayName": "1000+ units",
+      "description": "15% volume discount"
+    }
+  ],
+  "defaultValues": {
+    "profitMargin": 0.35,
+    "profitMarginPercentage": "35%",
+    "defaultColors": 1,
+    "defaultSize": "M",
+    "defaultLocation": "chest",
+    "defaultRush": "standard",
+    "setupFeeForNewDesign": 74.28,
+    "colorSurchargePerColor": 0.50
+  },
+  "pricingFormulas": {
+    "basePrice": {
+      "formula": "(service_base + color_surcharge) * size_multiplier",
+      "example": "(4.00 + 0.50) * 1.0 = 4.50 per unit"
+    },
+    "subtotal": {
+      "formula": "base_price * quantity + setup_fee",
+      "example": "4.50 * 100 + 74.28 = 556.28"
+    },
+    "locationPrice": {
+      "formula": "subtotal * location_multiplier",
+      "example": "556.28 * 1.0 = 556.28"
+    },
+    "rushPrice": {
+      "formula": "location_price * rush_multiplier",
+      "example": "556.28 * 1.0 = 556.28"
+    },
+    "withAddOns": {
+      "formula": "rush_price + (addon_price_per_unit * quantity)",
+      "example": "556.28 + (0.15 * 100) = 571.28"
+    },
+    "volumeDiscounted": {
+      "formula": "with_addons * (1 - volume_discount)",
+      "example": "571.28 * (1 - 0.0) = 571.28"
+    },
+    "finalRetailPrice": {
+      "formula": "volume_discounted * (1 + profit_margin)",
+      "example": "571.28 * 1.35 = 771.23"
+    }
+  },
+  "exampleQuotes": [
+    {
+      "description": "100pc Screen Print, 1-color, Left Chest, Standard 5-day",
+      "quantity": 100,
+      "service": "screen",
+      "colors": 1,
+      "location": "chest",
+      "size": "M",
+      "rush": "standard",
+      "isNewDesign": true,
+      "expectedRetailPrice": 751.78,
+      "breakdown": {
+        "unitPrice": 4.50,
+        "setupFee": 74.28,
+        "subtotal": 556.28,
+        "locationMultiplier": 1.0,
+        "locationPrice": 556.28,
+        "rushMultiplier": 1.0,
+        "rushPrice": 556.28,
+        "addOns": 0,
+        "volumeDiscount": 0.0,
+        "priceBeforeMargin": 556.28,
+        "profitMargin": 0.35,
+        "finalRetailPrice": 751.78
+      }
+    },
+    {
+      "description": "200pc Screen Print, 2-color, Full Back, Next-day Rush",
+      "quantity": 200,
+      "service": "screen",
+      "colors": 2,
+      "location": "full-back",
+      "size": "L",
+      "rush": "next-day",
+      "isNewDesign": true,
+      "expectedRetailPrice": "~1,400-1,600",
+      "notes": "8% volume discount + 20% location premium + 25% rush premium"
+    },
+    {
+      "description": "500pc Embroidery, 4-color, Sleeve Combo, Standard",
+      "quantity": 500,
+      "service": "embroidery",
+      "colors": 4,
+      "location": "sleeve-combo",
+      "size": "M",
+      "rush": "standard",
+      "isNewDesign": false,
+      "expectedRetailPrice": "~2,700-3,000",
+      "notes": "12% volume discount + 25% sleeve combo premium, no setup fee"
+    },
+    {
+      "description": "50pc Small Logo Screen Print, Standard",
+      "quantity": 50,
+      "service": "screen",
+      "colors": 1,
+      "location": "chest",
+      "size": "S",
+      "rush": "standard",
+      "isNewDesign": false,
+      "expectedRetailPrice": "~210-250",
+      "notes": "5% volume discount + 10% size discount"
+    }
+  ]
+}
