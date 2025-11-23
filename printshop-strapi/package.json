@@ -11,6 +11,9 @@
     "develop": "strapi develop",
     "start": "strapi start",
     "strapi": "strapi",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "migrate:compile": "npx tsc database/migrations/001_create_collections.ts --outDir database/migrations --module commonjs --esModuleInterop --skipLibCheck",
     "migrate:up": "npm run migrate:compile && node database/migrations/001_create_collections.js up",
     "migrate:down": "npm run migrate:compile && node database/migrations/001_create_collections.js down",
@@ -34,10 +37,13 @@
   },
   "devDependencies": {
     "@types/bull": "^4.10.0",
+    "@types/jest": "^29.5.0",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5"
   },
   "engines": {
