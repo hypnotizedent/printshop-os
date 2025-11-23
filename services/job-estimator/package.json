@@ -1,0 +1,42 @@
+{
+  "name": "@mintprints/job-estimator",
+  "version": "1.0.0",
+  "description": "Unified pricing and job estimation engine for Mint Prints",
+  "main": "lib/estimator.ts",
+  "types": "lib/estimator.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "dev": "ts-node lib/estimator.ts",
+    "start": "node build/estimator.js",
+    "lint": "eslint lib tests --ext .ts",
+    "format": "prettier --write \"lib/**/*.ts\" \"tests/**/*.ts\""
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "pricing",
+    "job-estimator",
+    "mint-prints",
+    "apparel",
+    "embroidery",
+    "screenprint",
+    "estimator"
+  ],
+  "author": "Mint Prints",
+  "license": "MIT"
+}
