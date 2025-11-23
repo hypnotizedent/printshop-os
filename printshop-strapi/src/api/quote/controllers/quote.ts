@@ -31,25 +31,31 @@ export default factories.createCoreController('api::quote.quote', ({ strapi }) =
         return ctx.badRequest('Customer email is required to send quote');
       }
 
-      // Prepare email data
-      const emailData = {
-        quoteId: id.toString(),
-        customerName: customer.name,
-        customerEmail: customer.email,
-        items: quote.items || [],
-        subtotal: parseFloat(quote.subtotal || '0'),
-        tax: quote.tax ? parseFloat(quote.tax) : undefined,
-        total: parseFloat(quote.total || '0'),
-        validUntil: quote.validUntil ? new Date(quote.validUntil) : undefined,
-      };
+      // Note: In production, integrate with the email service:
+      // const quoteEmailService = require('../../../services/quote-email-service').default;
+      // quoteEmailService.initialize();
+      // const result = await quoteEmailService.sendQuote(quote);
+      // 
+      // if (!result.success) {
+      //   return ctx.badRequest(result.error);
+      // }
 
-      // Send email using SendGrid service (needs to be initialized separately)
-      // For now, we'll just update the status
+      // Generate approval token
+      const jwt = require('jsonwebtoken');
+      const JWT_SECRET = process.env.JWT_SECRET || 'printshop-secret-change-in-production';
+      const approvalToken = jwt.sign(
+        { quoteId: id.toString(), type: 'quote_approval' },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      // Update quote with email sent status
       const updatedQuote = await strapi.entityService.update('api::quote.quote', id, {
         data: {
           status: 'Sent',
           emailSentAt: new Date(),
           emailDeliveryStatus: 'sent',
+          approvalToken,
         },
       });
 

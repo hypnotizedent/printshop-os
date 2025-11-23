@@ -3,7 +3,7 @@
  * Handles email sending, tracking, and delivery management
  */
 
-import sgMail from '@sendgrid/mail';
+import * as sgMail from '@sendgrid/mail';
 import { generateQuoteApprovalToken, verifyQuoteApprovalToken } from '../../utils/jwt-utils';
 
 export interface EmailRecipient {

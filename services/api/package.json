@@ -12,6 +12,7 @@
     "test:coverage": "jest --coverage",
     "sync:printavo": "ts-node scripts/sync-printavo-live.ts",
     "import:historical": "ts-node scripts/import-historical-orders.ts",
+    "send:reminders": "ts-node scripts/send-quote-reminders.ts",
     "lint": "tsc --noEmit"
   },
   "keywords": [

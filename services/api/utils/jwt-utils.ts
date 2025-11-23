@@ -3,7 +3,7 @@
  * Generates and validates JWT tokens for email approval links
  */
 
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'printshop-secret-change-in-production';
 
