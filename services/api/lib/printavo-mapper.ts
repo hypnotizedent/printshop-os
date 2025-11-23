@@ -13,9 +13,7 @@ import {
   OrderStatus,
   STATE_ABBREVIATIONS,
   validateStrapiOrder,
-  validateAddress,
   isValidEmail,
-  isValidISODate,
 } from './strapi-schema';
 
 /**
