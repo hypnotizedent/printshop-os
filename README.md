@@ -121,18 +121,28 @@ Customer-facing portal and internal management interface.
 - **Location:** `./frontend` directory
 - **Documentation:** [Frontend README](frontend/README_FRONTEND.md), [Integration Guide](docs/SPARK_FRONTEND_INTEGRATION.md)
 
+#### 💰 **Job Estimator** - Pricing Engine
+Flexible JSON-driven pricing calculator with sub-100ms performance.
+- **Purpose:** Accurate quote pricing with configurable rules
+- **Technology:** Node.js/TypeScript with Express REST API
+- **Features:** Volume discounts, location surcharges, color multipliers, margin tracking, caching
+- **Location:** `./services/job-estimator` directory
+- **API Docs:** [Pricing API](services/job-estimator/docs/PRICING_API.md)
+
 ---
 
 ## 🚀 Technology Stack
 
 ### Core Technologies
-- **Backend/API:** Strapi 4.x (Node.js 18+)
+- **Backend/API:** Strapi 5.31.2 (Node.js 20+)
 - **Frontend:** React 19 + TypeScript + Tailwind CSS + Vite
 - **Database:** PostgreSQL 15+ (Production), SQLite 3 (Development)
-- **Frontend Dashboard:** Appsmith (Latest)
+- **Frontend Dashboard:** Appsmith CE (Latest)
 - **Conversational AI:** Botpress 12.x+
-- **Caching:** Redis 7+
+- **Caching/Queue:** Redis 7+ (caching + Bull queue for workflows)
 - **Document Store:** MongoDB 6+ (for Appsmith)
+- **Job Queue:** Bull 4.12.0 with Redis backend
+- **WebSocket:** Socket.io 4.6.0 (real-time notifications)
 
 ### Infrastructure
 - **Containerization:** Docker 24+, Docker Compose 2.x
@@ -191,6 +201,7 @@ After startup (allow 2-3 minutes for initialization):
 - **Frontend:** http://localhost:3000
 - **Strapi Admin:** http://localhost:1337/admin
 - **Strapi API:** http://localhost:1337/api
+- **Pricing API:** http://localhost:3001 (Job Estimator service)
 - **Appsmith Dashboard:** http://localhost:8080
 - **Botpress Studio:** http://localhost:3000 (note: Botpress may use same port in some configs)
 
@@ -259,6 +270,41 @@ python examples/easypost_example.py
 ```
 
 📚 **See:** [EasyPost Integration Guide](docs/api/easypost-integration.md)
+
+---
+
+## ✨ Key Features
+
+### 💰 Flexible Pricing Engine (Phase 2.3)
+**JSON-driven pricing with sub-100ms calculations**
+- Volume discounts, location surcharges, color multipliers
+- Embroidery stitch count pricing
+- Configurable margin targets (35% default)
+- Rule precedence system (most specific wins)
+- In-memory caching with 5-minute TTL
+- Complete pricing history and audit trail
+- **API:** `POST /pricing/calculate` - [Full API Docs](services/job-estimator/docs/PRICING_API.md)
+- **Performance:** 10-20ms average calculation time
+- **Tests:** 85 passing tests with comprehensive coverage
+
+### 🔄 Quote → Order → Job Workflow Automation (Phase 2.2)
+**Asynchronous workflow with real-time notifications**
+- Quote approval triggers automatic order and job creation
+- Bull queue with Redis for reliable async processing
+- 3x retry logic with exponential backoff
+- WebSocket notifications to production team
+- Email confirmations to customers (Nodemailer)
+- Complete audit trail for compliance
+- **API:** `POST /api/quotes/:id/approve`, `GET /api/quotes/:id/workflow-status`
+- **Architecture:** Bull queue + Socket.io + audit logging
+- **Tests:** 30 passing tests covering workflows and edge cases
+
+### 🔒 Security & Reliability
+- PostgreSQL driver with connection pooling
+- Docker containerization with health checks
+- Graceful shutdown handlers (SIGTERM, SIGINT)
+- XSS prevention with HTML escaping
+- Comprehensive error handling and logging
 
 ---
 
