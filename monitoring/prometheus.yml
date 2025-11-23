@@ -1,0 +1,46 @@
+# Prometheus Configuration for PrintShop OS AI Services
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'printshop-os'
+    environment: 'production'
+
+# Alertmanager configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - alertmanager:9093
+
+# Rule files (optional)
+rule_files:
+  # - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Customer Service AI API
+  - job_name: 'customer-service-ai'
+    static_configs:
+      - targets: ['cs-ai-api:5000']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Vector Database (ChromaDB)
+  - job_name: 'vector-db'
+    static_configs:
+      - targets: ['vector-db:8000']
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 30s
+
+  # LLM Service (if metrics available)
+  - job_name: 'llm-service'
+    static_configs:
+      - targets: ['llm-service:11434']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
