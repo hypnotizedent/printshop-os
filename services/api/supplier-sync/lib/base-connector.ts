@@ -124,6 +124,31 @@ export abstract class BaseConnector {
   }
 
   /**
+   * Extract array from various response structures
+   * Handles common API response patterns like { data: [] }, { items: [] }, or direct arrays
+   */
+  protected extractArrayFromResponse<T>(
+    response: any,
+    possibleKeys: string[] = ['data', 'items', 'results', 'products', 'styles']
+  ): T[] {
+    // If response is already an array, return it
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    // Check each possible key for array data
+    for (const key of possibleKeys) {
+      if (response[key] && Array.isArray(response[key])) {
+        return response[key];
+      }
+    }
+
+    // No array found, return empty array
+    this.log('warn', 'No array found in response structure', response);
+    return [];
+  }
+
+  /**
    * Log message (override in subclasses for custom logging)
    */
   protected log(level: 'info' | 'warn' | 'error', message: string, meta?: any): void {

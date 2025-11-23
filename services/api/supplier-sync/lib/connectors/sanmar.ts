@@ -59,6 +59,9 @@ interface OAuthTokenResponse {
   expires_in: number;
 }
 
+// Token expiry buffer to refresh token before actual expiry (5 minutes in ms)
+const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
+
 export class SanMarConnector extends BaseConnector implements SupplierConnector {
   private accessToken: string | null = null;
   private tokenExpiresAt: number = 0;
@@ -71,8 +74,8 @@ export class SanMarConnector extends BaseConnector implements SupplierConnector 
    * Get OAuth access token
    */
   private async getAccessToken(): Promise<string> {
-    // Return cached token if still valid (with 5 minute buffer)
-    if (this.accessToken && Date.now() < this.tokenExpiresAt - 300000) {
+    // Return cached token if still valid (with buffer before expiry)
+    if (this.accessToken && Date.now() < this.tokenExpiresAt - TOKEN_EXPIRY_BUFFER_MS) {
       return this.accessToken;
     }
 
@@ -134,19 +137,11 @@ export class SanMarConnector extends BaseConnector implements SupplierConnector 
           },
         });
 
-        // Handle different response structures
-        let products: SanMarProduct[] = [];
-        if (Array.isArray(response.data)) {
-          products = response.data;
-        } else if (response.data && Array.isArray(response.data.data)) {
-          products = response.data.data;
-        } else if (response.data && Array.isArray(response.data.products)) {
-          products = response.data.products;
-        } else if (response.data && Array.isArray(response.data.styles)) {
-          products = response.data.styles;
-        } else {
-          this.log('warn', 'Unexpected SanMar response structure', response.data);
-        }
+        // Use base connector's helper to extract array from response
+        const products = this.extractArrayFromResponse<SanMarProduct>(
+          response.data,
+          ['data', 'products', 'styles']
+        );
 
         this.log('info', `Fetched ${products.length} products from SanMar`);
 

@@ -110,21 +110,30 @@ export class SSActivewearConnector extends BaseConnector implements SupplierConn
   }
 
   /**
+   * Extract style ID from various possible field names
+   */
+  private extractStyleId(style: SSStyle): string {
+    const idFields = [
+      style.styleID,
+      style.styleId,
+      style.styleCode,
+      style.style,
+      style.itemSku,
+      style.itemNumber,
+      style.styleNumber,
+      style.sku,
+    ];
+
+    return idFields.find(id => id != null && id !== '') || 'unknown';
+  }
+
+  /**
    * Normalize S&S style to common product schema
    */
   private normalizeStyle(style: SSStyle): NormalizedProduct {
     return {
       supplier: 'S&S Activewear',
-      styleId:
-        style.styleID ||
-        style.styleId ||
-        style.styleCode ||
-        style.style ||
-        style.itemSku ||
-        style.itemNumber ||
-        style.styleNumber ||
-        style.sku ||
-        'unknown',
+      styleId: this.extractStyleId(style),
       name:
         style.title ||
         style.styleName ||

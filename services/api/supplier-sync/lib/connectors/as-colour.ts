@@ -60,17 +60,11 @@ export class ASColourConnector extends BaseConnector implements SupplierConnecto
     return this.executeWithRetry(async () => {
       const response = await this.client.get<ASResponse>('/products');
       
-      // Handle different response structures
-      let products: ASProduct[] = [];
-      if (Array.isArray(response.data)) {
-        products = response.data;
-      } else if (response.data && Array.isArray(response.data.data)) {
-        products = response.data.data;
-      } else if (response.data && Array.isArray(response.data.products)) {
-        products = response.data.products;
-      } else {
-        this.log('warn', 'Unexpected AS Colour response structure', response.data);
-      }
+      // Use base connector's helper to extract array from response
+      const products = this.extractArrayFromResponse<ASProduct>(
+        response.data,
+        ['data', 'products']
+      );
       
       this.log('info', `Fetched ${products.length} products from AS Colour`);
       
