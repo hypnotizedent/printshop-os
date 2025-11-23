@@ -358,7 +358,23 @@ Add these fields (click **+ Add another field** for each):
 - Number format: **integer**
 - Name: `Quantity`
 
-**Field 8: customer (Relation)**
+**Field 8: ProductionNotes**
+- Type: **Rich Text** (or Text)
+- Name: `ProductionNotes`
+
+**Field 9: Notes**
+- Type: **Rich Text** (or Text)
+- Name: `Notes`
+
+**Field 10: PaymentStatus**
+- Type: **Enumeration**
+- Name: `PaymentStatus`
+- Values:
+  - `Paid`
+  - `Unpaid`
+- Default: `Unpaid`
+
+**Field 11: customer (Relation)**
 - Type: **Relation**
 - Relation configuration:
   - Left side: Job (current)
