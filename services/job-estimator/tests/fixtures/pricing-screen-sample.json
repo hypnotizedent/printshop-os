@@ -1,0 +1,30 @@
+[
+  {
+    "quantity": "1-24",
+    "size": "S-M",
+    "colors": "1",
+    "unit_price": "$8.00",
+    "setup_price": "$25"
+  },
+  {
+    "quantity": "25-99",
+    "size": "S-M",
+    "colors": "1",
+    "unit_price": "$6.50",
+    "setup_price": "$25"
+  },
+  {
+    "quantity": "100+",
+    "size": "S-M",
+    "colors": "1",
+    "unit_price": "$5.00",
+    "setup_price": "$25"
+  },
+  {
+    "quantity": "1-24",
+    "size": "Jumbo",
+    "colors": "2",
+    "unit_price": "$12.00",
+    "setup_price": "$35"
+  }
+]
