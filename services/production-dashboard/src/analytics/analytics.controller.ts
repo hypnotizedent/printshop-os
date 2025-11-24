@@ -10,7 +10,8 @@ import {
   ReportConfig,
 } from './types';
 
-// Mock data for development
+// TODO: Replace mock data with actual database queries or service calls in production
+// Mock data for development and testing
 const mockJobEntries: JobEntry[] = [
   {
     id: '1',
@@ -210,11 +211,30 @@ export class AnalyticsController {
   /**
    * GET /api/production/metrics/efficiency
    * Efficiency data with variance analysis
+   * Note: Query parameters are used for filtering, not as sensitive data
    */
   static async getEfficiencyData(req: Request, res: Response): Promise<void> {
     try {
+      // Validate and sanitize query parameters to prevent injection
       const employeeId = req.query.employeeId as string | undefined;
       const jobType = req.query.jobType as string | undefined;
+      
+      // Basic validation to prevent injection
+      if (employeeId && !/^[a-zA-Z0-9-]+$/.test(employeeId)) {
+        res.status(400).json({
+          success: false,
+          error: 'Invalid employeeId format',
+        });
+        return;
+      }
+      
+      if (jobType && !/^[a-zA-Z0-9\s-]+$/.test(jobType)) {
+        res.status(400).json({
+          success: false,
+          error: 'Invalid jobType format',
+        });
+        return;
+      }
       
       let efficiencyData = MetricsService.generateEfficiencyData(mockJobEntries);
       

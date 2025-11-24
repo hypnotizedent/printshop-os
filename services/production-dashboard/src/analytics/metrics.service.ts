@@ -198,6 +198,7 @@ export class MetricsService {
       teamEfficiencyRate,
       bestPerformer,
       improvementNeeded,
+      // TODO: Implement trend calculations by comparing with previous period data
       throughputTrend: 0, // Would be calculated from historical data
       efficiencyTrend: 0, // Would be calculated from historical data
     };

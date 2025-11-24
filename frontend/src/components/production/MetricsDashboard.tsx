@@ -41,6 +41,7 @@ export function MetricsDashboard() {
   const loadOverview = async () => {
     setLoading(true);
     try {
+      // TODO: Replace with actual API call: fetch(`/api/production/metrics/overview?period=${period}`)
       // Mock data for demonstration
       const mockOverview: DashboardOverview = {
         period,
