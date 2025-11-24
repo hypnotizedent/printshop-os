@@ -1,0 +1,380 @@
+{
+  "exportedApplication": {
+    "name": "Production Dashboard",
+    "description": "Real-time job management dashboard for production team",
+    "version": "1.0.0",
+    "datasources": [
+      {
+        "name": "StrapiAPI",
+        "pluginId": "restapi-plugin",
+        "datasourceConfiguration": {
+          "url": "http://localhost:1337",
+          "headers": [
+            {
+              "key": "Authorization",
+              "value": "Bearer YOUR_STRAPI_API_TOKEN_HERE"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "queryParameters": []
+        }
+      }
+    ],
+    "queries": [
+      {
+        "name": "GetJobsInProduction",
+        "datasourceId": "StrapiAPI",
+        "actionConfiguration": {
+          "httpMethod": "GET",
+          "path": "/api/jobs",
+          "queryParameters": [
+            {
+              "key": "filters[status][$eq]",
+              "value": "InProduction"
+            },
+            {
+              "key": "sort[0]",
+              "value": "dueDate:asc"
+            },
+            {
+              "key": "populate",
+              "value": "customer"
+            },
+            {
+              "key": "pagination[pageSize]",
+              "value": "100"
+            }
+          ]
+        },
+        "executeOnLoad": true,
+        "dynamicBindingPathList": []
+      },
+      {
+        "name": "GetJobById",
+        "datasourceId": "StrapiAPI",
+        "actionConfiguration": {
+          "httpMethod": "GET",
+          "path": "/api/jobs/{{Table1.selectedRow.id}}",
+          "queryParameters": [
+            {
+              "key": "populate",
+              "value": "*"
+            }
+          ]
+        },
+        "executeOnLoad": false,
+        "dynamicBindingPathList": [
+          {
+            "key": "path"
+          }
+        ]
+      },
+      {
+        "name": "UpdateJobStatus",
+        "datasourceId": "StrapiAPI",
+        "actionConfiguration": {
+          "httpMethod": "PUT",
+          "path": "/api/jobs/{{Table1.selectedRow.id}}",
+          "body": "{\n  \"data\": {\n    \"status\": \"{{JobDetailsModal.newStatus}}\"\n  }\n}",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "executeOnLoad": false,
+        "dynamicBindingPathList": [
+          {
+            "key": "path"
+          },
+          {
+            "key": "body"
+          }
+        ]
+      },
+      {
+        "name": "GetAllJobs",
+        "datasourceId": "StrapiAPI",
+        "actionConfiguration": {
+          "httpMethod": "GET",
+          "path": "/api/jobs",
+          "queryParameters": [
+            {
+              "key": "filters[status][$eq]",
+              "value": "{{StatusFilter.selectedOptionValue || 'InProduction'}}"
+            },
+            {
+              "key": "sort[0]",
+              "value": "dueDate:asc"
+            },
+            {
+              "key": "populate",
+              "value": "customer"
+            },
+            {
+              "key": "pagination[pageSize]",
+              "value": "50"
+            }
+          ]
+        },
+        "executeOnLoad": false,
+        "dynamicBindingPathList": [
+          {
+            "key": "queryParameters[0].value"
+          }
+        ]
+      }
+    ],
+    "pages": [
+      {
+        "name": "Production Dashboard",
+        "isDefault": true,
+        "layouts": [
+          {
+            "dsl": {
+              "widgetName": "MainContainer",
+              "backgroundColor": "none",
+              "rightColumn": 1224,
+              "snapColumns": 64,
+              "detachFromLayout": true,
+              "widgetId": "0",
+              "topRow": 0,
+              "bottomRow": 950,
+              "containerStyle": "none",
+              "snapRows": 95,
+              "parentRowSpace": 1,
+              "type": "CANVAS_WIDGET",
+              "canExtend": true,
+              "version": 1,
+              "minHeight": 950,
+              "children": [
+                {
+                  "widgetName": "HeaderContainer",
+                  "type": "CONTAINER_WIDGET",
+                  "topRow": 0,
+                  "bottomRow": 8,
+                  "leftColumn": 0,
+                  "rightColumn": 64,
+                  "children": [
+                    {
+                      "widgetName": "Title",
+                      "type": "TEXT_WIDGET",
+                      "text": "Production Dashboard",
+                      "fontSize": "2rem",
+                      "fontStyle": "BOLD",
+                      "textAlign": "LEFT",
+                      "topRow": 1,
+                      "bottomRow": 4,
+                      "leftColumn": 0,
+                      "rightColumn": 32
+                    },
+                    {
+                      "widgetName": "RefreshButton",
+                      "type": "BUTTON_WIDGET",
+                      "text": "🔄 Refresh",
+                      "buttonColor": "#2196F3",
+                      "onClick": "{{GetJobsInProduction.run()}}",
+                      "topRow": 1,
+                      "bottomRow": 4,
+                      "leftColumn": 56,
+                      "rightColumn": 64
+                    },
+                    {
+                      "widgetName": "StatusFilter",
+                      "type": "SELECT_WIDGET",
+                      "label": "Filter by Status",
+                      "options": [
+                        { "label": "In Production", "value": "InProduction" },
+                        { "label": "Ready", "value": "Ready" },
+                        { "label": "Pending", "value": "Pending" },
+                        { "label": "Complete", "value": "Complete" },
+                        { "label": "All Jobs", "value": "" }
+                      ],
+                      "defaultOptionValue": "InProduction",
+                      "onOptionChange": "{{GetAllJobs.run()}}",
+                      "topRow": 4,
+                      "bottomRow": 7,
+                      "leftColumn": 0,
+                      "rightColumn": 16
+                    }
+                  ]
+                },
+                {
+                  "widgetName": "JobsTable",
+                  "type": "TABLE_WIDGET",
+                  "topRow": 8,
+                  "bottomRow": 70,
+                  "leftColumn": 0,
+                  "rightColumn": 64,
+                  "tableData": "{{GetJobsInProduction.data.data.map(job => ({ id: job.id, jobNumber: job.attributes.jobNumber, title: job.attributes.title, status: job.attributes.status, dueDate: job.attributes.dueDate, customer: job.attributes.customer?.data?.attributes?.name || 'N/A', productionNotes: job.attributes.productionNotes, mockupUrls: job.attributes.mockupUrls }))}}",
+                  "primaryColumns": {
+                    "jobNumber": {
+                      "label": "Job Number",
+                      "columnType": "text",
+                      "computedValue": "{{JobsTable.sanitizedTableData.map((currentRow) => currentRow.jobNumber)}}"
+                    },
+                    "title": {
+                      "label": "Title",
+                      "columnType": "text",
+                      "computedValue": "{{JobsTable.sanitizedTableData.map((currentRow) => currentRow.title)}}"
+                    },
+                    "customer": {
+                      "label": "Customer",
+                      "columnType": "text",
+                      "computedValue": "{{JobsTable.sanitizedTableData.map((currentRow) => currentRow.customer)}}"
+                    },
+                    "dueDate": {
+                      "label": "Due Date",
+                      "columnType": "date",
+                      "computedValue": "{{JobsTable.sanitizedTableData.map((currentRow) => currentRow.dueDate)}}",
+                      "outputFormat": "MMM DD, YYYY"
+                    },
+                    "status": {
+                      "label": "Status",
+                      "columnType": "text",
+                      "computedValue": "{{JobsTable.sanitizedTableData.map((currentRow) => currentRow.status)}}"
+                    },
+                    "actions": {
+                      "label": "Actions",
+                      "columnType": "button",
+                      "buttonLabel": "View Details",
+                      "buttonColor": "#2196F3",
+                      "onClick": "{{showModal('JobDetailsModal'); GetJobById.run();}}"
+                    }
+                  },
+                  "enableClientSideSearch": true,
+                  "enableServerSideFiltering": false
+                },
+                {
+                  "widgetName": "JobDetailsModal",
+                  "type": "MODAL_WIDGET",
+                  "topRow": 0,
+                  "bottomRow": 80,
+                  "leftColumn": 0,
+                  "rightColumn": 64,
+                  "children": [
+                    {
+                      "widgetName": "ModalTitle",
+                      "type": "TEXT_WIDGET",
+                      "text": "Job #{{JobsTable.selectedRow.jobNumber}}",
+                      "fontSize": "1.5rem",
+                      "fontStyle": "BOLD",
+                      "topRow": 1,
+                      "bottomRow": 4,
+                      "leftColumn": 0,
+                      "rightColumn": 64
+                    },
+                    {
+                      "widgetName": "MockupImage",
+                      "type": "IMAGE_WIDGET",
+                      "image": "{{JobsTable.selectedRow.mockupUrls && JobsTable.selectedRow.mockupUrls[0] ? JobsTable.selectedRow.mockupUrls[0] : 'https://via.placeholder.com/600x400/cccccc/666666?text=No+Mockup'}}",
+                      "objectFit": "cover",
+                      "topRow": 4,
+                      "bottomRow": 34,
+                      "leftColumn": 0,
+                      "rightColumn": 64
+                    },
+                    {
+                      "widgetName": "CustomerLabel",
+                      "type": "TEXT_WIDGET",
+                      "text": "Customer: {{JobsTable.selectedRow.customer}}",
+                      "topRow": 35,
+                      "bottomRow": 38,
+                      "leftColumn": 0,
+                      "rightColumn": 32
+                    },
+                    {
+                      "widgetName": "DueDateLabel",
+                      "type": "TEXT_WIDGET",
+                      "text": "Due: {{moment(JobsTable.selectedRow.dueDate).format('MMMM DD, YYYY')}}",
+                      "topRow": 35,
+                      "bottomRow": 38,
+                      "leftColumn": 32,
+                      "rightColumn": 64
+                    },
+                    {
+                      "widgetName": "TitleLabel",
+                      "type": "TEXT_WIDGET",
+                      "text": "Title: {{JobsTable.selectedRow.title}}",
+                      "topRow": 38,
+                      "bottomRow": 41,
+                      "leftColumn": 0,
+                      "rightColumn": 64
+                    },
+                    {
+                      "widgetName": "ProductionNotesLabel",
+                      "type": "TEXT_WIDGET",
+                      "text": "Production Notes:",
+                      "fontStyle": "BOLD",
+                      "topRow": 41,
+                      "bottomRow": 44,
+                      "leftColumn": 0,
+                      "rightColumn": 64
+                    },
+                    {
+                      "widgetName": "ProductionNotesText",
+                      "type": "TEXT_WIDGET",
+                      "text": "{{JobsTable.selectedRow.productionNotes || 'No production notes'}}",
+                      "topRow": 44,
+                      "bottomRow": 52,
+                      "leftColumn": 0,
+                      "rightColumn": 64
+                    },
+                    {
+                      "widgetName": "MarkCompleteButton",
+                      "type": "BUTTON_WIDGET",
+                      "text": "✓ Mark Complete",
+                      "buttonColor": "#4CAF50",
+                      "onClick": "{{storeValue('newStatus', 'Complete'); UpdateJobStatus.run().then(() => { GetJobsInProduction.run(); closeModal('JobDetailsModal'); showAlert('Job marked as complete!', 'success'); })}}",
+                      "topRow": 55,
+                      "bottomRow": 60,
+                      "leftColumn": 0,
+                      "rightColumn": 15
+                    },
+                    {
+                      "widgetName": "MarkReadyButton",
+                      "type": "BUTTON_WIDGET",
+                      "text": "✓ Mark Ready",
+                      "buttonColor": "#4CAF50",
+                      "onClick": "{{storeValue('newStatus', 'Ready'); UpdateJobStatus.run().then(() => { GetJobsInProduction.run(); closeModal('JobDetailsModal'); showAlert('Job marked as ready!', 'success'); })}}",
+                      "topRow": 55,
+                      "bottomRow": 60,
+                      "leftColumn": 16,
+                      "rightColumn": 31
+                    },
+                    {
+                      "widgetName": "OnHoldButton",
+                      "type": "BUTTON_WIDGET",
+                      "text": "⏸ Put On Hold",
+                      "buttonColor": "#FF9800",
+                      "onClick": "{{storeValue('newStatus', 'Pending'); UpdateJobStatus.run().then(() => { GetJobsInProduction.run(); closeModal('JobDetailsModal'); showAlert('Job put on hold!', 'info'); })}}",
+                      "topRow": 55,
+                      "bottomRow": 60,
+                      "leftColumn": 32,
+                      "rightColumn": 47
+                    },
+                    {
+                      "widgetName": "CloseButton",
+                      "type": "BUTTON_WIDGET",
+                      "text": "Close",
+                      "buttonColor": "#757575",
+                      "onClick": "{{closeModal('JobDetailsModal')}}",
+                      "topRow": 55,
+                      "bottomRow": 60,
+                      "leftColumn": 48,
+                      "rightColumn": 64
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
