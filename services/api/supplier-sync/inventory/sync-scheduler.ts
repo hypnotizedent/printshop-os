@@ -3,13 +3,13 @@
  * Manages scheduled inventory synchronization jobs
  */
 
-import cron from 'node-cron';
+import cron, { ScheduledTask } from 'node-cron';
 import { InventorySyncService } from './inventory-sync.service';
 
 export class SyncScheduler {
   private inventorySyncService: InventorySyncService;
-  private fullSyncJob?: cron.ScheduledTask;
-  private prioritySyncJob?: cron.ScheduledTask;
+  private fullSyncJob?: ScheduledTask;
+  private prioritySyncJob?: ScheduledTask;
 
   constructor(inventorySyncService: InventorySyncService) {
     this.inventorySyncService = inventorySyncService;
