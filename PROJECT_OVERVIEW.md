@@ -123,6 +123,10 @@ printshop-os/
 - Analytics & reporting
 - Supplier integration
 
+**Phase 4: Automation Tools** 🆕 Planned
+- Label formatter (Issue #143 - Agent assigned)
+- Additional workflow automation
+
 ## Quick Start for New Contributors
 
 1. **Read this file first** - Understand the big picture

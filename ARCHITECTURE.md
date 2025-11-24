@@ -183,6 +183,41 @@ PrintShop OS uses a **microservices architecture** with a central CMS (Strapi) a
 - `/api/customer/tickets/*` - Support tickets
 - `/api/customer/quotes/*` - Quote management
 
+### 7. Label Formatter Service (Planned)
+**Location:** `services/label-formatter/`  
+**Role:** Automated shipping label processing and formatting
+
+**Features:**
+- PDF and image label processing
+- Auto-rotation detection
+- Smart cropping to label boundaries
+- Format conversion to 4x6 Rollo printer specs
+- Batch processing support
+- Label processing history
+
+**API:**
+- `POST /api/labels/format` - Upload and format label
+- `GET /api/labels/:id` - Retrieve formatted label
+- `GET /api/labels/history` - Processing history
+
+**Technology:**
+- Node.js/TypeScript or Python/FastAPI
+- PDF processing: pdf-lib or PyPDF2
+- Image processing: sharp or Pillow
+- Auto-detection algorithms for orientation
+
+**Performance:**
+- Processing time: <2 seconds per label
+- Supports PDF, PNG, JPG inputs
+- Output: Print-ready 4x6 PDF
+
+**Business Value:**
+- Eliminates 6-step manual Photoshop workflow
+- Time savings: 95% reduction (3-5 min → <10 sec)
+- Annual savings: ~40 hours (~$800-$2000 value)
+
+**Status:** Issue #143 - Agent assigned
+
 ## Data Flow Patterns
 
 ### Order Creation Flow
@@ -247,6 +282,33 @@ Scheduled Job → Supplier Sync Service → Supplier API
                             Update/Create in Strapi
                                              ↓
                           Invalidate Redis Cache
+```
+
+### Label Formatting Flow (Planned)
+```
+User Upload → Frontend → Label Formatter Service
+   (PDF/Image)                      ↓
+                            Parse Document
+                                    ↓
+                         Extract Label Image
+                                    ↓
+                        Detect Orientation
+                                    ↓
+                    Auto-Rotate if Needed
+                                    ↓
+                   Detect Label Boundaries
+                                    ↓
+                      Smart Crop to Label
+                                    ↓
+                    Resize to 4x6 Format
+                                    ↓
+                    Optimize for Printing
+                                    ↓
+                  Save to data/labels/
+                                    ↓
+                Return Print-Ready PDF
+                                    ↓
+              Frontend → Download/Print
 ```
 
 ## Authentication & Security

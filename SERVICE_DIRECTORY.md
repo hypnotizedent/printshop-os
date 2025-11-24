@@ -242,7 +242,55 @@ services/api/customer/
 
 ---
 
-### 6. Strapi CMS
+### 6. Label Formatter Service (Planned)
+
+**Location:** `services/label-formatter/`
+
+```
+services/label-formatter/
+├── src/
+│   ├── api/
+│   │   └── format-label.ts       # POST /api/labels/format
+│   ├── processors/
+│   │   ├── pdf-processor.ts      # Handle PDF inputs
+│   │   ├── image-processor.ts    # Handle image inputs
+│   │   └── rollo-formatter.ts    # Format for Rollo printer specs
+│   ├── detectors/
+│   │   ├── orientation.ts        # Auto-detect rotation needed
+│   │   └── boundaries.ts         # Smart crop detection
+│   └── utils/
+│       └── print-optimize.ts     # Optimize for printing
+├── tests/
+│   └── label-formatter.test.ts
+└── README.md
+```
+
+**Responsibilities:**
+- Automated shipping label formatting
+- PDF and image processing
+- Auto-rotation and cropping
+- Format conversion to 4x6 Rollo printer format
+- Eliminate manual Photoshop workflow
+
+**API Endpoints:**
+- `POST /api/labels/format` - Upload and format label
+- `GET /api/labels/:id` - Retrieve formatted label
+- `GET /api/labels/history` - Label processing history
+
+**Processing Features:**
+- PDF parsing and extraction
+- Auto-detect text orientation
+- Smart boundary detection
+- Resize to standard 4x6 format
+- Batch processing support
+
+**Port:** 3003 (planned)
+
+**Status:** Issue #143 - Agent assigned, in planning
+
+---
+
+### 7. Strapi CMS
 
 **Location:** `printshop-strapi/`
 
@@ -308,6 +356,10 @@ frontend/
 │   │   │   ├── OrderDetails.tsx
 │   │   │   ├── SupportTickets.tsx
 │   │   │   └── QuoteManager.tsx
+│   │   ├── labels/           # Label formatter UI (planned)
+│   │   │   ├── LabelUploader.tsx
+│   │   │   ├── LabelPreview.tsx
+│   │   │   └── LabelHistory.tsx
 │   │   ├── analytics/        # Analytics dashboards
 │   │   │   ├── RevenueChart.tsx
 │   │   │   ├── ProductMetrics.tsx
@@ -363,8 +415,12 @@ data/
 │   │   ├── general/          # FAQs, generic docs
 │   │   ├── operational/      # Supplier logic, shipping rules
 │   │   ├── technical/        # Artwork guidelines, mockups
-│   │   └── case_studies/     # Real-world examples
+│   │   ├── case_studies/     # Real-world examples
+│   │   └── email_history/    # Ingested email training data
 │   └── vector_store/         # ChromaDB persistence (gitignored)
+├── assets/                   # Customer Asset Vault (CDP)
+│   └── {customer_id}/        # Organized by customer
+
 ```
 
 **Purpose:**
@@ -478,6 +534,7 @@ printshop-os/
 | Analytics/reporting | `services/api/analytics/` |
 | AI-powered feature | `services/customer-service-ai/` |
 | Supplier integration | `services/api/supplier-sync/` |
+| Label formatting/automation | `services/label-formatter/` |
 | New data type | `printshop-strapi/src/api/` |
 | Frontend component | `frontend/src/components/` |
 | Frontend page | `frontend/src/pages/` |
@@ -583,6 +640,7 @@ Redis
 | Strapi CMS | 1337 | HTTP |
 | Production Dashboard | 3000 | HTTP + WebSocket |
 | Analytics API | 3002 | HTTP |
+| Label Formatter | 3003 | HTTP (planned) |
 | Frontend Dev Server | 5173 | HTTP |
 | PostgreSQL | 5432 | TCP |
 | Redis | 6379 | TCP |
