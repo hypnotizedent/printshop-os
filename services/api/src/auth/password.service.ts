@@ -3,8 +3,8 @@
  * Handles password hashing, validation, and reset token generation
  */
 
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 const SALT_ROUNDS = 12;
 

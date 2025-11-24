@@ -3,10 +3,10 @@
  * Core authentication logic for user registration, login, and token management
  */
 
-import * as jwt from 'jsonwebtoken';
-import * as speakeasy from 'speakeasy';
-import * as QRCode from 'qrcode';
-import * as crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+import speakeasy from 'speakeasy';
+import QRCode from 'qrcode';
+import crypto from 'crypto';
 import { PasswordService } from './password.service';
 
 // JWT configuration

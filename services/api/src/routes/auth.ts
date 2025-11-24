@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import * as rateLimit from 'express-rate-limit';
+import rateLimit from 'express-rate-limit';
 import { AuthController } from '../auth/auth.controller';
 import { authenticateToken } from '../auth/jwt.middleware';
 
