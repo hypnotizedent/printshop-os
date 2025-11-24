@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  label-formatter:
+    build:
+      context: .
+      dockerfile: printshop_os/labels/Dockerfile
+    container_name: printshop-label-formatter
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=production
+      - PYTHONPATH=/app
+    volumes:
+      # Mount for development (optional, comment out in production)
+      - ./printshop_os:/app/printshop_os:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5001/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - printshop-network
+
+networks:
+  printshop-network:
+    driver: bridge

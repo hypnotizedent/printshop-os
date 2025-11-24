@@ -72,6 +72,10 @@ def format_label():
             'error': f'File type not allowed. Allowed types: {", ".join(ALLOWED_EXTENSIONS)}'
         }), 400
     
+    # Initialize paths
+    input_path = None
+    output_path = None
+    
     try:
         # Get parameters
         output_format = request.form.get('format', 'pdf').lower()
@@ -112,9 +116,9 @@ def format_label():
     finally:
         # Clean up temporary files
         try:
-            if input_path.exists():
+            if input_path and input_path.exists():
                 input_path.unlink()
-            if output_path.exists() and output_path != input_path:
+            if output_path and output_path.exists() and output_path != input_path:
                 # Only delete if we're not in the middle of sending
                 pass  # File will be cleaned up by send_file
         except:
@@ -144,6 +148,9 @@ def preview_label():
         return jsonify({
             'error': f'File type not allowed. Allowed types: {", ".join(ALLOWED_EXTENSIONS)}'
         }), 400
+    
+    # Initialize path
+    input_path = None
     
     try:
         # Save uploaded file
@@ -175,7 +182,7 @@ def preview_label():
     finally:
         # Clean up
         try:
-            if input_path.exists():
+            if input_path and input_path.exists():
                 input_path.unlink()
         except:
             pass
@@ -208,4 +215,7 @@ def run_server(host='0.0.0.0', port=5001, debug=False):
 
 
 if __name__ == '__main__':
-    run_server(debug=True)
+    import os
+    # Only enable debug mode if explicitly set via environment variable
+    debug_mode = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    run_server(debug=debug_mode)

@@ -40,7 +40,7 @@ The Label Formatter is a Python-based tool that automatically formats shipping l
 pip install -r requirements.txt
 
 # Or install individual packages
-pip install Pillow PyPDF2 reportlab pdf2image
+pip install "Pillow>=10.2.0" "PyPDF2>=3.0.0" "reportlab>=4.0.0" "pdf2image>=1.16.3" "flask>=2.3.2" "flask-cors>=4.0.0"
 ```
 
 ### Basic Usage
