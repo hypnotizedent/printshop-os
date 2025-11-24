@@ -6,6 +6,7 @@ describe('Customer Preference Controller', () => {
   let mockStrapi: any;
   let mockCtx: any;
   let mockUser: any;
+  let controller: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -22,33 +23,7 @@ describe('Customer Preference Controller', () => {
         info: jest.fn(),
         error: jest.fn(),
       },
-      documents: jest.fn((type) => {
-        if (type === 'api::customer-preference.customer-preference') {
-          return {
-            findFirst: jest.fn().mockResolvedValue({
-              documentId: 'pref-123',
-              user: mockUser.id,
-              orderConfirmation: true,
-              artApproval: true,
-              productionUpdates: true,
-              shipmentNotifications: true,
-              quoteReminders: true,
-              marketingEmails: false,
-              smsNotifications: false,
-            }),
-            create: jest.fn().mockResolvedValue({
-              documentId: 'pref-new',
-              user: mockUser.id,
-              orderConfirmation: true,
-            }),
-            update: jest.fn().mockResolvedValue({
-              documentId: 'pref-123',
-              marketingEmails: true,
-            }),
-          };
-        }
-        return { create: jest.fn() };
-      }),
+      documents: jest.fn(),
       service: jest.fn().mockReturnValue({
         logActivity: jest.fn().mockResolvedValue({}),
       }),
@@ -71,14 +46,29 @@ describe('Customer Preference Controller', () => {
       unauthorized: jest.fn((msg) => msg),
       internalServerError: jest.fn((msg) => msg),
     };
+
+    // Dynamically import controller factory and create controller
+    const controllerFactory = require('../customer-preference').default;
+    controller = controllerFactory({ strapi: mockStrapi });
   });
 
   describe('getMyPreferences', () => {
     it('should return user preferences', async () => {
-      const controller = require('../customer-preference').default;
-      const instance = controller({ strapi: mockStrapi });
+      mockStrapi.documents.mockReturnValue({
+        findFirst: jest.fn().mockResolvedValue({
+          documentId: 'pref-123',
+          user: mockUser.id,
+          orderConfirmation: true,
+          artApproval: true,
+          productionUpdates: true,
+          shipmentNotifications: true,
+          quoteReminders: true,
+          marketingEmails: false,
+          smsNotifications: false,
+        }),
+      });
 
-      await instance.getMyPreferences(mockCtx);
+      await controller.getMyPreferences(mockCtx);
 
       expect(mockStrapi.documents).toHaveBeenCalledWith('api::customer-preference.customer-preference');
       expect(mockCtx.body).toBeDefined();
@@ -86,30 +76,22 @@ describe('Customer Preference Controller', () => {
     });
 
     it('should create default preferences if none exist', async () => {
-      mockStrapi.documents = jest.fn((type) => {
-        if (type === 'api::customer-preference.customer-preference') {
-          return {
-            findFirst: jest.fn().mockResolvedValue(null),
-            create: jest.fn().mockResolvedValue({
-              documentId: 'pref-new',
-              user: mockUser.id,
-              orderConfirmation: true,
-              artApproval: true,
-              productionUpdates: true,
-              shipmentNotifications: true,
-              quoteReminders: true,
-              marketingEmails: false,
-              smsNotifications: false,
-            }),
-          };
-        }
-        return { create: jest.fn() };
+      mockStrapi.documents.mockReturnValue({
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({
+          documentId: 'pref-new',
+          user: mockUser.id,
+          orderConfirmation: true,
+          artApproval: true,
+          productionUpdates: true,
+          shipmentNotifications: true,
+          quoteReminders: true,
+          marketingEmails: false,
+          smsNotifications: false,
+        }),
       });
 
-      const controller = require('../customer-preference').default;
-      const instance = controller({ strapi: mockStrapi });
-
-      await instance.getMyPreferences(mockCtx);
+      await controller.getMyPreferences(mockCtx);
 
       const documentsInstance = mockStrapi.documents('api::customer-preference.customer-preference');
       expect(documentsInstance.create).toHaveBeenCalled();
@@ -117,10 +99,8 @@ describe('Customer Preference Controller', () => {
 
     it('should return 401 if not logged in', async () => {
       mockCtx.state.user = null;
-      const controller = require('../customer-preference').default;
-      const instance = controller({ strapi: mockStrapi });
 
-      await instance.getMyPreferences(mockCtx);
+      await controller.getMyPreferences(mockCtx);
 
       expect(mockCtx.unauthorized).toHaveBeenCalledWith('You must be logged in');
     });
@@ -128,33 +108,33 @@ describe('Customer Preference Controller', () => {
 
   describe('updateMyPreferences', () => {
     it('should update existing preferences', async () => {
-      const controller = require('../customer-preference').default;
-      const instance = controller({ strapi: mockStrapi });
+      mockStrapi.documents.mockReturnValue({
+        findFirst: jest.fn().mockResolvedValue({
+          documentId: 'pref-123',
+          user: mockUser.id,
+        }),
+        update: jest.fn().mockResolvedValue({
+          documentId: 'pref-123',
+          marketingEmails: true,
+        }),
+      });
 
-      await instance.updateMyPreferences(mockCtx);
+      await controller.updateMyPreferences(mockCtx);
 
       expect(mockStrapi.documents).toHaveBeenCalledWith('api::customer-preference.customer-preference');
       expect(mockCtx.body).toBeDefined();
     });
 
     it('should create preferences if they do not exist', async () => {
-      mockStrapi.documents = jest.fn((type) => {
-        if (type === 'api::customer-preference.customer-preference') {
-          return {
-            findFirst: jest.fn().mockResolvedValue(null),
-            create: jest.fn().mockResolvedValue({
-              documentId: 'pref-new',
-              marketingEmails: true,
-            }),
-          };
-        }
-        return { create: jest.fn() };
+      mockStrapi.documents.mockReturnValue({
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({
+          documentId: 'pref-new',
+          marketingEmails: true,
+        }),
       });
 
-      const controller = require('../customer-preference').default;
-      const instance = controller({ strapi: mockStrapi });
-
-      await instance.updateMyPreferences(mockCtx);
+      await controller.updateMyPreferences(mockCtx);
 
       const documentsInstance = mockStrapi.documents('api::customer-preference.customer-preference');
       expect(documentsInstance.create).toHaveBeenCalled();
@@ -162,10 +142,8 @@ describe('Customer Preference Controller', () => {
 
     it('should return 401 if not logged in', async () => {
       mockCtx.state.user = null;
-      const controller = require('../customer-preference').default;
-      const instance = controller({ strapi: mockStrapi });
 
-      await instance.updateMyPreferences(mockCtx);
+      await controller.updateMyPreferences(mockCtx);
 
       expect(mockCtx.unauthorized).toHaveBeenCalledWith('You must be logged in');
     });

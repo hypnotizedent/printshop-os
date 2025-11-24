@@ -2,15 +2,11 @@
  * Customer Profile Controller Tests
  */
 
-// Mock services before importing
-jest.mock('../../../../services/queue', () => ({
-  addWorkflowJob: jest.fn().mockResolvedValue({ id: 'test-job-123' }),
-}));
-
 describe('Customer Profile Controller', () => {
   let mockStrapi: any;
   let mockCtx: any;
   let mockUser: any;
+  let controller: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,24 +24,13 @@ describe('Customer Profile Controller', () => {
         info: jest.fn(),
         error: jest.fn(),
       },
-      documents: jest.fn((type) => {
-        if (type === 'plugin::users-permissions.user') {
-          return {
-            findOne: jest.fn().mockResolvedValue({ ...mockUser, password: 'hashed' }),
-            findFirst: jest.fn().mockResolvedValue(null),
-            update: jest.fn().mockResolvedValue({ ...mockUser, email: 'new@example.com' }),
-          };
-        }
-        return {
-          create: jest.fn().mockResolvedValue({}),
-        };
-      }),
+      documents: jest.fn(),
       plugins: {
         'users-permissions': {
           services: {
             user: {
               validatePassword: jest.fn().mockResolvedValue(true),
-              hashPassword: jest.fn().mockResolvedValue('new_hashed_password'),
+              hashPassword: jest.fn().mockResolvedValue({ password: 'new_hashed_password' }),
             },
           },
         },
@@ -72,14 +57,21 @@ describe('Customer Profile Controller', () => {
       unauthorized: jest.fn((msg) => msg),
       internalServerError: jest.fn((msg) => msg),
     };
+
+    // Dynamically import controller factory and create controller
+    const controllerFactory = require('../customer-profile').default;
+    controller = controllerFactory({ strapi: mockStrapi });
   });
 
   describe('getProfile', () => {
     it('should return user profile without sensitive data', async () => {
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
+      const profileData = { ...mockUser, password: 'hashed' };
+      
+      mockStrapi.documents.mockReturnValue({
+        findOne: jest.fn().mockResolvedValue(profileData),
+      });
 
-      await instance.getProfile(mockCtx);
+      await controller.getProfile(mockCtx);
 
       expect(mockStrapi.documents).toHaveBeenCalledWith('plugin::users-permissions.user');
       expect(mockCtx.body).toBeDefined();
@@ -88,10 +80,8 @@ describe('Customer Profile Controller', () => {
 
     it('should return 401 if not logged in', async () => {
       mockCtx.state.user = null;
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
 
-      await instance.getProfile(mockCtx);
+      await controller.getProfile(mockCtx);
 
       expect(mockCtx.unauthorized).toHaveBeenCalledWith('You must be logged in');
     });
@@ -104,10 +94,12 @@ describe('Customer Profile Controller', () => {
         username: 'newusername',
       };
 
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
+      mockStrapi.documents.mockReturnValue({
+        findFirst: jest.fn().mockResolvedValue(null),
+        update: jest.fn().mockResolvedValue({ ...mockUser, email: 'new@example.com' }),
+      });
 
-      await instance.updateProfile(mockCtx);
+      await controller.updateProfile(mockCtx);
 
       expect(mockStrapi.documents).toHaveBeenCalledWith('plugin::users-permissions.user');
       expect(mockCtx.body).toBeDefined();
@@ -118,30 +110,20 @@ describe('Customer Profile Controller', () => {
         email: 'existing@example.com',
       };
 
-      mockStrapi.documents = jest.fn((type) => {
-        if (type === 'plugin::users-permissions.user') {
-          return {
-            findFirst: jest.fn().mockResolvedValue({ documentId: 'other-user' }),
-            update: jest.fn(),
-          };
-        }
-        return { create: jest.fn() };
+      mockStrapi.documents.mockReturnValue({
+        findFirst: jest.fn().mockResolvedValue({ documentId: 'other-user' }),
+        update: jest.fn(),
       });
 
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
-
-      await instance.updateProfile(mockCtx);
+      await controller.updateProfile(mockCtx);
 
       expect(mockCtx.badRequest).toHaveBeenCalledWith('Email already in use');
     });
 
     it('should return 401 if not logged in', async () => {
       mockCtx.state.user = null;
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
 
-      await instance.updateProfile(mockCtx);
+      await controller.updateProfile(mockCtx);
 
       expect(mockCtx.unauthorized).toHaveBeenCalledWith('You must be logged in');
     });
@@ -155,10 +137,11 @@ describe('Customer Profile Controller', () => {
         confirmPassword: 'NewPassword123',
       };
 
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
+      mockStrapi.documents.mockReturnValue({
+        update: jest.fn().mockResolvedValue({}),
+      });
 
-      await instance.changePassword(mockCtx);
+      await controller.changePassword(mockCtx);
 
       expect(mockStrapi.plugins['users-permissions'].services.user.validatePassword).toHaveBeenCalled();
       expect(mockStrapi.plugins['users-permissions'].services.user.hashPassword).toHaveBeenCalled();
@@ -172,10 +155,7 @@ describe('Customer Profile Controller', () => {
         confirmPassword: 'DifferentPassword123',
       };
 
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
-
-      await instance.changePassword(mockCtx);
+      await controller.changePassword(mockCtx);
 
       expect(mockCtx.badRequest).toHaveBeenCalledWith('New passwords do not match');
     });
@@ -187,10 +167,7 @@ describe('Customer Profile Controller', () => {
         confirmPassword: 'short',
       };
 
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
-
-      await instance.changePassword(mockCtx);
+      await controller.changePassword(mockCtx);
 
       expect(mockCtx.badRequest).toHaveBeenCalledWith('Password must be at least 8 characters');
     });
@@ -204,20 +181,15 @@ describe('Customer Profile Controller', () => {
 
       mockStrapi.plugins['users-permissions'].services.user.validatePassword = jest.fn().mockResolvedValue(false);
 
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
-
-      await instance.changePassword(mockCtx);
+      await controller.changePassword(mockCtx);
 
       expect(mockCtx.badRequest).toHaveBeenCalledWith('Current password is incorrect');
     });
 
     it('should return 401 if not logged in', async () => {
       mockCtx.state.user = null;
-      const controller = require('../customer-profile').default;
-      const instance = controller({ strapi: mockStrapi });
 
-      await instance.changePassword(mockCtx);
+      await controller.changePassword(mockCtx);
 
       expect(mockCtx.unauthorized).toHaveBeenCalledWith('You must be logged in');
     });
