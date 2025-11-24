@@ -78,3 +78,62 @@ export interface DashboardStats {
   lowStockItems: number
   urgentJobs: number
 }
+
+export type QuoteStatus = 'Pending' | 'Approved' | 'Rejected' | 'Expired' | 'Converted'
+
+export interface QuoteItem {
+  id: string
+  productName: string
+  quantity: number
+  unitPrice: number
+  colors: number
+  printLocations: string[]
+  description: string
+  total: number
+}
+
+export interface ChangeRequest {
+  id: string
+  requestedAt: string
+  comments: string
+  status: 'Pending' | 'Reviewed'
+}
+
+export interface QuoteFile {
+  id: string
+  name: string
+  url: string
+  type: string
+}
+
+export interface Quote {
+  id: string
+  quoteNumber: string
+  customerId: string
+  status: QuoteStatus
+  createdAt: string
+  expiresAt: string
+  approvedAt?: string
+  rejectedAt?: string
+  convertedAt?: string
+  orderNumber?: string
+
+  lineItems: QuoteItem[]
+  subtotal: number
+  setupFees: number
+  rushFee: number
+  tax: number
+  total: number
+
+  artworkFiles: QuoteFile[]
+  proofFile?: QuoteFile
+
+  approvalSignature?: string
+  approvalName?: string
+  approvalEmail?: string
+
+  rejectionReason?: string
+  changeRequests: ChangeRequest[]
+
+  notes?: string
+}
