@@ -9,6 +9,7 @@ import { CustomersPage } from "./components/customers/CustomersPage"
 import { FilesPage } from "./components/files/FilesPage"
 import { ReportsPage } from "./components/reports/ReportsPage"
 import { SettingsPage } from "./components/settings/SettingsPage"
+import { ProductionPage } from "./components/production/ProductionPage"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 
 function App() {
@@ -42,6 +43,8 @@ function App() {
     switch (currentPage) {
       case "dashboard":
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} />
+      case "production":
+        return <ProductionPage />
       case "jobs":
         return <JobsPage jobs={jobsList} onUpdateJob={handleUpdateJob} />
       case "machines":
