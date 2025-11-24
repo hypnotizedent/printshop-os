@@ -49,14 +49,6 @@ const operatorUser: User = {
   teamId: 'team-1'
 };
 
-// @ts-ignore - unused but kept for completeness
-const readOnlyUser: User = {
-  id: 'readonly-1',
-  name: 'ReadOnly User',
-  email: 'readonly@printshop.com',
-  role: Role.READ_ONLY
-};
-
 // Helper functions for creating mock Express objects
 function createMockRequest(overrides: Partial<Request> = {}): Request {
   return {

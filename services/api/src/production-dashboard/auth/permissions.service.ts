@@ -109,7 +109,7 @@ class PermissionsService {
     }
 
     // Manager can see all data
-    if (role === Role.MANAGER && roleHasPermission(role, Permission.TIME_VIEW_ALL)) {
+    if (role === Role.MANAGER) {
       return true;
     }
 
@@ -133,7 +133,7 @@ class PermissionsService {
     const role = user.role;
 
     // Admin and Manager can edit all
-    if (role === Role.ADMIN || (role === Role.MANAGER && roleHasPermission(role, Permission.TIME_EDIT_ALL))) {
+    if (role === Role.ADMIN || role === Role.MANAGER) {
       return true;
     }
 
