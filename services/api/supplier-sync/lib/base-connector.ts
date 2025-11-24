@@ -4,12 +4,15 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 import { ConnectorConfig, RetryConfig } from './types';
+import { CacheService } from './cache';
 
 export abstract class BaseConnector {
   protected client: AxiosInstance;
   protected retryConfig: RetryConfig;
+  protected cacheService?: CacheService;
 
-  constructor(protected config: ConnectorConfig) {
+  constructor(protected config: ConnectorConfig, cacheService?: CacheService) {
+    this.cacheService = cacheService;
     this.client = axios.create({
       baseURL: config.baseUrl,
       timeout: config.timeout || 30000,

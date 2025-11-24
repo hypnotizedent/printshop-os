@@ -79,6 +79,55 @@ export interface DashboardStats {
   urgentJobs: number
 }
 
+// Customer Portal Types
+export type OrderStatus = 'completed' | 'in-production' | 'shipped' | 'delivered' | 'cancelled'
+
+export interface CustomerOrder {
+  id: string
+  orderNumber: string
+  status: OrderStatus
+  total: number
+  date: string
+  items: number
+  trackingNumber?: string
+}
+
+export interface QuoteRequest {
+  id: string
+  quoteNumber: string
+  status: 'pending' | 'approved' | 'rejected'
+  description: string
+  requestedDate: string
+  estimatedTotal?: number
+  expiresAt?: string
+}
+
+export interface CustomerNotification {
+  id: string
+  type: 'info' | 'warning' | 'success' | 'error'
+  title: string
+  message: string
+  date: string
+  read: boolean
+  actionUrl?: string
+}
+
+export interface CustomerDashboardStats {
+  ordersThisMonth: number
+  pendingQuotes: number
+  activeJobs: number
+  totalSpentYTD: number
+}
+
+export interface CustomerUser {
+  id: string
+  name: string
+  email: string
+  company?: string
+  avatar?: string
+  role: 'customer'
+}
+
 // Billing & Invoicing Types
 export type InvoiceStatus = 'Paid' | 'Pending' | 'Overdue' | 'Void'
 export type PaymentStatus = 'Completed' | 'Pending' | 'Failed' | 'Refunded'
