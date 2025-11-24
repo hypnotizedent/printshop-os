@@ -18,8 +18,8 @@ import {
   type PrintavoOrder,
   type PrintavoAddress,
   type PrintavoLineItem,
-} from './printavo-mapper';
-import { OrderStatus, validateStrapiOrder } from './strapi-schema';
+} from '../lib/printavo-mapper';
+import { OrderStatus, validateStrapiOrder } from '../lib/strapi-schema';
 
 describe('Printavo to Strapi Mapper', () => {
   // Mock data factories
