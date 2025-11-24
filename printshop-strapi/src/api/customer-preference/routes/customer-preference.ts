@@ -2,8 +2,6 @@
  * customer-preference router
  */
 
-import { factories } from '@strapi/strapi';
-
 const customRoutes = [
   {
     method: 'GET',
@@ -11,7 +9,7 @@ const customRoutes = [
     handler: 'customer-preference.getMyPreferences',
     config: {
       policies: [],
-      middlewares: [],
+      middlewares: ['plugin::users-permissions.rateLimit'],
     },
   },
   {
@@ -20,7 +18,7 @@ const customRoutes = [
     handler: 'customer-preference.updateMyPreferences',
     config: {
       policies: [],
-      middlewares: [],
+      middlewares: ['plugin::users-permissions.rateLimit'],
     },
   },
 ];

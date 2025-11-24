@@ -28,19 +28,26 @@ export default factories.createCoreController('api::customer-address.customer-ad
         return ctx.notFound('Address not found');
       }
 
-      // Unset all other addresses as default for this user
+      // Unset all other addresses as default for this user using a more efficient approach
+      // Note: In production, consider using a database transaction for atomicity
       const userAddresses = await strapi.documents('api::customer-address.customer-address').findMany({
-        filters: { user: user.id },
+        filters: { 
+          user: user.id,
+          isDefault: true,
+        },
       });
 
-      for (const addr of userAddresses) {
-        if (addr.documentId !== id && addr.isDefault) {
-          await strapi.documents('api::customer-address.customer-address').update({
+      // Update only addresses that are currently default and not the target address
+      const updatePromises = userAddresses
+        .filter(addr => addr.documentId !== id)
+        .map(addr => 
+          strapi.documents('api::customer-address.customer-address').update({
             documentId: addr.documentId,
             data: { isDefault: false },
-          });
-        }
-      }
+          })
+        );
+
+      await Promise.all(updatePromises);
 
       // Set the selected address as default
       const updatedAddress = await strapi.documents('api::customer-address.customer-address').update({

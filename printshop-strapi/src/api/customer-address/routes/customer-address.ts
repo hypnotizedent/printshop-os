@@ -13,7 +13,7 @@ const customRoutes = [
     handler: 'customer-address.setDefault',
     config: {
       policies: [],
-      middlewares: [],
+      middlewares: ['plugin::users-permissions.rateLimit'],
     },
   },
 ];

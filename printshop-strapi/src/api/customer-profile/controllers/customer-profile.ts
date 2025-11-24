@@ -127,8 +127,11 @@ export default factories.createCoreController('plugin::users-permissions.user', 
         return ctx.badRequest('New passwords do not match');
       }
 
-      if (newPassword.length < 8) {
-        return ctx.badRequest('Password must be at least 8 characters');
+      // Use service method for password validation
+      const passwordService = strapi.service('api::customer-profile.customer-profile');
+      const validation = passwordService.validatePassword(newPassword);
+      if (!validation.valid) {
+        return ctx.badRequest(validation.errors.join(', '));
       }
 
       // Verify current password

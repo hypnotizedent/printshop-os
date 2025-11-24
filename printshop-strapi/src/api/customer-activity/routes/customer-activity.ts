@@ -2,8 +2,6 @@
  * customer-activity router
  */
 
-import { factories } from '@strapi/strapi';
-
 const customRoutes = [
   {
     method: 'GET',

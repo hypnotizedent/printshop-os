@@ -9,7 +9,7 @@ const customRoutes = [
     handler: 'customer-profile.getProfile',
     config: {
       policies: [],
-      middlewares: [],
+      middlewares: ['plugin::users-permissions.rateLimit'],
     },
   },
   {
@@ -18,7 +18,7 @@ const customRoutes = [
     handler: 'customer-profile.updateProfile',
     config: {
       policies: [],
-      middlewares: [],
+      middlewares: ['plugin::users-permissions.rateLimit'],
     },
   },
   {
@@ -27,7 +27,7 @@ const customRoutes = [
     handler: 'customer-profile.changePassword',
     config: {
       policies: [],
-      middlewares: [],
+      middlewares: ['plugin::users-permissions.rateLimit'],
     },
   },
 ];
