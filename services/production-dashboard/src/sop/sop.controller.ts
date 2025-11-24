@@ -6,6 +6,20 @@ import { Request, Response } from 'express';
 import { sopService } from './sop.service';
 import { SOPCreateInput, SOPUpdateInput, SOPSearchQuery } from './types';
 
+// Extend Express Request to include user property
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+  };
+}
+
+/**
+ * Helper to get user ID from request
+ */
+function getUserId(req: Request): string | undefined {
+  return (req as AuthenticatedRequest).user?.id;
+}
+
 export class SOPController {
   /**
    * GET /api/production/sops
@@ -63,7 +77,7 @@ export class SOPController {
         });
       }
 
-      const userId = (req as any).user?.id; // Assuming user is attached by auth middleware
+      const userId = getUserId(req);
       const sop = await sopService.create(input, userId);
 
       return res.status(201).json(sop);
@@ -80,7 +94,7 @@ export class SOPController {
     try {
       const { id } = req.params;
       const input: SOPUpdateInput = req.body;
-      const userId = (req as any).user?.id;
+      const userId = getUserId(req);
 
       const sop = await sopService.update(id, input, userId);
 
@@ -142,7 +156,7 @@ export class SOPController {
   async toggleFavorite(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const userId = (req as any).user?.id || req.body.userId;
+      const userId = getUserId(req) || req.body.userId;
 
       if (!userId) {
         return res.status(400).json({ error: 'User ID required' });

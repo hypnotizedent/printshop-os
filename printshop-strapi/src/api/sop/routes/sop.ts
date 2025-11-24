@@ -8,6 +8,23 @@ export default {
         policies: [],
       },
     },
+    // Place specific routes before /:id to avoid route conflicts
+    {
+      method: 'GET',
+      path: '/sops/search',
+      handler: 'sop.search',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/sops/analytics',
+      handler: 'sop.analytics',
+      config: {
+        policies: [],
+      },
+    },
     {
       method: 'GET',
       path: '/sops/:id',
@@ -41,25 +58,9 @@ export default {
       },
     },
     {
-      method: 'GET',
-      path: '/sops/search',
-      handler: 'sop.search',
-      config: {
-        policies: [],
-      },
-    },
-    {
       method: 'POST',
       path: '/sops/:id/favorite',
       handler: 'sop.toggleFavorite',
-      config: {
-        policies: [],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/sops/analytics',
-      handler: 'sop.analytics',
       config: {
         policies: [],
       },

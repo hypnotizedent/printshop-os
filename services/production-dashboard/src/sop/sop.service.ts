@@ -91,7 +91,7 @@ export class SOPService {
       machineId: input.machineId,
       difficulty: input.difficulty || 'Beginner',
       estimatedTime: input.estimatedTime || 0,
-      version: 1.0,
+      version: 1,
       createdBy: userId,
       createdAt: now,
       updatedAt: now,
@@ -121,7 +121,7 @@ export class SOPService {
       ...input,
       id: existing.id,
       slug: input.title ? this.generateSlug(input.title) : existing.slug,
-      version: existing.version + 0.1,
+      version: existing.version + 1,
       updatedAt: new Date(),
       updatedBy: userId,
       createdAt: existing.createdAt,
@@ -263,9 +263,10 @@ export class SOPService {
 
   /**
    * Helper: Generate unique ID
+   * Note: In production, use a proper UUID library like 'uuid' or 'nanoid'
    */
   private generateId(): string {
-    return `sop-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `sop-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**

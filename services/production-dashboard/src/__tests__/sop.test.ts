@@ -30,7 +30,7 @@ describe('SOPService', () => {
       expect(sop.title).toBe('Screen Press Setup');
       expect(sop.slug).toBe('screen-press-setup');
       expect(sop.category).toBe('Machines');
-      expect(sop.version).toBe(1.0);
+      expect(sop.version).toBe(1);
       expect(sop.viewCount).toBe(0);
       expect(sop.difficulty).toBe('Beginner');
       expect(sop.createdBy).toBe('user-123');
@@ -359,7 +359,7 @@ describe('SOPService', () => {
       const versions = await service.getVersionHistory(sop.id);
 
       expect(versions).toHaveLength(1);
-      expect(versions[0].version).toBe(1.0);
+      expect(versions[0].version).toBe(1);
       expect(versions[0].updatedBy).toBe('user-123');
     });
 

@@ -43,7 +43,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
     const entity = await strapi.entityService.create('api::sop.sop', {
       data: {
         ...data,
-        version: 1.0,
+        version: 1,
         viewCount: 0,
       },
     });
@@ -60,7 +60,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
     const entity = await strapi.entityService.update('api::sop.sop', id, {
       data: {
         ...data,
-        version: (currentEntity?.version || 1) + 0.1,
+        version: (currentEntity?.version || 1) + 1,
       },
     });
 

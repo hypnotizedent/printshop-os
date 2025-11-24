@@ -72,8 +72,8 @@
       "default": 0
     },
     "version": {
-      "type": "decimal",
-      "default": 1.0
+      "type": "integer",
+      "default": 1
     },
     "viewCount": {
       "type": "integer",
