@@ -122,7 +122,8 @@ printshop-strapi/.strapi/
 # Data (Sensitive)
 data/raw/
 data/processed/
-data/intelligence/
+data/intelligence/vector_store/
+data/intelligence/context/
 data/printavo-exports/
 data/strapi-imports/
 data/assets/
@@ -135,3 +136,9 @@ data/downloads/
 
 # Action items (temporary)
 ACTION-IMMEDIATE.md
+
+# Large media files in reference docs
+docs/reference/inspiration/**/*.mov
+docs/reference/inspiration/**/*.MOV
+docs/reference/legacy_web_assets/**/*.mov
+docs/reference/legacy_web_assets/**/*.MOV

@@ -9,6 +9,7 @@
 
 ---
 
+
 ## 🎯 Vision
 
 PrintShop OS is designed to be the central nervous system for print shop operations, connecting order intake, production management, and business operations in a seamless, automated workflow. Built with scalability, reliability, and disaster recovery in mind, this system aims to eliminate manual processes and enable real-time operational visibility.
