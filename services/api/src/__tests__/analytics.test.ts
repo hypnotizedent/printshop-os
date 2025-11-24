@@ -35,11 +35,13 @@ describe('Analytics API', () => {
       
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('documentation');
       expect(response.body).toHaveProperty('endpoints');
       expect(response.body.endpoints).toHaveProperty('revenue');
       expect(response.body.endpoints).toHaveProperty('products');
       expect(response.body.endpoints).toHaveProperty('customers');
       expect(response.body.endpoints).toHaveProperty('orders');
+      expect(response.body.documentation).toBe('/api-docs');
     });
   });
 

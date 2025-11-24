@@ -24,6 +24,7 @@ router.get('/', (_req, res) => {
   res.json({
     message: 'PrintShop OS Analytics API',
     version: '1.0.0',
+    documentation: '/api-docs',
     endpoints: {
       revenue: '/api/analytics/revenue',
       products: '/api/analytics/products',

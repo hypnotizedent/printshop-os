@@ -5,7 +5,9 @@
 
 import express from 'express';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
 import analyticsRouter from './routes/analytics';
+import { swaggerDocument } from './swagger';
 
 const app = express();
 const PORT = process.env.API_PORT || 3002;
@@ -13,6 +15,9 @@ const PORT = process.env.API_PORT || 3002;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Health check endpoint
 app.get('/health', (_req, res) => {

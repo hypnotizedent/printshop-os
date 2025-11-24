@@ -28,6 +28,7 @@
     }
   },
   "include": [
+    "src/**/*",
     "lib/**/*",
     "scripts/**/*",
     "tests/**/*",
