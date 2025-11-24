@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { MagnifyingGlass } from "@phosphor-icons/react"
 
@@ -14,24 +14,15 @@ export function OrderSearch({
   debounceMs = 300 
 }: OrderSearchProps) {
   const [searchValue, setSearchValue] = useState("")
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null)
 
-  // Debounce search
-  const handleSearchChange = (value: string) => {
-    setSearchValue(value)
-    
-    // Clear previous timeout
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-    
-    // Set new timeout
-    const newTimeoutId = setTimeout(() => {
-      onSearch(value)
+  // Debounce search with cleanup
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onSearch(searchValue)
     }, debounceMs)
     
-    setTimeoutId(newTimeoutId)
-  }
+    return () => clearTimeout(timeoutId)
+  }, [searchValue, debounceMs, onSearch])
 
   return (
     <div className="relative flex-1">
@@ -42,7 +33,7 @@ export function OrderSearch({
       <Input
         placeholder={placeholder}
         value={searchValue}
-        onChange={(e) => handleSearchChange(e.target.value)}
+        onChange={(e) => setSearchValue(e.target.value)}
         className="pl-10"
       />
     </div>

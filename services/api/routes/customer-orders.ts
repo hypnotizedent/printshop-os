@@ -34,7 +34,7 @@ router.get('/orders', async (req: Request, res: Response): Promise<void> => {
   try {
     // Extract and validate query parameters
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const limit = Math.min(100, Math.max(1, (parseInt(req.query.limit as string) || 10)));
     const sort = (req.query.sort as string) || 'timeline.createdAt:desc';
     const status = req.query.status as string;
     const dateFrom = req.query.dateFrom as string;

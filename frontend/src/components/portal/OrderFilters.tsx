@@ -24,9 +24,10 @@ export function OrderFilters({ onFilterChange, onClearFilters }: OrderFiltersPro
   const [dateTo, setDateTo] = useState<Date>()
 
   const handleStatusChange = (value: string) => {
-    setStatus(value === "all" ? "" : value)
+    const newStatus = value === "all" ? undefined : value
+    setStatus(newStatus || "")
     onFilterChange({
-      status: value === "all" ? undefined : value,
+      status: newStatus,
       dateFrom,
       dateTo,
     })
@@ -54,6 +55,11 @@ export function OrderFilters({ onFilterChange, onClearFilters }: OrderFiltersPro
     setStatus("")
     setDateFrom(undefined)
     setDateTo(undefined)
+    onFilterChange({
+      status: undefined,
+      dateFrom: undefined,
+      dateTo: undefined,
+    })
     onClearFilters()
   }
 
