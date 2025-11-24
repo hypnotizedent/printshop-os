@@ -207,6 +207,29 @@ docker-compose down
 
 ---
 
+## Data Ingestion & AI Training
+
+### Email History Ingestion
+We use a script to ingest your email history (from Outlook/Exchange) to train the AI agent on your tone and customer interactions.
+
+**The "Drag & Drop" Method (Mac):**
+1.  Create a folder on your Desktop (e.g., `Training Emails`).
+2.  Open Outlook for Mac.
+3.  Select emails (Cmd+A) and **drag them** into the folder. This creates `.eml` files.
+4.  Move the folder to: `data/raw/email-exports/`
+5.  Run the ingestion script:
+
+```bash
+python3 services/customer-service-ai/scripts/ingest_mailbox.py
+```
+
+**Result:**
+- The script parses all `.eml` and `.mbox` files.
+- It generates Markdown training files in `data/intelligence/knowledge_base/email_history/`.
+- The Agent automatically indexes these files on its next startup.
+
+---
+
 ## Common Commands
 
 ### Development Commands
