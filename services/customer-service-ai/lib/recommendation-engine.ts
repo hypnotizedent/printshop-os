@@ -3,8 +3,14 @@
  */
 
 import { DesignAnalysis, DesignInput, Suggestion, DesignIssue, PrintConfig } from './types';
+import { PricingConfig, getPricingConfig } from './pricing-config';
 
 export class RecommendationEngine {
+  private pricing: PricingConfig;
+
+  constructor(customPricing?: Partial<PricingConfig>) {
+    this.pricing = getPricingConfig(customPricing);
+  }
   /**
    * Generate print configuration from design analysis
    */
@@ -33,7 +39,7 @@ export class RecommendationEngine {
         type: 'add-on',
         title: 'Professional Fold & Bag Service',
         description: `Individually fold and bag all ${input.quantity} items for a polished presentation. Perfect for retail or events.`,
-        priceImpact: input.quantity * 0.50, // $0.50 per item
+        priceImpact: input.quantity * this.pricing.addOnPricing.foldAndBag,
         confidence: 0.9,
       });
     }
@@ -44,7 +50,7 @@ export class RecommendationEngine {
         type: 'add-on',
         title: 'Custom Woven Tags',
         description: 'Add professional branded tags to enhance your brand identity and perceived value.',
-        priceImpact: input.quantity * 1.25, // $1.25 per item
+        priceImpact: input.quantity * this.pricing.addOnPricing.customTags,
         confidence: 0.85,
       });
     }
@@ -55,7 +61,7 @@ export class RecommendationEngine {
         type: 'add-on',
         title: 'Custom Hang Tickets',
         description: 'Professional hang tickets with your branding, pricing, and care instructions.',
-        priceImpact: input.quantity * 0.75, // $0.75 per item
+        priceImpact: input.quantity * this.pricing.addOnPricing.hangTickets,
         confidence: 0.88,
       });
     }
@@ -75,7 +81,7 @@ export class RecommendationEngine {
         type: 'upgrade',
         title: `Upgrade to ${newSize} Print Size`,
         description: 'Complex designs benefit from larger print sizes to maintain detail clarity and visual impact.',
-        priceImpact: input.quantity * 1.50, // $1.50 per item for size upgrade
+        priceImpact: input.quantity * this.pricing.upgradePricing.sizeUpgrade,
         confidence: 0.82,
       });
     }
@@ -86,7 +92,7 @@ export class RecommendationEngine {
         type: 'upgrade',
         title: 'Water-Based or Discharge Ink',
         description: 'Premium soft-hand inks for a high-end feel. Perfect for retail and premium brands.',
-        priceImpact: input.quantity * 2.00, // $2 per item premium
+        priceImpact: input.quantity * this.pricing.upgradePricing.premiumInk,
         confidence: 0.75,
       });
     }
@@ -108,7 +114,7 @@ export class RecommendationEngine {
         type: 'add-on',
         title: 'Individual Poly Bags',
         description: 'Protect items during shipping and storage. Professional presentation for resale.',
-        priceImpact: input.quantity * 0.35, // $0.35 per item
+        priceImpact: input.quantity * this.pricing.addOnPricing.polyBags,
         confidence: 0.80,
       });
     }
@@ -134,7 +140,7 @@ export class RecommendationEngine {
         type: 'upgrade',
         title: 'Rush Service (5-6 Days)',
         description: `Meet your deadline with rush production. ${daysUntilDeadline} days until deadline.`,
-        priceImpact: quantity * 3.00, // $3 per item for rush
+        priceImpact: quantity * this.pricing.rushPricing.rush,
         confidence: 0.90,
       };
     } else if (daysUntilDeadline < 5 && daysUntilDeadline >= 3) {
@@ -142,7 +148,7 @@ export class RecommendationEngine {
         type: 'upgrade',
         title: 'Super Rush Service (3-4 Days)',
         description: `Priority production to meet your tight deadline. ${daysUntilDeadline} days until deadline.`,
-        priceImpact: quantity * 5.50, // $5.50 per item for super rush
+        priceImpact: quantity * this.pricing.rushPricing.superRush,
         confidence: 0.95,
       };
     } else if (daysUntilDeadline < 3) {
@@ -150,7 +156,7 @@ export class RecommendationEngine {
         type: 'warning',
         title: 'Emergency Rush Required (1-2 Days)',
         description: `Extremely tight deadline requires emergency production. ${daysUntilDeadline} days until deadline. Additional fees apply.`,
-        priceImpact: quantity * 8.00, // $8 per item for emergency
+        priceImpact: quantity * this.pricing.rushPricing.emergency,
         confidence: 0.98,
       };
     }
@@ -311,37 +317,27 @@ export class RecommendationEngine {
    * Calculate base print price
    */
   private calculateBasePrice(config: PrintConfig, quantity: number): number {
-    // Base rates per method
-    const methodRates: Record<string, number> = {
-      'screen-print': 7.50,
-      'DTG': 12.00,
-      'embroidery': 15.00,
-      'sublimation': 10.00,
-    };
-
-    let unitPrice = methodRates[config.method] || 7.50;
+    let unitPrice = this.pricing.methodRates[config.method] || this.pricing.methodRates['screen-print'];
     
     // Adjust for colors (screen printing)
     if (config.method === 'screen-print') {
-      unitPrice += (config.colors - 1) * 1.25;
+      unitPrice += (config.colors - 1) * this.pricing.colorAdditionalCost;
     }
     
     // Adjust for size
-    const sizeMultipliers: Record<string, number> = {
-      'S': 0.9,
-      'M': 1.0,
-      'L': 1.2,
-      'XL': 1.4,
-    };
-    unitPrice *= sizeMultipliers[config.size] || 1.0;
+    unitPrice *= this.pricing.sizeMultipliers[config.size] || 1.0;
     
-    // Volume discounts
-    if (quantity >= 500) unitPrice *= 0.85;
-    if (quantity >= 1000) unitPrice *= 0.75;
-    if (quantity >= 2000) unitPrice *= 0.70;
+    // Apply volume discounts (in order from highest to lowest)
+    for (const discount of this.pricing.volumeDiscounts) {
+      if (quantity >= discount.minQuantity) {
+        unitPrice *= discount.multiplier;
+        break;
+      }
+    }
     
     // Setup fee
-    const setupFee = config.method === 'screen-print' ? 50 * config.colors : 25;
+    const baseSetupFee = this.pricing.setupFees[config.method] || this.pricing.setupFees['screen-print'];
+    const setupFee = config.method === 'screen-print' ? baseSetupFee * config.colors : baseSetupFee;
     
     return (unitPrice * quantity) + setupFee;
   }

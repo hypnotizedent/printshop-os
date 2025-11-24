@@ -2,6 +2,7 @@
  * Quote Optimizer - Main orchestrator for AI-powered quote optimization
  */
 
+import * as crypto from 'crypto-js';
 import { DesignAnalyzer } from './design-analyzer';
 import { RecommendationEngine } from './recommendation-engine';
 import { 
@@ -140,7 +141,6 @@ export class QuoteOptimizer {
    * Generate design hash for tracking
    */
   private generateDesignHash(input: DesignInput): string {
-    const crypto = require('crypto-js');
     const hashInput = input.imageUrl || input.imageBuffer?.toString('base64').substring(0, 100) || 'no-image';
     return crypto.SHA256(hashInput).toString();
   }

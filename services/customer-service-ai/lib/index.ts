@@ -28,5 +28,6 @@
 export { QuoteOptimizer, createQuoteOptimizer } from './quote-optimizer';
 export { DesignAnalyzer } from './design-analyzer';
 export { RecommendationEngine } from './recommendation-engine';
+export { PricingConfig, DEFAULT_PRICING_CONFIG, getPricingConfig } from './pricing-config';
 
 export * from './types';
