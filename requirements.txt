@@ -38,3 +38,9 @@ mypy>=1.4.0
 # Logging
 python-json-logger>=2.0.0
 
+# Label Processing & Image Manipulation
+Pillow>=10.0.0
+PyPDF2>=3.0.0
+reportlab>=4.0.0
+pdf2image>=1.16.3
+

@@ -4,6 +4,79 @@ This Python module provides integrations and utilities for the PrintShop OS plat
 
 ## Components
 
+### Label Formatter Module (`printshop_os.labels`)
+
+The label formatter module provides automatic formatting and processing of shipping labels for thermal printers.
+
+**Features:**
+- Automatic rotation detection and correction
+- Smart cropping to remove whitespace
+- Standardized 4x6 inch output (Rollo printer compatible)
+- Supports PDF and image formats (PNG, JPG, TIFF)
+- Black & white optimization for thermal printing
+- Batch processing capabilities
+- REST API for integration
+- Command-line interface
+
+**Quick Start - Command Line:**
+
+```bash
+# Format a single label
+python -m printshop_os.labels.cli format input.pdf output.pdf
+
+# Batch process a directory
+python -m printshop_os.labels.cli batch labels/ formatted_labels/
+
+# Format with specific options
+python -m printshop_os.labels.cli format input.pdf output.png --format png --no-rotate
+```
+
+**Quick Start - Python API:**
+
+```python
+from printshop_os.labels import LabelFormatter
+
+# Initialize formatter
+formatter = LabelFormatter()
+
+# Format a single label
+formatter.process_label(
+    input_path='shipping_label.pdf',
+    output_path='formatted_label.pdf',
+    output_format='pdf',
+    auto_rotate=True,
+    optimize_bw=True
+)
+
+# Batch process multiple labels
+formatter.batch_process(
+    input_dir='downloads/',
+    output_dir='ready_to_print/',
+    output_format='pdf'
+)
+```
+
+**Quick Start - REST API:**
+
+```bash
+# Start the API server
+python -m printshop_os.labels.api
+
+# Format a label via API
+curl -X POST http://localhost:5001/api/labels/format \
+  -F "file=@label.pdf" \
+  -F "format=pdf" \
+  -F "auto_rotate=true" \
+  --output formatted_label.pdf
+
+# Get a preview
+curl -X POST http://localhost:5001/api/labels/preview \
+  -F "file=@label.pdf" \
+  --output preview.png
+```
+
+**Integration with Frontend:** The REST API can be integrated with the React frontend for a user-friendly web interface.
+
 ### Shipping Module (`printshop_os.shipping`)
 
 The shipping module handles shipping integrations including label creation, tracking, and fulfillment.
