@@ -18,15 +18,6 @@ export function extractField(
   const paths = Array.isArray(fieldPath) ? fieldPath : [fieldPath];
   
   for (const path of paths) {
-    // If path doesn't contain dots and doesn't exist as a key, treat it as a constant value
-    if (!path.includes('.') && !Object.prototype.hasOwnProperty.call(data, path)) {
-      // Return the path itself as a constant if it looks like a value (contains spaces or special chars)
-      if (path.includes(' ') || path.match(/[A-Z][a-z]/) || path === path) {
-        // This might be a constant value, continue to next path
-        continue;
-      }
-    }
-    
     const value = getNestedValue(data, path);
     if (value !== undefined && value !== null) {
       return value;
@@ -34,8 +25,9 @@ export function extractField(
   }
   
   // If no paths worked and the first path looks like a constant string, return it
+  // This handles cases where the mapping provides a constant value (e.g., brand: 'AS Colour')
   const firstPath = paths[0];
-  if (typeof firstPath === 'string' && (firstPath.includes(' ') || /^[A-Z]/.test(firstPath))) {
+  if (typeof firstPath === 'string' && (firstPath.includes(' ') || /^[A-Z][a-z]/.test(firstPath))) {
     return firstPath;
   }
   

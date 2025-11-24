@@ -115,7 +115,8 @@ export function parseSKU(sku: string): {
  */
 export function isValidInternalSKU(sku: string): boolean {
   // Format: BRAND-STYLE-COLOR-SIZE
-  const regex = /^[A-Z]{2,3}-[A-Z0-9]{1,6}-[A-Z]{3}-[A-Z0-9\s]+$/;
+  // Note: Size code can contain spaces for youth sizes like "Youth XL"
+  const regex = /^[A-Z]{2,3}-[A-Z0-9]{1,6}-[A-Z]{3}-[A-Z0-9]+(\s[A-Z0-9]+)?$/;
   return regex.test(sku);
 }
 

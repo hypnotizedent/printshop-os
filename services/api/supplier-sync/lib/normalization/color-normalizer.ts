@@ -53,11 +53,6 @@ const COLOR_MAPPINGS: ColorMapping[] = [
     aliases: ['CHARCOAL', 'CHAR', 'CHARCOAL GRAY', 'CHARCOAL GREY', 'CHR']
   },
   {
-    name: 'Navy',
-    hex: '#000080',
-    aliases: ['NAVY', 'NVY', 'DARK BLUE', 'NAVY BLUE']
-  },
-  {
     name: 'Maroon',
     hex: '#800000',
     aliases: ['MAROON', 'BURGUNDY', 'WINE', 'CARDINAL']
