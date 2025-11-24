@@ -143,8 +143,8 @@ open http://localhost:8080
    Name: StrapiAPI
    
    URL: http://strapi:1337
-   (Use 'strapi' as hostname since we're inside Docker network)
-   (Alternative if not in Docker: http://localhost:1337)
+   (Use 'strapi' as hostname - this is the Docker service name from docker-compose.yml)
+   (Alternative if Appsmith runs outside Docker: http://localhost:1337)
    
    Headers:
    ┌─────────────────┬──────────────────────────────────────────────┐

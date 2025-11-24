@@ -12,7 +12,7 @@
           "headers": [
             {
               "key": "Authorization",
-              "value": "Bearer YOUR_STRAPI_API_TOKEN_HERE"
+              "value": "Bearer REPLACE_WITH_YOUR_STRAPI_API_TOKEN"
             },
             {
               "key": "Content-Type",

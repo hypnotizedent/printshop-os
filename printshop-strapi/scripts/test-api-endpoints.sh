@@ -72,7 +72,7 @@ make_request() {
     local endpoint=$2
     local data=$3
     
-    local curl_opts="-s -w \n%{http_code}"
+    local curl_opts=$'-s -w \n%{http_code}'
     
     if [ "$VERBOSE" = "true" ]; then
         curl_opts="-v $curl_opts"
@@ -164,7 +164,7 @@ test_get_jobs() {
 test_get_jobs_filtered() {
     print_test "GET /api/jobs - Filter by InProduction status"
     
-    response=$(make_request GET "/api/jobs?filters[status][\$eq]=InProduction&pagination[limit]=10")
+    response=$(make_request GET '/api/jobs?filters[status][$eq]=InProduction&pagination[limit]=10')
     status_code=$(echo "$response" | tail -n1)
     body=$(echo "$response" | head -n -1)
     

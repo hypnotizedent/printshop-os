@@ -8,6 +8,10 @@
  * - Strapi must be running
  * - Customer collection must exist with at least one customer
  * - Job collection must be configured
+ * - Required npm packages: axios, moment (should be installed with Strapi)
+ * 
+ * Installation (if packages missing):
+ *   npm install axios moment
  */
 
 const axios = require('axios');
