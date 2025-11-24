@@ -5,6 +5,9 @@
 
 import { BaseConnector } from '../base-connector';
 import { NormalizedProduct, SupplierConnector, ConnectorConfig } from '../types';
+import { CacheService } from '../cache';
+import { CacheDecorator } from '../cache-decorator';
+import { CACHE_PREFIXES, DEFAULT_TTL } from '../cache-config';
 
 interface SanMarProduct {
   styleId?: string;
@@ -66,8 +69,8 @@ export class SanMarConnector extends BaseConnector implements SupplierConnector 
   private accessToken: string | null = null;
   private tokenExpiresAt: number = 0;
 
-  constructor(config: ConnectorConfig) {
-    super(config);
+  constructor(config: ConnectorConfig, cacheService?: CacheService) {
+    super(config, cacheService);
   }
 
   /**
@@ -126,6 +129,7 @@ export class SanMarConnector extends BaseConnector implements SupplierConnector 
   /**
    * Fetch all products from SanMar
    */
+  @CacheDecorator({ ttl: DEFAULT_TTL.productLists, keyPrefix: `${CACHE_PREFIXES.productList}:sanmar` })
   async fetchProducts(): Promise<NormalizedProduct[]> {
     this.log('info', 'Fetching all products from SanMar');
 
@@ -153,6 +157,7 @@ export class SanMarConnector extends BaseConnector implements SupplierConnector 
   /**
    * Fetch a single product by style ID
    */
+  @CacheDecorator({ ttl: DEFAULT_TTL.productDetails, keyPrefix: `${CACHE_PREFIXES.productDetail}:sanmar` })
   async fetchProduct(styleId: string): Promise<NormalizedProduct | null> {
     this.log('info', `Fetching product ${styleId} from SanMar`);
 
@@ -259,7 +264,7 @@ export class SanMarConnector extends BaseConnector implements SupplierConnector 
 /**
  * Factory function to create SanMar connector from environment variables
  */
-export function createSanMarConnector(): SanMarConnector {
+export function createSanMarConnector(cacheService?: CacheService): SanMarConnector {
   const config: ConnectorConfig = {
     baseUrl: process.env.SANMAR_BASE_URL || 'https://api.sanmar.com',
     auth: {
@@ -273,5 +278,5 @@ export function createSanMarConnector(): SanMarConnector {
     throw new Error('SanMar OAuth credentials not configured. Set SANMAR_CLIENT_ID and SANMAR_CLIENT_SECRET environment variables.');
   }
 
-  return new SanMarConnector(config);
+  return new SanMarConnector(config, cacheService);
 }
