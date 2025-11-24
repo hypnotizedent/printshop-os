@@ -25,9 +25,18 @@ export const MobileTimeClock = () => {
 
     setIsClockingIn(true);
     try {
+      // SECURITY NOTE: In production, this PIN should be validated against a secure backend
+      // and exchanged for a proper user identifier. Never use the PIN directly as a user ID.
+      // This is a demo implementation showing the UI/UX flow only.
+      // TODO: Implement secure PIN validation: 
+      //   1. Hash PIN before sending to backend
+      //   2. Backend validates against secure storage
+      //   3. Backend returns JWT or session token with user ID
+      //   4. Use token for authenticated requests
+      
       const entry = {
         id: uuidv4(),
-        userId: pin, // In real app, would validate PIN and get user ID
+        userId: `temp-${pin}`, // Temporary - replace with validated user ID from backend
         timestamp: Date.now(),
         type: 'clock-in' as const,
         synced: false

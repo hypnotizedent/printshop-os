@@ -1,4 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
+
+// Default events to listen for user activity
+const DEFAULT_ACTIVITY_EVENTS = ['mousedown', 'keydown', 'touchstart', 'scroll', 'mousemove'];
 
 export interface UseInactivityOptions {
   timeout: number; // milliseconds
@@ -9,11 +12,11 @@ export interface UseInactivityOptions {
 export const useInactivity = ({
   timeout,
   onInactive,
-  events = ['mousedown', 'keydown', 'touchstart', 'scroll', 'mousemove']
+  events = DEFAULT_ACTIVITY_EVENTS
 }: UseInactivityOptions) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
@@ -21,7 +24,7 @@ export const useInactivity = ({
     timerRef.current = setTimeout(() => {
       onInactive();
     }, timeout);
-  };
+  }, [timeout, onInactive]);
 
   useEffect(() => {
     // Set up event listeners
@@ -41,7 +44,7 @@ export const useInactivity = ({
         clearTimeout(timerRef.current);
       }
     };
-  }, [timeout, onInactive]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [events, resetTimer]);
 
   return {
     resetTimer

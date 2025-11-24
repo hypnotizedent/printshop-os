@@ -120,12 +120,16 @@ export const getAllCachedSOPs = async (): Promise<SOPCache[]> => {
 export const clearOldSOPCache = async () => {
   const db = await initOfflineDB();
   const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-  const index = db.transaction('sops', 'readwrite').store.index('cachedAt');
-  const oldSOPs = await index.getAll(IDBKeyRange.upperBound(sevenDaysAgo));
   
+  // Use cursor to iterate and delete to reduce memory usage
   const tx = db.transaction('sops', 'readwrite');
-  for (const sop of oldSOPs) {
-    await tx.store.delete(sop.id);
+  const index = tx.store.index('cachedAt');
+  let cursor = await index.openCursor(IDBKeyRange.upperBound(sevenDaysAgo));
+  
+  while (cursor) {
+    await cursor.delete();
+    cursor = await cursor.continue();
   }
+  
   await tx.done;
 };

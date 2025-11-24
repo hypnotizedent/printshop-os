@@ -197,6 +197,15 @@ frontend/
 - Configurable timeout
 - Activity detection on touch/mouse events
 
+### PIN Authentication
+- **IMPORTANT**: Current implementation is a demo showing UI/UX flow only
+- **Production TODO**: Implement secure PIN validation
+  1. Hash PIN before sending to backend
+  2. Backend validates against secure storage (bcrypt/argon2)
+  3. Backend returns JWT or session token with user ID
+  4. Use token for authenticated requests
+  5. Never use PIN directly as user identifier
+
 ### Camera Permissions
 - Explicit permission request
 - Error handling for denied access
@@ -253,6 +262,11 @@ When testing is implemented, include:
 - [ ] AR features for equipment setup
 - [ ] Real-time collaboration features
 - [ ] Advanced analytics for production metrics
+- [ ] Migrate to Workbox for service worker (currently using manual implementation)
+  - Better caching strategies
+  - Automatic precaching
+  - Background sync API
+  - Push notifications support
 
 ## Troubleshooting
 
