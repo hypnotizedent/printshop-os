@@ -7,10 +7,10 @@ import { Server as HTTPServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { createClient, RedisClientType } from 'redis';
 import { verifyWebSocketToken } from './middleware/auth';
-import { User, OrderStatus, QueueItem, ProductionStage } from './types';
+import { User, OrderStatus, QueueItem, ProductionStage, Order } from './types';
 
 // Mock data stores (in production, these would be database queries)
-const mockOrders = new Map<string, any>();
+const mockOrders = new Map<string, Order>();
 const mockQueue: QueueItem[] = [];
 
 interface AuthenticatedSocket extends Socket {
@@ -310,11 +310,11 @@ export class ProductionWebSocketServer {
 }
 
 // Helper functions for mock data (to be replaced with database calls)
-export function setMockOrder(orderId: string, order: any): void {
+export function setMockOrder(orderId: string, order: Order): void {
   mockOrders.set(orderId, order);
 }
 
-export function getMockOrder(orderId: string): any {
+export function getMockOrder(orderId: string): Order | undefined {
   return mockOrders.get(orderId);
 }
 

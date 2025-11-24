@@ -98,14 +98,19 @@ export function verifyWebSocketToken(token: string): User | null {
 
 /**
  * Generate JWT token for testing purposes
+ * @param user - User object to encode in the token
+ * @param expiresIn - Token expiration time (e.g., '24h', '7d', or seconds as number)
  */
-export function generateToken(user: User, expiresIn = '24h'): string {
+export function generateToken(user: User, expiresIn: string | number = '24h'): string {
   const payload = {
     id: user.id,
     username: user.username,
     role: user.role,
     email: user.email
   };
-  // Use type assertion to handle ms.StringValue type
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: expiresIn as any });
+  // Cast to unknown first, then to the expected type to satisfy TypeScript
+  // This is safe because we know jwt.sign accepts string | number for expiresIn
+  return jwt.sign(payload, JWT_SECRET, { 
+    expiresIn: expiresIn as unknown as string & number
+  });
 }
