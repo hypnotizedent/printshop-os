@@ -3,7 +3,7 @@
  * Generates professional invoice PDFs for customer download
  */
 
-import PDFDocument from 'pdfkit';
+import PDFDocument = require('pdfkit');
 import { Invoice } from '../billing-types';
 
 /**
