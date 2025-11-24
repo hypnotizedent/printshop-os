@@ -5,6 +5,9 @@
 
 import { BaseConnector } from '../base-connector';
 import { NormalizedProduct, SupplierConnector, ConnectorConfig } from '../types';
+import { CacheService } from '../cache';
+import { CacheDecorator } from '../cache-decorator';
+import { CACHE_PREFIXES, DEFAULT_TTL } from '../cache-config';
 
 interface SSStyle {
   styleID?: string;
@@ -45,8 +48,8 @@ interface SSResponse {
 }
 
 export class SSActivewearConnector extends BaseConnector implements SupplierConnector {
-  constructor(config: ConnectorConfig) {
-    super(config);
+  constructor(config: ConnectorConfig, cacheService?: CacheService) {
+    super(config, cacheService);
     
     // Set up Basic Auth
     if (config.auth.username && config.auth.password) {
@@ -60,6 +63,7 @@ export class SSActivewearConnector extends BaseConnector implements SupplierConn
   /**
    * Fetch all products from S&S Activewear
    */
+  @CacheDecorator({ ttl: DEFAULT_TTL.productLists, keyPrefix: `${CACHE_PREFIXES.productList}:ssactivewear` })
   async fetchProducts(): Promise<NormalizedProduct[]> {
     this.log('info', 'Fetching all products from S&S Activewear');
 
@@ -76,6 +80,7 @@ export class SSActivewearConnector extends BaseConnector implements SupplierConn
   /**
    * Fetch a single product by style ID
    */
+  @CacheDecorator({ ttl: DEFAULT_TTL.productDetails, keyPrefix: `${CACHE_PREFIXES.productDetail}:ssactivewear` })
   async fetchProduct(styleId: string): Promise<NormalizedProduct | null> {
     this.log('info', `Fetching style ${styleId} from S&S Activewear`);
 
@@ -166,7 +171,7 @@ export class SSActivewearConnector extends BaseConnector implements SupplierConn
 /**
  * Factory function to create S&S Activewear connector from environment variables
  */
-export function createSSActivewearConnector(): SSActivewearConnector {
+export function createSSActivewearConnector(cacheService?: CacheService): SSActivewearConnector {
   const config: ConnectorConfig = {
     baseUrl: process.env.SS_BASE_URL || 'https://api.ssactivewear.com/v2',
     auth: {
@@ -180,5 +185,5 @@ export function createSSActivewearConnector(): SSActivewearConnector {
     throw new Error('S&S Activewear credentials not configured. Set SS_USERNAME and SS_PASSWORD environment variables.');
   }
 
-  return new SSActivewearConnector(config);
+  return new SSActivewearConnector(config, cacheService);
 }

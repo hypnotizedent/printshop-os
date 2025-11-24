@@ -5,6 +5,9 @@
 
 import { BaseConnector } from '../base-connector';
 import { NormalizedProduct, SupplierConnector, ConnectorConfig } from '../types';
+import { CacheService } from '../cache';
+import { CacheDecorator } from '../cache-decorator';
+import { CACHE_PREFIXES, DEFAULT_TTL } from '../cache-config';
 
 interface ASProduct {
   styleCode?: string;
@@ -40,8 +43,8 @@ interface ASResponse {
 }
 
 export class ASColourConnector extends BaseConnector implements SupplierConnector {
-  constructor(config: ConnectorConfig) {
-    super(config);
+  constructor(config: ConnectorConfig, cacheService?: CacheService) {
+    super(config, cacheService);
     
     // Set up API key authentication
     if (config.auth.apiKey) {
@@ -54,6 +57,7 @@ export class ASColourConnector extends BaseConnector implements SupplierConnecto
   /**
    * Fetch all products from AS Colour
    */
+  @CacheDecorator({ ttl: DEFAULT_TTL.productLists, keyPrefix: `${CACHE_PREFIXES.productList}:ascolour` })
   async fetchProducts(): Promise<NormalizedProduct[]> {
     this.log('info', 'Fetching all products from AS Colour');
 
@@ -75,6 +79,7 @@ export class ASColourConnector extends BaseConnector implements SupplierConnecto
   /**
    * Fetch a single product by style code
    */
+  @CacheDecorator({ ttl: DEFAULT_TTL.productDetails, keyPrefix: `${CACHE_PREFIXES.productDetail}:ascolour` })
   async fetchProduct(styleCode: string): Promise<NormalizedProduct | null> {
     this.log('info', `Fetching product ${styleCode} from AS Colour`);
 
@@ -157,7 +162,7 @@ export class ASColourConnector extends BaseConnector implements SupplierConnecto
 /**
  * Factory function to create AS Colour connector from environment variables
  */
-export function createASColourConnector(): ASColourConnector {
+export function createASColourConnector(cacheService?: CacheService): ASColourConnector {
   const config: ConnectorConfig = {
     baseUrl: process.env.ASCOLOUR_BASE_URL || 'https://api.ascolour.com/v1/catalog',
     auth: {
@@ -170,5 +175,5 @@ export function createASColourConnector(): ASColourConnector {
     throw new Error('AS Colour API key not configured. Set ASCOLOUR_API_KEY environment variable.');
   }
 
-  return new ASColourConnector(config);
+  return new ASColourConnector(config, cacheService);
 }
