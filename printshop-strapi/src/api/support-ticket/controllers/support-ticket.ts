@@ -2,6 +2,9 @@
  * support-ticket controller
  */
 
+// Note: @ts-nocheck is used here due to Strapi 5's strict typing system
+// which doesn't recognize custom content type UIDs at compile time.
+// The types are validated at runtime by Strapi.
 // @ts-nocheck
 import { factories } from '@strapi/strapi';
 import multer from 'multer';
@@ -23,14 +26,27 @@ const upload = multer({
     files: 5,
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|pdf|ai|eps|psd|zip/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+    // Validate file extension
+    const allowedExtensions = /\.(jpeg|jpg|png|pdf|ai|eps|psd|zip)$/i;
+    const hasValidExtension = allowedExtensions.test(file.originalname);
+    
+    // Validate MIME type
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'application/pdf',
+      'application/postscript',
+      'application/x-photoshop',
+      'image/vnd.adobe.photoshop',
+      'application/zip',
+      'application/x-zip-compressed',
+    ];
+    const hasValidMimeType = allowedMimeTypes.includes(file.mimetype);
 
-    if (mimetype && extname) {
+    if (hasValidExtension && hasValidMimeType) {
       return cb(null, true);
     } else {
-      cb(new Error('Invalid file type'));
+      cb(new Error('Invalid file type. Only JPG, PNG, PDF, AI, EPS, PSD, and ZIP files are allowed.'));
     }
   },
 });

@@ -235,6 +235,14 @@ commentId: "uuid" (optional)
 - Maximum file size: 10MB per file
 - Maximum files: 5 per upload
 - Allowed types: JPG, PNG, PDF, AI, EPS, PSD, ZIP
+- Files are validated by both extension and MIME type
+
+**Security Note:**
+For production use, consider implementing additional file validation:
+- Magic number (file signature) verification to prevent file type spoofing
+- Virus scanning for uploaded files
+- Content Security Policy headers for serving files
+- Separate storage domain for user uploads
 
 **Response:**
 ```json
