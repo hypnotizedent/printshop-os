@@ -230,13 +230,13 @@ function SupportTickets() {
 
 export function Portal() {
   const handleSearch = () => {
-    // Search functionality would be implemented here
-    console.log("Search triggered")
+    // TODO: Implement search functionality
+    // This will be connected to the backend search API
   }
 
   const handleLogout = () => {
-    // Logout functionality would be implemented here
-    console.log("Logout triggered")
+    // TODO: Implement logout functionality
+    // This will clear session and redirect to login page
   }
 
   return (
