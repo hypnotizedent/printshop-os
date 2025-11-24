@@ -14,11 +14,11 @@ module.exports = {
     '/dist/'
   ],
   testTimeout: 10000,
-  globals: {
-    'ts-jest': {
+  transform: {
+    '^.+\\.ts$': ['ts-jest', {
       tsconfig: {
         esModuleInterop: true
       }
-    }
+    }]
   }
 };

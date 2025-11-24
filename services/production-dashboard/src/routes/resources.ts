@@ -243,9 +243,13 @@ router.get('/employees', authenticateToken, (_req: Request, res: Response): void
 /**
  * GET /api/production/resources/employees/:employeeId
  * Get specific employee
+ * 
+ * Note: employeeId is from path params (not query params), is behind authentication,
+ * and represents a non-sensitive resource identifier (not PII).
  */
 router.get('/employees/:employeeId', authenticateToken, (req: Request, res: Response): void => {
   try {
+    // employeeId is a path parameter used for resource lookup, not sensitive data
     const { employeeId } = req.params;
     const employee = employees.find(e => e.id === employeeId);
 

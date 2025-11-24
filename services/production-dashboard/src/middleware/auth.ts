@@ -108,9 +108,9 @@ export function generateToken(user: User, expiresIn: string | number = '24h'): s
     role: user.role,
     email: user.email
   };
-  // Cast to unknown first, then to the expected type to satisfy TypeScript
-  // This is safe because we know jwt.sign accepts string | number for expiresIn
+  // Type assertion needed due to ms.StringValue template literal type in jsonwebtoken
+  // jwt.sign accepts both string (like '24h') and number (seconds) for expiresIn
   return jwt.sign(payload, JWT_SECRET, { 
-    expiresIn: expiresIn as unknown as string & number
+    expiresIn: expiresIn as any
   });
 }
