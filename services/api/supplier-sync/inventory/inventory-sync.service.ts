@@ -440,8 +440,8 @@ export class InventorySyncService {
     return {
       lastSync: recentLogs[0]?.startedAt,
       nextSync: this.calculateNextSync(),
-      suppliers: suppliers.map(supplier => {
-        const lastLog = recentLogs.find(log => log.supplierId === supplier.id);
+      suppliers: suppliers.map((supplier: any) => {
+        const lastLog = recentLogs.find((log: any) => log.supplierId === supplier.id);
         return {
           id: supplier.code,
           name: supplier.name,

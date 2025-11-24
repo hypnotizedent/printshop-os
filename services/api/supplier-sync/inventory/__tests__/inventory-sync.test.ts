@@ -7,16 +7,47 @@ import Redis from 'ioredis';
 import { InventorySyncService } from '../inventory-sync.service';
 import { SupplierInventoryData } from '../types';
 
+// Mock Prisma Client
+jest.mock('@prisma/client', () => {
+  return {
+    PrismaClient: jest.fn().mockImplementation(() => ({
+      supplier: {
+        findUnique: jest.fn(),
+        findMany: jest.fn(),
+      },
+      product: {
+        findMany: jest.fn(),
+      },
+      supplierInventory: {
+        findUnique: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+      },
+      inventorySyncLog: {
+        create: jest.fn(),
+        update: jest.fn(),
+        findMany: jest.fn(),
+      },
+      inventoryChange: {
+        create: jest.fn(),
+        findMany: jest.fn(),
+      },
+      $disconnect: jest.fn(),
+    })),
+  };
+});
+
 // Mock Redis
 jest.mock('ioredis');
 
 describe('InventorySyncService', () => {
-  let prisma: PrismaClient;
+  let prisma: jest.Mocked<PrismaClient>;
   let redis: jest.Mocked<Redis>;
   let service: InventorySyncService;
 
   beforeEach(() => {
-    prisma = new PrismaClient();
+    prisma = new PrismaClient() as jest.Mocked<PrismaClient>;
     redis = new Redis() as jest.Mocked<Redis>;
     
     // Mock Redis methods
@@ -28,7 +59,7 @@ describe('InventorySyncService', () => {
   });
 
   afterEach(async () => {
-    await prisma.$disconnect();
+    jest.clearAllMocks();
   });
 
   describe('calculateStatus', () => {

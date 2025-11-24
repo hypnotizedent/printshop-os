@@ -29,9 +29,9 @@ model Product {
   brand       String
   category    String
   material    String?
-  imageUrls   String[]            @db.Text[]
-  tags        String[]            @db.Text[]
-  sizes       String[]            @db.Text[]
+  imageUrls   String[]
+  tags        String[]
+  sizes       String[]
   colors      Json
   description String?
   createdAt   DateTime            @default(now())
