@@ -207,7 +207,7 @@ export function SOPLibrary({ onNavigate }: SOPLibraryProps) {
   if ((isEditing || isCreating) && (selectedSOP || isCreating)) {
     return (
       <SOPEditor
-        sop={isEditing ? selectedSOP : undefined}
+        sop={isEditing ? selectedSOP || undefined : undefined}
         onSave={handleSave}
         onCancel={handleCancel}
       />
