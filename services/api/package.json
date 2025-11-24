@@ -33,7 +33,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "axios": "^1.4.0"
+    "@types/pdfkit": "^0.17.3",
+    "axios": "^1.4.0",
+    "pdfkit": "^0.17.2"
   },
   "engines": {
     "node": ">=18.0.0"
