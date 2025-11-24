@@ -4,6 +4,7 @@
 
 import { Router, Request, Response } from 'express';
 import { authenticateToken, requireRole } from '../middleware/auth';
+import { strictLimiter } from '../middleware/rateLimiter';
 import { Machine, Employee, RESTResponse } from '../types';
 
 const router = Router();
@@ -172,7 +173,7 @@ router.get('/machines/:machineId', authenticateToken, (req: Request, res: Respon
  * POST /api/production/resources/machines/:machineId/allocate
  * Allocate machine to an order
  */
-router.post('/machines/:machineId/allocate', authenticateToken, requireRole('supervisor', 'admin'), (req: Request, res: Response): void => {
+router.post('/machines/:machineId/allocate', strictLimiter, authenticateToken, requireRole('supervisor', 'admin'), (req: Request, res: Response): void => {
   try {
     const { machineId } = req.params;
     const { orderId } = req.body;
@@ -278,7 +279,7 @@ router.get('/employees/:employeeId', authenticateToken, (req: Request, res: Resp
  * POST /api/production/resources/employees/:employeeId/assign
  * Assign employee to an order
  */
-router.post('/employees/:employeeId/assign', authenticateToken, requireRole('supervisor', 'admin'), (req: Request, res: Response): void => {
+router.post('/employees/:employeeId/assign', strictLimiter, authenticateToken, requireRole('supervisor', 'admin'), (req: Request, res: Response): void => {
   try {
     const { employeeId } = req.params;
     const { orderId } = req.body;

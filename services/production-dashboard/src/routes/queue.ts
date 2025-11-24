@@ -4,6 +4,7 @@
 
 import { Router, Request, Response } from 'express';
 import { authenticateToken, requireRole } from '../middleware/auth';
+import { strictLimiter } from '../middleware/rateLimiter';
 import { QueueItem, Order, RESTResponse } from '../types';
 import { setMockQueue } from '../websocket';
 
@@ -96,7 +97,7 @@ router.get('/', authenticateToken, (_req: Request, res: Response): void => {
  * Reorder production queue
  * Body: { orderIds: string[] } - Array of order IDs in desired order
  */
-router.post('/reorder', authenticateToken, requireRole('supervisor', 'admin'), (req: Request, res: Response): void => {
+router.post('/reorder', strictLimiter, authenticateToken, requireRole('supervisor', 'admin'), (req: Request, res: Response): void => {
   try {
     const { orderIds } = req.body;
 

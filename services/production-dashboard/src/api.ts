@@ -8,6 +8,7 @@ import { createServer } from 'http';
 import cors from 'cors';
 import { ProductionWebSocketServer, setMockOrder } from './websocket';
 import { authenticateToken, requireRole } from './middleware/auth';
+import { apiLimiter, strictLimiter } from './middleware/rateLimiter';
 import queueRouter, { productionQueue } from './routes/queue';
 import resourcesRouter from './routes/resources';
 import analyticsRouter from './routes/analytics';
@@ -20,6 +21,7 @@ const httpServer = createServer(app);
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(apiLimiter); // Apply rate limiting to all routes
 
 // Request logging middleware
 app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -151,7 +153,7 @@ app.get('/api/production/orders/:id', authenticateToken, (req: Request, res: Res
  * POST /api/production/status
  * Update job status
  */
-app.post('/api/production/status', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+app.post('/api/production/status', strictLimiter, authenticateToken, async (req: Request, res: Response): Promise<void> => {
   try {
     const { orderId, status } = req.body;
 
@@ -238,7 +240,7 @@ app.post('/api/production/status', authenticateToken, async (req: Request, res: 
  * GET /api/production/connections
  * Get connected users (admin only)
  */
-app.get('/api/production/connections', authenticateToken, requireRole('admin'), (_req: Request, res: Response): void => {
+app.get('/api/production/connections', strictLimiter, authenticateToken, requireRole('admin'), (_req: Request, res: Response): void => {
   try {
     const users = wsServer.getConnectedUsers();
     const response: RESTResponse = {
