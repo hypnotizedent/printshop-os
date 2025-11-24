@@ -12,7 +12,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
     const entities = await strapi.entityService.findMany('api::sop.sop', {
       ...query,
       populate: ['relatedSOPs'],
-    });
+    } as any);
 
     return entities;
   },
@@ -22,7 +22,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
 
     const entity = await strapi.entityService.findOne('api::sop.sop', id, {
       populate: ['relatedSOPs'],
-    });
+    } as any) as any;
 
     // Increment view count
     if (entity) {
@@ -31,7 +31,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
           viewCount: (entity.viewCount || 0) + 1,
           lastViewed: new Date(),
         },
-      });
+      } as any);
     }
 
     return entity;
@@ -46,7 +46,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
         version: 1,
         viewCount: 0,
       },
-    });
+    } as any);
 
     return entity;
   },
@@ -55,14 +55,14 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
     const { id } = ctx.params;
     const { data } = ctx.request.body;
 
-    const currentEntity = await strapi.entityService.findOne('api::sop.sop', id);
+    const currentEntity = await strapi.entityService.findOne('api::sop.sop', id) as any;
     
     const entity = await strapi.entityService.update('api::sop.sop', id, {
       data: {
         ...data,
         version: (currentEntity?.version || 1) + 1,
       },
-    });
+    } as any);
 
     return entity;
   },
@@ -78,7 +78,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
   async search(ctx) {
     const { q, category, difficulty } = ctx.query;
 
-    let filters: any = {};
+    const filters: any = {};
 
     if (category) {
       filters.category = { $eq: category };
@@ -99,7 +99,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
     const entities = await strapi.entityService.findMany('api::sop.sop', {
       filters,
       populate: ['relatedSOPs'],
-    });
+    } as any);
 
     return entities;
   },
@@ -108,7 +108,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
     const { id } = ctx.params;
     const { userId } = ctx.request.body;
 
-    const entity = await strapi.entityService.findOne('api::sop.sop', id);
+    const entity = await strapi.entityService.findOne('api::sop.sop', id) as any;
 
     if (!entity) {
       return ctx.notFound('SOP not found');
@@ -124,7 +124,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
 
     const updated = await strapi.entityService.update('api::sop.sop', id, {
       data: { favorites },
-    });
+    } as any);
 
     return updated;
   },
@@ -133,7 +133,7 @@ export default factories.createCoreController('api::sop.sop', ({ strapi }) => ({
     const entities = await strapi.entityService.findMany('api::sop.sop', {
       sort: { viewCount: 'desc' },
       limit: 100,
-    });
+    } as any) as any[];
 
     const mostViewed = entities.slice(0, 10);
     const leastViewed = entities.slice(-10).reverse();
