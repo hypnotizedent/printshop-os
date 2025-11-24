@@ -4,9 +4,10 @@
  * Handles checklist lifecycle: start, update steps, complete, approve
  */
 
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 import {
   ChecklistInstance,
+  ChecklistStep,
   StartChecklistRequest,
   UpdateStepRequest,
   CompleteChecklistRequest,
@@ -275,7 +276,7 @@ class ChecklistService {
   /**
    * Get visible steps based on conditional logic
    */
-  private getVisibleSteps(checklist: ChecklistInstance, templateSteps: any[]): any[] {
+  private getVisibleSteps(checklist: ChecklistInstance, templateSteps: ChecklistStep[]): ChecklistStep[] {
     return templateSteps.filter(step => {
       if (!step.conditionalOn) {
         return true; // Always visible if no condition
