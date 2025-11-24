@@ -139,9 +139,10 @@ router.get('/', async (req: Request, res: Response) => {
     const totalCustomers = parseInt(acqResult.rows[0]?.total_customers || '0');
     const totalRevenue = parseFloat(acqResult.rows[0]?.total_revenue || '0');
     
-    // Estimate acquisition cost as 10% of average revenue per customer
+    // Estimate acquisition cost (configurable ratio of average revenue per customer)
+    const acqCostRatio = parseFloat(process.env.CUSTOMER_ACQ_COST_RATIO || '0.1'); // Default 10%
     const acquisitionCost = totalCustomers > 0 
-      ? (totalRevenue / totalCustomers) * 0.1 
+      ? (totalRevenue / totalCustomers) * acqCostRatio 
       : 0;
 
     // Get customer segments

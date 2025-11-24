@@ -143,8 +143,9 @@ router.get('/', async (req: Request, res: Response) => {
       : 0;
 
     // Simple forecast (using linear extrapolation)
+    const growthMultiplier = parseFloat(process.env.REVENUE_GROWTH_RATE || '1.05'); // Default 5% growth
     const forecastNextPeriod = periodResult.rows.length > 1
-      ? parseFloat(periodResult.rows[0]?.revenue || '0') * 1.05 // 5% growth assumption
+      ? parseFloat(periodResult.rows[0]?.revenue || '0') * growthMultiplier
       : currentRevenue;
 
     const response = {

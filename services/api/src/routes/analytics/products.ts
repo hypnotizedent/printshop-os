@@ -91,7 +91,7 @@ router.get('/', async (req: Request, res: Response) => {
         order_count,
         avg_unit_price,
         CASE 
-          WHEN revenue > 0 THEN ((revenue * 0.3) / revenue * 100)
+          WHEN revenue > 0 THEN ((revenue * $5) / revenue * 100)
           ELSE 0 
         END as margin
       FROM aggregated
@@ -105,11 +105,15 @@ router.get('/', async (req: Request, res: Response) => {
       LIMIT $4
     `;
 
+    // Default margin rate (30% = 0.3)
+    const marginRate = parseFloat(process.env.DEFAULT_MARGIN_RATE || '0.3');
+    
     const productsResult = await query(productsQuery, [
       startDate.toISOString(),
       endDate.toISOString(),
       sort_by,
       limitNum,
+      marginRate,
     ]);
 
     // Get category breakdown

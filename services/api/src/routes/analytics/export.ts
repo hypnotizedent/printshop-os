@@ -9,6 +9,7 @@ import PDFDocument from 'pdfkit';
 import { query } from '../../utils/db';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
 const router = Router();
 
@@ -201,7 +202,7 @@ router.get('/', async (req: Request, res: Response): Promise<any> => {
 
     if (format === 'csv') {
       // Generate CSV
-      const tmpDir = '/tmp';
+      const tmpDir = os.tmpdir();
       const filename = `${report}-${period}-${Date.now()}.csv`;
       const filepath = path.join(tmpDir, filename);
 
