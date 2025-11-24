@@ -16,6 +16,17 @@ import {
 import { quoteStore } from './customer-quotes';
 
 /**
+ * Generate a unique ID using crypto random values
+ */
+function generateId(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
  * Email notification service (mock implementation)
  */
 class EmailNotificationService {
@@ -213,7 +224,11 @@ export async function rejectQuote(
   }
 
   // Update quote with rejection data
-  const rejectionMetadata: any = {
+  const rejectionMetadata: {
+    rejectionReason: string;
+    rejectedAt: string;
+    notes?: string;
+  } = {
     rejectionReason: rejectionData.reason || 'No reason provided',
     rejectedAt: new Date().toISOString(),
   };
@@ -276,7 +291,7 @@ export async function requestQuoteChanges(
 
   // Create change request
   const changeRequest: ChangeRequest = {
-    id: `CR-${Date.now()}`,
+    id: `CR-${generateId()}`,
     requestedAt: new Date().toISOString(),
     comments: changeData.comments,
     status: 'Pending',
@@ -329,7 +344,7 @@ export async function convertQuoteToOrder(
   }
 
   // Generate order number
-  const orderNumber = `ORD-${Date.now()}`;
+  const orderNumber = `ORD-${generateId().substring(0, 8).toUpperCase()}`;
 
   // Update quote with conversion data
   const conversionMetadata = {
