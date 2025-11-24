@@ -1,21 +1,108 @@
-model Product {
-  id          String   @id @default(cuid())
-  supplierId  String
-  supplier    Supplier @relation(fields: [supplierId], references: [id])
+generator client {
+  provider = "prisma-client-js"
+}
 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Supplier {
+  id                String              @id @default(cuid())
+  name              String              @unique
+  code              String              @unique
+  apiUrl            String?
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  products          Product[]
+  inventories       SupplierInventory[]
+  syncLogs          InventorySyncLog[]
+}
+
+model Product {
+  id          String              @id @default(cuid())
+  supplierId  String
+  supplier    Supplier            @relation(fields: [supplierId], references: [id])
   styleId     String
   name        String
   brand       String
   category    String
   material    String?
-  imageUrls   String[] @db.Text[]
-  tags        String[] @db.Text[]
-  sizes       String[] @db.Text[]
-  colors      Json     // ✅ stores full color objects
+  imageUrls   String[]            @db.Text[]
+  tags        String[]            @db.Text[]
+  sizes       String[]            @db.Text[]
+  colors      Json
   description String?
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  inventories SupplierInventory[]
 
   @@unique([supplierId, styleId], name: "supplierId_styleId")
+}
+
+model SupplierInventory {
+  id                String    @id @default(cuid())
+  variantId         String
+  product           Product   @relation(fields: [variantId], references: [id])
+  supplierId        String
+  supplier          Supplier  @relation(fields: [supplierId], references: [id])
+  supplierSKU       String
+  quantity          Int       @default(0)
+  status            String    @default("unknown") // in_stock, low_stock, out_of_stock, backordered, discontinued
+  threshold         Int       @default(50)
+  price             Float
+  priceLastChanged  DateTime?
+  isAvailable       Boolean   @default(true)
+  leadTime          Int       @default(0) // Days
+  backorderDate     DateTime?
+  lastSynced        DateTime  @default(now())
+  syncSource        String    @default("manual") // scheduled, manual, webhook
+  syncError         String?
+  previousQuantity  Int?
+  previousPrice     Float?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  changes           InventoryChange[]
+
+  @@unique([variantId, supplierId], name: "variantId_supplierId")
+  @@index([supplierSKU])
+  @@index([status])
+}
+
+model InventorySyncLog {
+  id               String    @id @default(cuid())
+  supplierId       String
+  supplier         Supplier  @relation(fields: [supplierId], references: [id])
+  supplierName     String
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+  status           String    @default("running") // running, completed, failed
+  variantsSynced   Int       @default(0)
+  changesDetected  Int       @default(0)
+  errors           String[]  @default([])
+  duration         Int?      // milliseconds
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+  @@index([startedAt])
+}
+
+model InventoryChange {
+  id               String            @id @default(cuid())
+  variantId        String
+  inventory        SupplierInventory @relation(fields: [variantId, supplierId], references: [variantId, supplierId])
+  sku              String
+  supplierId       String
+  changeType       String // quantity, price, status, leadtime
+  oldValue         Json?
+  newValue         Json?
+  detectedAt       DateTime          @default(now())
+  notified         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+
+  @@index([detectedAt])
+  @@index([changeType])
+  @@index([notified])
 }
