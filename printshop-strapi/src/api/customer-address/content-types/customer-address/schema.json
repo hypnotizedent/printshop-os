@@ -1,0 +1,68 @@
+{
+  "kind": "collectionType",
+  "collectionName": "customer_addresses",
+  "info": {
+    "singularName": "customer-address",
+    "pluralName": "customer-addresses",
+    "displayName": "Customer Address",
+    "description": "Shipping and billing addresses for customers"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "isDefault": {
+      "type": "boolean",
+      "default": false
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
+    },
+    "company": {
+      "type": "string"
+    },
+    "address1": {
+      "type": "string",
+      "required": true
+    },
+    "address2": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string",
+      "required": true
+    },
+    "state": {
+      "type": "string",
+      "required": true
+    },
+    "zipCode": {
+      "type": "string",
+      "required": true
+    },
+    "country": {
+      "type": "string",
+      "required": true,
+      "default": "US"
+    },
+    "phone": {
+      "type": "string",
+      "required": true
+    }
+  }
+}
