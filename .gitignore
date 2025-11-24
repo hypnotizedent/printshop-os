@@ -122,7 +122,8 @@ printshop-strapi/.strapi/
 # Data (Sensitive)
 data/raw/
 data/processed/
-data/intelligence/
+data/intelligence/vector_store/
+data/intelligence/context/
 data/printavo-exports/
 data/strapi-imports/
 data/assets/
