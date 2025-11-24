@@ -24,6 +24,14 @@
     },
     "hireDate": {
       "type": "date"
+    },
+    "pin": {
+      "type": "string",
+      "private": true
+    },
+    "hourlyRate": {
+      "type": "decimal",
+      "default": 20.00
     }
   }
 }
