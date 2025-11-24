@@ -87,7 +87,7 @@ export function OrderDetails({ order, onDownloadInvoice, onDownloadFiles }: Orde
               </div>
             </div>
           )}
-          {attributes.status === 'delivered' || attributes.status === 'completed' && (
+          {(attributes.status === 'delivered' || attributes.status === 'completed') && (
             <div className="flex items-start gap-3">
               <CheckCircle size={20} className="text-green-600 mt-0.5" />
               <div>

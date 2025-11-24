@@ -42,7 +42,20 @@ router.get('/orders', async (req: Request, res: Response): Promise<void> => {
     const search = req.query.search as string;
 
     // Build Strapi query filters
-    const filters: any = {};
+    interface StrapiFilters {
+      status?: { $in: string[] };
+      'timeline.createdAt'?: {
+        $gte?: string;
+        $lte?: string;
+      };
+      $or?: Array<{
+        printavoId?: { $containsi: string };
+        orderNickname?: { $containsi: string };
+        'lineItems.description'?: { $containsi: string };
+      }>;
+    }
+    
+    const filters: StrapiFilters = {};
     
     // Filter by status
     if (status) {

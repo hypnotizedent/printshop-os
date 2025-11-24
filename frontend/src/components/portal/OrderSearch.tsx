@@ -14,17 +14,23 @@ export function OrderSearch({
   debounceMs = 300 
 }: OrderSearchProps) {
   const [searchValue, setSearchValue] = useState("")
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null)
 
   // Debounce search
   const handleSearchChange = (value: string) => {
     setSearchValue(value)
     
     // Clear previous timeout
-    const timeoutId = setTimeout(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+    
+    // Set new timeout
+    const newTimeoutId = setTimeout(() => {
       onSearch(value)
     }, debounceMs)
     
-    return () => clearTimeout(timeoutId)
+    setTimeoutId(newTimeoutId)
   }
 
   return (
