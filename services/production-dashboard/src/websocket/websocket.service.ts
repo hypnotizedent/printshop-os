@@ -3,25 +3,27 @@
  * Handles real-time updates for time clock operations
  */
 
-import { Server } from 'ws';
-import { IncomingMessage } from 'http';
+import { Server as WebSocketServer, WebSocket } from 'ws';
+import { IncomingMessage, Server as HttpServer } from 'http';
 
 export interface WebSocketMessage {
   type: string;
   payload: any;
 }
 
+const WS_READY_STATE_OPEN = 1; // WebSocket.OPEN
+
 export class WebSocketService {
-  private wss: Server | null = null;
-  private clients: Set<any> = new Set();
+  private wss: WebSocketServer | null = null;
+  private clients: Set<WebSocket> = new Set();
 
   /**
    * Initialize WebSocket server
    */
-  initialize(server: any): void {
-    this.wss = new Server({ server });
+  initialize(server: HttpServer): void {
+    this.wss = new WebSocketServer({ server });
 
-    this.wss.on('connection', (ws: any, req: IncomingMessage) => {
+    this.wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
       console.log('New WebSocket connection from:', req.socket.remoteAddress);
       this.clients.add(ws);
 
@@ -55,7 +57,7 @@ export class WebSocketService {
   /**
    * Handle incoming WebSocket messages
    */
-  private handleMessage(ws: any, message: WebSocketMessage): void {
+  private handleMessage(ws: WebSocket, message: WebSocketMessage): void {
     console.log('Received message:', message.type);
 
     switch (message.type) {
@@ -79,8 +81,8 @@ export class WebSocketService {
   /**
    * Send message to a specific client
    */
-  private send(ws: any, message: WebSocketMessage): void {
-    if (ws.readyState === 1) {
+  private send(ws: WebSocket, message: WebSocketMessage): void {
+    if (ws.readyState === WS_READY_STATE_OPEN) {
       ws.send(JSON.stringify(message));
     }
   }
@@ -91,7 +93,7 @@ export class WebSocketService {
   broadcast(message: WebSocketMessage): void {
     const data = JSON.stringify(message);
     this.clients.forEach((client) => {
-      if (client.readyState === 1) {
+      if (client.readyState === WS_READY_STATE_OPEN) {
         client.send(data);
       }
     });

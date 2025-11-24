@@ -3,14 +3,25 @@
  * Main entry point for time clock and production tracking
  */
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { createServer } from 'http';
 import { createTimeClockRoutes } from './time-clock/time-clock.routes';
 import { WebSocketService } from './websocket/websocket.service';
 
+// Service container for dependency injection
+export interface ServiceContainer {
+  wsService: WebSocketService;
+}
+
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 3001;
+
+// Initialize services
+const wsService = new WebSocketService();
+const services: ServiceContainer = {
+  wsService,
+};
 
 // Middleware
 app.use(express.json());
@@ -32,19 +43,20 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'production-dashboard' });
 });
 
+// Make services available via request object
+app.use((req: any, res: Response, next: NextFunction) => {
+  req.services = services;
+  next();
+});
+
 // API Routes
 app.use('/api/production', createTimeClockRoutes());
 
 // Initialize WebSocket
-const wsService = new WebSocketService();
 wsService.initialize(server);
 
-// Store WebSocket service globally for use in controllers
-// In a real app, we'd use dependency injection
-(global as any).wsService = wsService;
-
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
