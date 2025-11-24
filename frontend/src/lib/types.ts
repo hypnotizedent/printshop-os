@@ -78,3 +78,45 @@ export interface DashboardStats {
   lowStockItems: number
   urgentJobs: number
 }
+
+export type TicketStatus = 'Open' | 'In Progress' | 'Waiting' | 'Resolved' | 'Closed'
+export type TicketPriority = 'Low' | 'Medium' | 'High' | 'Urgent'
+export type TicketCategory = 'Order Issue' | 'Art Approval' | 'Shipping' | 'Billing' | 'General'
+
+export interface TicketAttachment {
+  id: string
+  fileName: string
+  fileUrl: string
+  fileSize: number
+  mimeType: string
+}
+
+export interface TicketComment {
+  id: string
+  ticketId: string
+  userId: string
+  userType: 'customer' | 'staff'
+  message: string
+  isInternal: boolean
+  createdAt: string
+  attachments?: TicketAttachment[]
+}
+
+export interface SupportTicket {
+  id: string
+  ticketNumber: string
+  customerId: string
+  customerName?: string
+  category: TicketCategory
+  priority: TicketPriority
+  status: TicketStatus
+  subject: string
+  description: string
+  orderNumber?: string
+  createdAt: string
+  updatedAt: string
+  closedAt?: string
+  assignedTo?: string
+  comments?: TicketComment[]
+  attachments?: TicketAttachment[]
+}
