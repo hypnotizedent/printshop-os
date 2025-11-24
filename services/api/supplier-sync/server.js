@@ -9,6 +9,7 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
+// Legacy products endpoint
 app.get('/products', async (req, res) => {
   const { brand, category, supplier, search, limit = 100 } = req.query;
 
@@ -38,6 +39,17 @@ app.get('/products', async (req, res) => {
   }
 });
 
+// Mount variant routes (TypeScript compiled)
+try {
+  const variantRoutes = require('./dist/routes/variants');
+  app.use('/api/supplier', variantRoutes.default || variantRoutes);
+  console.log('✅ Variant routes loaded');
+} catch (err) {
+  console.warn('⚠️  Variant routes not available (run npm run build):', err.message);
+}
+
 app.listen(PORT, () => {
-  console.log(`🚀 API running at http://localhost:${PORT}/products`);
+  console.log(`🚀 API running at http://localhost:${PORT}`);
+  console.log(`📦 Products: http://localhost:${PORT}/products`);
+  console.log(`🔀 Variants: http://localhost:${PORT}/api/supplier/variants`);
 });
