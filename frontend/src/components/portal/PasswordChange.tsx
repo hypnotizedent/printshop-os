@@ -61,8 +61,9 @@ export function PasswordChange() {
 
       toast.success('Password changed successfully');
       reset();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to change password');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

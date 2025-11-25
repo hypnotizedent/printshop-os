@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Ticket, Clock, CheckCircle, XCircle } from "@phosphor-icons/react"
+import { Plus, Ticket, Clock, CheckCircle, XCircle, type Icon } from "@phosphor-icons/react"
 import { TicketFilters } from "./TicketFilters"
 import type { SupportTicket } from "@/lib/types"
 
@@ -25,7 +25,7 @@ export function SupportTickets({ tickets, onCreateTicket, onViewTicket }: Suppor
     const matchesSearch = filters.search === "" ||
       ticket.subject.toLowerCase().includes(filters.search.toLowerCase()) ||
       ticket.ticketNumber.toLowerCase().includes(filters.search.toLowerCase())
-    
+
     return matchesStatus && matchesCategory && matchesSearch
   })
 
@@ -33,7 +33,7 @@ export function SupportTickets({ tickets, onCreateTicket, onViewTicket }: Suppor
   const resolvedTickets = tickets.filter(t => t.status === "Resolved" || t.status === "Closed").length
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { color: string; icon: any }> = {
+    const variants: Record<string, { color: string; icon: Icon }> = {
       Open: { color: "bg-blue-100 text-blue-800", icon: Clock },
       "In Progress": { color: "bg-yellow-100 text-yellow-800", icon: Clock },
       Waiting: { color: "bg-purple-100 text-purple-800", icon: Clock },
@@ -41,10 +41,10 @@ export function SupportTickets({ tickets, onCreateTicket, onViewTicket }: Suppor
       Closed: { color: "bg-gray-100 text-gray-800", icon: XCircle },
     }
     const variant = variants[status] || variants.Open
-    const Icon = variant.icon
+    const IconComponent = variant.icon
     return (
       <Badge className={variant.color}>
-        <Icon size={14} className="mr-1" weight="fill" />
+        <IconComponent size={14} className="mr-1" weight="fill" />
         {status}
       </Badge>
     )
@@ -66,7 +66,7 @@ export function SupportTickets({ tickets, onCreateTicket, onViewTicket }: Suppor
     const diff = now.getTime() - d.getTime()
     const hours = Math.floor(diff / (1000 * 60 * 60))
     const days = Math.floor(hours / 24)
-    
+
     if (hours < 1) return "less than an hour ago"
     if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`
     if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`
@@ -152,7 +152,7 @@ export function SupportTickets({ tickets, onCreateTicket, onViewTicket }: Suppor
                     <p className="text-sm text-muted-foreground line-clamp-2">{ticket.description}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-4">
                     <span>Opened: {formatDate(ticket.createdAt)}</span>

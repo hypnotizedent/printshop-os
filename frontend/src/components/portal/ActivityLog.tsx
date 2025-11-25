@@ -3,14 +3,15 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { 
-  Loader2, 
-  LogIn, 
-  Lock, 
-  Mail, 
-  User, 
-  MapPin, 
-  Settings 
+import {
+  Loader2,
+  LogIn,
+  Lock,
+  Mail,
+  User,
+  MapPin,
+  Settings,
+  type LucideIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -22,7 +23,7 @@ interface ActivityItem {
   createdAt: string;
 }
 
-const activityIcons: Record<string, any> = {
+const activityIcons: Record<string, LucideIcon> = {
   login: LogIn,
   password_changed: Lock,
   email_updated: Mail,
