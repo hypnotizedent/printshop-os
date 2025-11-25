@@ -17,7 +17,10 @@
 
 ### Services Inventory
 1. **api/** - Central API service (Printavo sync, quotes, supplier connectors)
-2. **supplier-sync/** - TypeScript supplier integration service (AS Colour complete)
+2. **supplier-sync/** - TypeScript supplier integration service
+   - ✅ AS Colour: Production ready (522 products, REST API)
+   - ✅ SanMar: Core complete (495MB catalog, SFTP + CSV, 415K records)
+   - ⏳ S&S Activewear: Pending
 3. **customer-service-ai/** - AI automation
 4. **job-estimator/** - Job estimation tools
 5. **pricing/** - Pricing calculations (11 planning docs - needs consolidation)
@@ -26,24 +29,21 @@
 
 ### Critical Issues Identified
 
-#### 1. Duplicate Supplier-Sync Implementations ⚠️
-**Active:** `/services/supplier-sync/` (TypeScript, AS Colour production-ready)
-- TypeScript with CLI tools
+#### 1. Duplicate Supplier-Sync Implementations ✅ RESOLVED
+**Active:** `/services/supplier-sync/` (TypeScript, multi-supplier)
+- TypeScript with CLI tools (sync-as-colour, sync-sanmar)
 - Client/transformer architecture
 - Cache service (Redis, TTL strategy)
-- 10 .md files, 3,000+ lines documentation
+- 13+ .md files, 4,000+ lines documentation
 - JSONL file storage
+- Suppliers: AS Colour (✅), SanMar (✅), S&S Activewear (⏳)
 - Status: ✅ Production ready
 
-**Legacy:** `/services/api/supplier-sync/` (JavaScript, unclear status)
-- JavaScript with Express server
-- Prisma ORM database models
-- Redis cache (117 tests, cost tracking)
-- Cron job scheduling (node-cron)
-- 3 cache documentation files
-- Status: ⚠️ Archive recommended - features duplicated in new implementation
-
-**Resolution:** Archive legacy to `/docs/archive/legacy-supplier-sync/`
+**Legacy:** `/services/api/supplier-sync/` → **ARCHIVED**
+- Moved to `/docs/archive/legacy-supplier-sync/` (103 files preserved)
+- JavaScript Express server, Prisma ORM, Redis cache (117 tests)
+- Comprehensive README explaining archive context
+- Status: ✅ Archived with documentation
 
 #### 2. Daily Log Duplication ✅ RESOLVED
 - ❌ Deleted: `/services/supplier-sync/TODAYS_WORK.md`
@@ -257,11 +257,24 @@ docs/
 - ✅ Create quarterly documentation review process
 - 🚧 Update SERVICE_DIRECTORY.md with current service status (deferred)
 
-### Phase 3: Ongoing
+### Phase 3: Supplier Integration (This Week) ✅
+- ✅ Complete SanMar SFTP integration
+  - ✅ Download full EPDD catalog (495 MB, 415,941 records)
+  - ✅ CSV parsing with error tolerance (malformed record handling)
+  - ✅ Transform 1,000 records → 18 products (validated)
+  - ✅ Transform 10,000 records → 61 products in 8s (performance validated)
+  - ✅ Persistence tested (JSONL storage working)
+  - ✅ CLI tool complete (sync-sanmar.ts with dry-run, limit, file-type options)
+  - ✅ Comprehensive documentation (560 lines: SANMAR.md)
+- ✅ Validate documentation standards in practice
+- ✅ Test new templates with real implementation
+
+### Phase 4: Ongoing
 - Enforce guidelines in PR reviews
 - Quarterly documentation review (check for duplicates)
 - Update this file when organization patterns change
 - Maintain single source of truth principle
+- Continue supplier integrations (S&S Activewear next)
 
 ---
 
