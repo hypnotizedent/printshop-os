@@ -17,8 +17,31 @@
   "attributes": {
     "employee": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "manyToOne",
       "target": "api::employee.employee"
+    },
+    "job": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::job.job"
+    },
+    "taskType": {
+      "type": "enumeration",
+      "enum": [
+        "Screen Prep",
+        "Printing",
+        "Heat Press",
+        "Folding",
+        "Packaging",
+        "Quality Check",
+        "Setup",
+        "Cleanup",
+        "Other"
+      ],
+      "required": true
+    },
+    "machineId": {
+      "type": "string"
     },
     "clockIn": {
       "type": "datetime",
@@ -26,6 +49,56 @@
     },
     "clockOut": {
       "type": "datetime"
+    },
+    "pausedAt": {
+      "type": "datetime"
+    },
+    "totalTime": {
+      "type": "integer",
+      "default": 0
+    },
+    "breakTime": {
+      "type": "integer",
+      "default": 0
+    },
+    "productiveTime": {
+      "type": "integer",
+      "default": 0
+    },
+    "laborCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "notes": {
+      "type": "text"
+    },
+    "issues": {
+      "type": "text"
+    },
+    "editedBy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::employee.employee"
+    },
+    "editApprovedBy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::employee.employee"
+    },
+    "editReason": {
+      "type": "text"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "Active",
+        "Paused",
+        "Completed",
+        "Edited",
+        "PendingApproval"
+      ],
+      "default": "Active",
+      "required": true
     }
   }
 }

@@ -2,6 +2,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
 <<<<<<< HEAD
+<<<<<<< HEAD
   roots: ['<rootDir>'],
   testMatch: ['**/__tests__/**/*.test.ts'],
   moduleFileExtensions: ['ts', 'js', 'json'],
@@ -28,6 +29,16 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
+=======
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!**/*.d.ts',
+>>>>>>> origin/copilot/build-time-clock-job-detail
     '!**/node_modules/**',
     '!**/dist/**',
   ],
@@ -48,5 +59,8 @@ module.exports = {
       },
     },
   },
+<<<<<<< HEAD
 >>>>>>> origin/copilot/build-sop-library-dashboard
+=======
+>>>>>>> origin/copilot/build-time-clock-job-detail
 };
