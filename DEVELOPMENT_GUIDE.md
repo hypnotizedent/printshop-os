@@ -1,17 +1,18 @@
 # PrintShop OS - Development Guide
 
-**Last Updated:** November 24, 2025
+**Last Updated:** November 25, 2024
 
 ## Prerequisites
 
 ### Required Software
-- **Node.js:** 18+ (LTS recommended)
+- **Node.js:** 20+ (LTS recommended)
 - **npm:** 9+ (comes with Node.js)
 - **PostgreSQL:** 15+
 - **Redis:** 7+
+- **MongoDB:** 6+ (for Appsmith)
 - **Git:** Latest version
-- **Docker:** 20+ (optional but recommended)
-- **Docker Compose:** 2+ (optional but recommended)
+- **Docker:** 24+ (recommended)
+- **Docker Compose:** 2+ (recommended)
 
 ### Recommended Tools
 - **VS Code** with extensions:
@@ -23,6 +24,36 @@
 - **Postman** or **Insomnia** for API testing
 - **Redis Commander** or **RedisInsight** for Redis debugging
 - **pgAdmin** or **DBeaver** for PostgreSQL management
+
+---
+
+## Quick Start (Docker Compose)
+
+The easiest way to run the full PrintShop OS stack locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/hypnotizedent/printshop-os.git
+cd printshop-os
+
+# Start all services
+docker compose up -d
+
+# Run system test
+./test-system.sh
+
+# View logs
+docker compose logs -f
+```
+
+**Access Points:**
+- **Strapi Admin:** http://localhost:1337/admin
+- **Strapi API:** http://localhost:1337/api
+- **Appsmith Dashboard:** http://localhost:8080
+- **Frontend:** http://localhost:3000
+- **Database:** localhost:5432
+- **Redis:** localhost:6379
+- **MongoDB:** localhost:27017
 
 ---
 
@@ -48,16 +79,15 @@ cp .env.example .env
 
 ```env
 # Database
-DATABASE_HOST=localhost
+DATABASE_HOST=postgres
 DATABASE_PORT=5432
-DATABASE_NAME=printshop_os
-DATABASE_USER=postgres
-DATABASE_PASSWORD=your_password_here
+DATABASE_NAME=printshop
+DATABASE_USERNAME=strapi
+DATABASE_PASSWORD=secure_password_change_this
 
 # Redis
-REDIS_HOST=localhost
+REDIS_HOST=redis
 REDIS_PORT=6379
-REDIS_PASSWORD=
 
 # Strapi
 STRAPI_APP_KEYS=generate_random_keys_here
@@ -65,19 +95,12 @@ STRAPI_API_TOKEN_SALT=generate_random_salt_here
 STRAPI_ADMIN_JWT_SECRET=generate_random_secret_here
 STRAPI_JWT_SECRET=generate_random_secret_here
 
-# OpenAI (for AI Quote Optimizer)
+# OpenAI (optional - for AI features)
 OPENAI_API_KEY=sk-your-key-here
-
-# Supplier APIs (optional for development)
-SS_ACTIVEWEAR_API_KEY=
-SANMAR_CLIENT_ID=
-SANMAR_CLIENT_SECRET=
-AS_COLOUR_API_KEY=
 
 # App Configuration
 NODE_ENV=development
-PORT=3000
-FRONTEND_URL=http://localhost:5173
+TZ=America/New_York
 ```
 
 **Generate secure random values:**
@@ -87,429 +110,303 @@ FRONTEND_URL=http://localhost:5173
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
-### 3. Install Dependencies
+### 3. Start Services
 
-**Option A: Using Docker (Recommended)**
+**Using Docker (Recommended):**
 
 ```bash
 # Start all services
-docker-compose up -d
+docker compose up -d
 
-# Services will be available at:
-# - Strapi: http://localhost:1337
-# - Production Dashboard: http://localhost:3000
-# - Analytics: http://localhost:3002
-# - Frontend: http://localhost:5173
-# - PostgreSQL: localhost:5432
-# - Redis: localhost:6379
+# Wait for services to be healthy
+docker compose ps
+
+# Run system test
+./test-system.sh
+
+# Services will be available at URLs listed above
 ```
 
-**Option B: Manual Installation**
+**Manual Installation (Advanced):**
 
 ```bash
-# Install root dependencies
-npm install
+# Start PostgreSQL
+docker run -d --name printshop-postgres \
+  -e POSTGRES_USER=strapi \
+  -e POSTGRES_PASSWORD=secure_password \
+  -e POSTGRES_DB=printshop \
+  -p 5432:5432 \
+  postgres:15-alpine
+
+# Start Redis
+docker run -d --name printshop-redis \
+  -p 6379:6379 \
+  redis:7-alpine
 
 # Install Strapi dependencies
-cd printshop-strapi && npm install
-
-# Install Production Dashboard dependencies
-cd ../services/production-dashboard && npm install
-
-# Install Analytics dependencies
-cd ../api && npm install
-
-# Install Customer Service AI dependencies
-cd ../customer-service-ai && npm install
-
-# Install Frontend dependencies
-cd ../../frontend && npm install
-```
-
-### 4. Database Setup
-
-**If using Docker:**
-Database is automatically created and configured.
-
-**If manual installation:**
-
-```bash
-# Create database
-createdb printshop_os
-
-# Run Strapi (will auto-create tables)
 cd printshop-strapi
+npm install
+
+# Start Strapi
 npm run develop
+
+# Install Pricing Engine dependencies
+cd ../services/job-estimator
+npm install
+
+# Run Pricing Engine tests
+npm test
 ```
 
-**First-time Strapi setup:**
+### 4. First-Time Strapi Setup
+
 1. Navigate to http://localhost:1337/admin
 2. Create admin user account
 3. Strapi will auto-generate database schema
+4. Generate API token: Settings → API Tokens → Create New
+5. Copy token to `.env` file
 
 ---
 
 ## Development Workflow
 
-### Starting the Development Environment
-
-**Using Docker:**
+### Starting Services
 
 ```bash
 # Start all services
-docker-compose up
+docker compose up -d
 
-# Start in background
-docker-compose up -d
+# Start specific service
+docker compose up -d strapi
 
-# View logs
-docker-compose logs -f
+# View logs (all services)
+docker compose logs -f
+
+# View logs (specific service)
+docker compose logs -f strapi
 
 # Stop all services
-docker-compose down
+docker compose down
+
+# Stop and remove volumes (clean slate)
+docker compose down -v
 ```
 
-**Manual start:**
+### Running Tests
 
 ```bash
-# Terminal 1: Start Strapi
-cd printshop-strapi
-npm run develop
+# System test (all services)
+./test-system.sh
 
-# Terminal 2: Start Production Dashboard
-cd services/production-dashboard
-npm run dev
+# Pricing Engine tests
+cd services/job-estimator
+npm test
 
-# Terminal 3: Start Analytics API
-cd services/api
-npm run dev
+# Watch mode
+npm test -- --watch
 
-# Terminal 4: Start Frontend
-cd frontend
-npm run dev
-
-# Terminal 5: Start Redis (if not using Docker)
-redis-server
-
-# Terminal 6: Start PostgreSQL (if not using Docker)
-postgres -D /usr/local/var/postgres
+# Coverage report
+npm test -- --coverage
 ```
-
-### Stopping Services
-
-**Docker:**
-```bash
-docker-compose down
-```
-
-**Manual:**
-- Press `Ctrl+C` in each terminal
-
----
-
-## Data Ingestion & AI Training
-
-### Email History Ingestion
-We use a script to ingest your email history (from Outlook/Exchange) to train the AI agent on your tone and customer interactions.
-
-**The "Drag & Drop" Method (Mac):**
-1.  Create a folder on your Desktop (e.g., `Training Emails`).
-2.  Open Outlook for Mac.
-3.  Select emails (Cmd+A) and **drag them** into the folder. This creates `.eml` files.
-4.  Move the folder to: `data/raw/email-exports/`
-5.  Run the ingestion script:
-
-```bash
-python3 services/customer-service-ai/scripts/ingest_mailbox.py
-```
-
-**Result:**
-- The script parses all `.eml` and `.mbox` files.
-- It generates Markdown training files in `data/intelligence/knowledge_base/email_history/`.
-- The Agent automatically indexes these files on its next startup.
-
----
-
-## Common Commands
 
 ### Development Commands
 
 ```bash
-# Install dependencies for all services
-npm run install:all
-
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm test -- --watch
-
-# Lint all code
-npm run lint
-
-# Format all code
-npm run format
-
-# Build all services for production
-npm run build
-
-# Clean all node_modules and build artifacts
-npm run clean
-```
-
-### Strapi Commands
-
-```bash
+# Strapi development mode (with admin panel)
 cd printshop-strapi
-
-# Start development server (auto-reload)
 npm run develop
 
-# Start production server
+# Strapi production mode
 npm start
 
-# Build admin panel
+# Build Strapi admin panel
 npm run build
 
-# Generate content type
-npm run strapi generate
+# Pricing Engine API (development)
+cd services/job-estimator
+npm run api:dev
 
-# Create admin user
-npm run strapi admin:create-user
-```
+# Pricing Engine API (production)
+npm run api:start
 
-### Service-Specific Commands
-
-**Production Dashboard:**
-```bash
-cd services/production-dashboard
-
-# Start development server
-npm run dev
-
-# Run tests
-npm test
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-**Analytics Service:**
-```bash
-cd services/api
-
-# Start development server
-npm run dev
-
-# Run tests
-npm test
-
-# Build for production
-npm run build
-```
-
-**Frontend:**
-```bash
+# Frontend development server
 cd frontend
-
-# Start development server
 npm run dev
 
-# Build for production
+# Frontend production build
 npm run build
-
-# Preview production build
-npm run preview
-
-# Type check
-npm run type-check
 ```
 
-### Database Commands
+---
+
+## Project Structure
+
+```
+printshop-os/
+├── services/
+│   ├── job-estimator/           # Pricing Engine (PR #98)
+│   │   ├── lib/
+│   │   │   ├── pricing-rules-engine.ts
+│   │   │   ├── pricing-api.ts
+│   │   │   └── api-server.ts
+│   │   └── tests/               # 85 tests
+│   │
+│   ├── api/                     # Additional APIs
+│   └── customer-service-ai/     # AI services
+│
+├── printshop-strapi/            # Strapi CMS + Workflow (PR #99)
+│   ├── src/
+│   │   ├── api/
+│   │   │   ├── quote/
+│   │   │   ├── order/
+│   │   │   └── job/
+│   │   └── services/
+│   │       ├── workflow.ts      # State machine
+│   │       ├── queue.ts         # Bull Queue
+│   │       ├── notification.ts  # Email delivery
+│   │       └── audit.ts         # Activity logging
+│   └── tests/                   # 30 tests
+│
+├── frontend/                    # React + Vite UI
+│   └── src/
+│
+├── docs/                        # Documentation
+│   ├── archive/                 # Historical docs
+│   ├── api/
+│   ├── architecture/
+│   └── phases/
+│
+├── scripts/                     # Utility scripts
+├── tests/                       # Integration tests
+├── data/                        # Data storage
+│
+├── docker-compose.yml           # Main services
+├── docker-compose.ai.yml        # AI services
+├── docker-compose.local.yml     # Local overrides
+├── docker-compose.label-formatter.yml
+│
+├── STATUS.md                    # Current system state
+├── ROADMAP.md                   # Future plans
+├── README.md                    # Getting started
+├── ARCHITECTURE.md              # System design
+├── test-system.sh               # System test script
+└── .env                         # Environment variables
+```
+
+---
+
+## Common Tasks
+
+### Database Operations
 
 ```bash
 # Backup database
-pg_dump printshop_os > backup.sql
+docker compose exec postgres pg_dump -U strapi printshop > backup.sql
 
 # Restore database
-psql printshop_os < backup.sql
+cat backup.sql | docker compose exec -T postgres psql -U strapi printshop
 
 # Connect to database
-psql printshop_os
+docker compose exec postgres psql -U strapi printshop
 
-# Reset database (WARNING: Deletes all data)
-dropdb printshop_os && createdb printshop_os
+# Check database connection
+docker compose exec postgres pg_isready -U strapi
 ```
 
-### Redis Commands
+### Redis Operations
 
 ```bash
 # Connect to Redis CLI
-redis-cli
+docker compose exec redis redis-cli
+
+# Check Redis health
+docker compose exec redis redis-cli PING
 
 # View all keys
-redis-cli KEYS "*"
+docker compose exec redis redis-cli KEYS "*"
 
 # Clear all cache
-redis-cli FLUSHALL
+docker compose exec redis redis-cli FLUSHALL
 
 # Monitor Redis commands
-redis-cli MONITOR
+docker compose exec redis redis-cli MONITOR
+```
+
+### Service Management
+
+```bash
+# Restart single service
+docker compose restart strapi
+
+# Rebuild service
+docker compose up -d --build strapi
+
+# View service status
+docker compose ps
+
+# View resource usage
+docker stats
+
+# Remove stopped containers
+docker compose rm
+
+# Pull latest images
+docker compose pull
 ```
 
 ---
 
 ## Testing
 
-### Running Tests
+### System Test
 
-**All tests:**
 ```bash
-npm test
+# Run comprehensive system test
+./test-system.sh
+
+# Expected output: 12-15 tests passing
+# Tests: Docker services, databases, Strapi API, Pricing Engine, Workflow Automation
 ```
 
-**Specific service:**
-```bash
-cd services/production-dashboard
-npm test
-```
+### Unit Tests
 
-**Watch mode (auto-rerun on changes):**
 ```bash
+# Pricing Engine (85 tests)
+cd services/job-estimator
+npm test
+
+# Strapi/Workflow (30 tests)
+cd printshop-strapi
+npm test
+
+# Watch mode (auto-rerun on changes)
 npm test -- --watch
+
+# Single test file
+npm test pricing-rules-engine.test.ts
 ```
 
-**Coverage report:**
+### Integration Tests
+
 ```bash
-npm test -- --coverage
-```
-
-**Single test file:**
-```bash
-npm test time-clock.test.ts
-```
-
-### Writing Tests
-
-**Test file structure:**
-```typescript
-// services/production-dashboard/tests/time-clock.test.ts
-import { TimeClockService } from '../src/services/TimeClockService';
-
-describe('TimeClockService', () => {
-  let service: TimeClockService;
-
-  beforeEach(() => {
-    service = new TimeClockService();
-  });
-
-  describe('clockIn', () => {
-    it('should clock in employee with valid PIN', async () => {
-      const result = await service.clockIn('1234', 'JOB-001');
-      expect(result.success).toBe(true);
-    });
-
-    it('should reject invalid PIN', async () => {
-      await expect(service.clockIn('wrong', 'JOB-001'))
-        .rejects.toThrow('Invalid PIN');
-    });
-  });
-});
-```
-
-**Test naming conventions:**
-- Test files: `{name}.test.ts`
-- Describe blocks: Feature/class name
-- It blocks: "should [expected behavior]"
-
----
-
-## Debugging
-
-### VS Code Debug Configuration
-
-Create `.vscode/launch.json`:
-
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Debug Production Dashboard",
-      "type": "node",
-      "request": "launch",
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "args": ["${workspaceFolder}/services/production-dashboard/src/server.ts"],
-      "cwd": "${workspaceFolder}/services/production-dashboard",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    {
-      "name": "Debug Tests",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["--runInBand", "--no-cache"],
-      "console": "integratedTerminal"
-    }
-  ]
-}
-```
-
-### Console Logging
-
-**Best practices:**
-```typescript
-// Development only
-if (process.env.NODE_ENV === 'development') {
-  console.log('[TimeClockService] Clock in attempt:', { pin, jobNumber });
-}
-
-// Production-safe
-logger.info('Employee clocked in', { employeeId, jobNumber });
-```
-
-### API Debugging
-
-**Using curl:**
-```bash
-# Test time clock endpoint
-curl -X POST http://localhost:3000/api/production/time-clock/in \
+# Test Pricing Engine API
+curl -X POST http://localhost:3001/api/quote \
   -H "Content-Type: application/json" \
-  -d '{"pin": "1234", "jobNumber": "JOB-001"}'
-```
+  -d '{
+    "items": [{
+      "product": "t-shirt",
+      "quantity": 100,
+      "colors": 2,
+      "printLocations": ["front", "back"]
+    }]
+  }'
 
-**Using Postman:**
-1. Import collection (if available)
-2. Set environment variables
-3. Test endpoints interactively
+# Test Strapi API
+curl http://localhost:1337/api/orders
 
-### Database Debugging
-
-**Check database connections:**
-```sql
-SELECT * FROM pg_stat_activity WHERE datname = 'printshop_os';
-```
-
-**View slow queries:**
-```sql
-SELECT * FROM pg_stat_statements ORDER BY total_time DESC LIMIT 10;
-```
-
-### Redis Debugging
-
-**Monitor cache hits/misses:**
-```bash
-redis-cli INFO stats | grep keyspace
-```
-
-**View specific key:**
-```bash
-redis-cli GET cache:analytics:revenue:2024
+# Test health endpoints
+curl http://localhost:1337/_health
+curl http://localhost:3001/health
 ```
 
 ---
@@ -518,52 +415,48 @@ redis-cli GET cache:analytics:revenue:2024
 
 ### TypeScript
 
-**Use strict mode:**
-```json
-// tsconfig.json
-{
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true
-  }
-}
-```
-
-**Type definitions:**
 ```typescript
-// Good
-interface TimeClockEntry {
+// Use strict typing
+interface Order {
   id: string;
-  employeeId: string;
-  clockIn: Date;
-  clockOut?: Date;
+  orderNumber: string;
+  status: OrderStatus;
+  customer: Customer;
+  items: OrderItem[];
+  createdAt: Date;
 }
 
-// Avoid
-const entry: any = { ... };
+// Avoid 'any' type
+// Bad
+const data: any = await fetchData();
+
+// Good
+const data: Order[] = await fetchOrders();
 ```
 
 ### Naming Conventions
 
 ```typescript
 // Classes: PascalCase
-class TimeClockService {}
+class PricingRulesEngine {}
+class WorkflowService {}
 
-// Interfaces: PascalCase with 'I' prefix (optional)
-interface IEmployee {}
+// Interfaces: PascalCase
+interface Order {}
+interface PricingRule {}
 
 // Functions/variables: camelCase
-const calculateLaborCost = () => {};
-let totalHours = 0;
+const calculatePrice = () => {};
+let totalCost = 0;
 
 // Constants: SCREAMING_SNAKE_CASE
-const MAX_CLOCK_ENTRIES = 100;
-const CACHE_TTL = 3600;
+const MAX_QUANTITY = 10000;
+const CACHE_TTL_SECONDS = 3600;
 
 // Files: kebab-case
-time-clock.service.ts
-order-history.component.tsx
+pricing-rules-engine.ts
+workflow-service.ts
+order-repository.ts
 ```
 
 ### File Organization
@@ -574,45 +467,15 @@ order-history.component.tsx
 import express from 'express';
 import { Request, Response } from 'express';
 
-// 2. Internal modules (absolute imports)
-import { TimeClockService } from '@/services/TimeClockService';
+// 2. Internal modules
+import { PricingRulesEngine } from './pricing-rules-engine';
+import { WorkflowService } from './workflow-service';
 
-// 3. Relative imports
-import { validatePin } from './validators';
-import type { TimeClockEntry } from './types';
+// 3. Types
+import type { Order, PricingRule } from './types';
 
-// 4. Type-only imports last
-import type { Employee } from '@/types';
-```
-
-### Comments
-
-**Good comments:**
-```typescript
-// Calculate labor cost based on time worked and hourly rate
-// Includes overtime (1.5x) after 8 hours
-const laborCost = calculateLaborCost(hours, rate);
-```
-
-**Avoid obvious comments:**
-```typescript
-// Bad - comment doesn't add value
-// Set the name variable to John
-const name = 'John';
-```
-
-**Use JSDoc for public APIs:**
-```typescript
-/**
- * Clock in an employee for a job
- * @param pin - Employee PIN (4 digits)
- * @param jobNumber - Job number to clock into
- * @returns Promise<TimeClockEntry>
- * @throws {Error} If PIN is invalid or employee already clocked in
- */
-async clockIn(pin: string, jobNumber: string): Promise<TimeClockEntry> {
-  // Implementation
-}
+// 4. Constants
+import { MAX_QUANTITY, CACHE_TTL } from './constants';
 ```
 
 ---
@@ -622,16 +485,16 @@ async clockIn(pin: string, jobNumber: string): Promise<TimeClockEntry> {
 ### Branch Naming
 
 ```bash
-# Feature branches (user-created)
+# Feature branches
 feature/order-history
 feature/analytics-dashboard
 
 # Bug fixes
-bugfix/time-clock-timezone
-fix/cache-invalidation
+fix/time-clock-timezone
+bugfix/cache-invalidation
 
-# Agent-created branches (by GitHub Copilot)
-copilot/production-dashboard-api
+# Agent-created branches (GitHub Copilot)
+copilot/production-dashboard
 copilot/role-based-permissions
 ```
 
@@ -650,56 +513,19 @@ copilot/role-based-permissions
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
-- `style`: Formatting changes (no code change)
+- `style`: Formatting changes
 - `refactor`: Code refactoring
 - `test`: Adding tests
 - `chore`: Maintenance tasks
 
 **Examples:**
 ```bash
-# Good
-git commit -m "feat(time-clock): add PIN authentication"
-git commit -m "fix(analytics): correct revenue calculation for refunds"
+git commit -m "feat(pricing): add volume discount tiers"
+git commit -m "fix(workflow): correct order status transition"
 git commit -m "docs(readme): update setup instructions"
-
-# Avoid
-git commit -m "fixed stuff"
-git commit -m "updates"
+git commit -m "test(pricing): add edge case tests"
+git commit -m "chore: update dependencies"
 ```
-
-### Pull Request Workflow
-
-1. **Create feature branch:**
-   ```bash
-   git checkout -b feature/new-feature
-   ```
-
-2. **Make changes and commit:**
-   ```bash
-   git add .
-   git commit -m "feat(scope): description"
-   ```
-
-3. **Push to GitHub:**
-   ```bash
-   git push origin feature/new-feature
-   ```
-
-4. **Create PR on GitHub:**
-   - Draft initially
-   - Mark ready when complete
-   - CI checks run automatically
-
-5. **Address review comments:**
-   ```bash
-   git add .
-   git commit -m "fix: address review comments"
-   git push
-   ```
-
-6. **Merge after approval:**
-   - Use "Squash and merge" for clean history
-   - Delete branch after merge
 
 ---
 
@@ -707,207 +533,236 @@ git commit -m "updates"
 
 ### Common Issues
 
-**1. Port already in use:**
+**1. Services won't start:**
+```bash
+# Check docker is running
+docker ps
+
+# Check docker-compose syntax
+docker compose config
+
+# Restart services
+docker compose down && docker compose up -d
+
+# View error logs
+docker compose logs
+```
+
+**2. Port already in use:**
 ```bash
 # Find process using port
-lsof -i :3000
+lsof -i :1337
 
 # Kill process
 kill -9 <PID>
+
+# Or change port in docker-compose.yml
 ```
 
-**2. Database connection error:**
+**3. Database connection error:**
 ```bash
 # Check PostgreSQL is running
-pg_isready
+docker compose ps postgres
 
-# Check connection settings in .env
+# Check connection
+docker compose exec postgres pg_isready -U strapi
+
+# View database logs
+docker compose logs postgres
+
+# Verify .env settings
 cat .env | grep DATABASE
 ```
 
-**3. Redis connection error:**
+**4. Redis connection error:**
 ```bash
 # Check Redis is running
-redis-cli ping
-# Should return: PONG
+docker compose ps redis
 
-# Start Redis if not running
-redis-server
+# Test connection
+docker compose exec redis redis-cli PING
+
+# View Redis logs
+docker compose logs redis
 ```
 
-**4. Module not found:**
+**5. Strapi won't start:**
 ```bash
-# Clear node_modules and reinstall
+# Clear Strapi cache
+rm -rf printshop-strapi/.cache printshop-strapi/build
+
+# Rebuild
+cd printshop-strapi
+npm run build
+
+# Check logs
+docker compose logs strapi
+```
+
+**6. Module not found:**
+```bash
+# Reinstall dependencies
 rm -rf node_modules package-lock.json
 npm install
+
+# Clear npm cache
+npm cache clean --force
 ```
 
-**5. TypeScript errors:**
+**7. Test failures:**
 ```bash
-# Rebuild TypeScript
-npm run build
+# Update snapshots
+npm test -- -u
 
-# Check TypeScript version
-npx tsc --version
+# Clear Jest cache
+npm test -- --clearCache
+
+# Run in verbose mode
+npm test -- --verbose
 ```
 
-**6. Docker issues:**
+### Performance Issues
+
+**Slow Docker:**
 ```bash
-# Rebuild containers
-docker-compose build --no-cache
+# Prune unused resources
+docker system prune -a
 
-# Remove all containers and volumes
-docker-compose down -v
-
-# View container logs
-docker-compose logs <service-name>
+# Increase Docker memory (Docker Desktop settings)
+# Memory: 4GB+ recommended
 ```
 
-### Getting Help
-
-1. **Check documentation:**
-   - PROJECT_OVERVIEW.md
-   - ARCHITECTURE.md
-   - SERVICE_DIRECTORY.md
-   - This file (DEVELOPMENT_GUIDE.md)
-
-2. **Check existing code:**
-   - Look for similar implementations
-   - Review tests for examples
-
-3. **Check GitHub issues:**
-   - Search for similar problems
-   - Create new issue if needed
-
-4. **Debug systematically:**
-   - Reproduce the issue
-   - Check logs
-   - Isolate the problem
-   - Test potential solutions
-
----
-
-## Performance Tips
-
-### Development Performance
-
-**1. Use npm workspaces:**
-Already configured - run commands from root.
-
-**2. Enable caching:**
+**Slow npm install:**
 ```bash
-# TypeScript incremental compilation
-# Already enabled in tsconfig.json
+# Use npm ci for faster installs
+npm ci
 
-# Jest cache
-# Already enabled by default
-```
-
-**3. Selective service start:**
-```bash
-# Only start services you need
-docker-compose up strapi redis postgres
-```
-
-### Code Performance
-
-**1. Use Redis caching:**
-```typescript
-// Always cache expensive operations
-const cached = await redis.get(cacheKey);
-if (cached) return JSON.parse(cached);
-
-const result = await expensiveOperation();
-await redis.setex(cacheKey, 3600, JSON.stringify(result));
-```
-
-**2. Optimize database queries:**
-```typescript
-// Use select to limit fields
-const orders = await strapi.entityService.findMany('api::order.order', {
-  fields: ['id', 'orderNumber', 'status'], // Only needed fields
-  populate: ['customer'], // Only needed relations
-  limit: 20 // Always paginate
-});
-```
-
-**3. Avoid N+1 queries:**
-```typescript
-// Bad - N+1 query
-const orders = await getOrders();
-for (const order of orders) {
-  const customer = await getCustomer(order.customerId); // N queries
-}
-
-// Good - batch load
-const orders = await getOrders();
-const customerIds = orders.map(o => o.customerId);
-const customers = await getCustomers(customerIds); // 1 query
+# Clear npm cache
+npm cache clean --force
 ```
 
 ---
 
-## Production Deployment (Planned)
+## Environment Variables Reference
 
-### Environment Setup
+### Core Services
 
-**Production .env:**
 ```env
-NODE_ENV=production
-DATABASE_URL=postgres://user:pass@host:5432/dbname
-REDIS_URL=redis://user:pass@host:6379
-OPENAI_API_KEY=sk-production-key
+# General
+NODE_ENV=development
+LOG_LEVEL=info
+TZ=America/New_York
+
+# PostgreSQL
+POSTGRES_USER=strapi
+POSTGRES_PASSWORD=secure_password_change_this
+POSTGRES_DB=printshop
+DATABASE_CLIENT=postgres
+DATABASE_HOST=postgres
+DATABASE_PORT=5432
+
+# Redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# Strapi
+STRAPI_HOST=0.0.0.0
+STRAPI_PORT=1337
+STRAPI_URL=http://localhost:1337
+STRAPI_APP_KEYS=key1,key2,key3,key4
+STRAPI_API_TOKEN_SALT=your-salt-here
+STRAPI_ADMIN_JWT_SECRET=your-secret-here
+STRAPI_JWT_SECRET=your-jwt-secret-here
+
+# MongoDB (Appsmith)
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=secure_password
+MONGO_INITDB_DATABASE=appsmith
+
+# Appsmith
+APPSMITH_ENCRYPTION_PASSWORD=secure_password
+APPSMITH_ENCRYPTION_SALT=secure_salt
 ```
 
-### Build Commands
+### Optional Services
+
+```env
+# Email (Nodemailer)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+
+# OpenAI (AI features)
+OPENAI_API_KEY=sk-your-key-here
+
+# Supplier APIs (future)
+SS_ACTIVEWEAR_API_KEY=
+SANMAR_CLIENT_ID=
+SANMAR_CLIENT_SECRET=
+AS_COLOUR_API_KEY=
+```
+
+---
+
+## Quick Reference Commands
 
 ```bash
-# Build all services
-npm run build
+# Start everything
+docker compose up -d && ./test-system.sh
 
-# Or individually
-cd services/production-dashboard && npm run build
-cd services/api && npm run build
-cd frontend && npm run build
+# View all logs
+docker compose logs -f
+
+# Restart a service
+docker compose restart strapi
+
+# Clean slate (remove all data)
+docker compose down -v && docker compose up -d
+
+# Check service health
+docker compose ps
+docker compose exec postgres pg_isready -U strapi
+docker compose exec redis redis-cli PING
+
+# Run tests
+./test-system.sh
+cd services/job-estimator && npm test
+
+# View database
+docker compose exec postgres psql -U strapi printshop
+
+# View Redis
+docker compose exec redis redis-cli
+
+# Backup database
+docker compose exec postgres pg_dump -U strapi printshop > backup.sql
 ```
 
-### Deployment Checklist
+---
 
-- [ ] Environment variables configured
-- [ ] Database migrations run
-- [ ] Redis configured and accessible
-- [ ] All tests passing
-- [ ] Security scan complete (CodeQL)
-- [ ] Performance tested
-- [ ] Monitoring configured
-- [ ] Backup strategy in place
-- [ ] SSL certificates installed
-- [ ] Domain configured
+## Getting Help
+
+1. **Check current status:**
+   - Read `STATUS.md` for system state
+   - Run `./test-system.sh` to verify health
+
+2. **Check documentation:**
+   - `STATUS.md` - Current state
+   - `ROADMAP.md` - Future plans
+   - `ARCHITECTURE.md` - System design
+   - `README.md` - Getting started
+
+3. **Check logs:**
+   ```bash
+   docker compose logs [service]
+   ```
+
+4. **Check GitHub:**
+   - Issues: https://github.com/hypnotizedent/printshop-os/issues
+   - PRs: https://github.com/hypnotizedent/printshop-os/pulls
 
 ---
 
-## Useful Resources
-
-### Documentation
-- [Strapi Docs](https://docs.strapi.io/)
-- [Express.js Guide](https://expressjs.com/en/guide/routing.html)
-- [Socket.io Docs](https://socket.io/docs/v4/)
-- [React Docs](https://react.dev/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-
-### Tools
-- [Redis Commander](http://joeferner.github.io/redis-commander/)
-- [pgAdmin](https://www.pgadmin.org/)
-- [Postman](https://www.postman.com/)
-- [VS Code](https://code.visualstudio.com/)
-
-### Project-Specific
-- GitHub Repository: https://github.com/hypnotizedent/printshop-os
-- Project Documentation: Root `*.md` files
-- Issue Tracker: GitHub Issues
-
----
-
-**Last Updated:** November 24, 2025  
-**Next Review:** When major changes to development workflow  
+**Last Updated:** November 25, 2024  
 **Maintained By:** Development team
