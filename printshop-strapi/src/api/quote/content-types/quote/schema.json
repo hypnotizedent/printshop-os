@@ -75,6 +75,36 @@
     },
     "rejected_at": {
       "type": "datetime"
+    },
+    "pricingDetails": {
+      "type": "json"
+    },
+    "discountAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "discountPercent": {
+      "type": "decimal"
+    },
+    "taxAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "subtotal": {
+      "type": "decimal"
+    },
+    "expiryNotificationSent": {
+      "type": "boolean",
+      "default": false
+    },
+    "revisionNumber": {
+      "type": "integer",
+      "default": 1
+    },
+    "parentQuote": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::quote.quote"
     }
   }
 }

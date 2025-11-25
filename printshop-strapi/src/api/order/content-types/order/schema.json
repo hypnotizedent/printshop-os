@@ -65,7 +65,40 @@
     "notes": {
       "type": "text"
     },
+    "paymentStatus": {
+      "type": "enumeration",
+      "enum": [
+        "Unpaid",
+        "DepositPaid",
+        "FullyPaid",
+        "Refunded"
+      ],
+      "default": "Unpaid"
+    },
+    "depositAmount": {
+      "type": "decimal"
+    },
+    "paidAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "productionNotes": {
+      "type": "text"
+    },
+    "dueDate": {
+      "type": "date"
+    },
+    "rushOrder": {
+      "type": "boolean",
+      "default": false
+    },
+    "tags": {
+      "type": "json"
+    },
     "created_at_timestamp": {
+      "type": "datetime"
+    },
+    "completed_at": {
       "type": "datetime"
     }
   }

@@ -89,6 +89,53 @@
     },
     "created_at_timestamp": {
       "type": "datetime"
+    },
+    "priority": {
+      "type": "enumeration",
+      "enum": [
+        "Low",
+        "Normal",
+        "High",
+        "Rush"
+      ],
+      "default": "Normal"
+    },
+    "assignedTo": {
+      "type": "string"
+    },
+    "estimatedHours": {
+      "type": "decimal"
+    },
+    "actualHours": {
+      "type": "decimal"
+    },
+    "completionPercentage": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "max": 100
+    },
+    "productionStartedAt": {
+      "type": "datetime"
+    },
+    "productionCompletedAt": {
+      "type": "datetime"
+    },
+    "qualityCheckPassed": {
+      "type": "boolean",
+      "default": false
+    },
+    "qualityCheckNotes": {
+      "type": "text"
+    },
+    "shippingMethod": {
+      "type": "string"
+    },
+    "trackingNumber": {
+      "type": "string"
+    },
+    "items": {
+      "type": "json"
     }
   }
 }

@@ -180,6 +180,29 @@ services:
       start_period: 60s
 
   # ---------------------------------------------------------------------------
+  # Pricing Engine - Job Estimator API
+  # ---------------------------------------------------------------------------
+  pricing-engine:
+    build:
+      context: ./services/job-estimator
+      dockerfile: Dockerfile
+    container_name: printshop-pricing-engine
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    networks:
+      - printshop_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
   # Frontend - React UI for PrintShop OS
   # ---------------------------------------------------------------------------
   frontend:
@@ -191,6 +214,7 @@ services:
     environment:
       VITE_API_URL: http://api:3002
       VITE_STRAPI_URL: http://strapi:1337
+      VITE_PRICING_URL: http://pricing-engine:3001
       VITE_WS_URL: ws://localhost:3004
     ports:
       - "3000:3000"
@@ -198,6 +222,7 @@ services:
       - printshop_network
     depends_on:
       - strapi
+      - pricing-engine
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 30s
