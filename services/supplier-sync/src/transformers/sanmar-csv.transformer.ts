@@ -25,26 +25,52 @@ export interface SanMarSDLRecord {
 }
 
 /**
- * SanMar EPDD CSV Record
+ * SanMar EPDD CSV Record (Website Export Format)
  * Enhanced product data with inventory and detailed categories
  */
 export interface SanMarEPDDRecord {
-  StyleID: string;
-  StyleName: string;
-  BrandID: string;
-  BrandName: string;
-  MainCategory: string;
-  SubCategory?: string;
-  Description?: string;
-  ColorCode: string;
-  ColorName: string;
-  Size: string;
-  Inventory?: string;
-  WholesalePrice?: string;
-  RetailPrice?: string;
-  CaseQty?: string;
-  Weight?: string;
-  ImageURL?: string;
+  UNIQUE_KEY: string;
+  PRODUCT_TITLE: string;
+  PRODUCT_DESCRIPTION?: string;
+  'STYLE#': string; // Note: Contains # symbol
+  AVAILABLE_SIZES?: string;
+  BRAND_LOGO_IMAGE?: string;
+  THUMBNAIL_IMAGE?: string;
+  COLOR_SWATCH_IMAGE?: string;
+  PRODUCT_IMAGE?: string;
+  SPEC_SHEET?: string;
+  PRICE_TEXT?: string;
+  SUGGESTED_PRICE?: string;
+  CATEGORY_NAME?: string;
+  SUBCATEGORY_NAME?: string;
+  COLOR_NAME?: string;
+  COLOR_SQUARE_IMAGE?: string;
+  COLOR_PRODUCT_IMAGE?: string;
+  COLOR_PRODUCT_IMAGE_THUMBNAIL?: string;
+  SIZE?: string;
+  QTY?: string;
+  PIECE_WEIGHT?: string;
+  PIECE_PRICE?: string;
+  DOZENS_PRICE?: string;
+  CASE_PRICE?: string;
+  PRICE_GROUP?: string;
+  CASE_SIZE?: string;
+  INVENTORY_KEY?: string;
+  SIZE_INDEX?: string;
+  SANMAR_MAINFRAME_COLOR?: string;
+  MILL?: string;
+  PRODUCT_STATUS?: string;
+  COMPANION_STYLES?: string;
+  MSRP?: string;
+  MAP_PRICING?: string;
+  FRONT_MODEL_IMAGE_URL?: string;
+  BACK_MODEL_IMAGE?: string;
+  FRONT_FLAT_IMAGE?: string;
+  BACK_FLAT_IMAGE?: string;
+  PRODUCT_MEASUREMENTS?: string;
+  PMS_COLOR?: string;
+  GTIN?: string;
+  DECORATION_SPEC_SHEET?: string;
 }
 
 /**
@@ -138,13 +164,14 @@ export class SanMarCSVTransformer {
   transformEPDDRecords(records: SanMarEPDDRecord[]): UnifiedProduct[] {
     logger.info('Transforming SanMar EPDD records', { count: records.length });
 
-    // Group records by StyleID
+    // Group records by STYLE#
     const productMap = new Map<string, SanMarEPDDRecord[]>();
     
     for (const record of records) {
-      const existing = productMap.get(record.StyleID) || [];
+      const styleId = record['STYLE#'];
+      const existing = productMap.get(styleId) || [];
       existing.push(record);
-      productMap.set(record.StyleID, existing);
+      productMap.set(styleId, existing);
     }
 
     const products: UnifiedProduct[] = [];
@@ -155,21 +182,20 @@ export class SanMarCSVTransformer {
         
         const product: UnifiedProduct = {
           sku: `SM-${styleId}`,
-          name: baseRecord.StyleName,
-          brand: baseRecord.BrandName,
-          category: this.mapCategory(baseRecord.MainCategory, baseRecord.SubCategory),
+          name: baseRecord.PRODUCT_TITLE,
+          brand: baseRecord.MILL || 'Unknown',
+          category: this.mapCategory(baseRecord.CATEGORY_NAME, baseRecord.SUBCATEGORY_NAME),
           supplier: SupplierName.SANMAR,
-          description: baseRecord.Description || '',
+          description: baseRecord.PRODUCT_DESCRIPTION || '',
           variants: this.transformEPDDVariants(variants),
           pricing: this.extractEPDDPricing(baseRecord),
-          images: baseRecord.ImageURL ? [baseRecord.ImageURL] : [],
+          images: this.extractImages(baseRecord),
           availability: {
-            inStock: variants.some(v => parseInt(v.Inventory || '0') > 0),
-            totalQuantity: this.calculateTotalQuantity(variants),
+            inStock: variants.some(v => parseInt(v.QTY || '0') > 0),
+            totalQuantity: this.calculateTotalQuantityEPDD(variants),
           },
           metadata: {
             supplierProductId: styleId,
-            supplierBrandId: baseRecord.BrandID,
             lastUpdated: new Date(),
           },
         };
@@ -284,23 +310,23 @@ export class SanMarCSVTransformer {
   }
 
   /**
-   * Transform EPDD variants
+   * Transform EPDD variants (website export format)
    */
   private transformEPDDVariants(records: SanMarEPDDRecord[]): ProductVariant[] {
     return records.map((record) => ({
-      sku: `${record.StyleID}-${record.ColorCode}-${record.Size}`,
+      sku: `${record['STYLE#']}-${record.SANMAR_MAINFRAME_COLOR}-${record.SIZE}`,
       color: {
-        name: record.ColorName,
-        code: record.ColorCode,
+        name: record.COLOR_NAME || '',
+        code: record.SANMAR_MAINFRAME_COLOR || '',
       },
-      size: record.Size,
-      inStock: parseInt(record.Inventory || '0') > 0,
-      quantity: parseInt(record.Inventory || '0'),
-      weight: this.parseWeight(record.Weight),
+      size: record.SIZE || '',
+      inStock: parseInt(record.QTY || '0') > 0,
+      quantity: parseInt(record.QTY || '0'),
+      weight: this.parseWeight(record.PIECE_WEIGHT),
       pricing: {
-        wholesale: this.parsePrice(record.WholesalePrice),
-        retail: this.parsePrice(record.RetailPrice),
-        caseQuantity: this.parseNumber(record.CaseQty),
+        wholesale: this.parsePrice(record.PIECE_PRICE),
+        retail: this.parsePrice(record.MSRP),
+        caseQuantity: this.parseNumber(record.CASE_SIZE),
       },
     }));
   }
@@ -322,18 +348,22 @@ export class SanMarCSVTransformer {
   }
 
   /**
-   * Extract pricing from EPDD record
+   * Extract pricing from EPDD record (website export format)
    */
   private extractEPDDPricing(record: SanMarEPDDRecord) {
-    const wholesale = this.parsePrice(record.WholesalePrice);
-    const retail = this.parsePrice(record.RetailPrice);
+    const piecePrice = this.parsePrice(record.PIECE_PRICE);
+    const dozenPrice = this.parsePrice(record.DOZENS_PRICE);
+    const casePrice = this.parsePrice(record.CASE_PRICE);
+    const msrp = this.parsePrice(record.MSRP);
 
     return {
-      basePrice: wholesale || retail || 0,
+      basePrice: piecePrice || msrp || 0,
       currency: 'USD',
-      breaks: wholesale
-        ? [{ quantity: 1, price: wholesale }]
-        : [],
+      breaks: [
+        { quantity: 1, price: piecePrice || 0 },
+        { quantity: 12, price: dozenPrice || 0 },
+        { quantity: parseInt(record.CASE_SIZE || '0'), price: casePrice || 0 },
+      ].filter(b => b.price > 0),
     };
   }
 
@@ -369,23 +399,39 @@ export class SanMarCSVTransformer {
   }
 
   /**
-   * Calculate total quantity across all variants
+   * Calculate total quantity across all variants (website export format)
    */
-  private calculateTotalQuantity(records: SanMarEPDDRecord[]): number {
+  private calculateTotalQuantityEPDD(records: SanMarEPDDRecord[]): number {
     return records.reduce((sum, record) => {
-      return sum + parseInt(record.Inventory || '0', 10);
+      return sum + parseInt(record.QTY || '0', 10);
     }, 0);
   }
 
   /**
-   * Generate search tags from product data
+   * Extract image URLs from EPDD record
+   */
+  private extractImages(record: SanMarEPDDRecord): string[] {
+    const images: string[] = [];
+    
+    if (record.FRONT_MODEL_IMAGE_URL) images.push(record.FRONT_MODEL_IMAGE_URL);
+    if (record.BACK_MODEL_IMAGE) images.push(record.BACK_MODEL_IMAGE);
+    if (record.FRONT_FLAT_IMAGE) images.push(record.FRONT_FLAT_IMAGE);
+    if (record.BACK_FLAT_IMAGE) images.push(record.BACK_FLAT_IMAGE);
+    if (record.PRODUCT_IMAGE) images.push(record.PRODUCT_IMAGE);
+    if (record.COLOR_PRODUCT_IMAGE) images.push(record.COLOR_PRODUCT_IMAGE);
+    
+    return images;
+  }
+
+  /**
+   * Generate search tags from product data (website export format)
    */
   private generateTags(record: SanMarEPDDRecord): string[] {
     const tags: string[] = [];
 
-    if (record.BrandName) tags.push(record.BrandName.toLowerCase());
-    if (record.MainCategory) tags.push(record.MainCategory.toLowerCase());
-    if (record.SubCategory) tags.push(record.SubCategory.toLowerCase());
+    if (record.MILL) tags.push(record.MILL.toLowerCase());
+    if (record.CATEGORY_NAME) tags.push(record.CATEGORY_NAME.toLowerCase());
+    if (record.SUBCATEGORY_NAME) tags.push(record.SUBCATEGORY_NAME.toLowerCase());
 
     return tags;
   }
