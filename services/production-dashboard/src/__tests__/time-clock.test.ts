@@ -833,7 +833,8 @@ describe('TimeClockService', () => {
             },
           },
         });
-        mockedBcrypt.compare.mockResolvedValueOnce(true as never);
+        // Use mockResolvedValue (not Once) so it persists across loop iterations
+        mockedBcrypt.compare.mockResolvedValue(true as never);
 
         // Check active entries
         mockAxiosInstance.get.mockResolvedValueOnce({

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MagnifyingGlass, Plus, Funnel, CalendarBlank, FileText, Warning } from "@phosphor-icons/react"
 import type { Job } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -13,7 +13,7 @@ interface JobsPageProps {
   onUpdateJob: (jobId: string, updates: Partial<Job>) => void
 }
 
-export function JobsPage({ jobs, onUpdateJob }: JobsPageProps) {
+export function JobsPage({ jobs, onUpdateJob: _onUpdateJob }: JobsPageProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeView, setActiveView] = useState("kanban")
 
@@ -27,11 +27,11 @@ export function JobsPage({ jobs, onUpdateJob }: JobsPageProps) {
   ]
 
   const getJobsByStatus = (status: string) => {
-    return jobs.filter(job => 
+    return jobs.filter(job =>
       job.status === status &&
-      (searchQuery === "" || 
-       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       job.customer.toLowerCase().includes(searchQuery.toLowerCase()))
+      (searchQuery === "" ||
+        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.customer.toLowerCase().includes(searchQuery.toLowerCase()))
     )
   }
 
@@ -83,7 +83,7 @@ export function JobsPage({ jobs, onUpdateJob }: JobsPageProps) {
       <div className="flex gap-4 overflow-x-auto pb-4">
         {columns.map((column) => {
           const columnJobs = getJobsByStatus(column.id)
-          
+
           return (
             <div key={column.id} className="flex-shrink-0 w-80">
               <div className="mb-4">
@@ -113,7 +113,7 @@ export function JobsPage({ jobs, onUpdateJob }: JobsPageProps) {
 
                       <div className="space-y-2">
                         <p className="text-sm text-muted-foreground">{job.customer}</p>
-                        
+
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <FileText size={14} />
                           <span>{job.fileCount} files</span>
