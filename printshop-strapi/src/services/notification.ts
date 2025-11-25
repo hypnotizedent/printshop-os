@@ -212,11 +212,110 @@ export async function notifyProductionTeam(
   await sendProductionNotificationEmail(jobNumber, jobDetails, strapi);
 }
 
+/**
+ * Send ticket created confirmation email
+ */
+export async function sendTicketCreatedEmail(
+  customerEmail: string,
+  ticketNumber: string,
+  subject: string,
+  strapi?: Core.Strapi
+): Promise<boolean> {
+  const html = `
+    <h1>Support Ticket Created</h1>
+    <p>Your support ticket has been successfully created. Our team will review it and respond as soon as possible.</p>
+    
+    <h2>Ticket Details:</h2>
+    <p><strong>Ticket Number:</strong> ${escapeHtml(ticketNumber)}</p>
+    <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+    
+    <p>You can track the status of your ticket and view responses in your customer portal.</p>
+    
+    <p>Best regards,<br>PrintShop OS Support Team</p>
+  `;
+
+  return await sendEmail(
+    customerEmail,
+    `Support Ticket Created - ${ticketNumber}`,
+    html,
+    strapi
+  );
+}
+
+/**
+ * Send ticket response email
+ */
+export async function sendTicketResponseEmail(
+  customerEmail: string,
+  ticketNumber: string,
+  subject: string,
+  message: string,
+  strapi?: Core.Strapi
+): Promise<boolean> {
+  const html = `
+    <h1>New Response to Your Support Ticket</h1>
+    <p>Our team has added a response to your support ticket.</p>
+    
+    <h2>Ticket Details:</h2>
+    <p><strong>Ticket Number:</strong> ${escapeHtml(ticketNumber)}</p>
+    <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+    
+    <h3>Response:</h3>
+    <p>${escapeHtml(message)}</p>
+    
+    <p>View the full conversation in your customer portal.</p>
+    
+    <p>Best regards,<br>PrintShop OS Support Team</p>
+  `;
+
+  return await sendEmail(
+    customerEmail,
+    `New Response - ${ticketNumber}`,
+    html,
+    strapi
+  );
+}
+
+/**
+ * Send ticket status change email
+ */
+export async function sendTicketStatusEmail(
+  customerEmail: string,
+  ticketNumber: string,
+  subject: string,
+  status: string,
+  strapi?: Core.Strapi
+): Promise<boolean> {
+  const html = `
+    <h1>Ticket Status Updated</h1>
+    <p>The status of your support ticket has been updated.</p>
+    
+    <h2>Ticket Details:</h2>
+    <p><strong>Ticket Number:</strong> ${escapeHtml(ticketNumber)}</p>
+    <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+    <p><strong>New Status:</strong> ${escapeHtml(status)}</p>
+    
+    <p>View the full details in your customer portal.</p>
+    
+    <p>Best regards,<br>PrintShop OS Support Team</p>
+  `;
+
+  return await sendEmail(
+    customerEmail,
+    `Ticket Status Updated - ${ticketNumber}`,
+    html,
+    strapi
+  );
+}
+
 export default {
   sendEmail,
   sendWebSocketNotification,
   sendOrderConfirmationEmail,
   sendProductionNotificationEmail,
   notifyProductionTeam,
+  sendTicketCreatedEmail,
+  sendTicketResponseEmail,
+  sendTicketStatusEmail,
   setWebSocketInstance,
 };
