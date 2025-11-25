@@ -2,10 +2,14 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
 <<<<<<< HEAD
+<<<<<<< HEAD
   roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/lib', '<rootDir>/src', '<rootDir>/src/__tests__'],
 =======
   roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/src'],
 >>>>>>> origin/copilot/add-role-based-access-control
+=======
+  roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/routes'],
+>>>>>>> origin/copilot/add-order-history-view
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   moduleNameMapper: {
     '^@lib/(.*)$': '<rootDir>/lib/$1',

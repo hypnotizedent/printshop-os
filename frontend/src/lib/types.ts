@@ -79,6 +79,7 @@ export interface DashboardStats {
   urgentJobs: number
 }
 
+<<<<<<< HEAD
 // Customer Portal Types
 export type OrderStatus = 'completed' | 'in-production' | 'shipped' | 'delivered' | 'cancelled'
 
@@ -196,3 +197,92 @@ export interface AccountBalance {
 }
 =======
 >>>>>>> origin/copilot/build-customer-portal-dashboard
+=======
+// Order types for customer portal
+export type OrderStatus = 
+  | 'quote'
+  | 'pending'
+  | 'in_production'
+  | 'ready_to_ship'
+  | 'shipped'
+  | 'delivered'
+  | 'completed'
+  | 'cancelled'
+  | 'invoice_paid'
+  | 'payment_due'
+
+export interface OrderCustomer {
+  name: string
+  email: string
+  company?: string
+  firstName?: string
+  lastName?: string
+}
+
+export interface OrderAddress {
+  street: string
+  street2?: string
+  city: string
+  state: string
+  zip: string
+  country?: string
+}
+
+export interface OrderLineItem {
+  id: string
+  description: string
+  category?: string
+  quantity: number
+  unitCost: number
+  taxable: boolean
+  total: number
+}
+
+export interface OrderTotals {
+  subtotal: number
+  tax: number
+  shipping: number
+  discount: number
+  fees: number
+  total: number
+  amountPaid: number
+  amountOutstanding: number
+}
+
+export interface OrderTimeline {
+  createdAt: string
+  updatedAt: string
+  dueDate?: string
+  customerDueDate?: string
+  paymentDueDate?: string
+}
+
+export interface Order {
+  id: number
+  attributes: {
+    printavoId: string
+    customer: OrderCustomer
+    billingAddress?: OrderAddress
+    shippingAddress?: OrderAddress
+    status: OrderStatus
+    totals: OrderTotals
+    lineItems: OrderLineItem[]
+    timeline: OrderTimeline
+    notes?: string
+    productionNotes?: string
+    orderNickname?: string
+    publicHash?: string
+    approved?: boolean
+  }
+}
+
+export interface OrderListResponse {
+  data: Order[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
+}
+>>>>>>> origin/copilot/add-order-history-view
