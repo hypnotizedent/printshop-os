@@ -598,6 +598,112 @@ Add to relevant section if it's a major feature.
 - **Issues**: Search existing issues for similar problems
 - **Discussions**: Use GitHub Discussions for questions
 
+## Documentation Organization
+
+### Overview
+
+PrintShop OS follows strict documentation organization guidelines to maintain consistency across multiple contributors and AI agents. All documentation placement must follow the rules defined in [ENTERPRISE_FOUNDATION.md](../ENTERPRISE_FOUNDATION.md).
+
+### Documentation Decision Tree
+
+When creating or updating documentation, follow this decision tree:
+
+**Q1: Is this service-specific?**
+- YES → Place in `/services/<service-name>/docs/`
+- NO → Continue to Q2
+
+**Q2: Is this cross-service or architectural?**
+- YES → Place in `/docs/` (organized by category)
+- NO → Continue to Q3
+
+**Q3: Is this project-wide status/planning?**
+- YES → Update existing root-level file (STATUS.md, ROADMAP.md, etc.)
+- NO → Ask: "Should this be in an existing doc?"
+
+### Pre-Commit Documentation Checklist
+
+Before committing any changes, verify:
+
+- [ ] **Daily work logged correctly**
+  - Added to `/DEVELOPMENT_LOG.md` with date stamp (YYYY-MM-DD)
+  - ❌ Did NOT create service-specific daily logs
+  - ❌ Did NOT create date-stamped log files (e.g., `2025-11-25.md`)
+
+- [ ] **Documentation in correct location**
+  - Followed decision tree above
+  - Service-specific docs → `/services/<service-name>/docs/`
+  - Cross-service docs → `/docs/<category>/`
+  - Project-wide updates → root-level files only
+
+- [ ] **No duplicate documentation**
+  - Searched for existing docs on this topic
+  - Content belongs in one canonical location
+  - If updating, consolidated duplicates
+
+- [ ] **Service documentation complete** (if adding/modifying a service)
+  - `README.md` exists and is up-to-date
+  - `IMPLEMENTATION_SUMMARY.md` exists (use template: `/docs/templates/IMPLEMENTATION_SUMMARY_TEMPLATE.md`)
+  - Service-specific docs in `docs/` subdirectory
+
+- [ ] **References updated**
+  - Links to moved/renamed files updated
+  - Navigation guides updated if needed
+  - Related documentation cross-referenced
+
+### Pull Request Documentation Requirements
+
+Your PR must include:
+
+1. **DEVELOPMENT_LOG.md entry** - Document what was done with date stamp
+2. **Updated documentation** - If code changes affect docs
+3. **No orphaned files** - Deleted files removed from git
+4. **Checklist completion** - All 5 items above verified
+
+### Documentation Standards by Type
+
+#### Service Documentation
+```
+services/<service-name>/
+├── README.md                    ← Quick start, basic usage
+├── IMPLEMENTATION_SUMMARY.md    ← Use template from /docs/templates/
+├── docs/
+│   ├── API.md                   ← API documentation (if applicable)
+│   ├── ARCHITECTURE.md          ← Service-specific architecture
+│   └── guides/                  ← Usage guides
+```
+
+#### Daily Work Logging
+**Single Source of Truth:** `/DEVELOPMENT_LOG.md`
+
+**Format:**
+```markdown
+## YYYY-MM-DD
+
+### [Feature/Area] - Status Emoji
+
+#### What Was Implemented
+- Bullet points describing work
+
+#### Results
+- Validation details
+```
+
+**NEVER:**
+- ❌ Create `TODAYS_WORK.md` in service folders
+- ❌ Create date-stamped files (`2025-11-25.md`)
+- ❌ Use `CHANGELOG.md` for daily work (only for releases)
+
+### Common Documentation Mistakes
+
+| ❌ Wrong | ✅ Correct |
+|---------|-----------|
+| `/services/supplier-sync/TODAYS_WORK.md` | `/DEVELOPMENT_LOG.md` |
+| `/2025-11-25-work.md` | Entry in `/DEVELOPMENT_LOG.md` |
+| Create new planning doc | Update existing or use `/ROADMAP.md` |
+| Duplicate IMPLEMENTATION_SUMMARY | One per service only |
+
+---
+
 ### Asking Questions
 
 When asking for help:

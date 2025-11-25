@@ -247,14 +247,15 @@ docs/
 - ✅ Audit legacy supplier-sync for unique code
 - ✅ Consolidate daily logs (TODAYS_WORK.md → DEVELOPMENT_LOG.md)
 - ✅ Delete duplicate daily log file
-- 🚧 Archive legacy supplier-sync to `/docs/archive/`
-- 🚧 Document docker-compose usage in root README.md
+- ✅ Archive legacy supplier-sync to `/docs/archive/`
+- ✅ Document docker-compose usage in root README.md
 
-### Phase 2: Short Term (This Month)
-- Consolidate pricing service docs (11 → 3 files)
-- Standardize IMPLEMENTATION_SUMMARY.md format across all services
-- Update SERVICE_DIRECTORY.md with current service status
-- Add organization checklist to CONTRIBUTING.md
+### Phase 2: Short Term (This Month) ✅
+- ✅ Consolidate pricing service docs (12 → 1 file, archived planning docs)
+- ✅ Create IMPLEMENTATION_SUMMARY.md template
+- ✅ Add organization checklist to CONTRIBUTING.md
+- ✅ Create quarterly documentation review process
+- 🚧 Update SERVICE_DIRECTORY.md with current service status (deferred)
 
 ### Phase 3: Ongoing
 - Enforce guidelines in PR reviews
