@@ -10,6 +10,7 @@ import { FilesPage } from "./components/files/FilesPage"
 import { ReportsPage } from "./components/reports/ReportsPage"
 import { SettingsPage } from "./components/settings/SettingsPage"
 import { ProductionPage } from "./components/production/ProductionPage"
+import LabelsDemo from "./pages/LabelsDemo"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 
 function App() {

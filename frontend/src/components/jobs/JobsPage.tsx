@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MagnifyingGlass, Plus, Funnel, CalendarBlank, FileText, Warning } from "@phosphor-icons/react"
+import { PrintLabelButton } from "@/components/labels"
 import type { Job } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -134,6 +135,23 @@ export function JobsPage({ jobs, onUpdateJob: _onUpdateJob }: JobsPageProps) {
                         <span className="text-xs font-semibold text-foreground ml-auto">
                           ${job.estimatedCost.toLocaleString()}
                         </span>
+                      </div>
+
+                      {/* Quick Actions */}
+                      <div className="pt-2 flex justify-end">
+                        <PrintLabelButton
+                          job={{
+                            jobId: job.id,
+                            printavoId: job.id,
+                            customerName: job.customer,
+                            jobNickname: job.title,
+                            quantity: job.quantity,
+                            dueDate: job.dueDate,
+                          }}
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 text-xs"
+                        />
                       </div>
                     </div>
                   </Card>
