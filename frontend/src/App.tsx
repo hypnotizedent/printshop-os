@@ -58,6 +58,8 @@ function App() {
         return <ReportsPage />
       case "settings":
         return <SettingsPage />
+      case "labels-demo":
+        return <LabelsDemo />
       default:
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} />
     }

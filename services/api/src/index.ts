@@ -8,6 +8,7 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import analyticsRouter from './routes/analytics';
 import authRoutes from './routes/auth';
+import jobsRouter from './routes/jobs';
 import { swaggerDocument } from './swagger';
 
 const app = express();
@@ -29,6 +30,7 @@ app.get('/health', (_req: Request, res: Response) => {
 // API Routes
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/auth', authRoutes);
+app.use('/api/jobs', jobsRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
