@@ -207,10 +207,37 @@ docker-compose -f <file> ps
 ```
 
 **Docker Compose Files:**
-- `docker-compose.yml` - **Production deployment** (Strapi, PostgreSQL, frontend, all services)
-- `docker-compose.local.yml` - **Local development** (Appsmith CE, MongoDB, Redis)
-- `docker-compose.ai.yml` - **AI services** (LLM service, vector database)
-- `docker-compose.label-formatter.yml` - **Label formatter** (Shipping label generation service)
+
+| File | Purpose | Services Included | When to Use |
+|------|---------|-------------------|-------------|
+| `docker-compose.yml` | **Production deployment** | Strapi, PostgreSQL, Redis, Frontend, All APIs | Production environment, full system deployment |
+| `docker-compose.local.yml` | **Local development** | Appsmith CE, MongoDB, Redis | Dashboard development, internal tools |
+| `docker-compose.ai.yml` | **AI services** | LLM service, Vector database (ChromaDB) | AI features, quote optimizer, customer service automation |
+| `docker-compose.label-formatter.yml` | **Label formatter** | Label generation service, Image processor | Automated shipping label formatting |
+
+**Common Commands:**
+```bash
+# Start specific stack
+docker-compose -f <file> up -d
+
+# Stop services
+docker-compose -f <file> down
+
+# View logs (all services)
+docker-compose -f <file> logs -f
+
+# View logs (specific service)
+docker-compose -f <file> logs -f <service-name>
+
+# Restart a service
+docker-compose -f <file> restart <service-name>
+
+# Rebuild after code changes
+docker-compose -f <file> up -d --build
+
+# Remove volumes (fresh start)
+docker-compose -f <file> down -v
+```
 
 ### 3. Access the Components
 

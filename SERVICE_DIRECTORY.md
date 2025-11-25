@@ -1,6 +1,6 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 24, 2025
+**Last Updated:** November 25, 2025
 
 ## Purpose
 
@@ -168,38 +168,75 @@ services/customer-service-ai/
 
 ### 4. Supplier Sync Service
 
-**Location:** `services/api/supplier-sync/`
+**Location:** `services/supplier-sync/` (TypeScript, Production)
+
+**Status:**
+- ✅ **AS Colour**: Production ready (522 products, REST API, 3,000+ lines docs)
+- ✅ **SanMar**: Core complete (415K records, SFTP+CSV, 560 lines docs)
+- ⏳ **S&S Activewear**: Pending
 
 ```
-services/api/supplier-sync/
+services/supplier-sync/
 ├── src/
-│   ├── normalizer.ts         # Data normalization
-│   ├── suppliers/
-│   │   ├── ss-activewear.ts  # SS Activewear API
-│   │   ├── sanmar.ts         # SanMar API
-│   │   └── as-colour.ts      # AS Colour API
-│   ├── matchers/
-│   │   └── fuzzy-matcher.ts  # Product matching
-│   ├── validators/
-│   │   └── schema-validator.ts
+│   ├── clients/
+│   │   ├── as-colour.client.ts      # REST API client
+│   │   ├── sanmar-sftp.client.ts    # SFTP download client
+│   │   ├── sanmar.client.ts
+│   │   └── ss-activewear.client.ts  # Planned
+│   ├── transformers/
+│   │   ├── as-colour.transformer.ts # REST → UnifiedProduct
+│   │   ├── sanmar-csv.transformer.ts # CSV → UnifiedProduct
+│   │   ├── sanmar.transformer.ts
+│   │   └── ss-activewear.transformer.ts # Planned
+│   ├── cli/
+│   │   ├── sync-as-colour.ts        # CLI: AS Colour sync
+│   │   ├── sync-sanmar.ts           # CLI: SanMar sync
+│   │   └── sync-ss-activewear.ts    # Planned
+│   ├── persistence/
+│   │   └── productPersistence.ts    # JSONL storage
+│   ├── cache/
+│   │   └── cacheService.ts          # Redis caching
 │   └── types/
-│       └── supplier.types.ts
+│       └── product.ts               # UnifiedProduct schema
 ├── tests/
-│   └── normalizer.test.ts    # 49 tests
+│   └── transformers/
+│       └── __tests__/               # Transformer unit tests
+├── docs/
+│   ├── suppliers/
+│   │   ├── ASCOLOUR.md              # 653 lines (complete)
+│   │   └── SANMAR.md                # 560 lines (complete)
+│   ├── COMPLETE_DOCUMENTATION.md
+│   └── ADDING_NEW_SUPPLIER.md
+├── data/
+│   └── ascolour/
+│       └── products.jsonl           # Persisted products
 └── README.md
 ```
 
 **Responsibilities:**
-- Multi-supplier data integration
-- Data normalization (sizes, colors, SKUs, pricing)
-- Fuzzy product matching
-- Schema validation
-- Batch processing
+- Multi-supplier product catalog integration
+- Data transformation to UnifiedProduct schema
+- SFTP + REST API clients
+- CSV parsing with error tolerance
+- JSONL persistence (file-based storage)
+- Redis caching (TTL strategy)
+- CLI tools for manual/scheduled sync
 
-**Supported Suppliers:**
-- SS Activewear (JSON API)
-- SanMar (OAuth + XML)
-- AS Colour (REST API)
+**Integration Types:**
+- **REST API**: AS Colour (paginated, bearer token auth)
+- **SFTP + CSV**: SanMar (ZIP extraction, 42-field CSV format)
+- **REST API**: S&S Activewear (planned)
+
+**Data Flow:**
+1. Download from supplier (API or SFTP)
+2. Transform to UnifiedProduct schema
+3. Persist to JSONL files
+4. Cache in Redis (optional)
+
+**Performance:**
+- AS Colour: 522 products, ~5 sec full sync
+- SanMar: 415,941 records, 10K → 61 products in 8 sec
+- Memory: ~700-800 MB for full SanMar catalog
 
 ---
 
@@ -668,6 +705,16 @@ Redis
 
 ---
 
-**Last Updated:** November 24, 2025  
+**Last Updated:** November 25, 2025  
 **Maintained By:** Development team  
 **Next Review:** When project structure changes
+
+---
+
+## Recent Updates
+
+**November 25, 2025:**
+- Updated Supplier Sync Service with SanMar completion status
+- Added performance metrics (AS Colour: 522 products, SanMar: 415K records)
+- Documented new TypeScript implementation location
+- Added CLI tools and JSONL persistence details
