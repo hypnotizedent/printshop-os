@@ -5,68 +5,70 @@
 
 export interface UnifiedProduct {
   // Core Identity
-  id: string; // Internal ID
-  sku: string; // Our SKU
-  supplierSKU: string; // Supplier's SKU
-  supplier: SupplierName;
-  supplierProductId: string;
-
-  // Basic Info
+  sku: string; // Supplier's style ID
   name: string;
+  brand: string;
   description: string;
   category: ProductCategory;
-  subcategory?: string;
-  brand: string;
+  supplier: SupplierName;
 
-  // Specifications
-  specifications: {
-    material?: string;
-    weight?: string;
-    sizes: string[];
-    colors: ProductColor[];
-    printAreas?: PrintArea[];
-    features?: string[];
-  };
+  // Variants (color/size combinations)
+  variants: ProductVariant[];
+
+  // Images
+  images: string[];
 
   // Pricing
   pricing: {
     basePrice: number;
     currency: string;
-    priceBreaks?: PriceBreak[];
-    msrp?: number;
-    costPlus?: number;
+    breaks?: Array<{
+      quantity: number;
+      price: number;
+      casePrice?: number;
+    }>;
   };
 
-  // Inventory
-  inventory: {
-    available: boolean;
-    totalStock?: number;
-    stockByVariant: VariantStock[];
-    lastUpdated: Date;
+  // Specifications
+  specifications?: {
+    weight?: string;
+    fabric?: {
+      type: string;
+      content: string;
+    };
+    fit?: string;
+    features?: string[];
+    printMethods?: string[];
+  };
+
+  // Availability
+  availability: {
+    inStock: boolean;
+    totalQuantity: number;
   };
 
   // Metadata
   metadata: {
-    imageUrls: string[];
-    sizeChart?: string;
-    careInstructions?: string;
-    tags?: string[];
-    isActive: boolean;
-    lastSyncedAt: Date;
+    supplierProductId: string;
+    supplierBrandId?: string;
+    supplierCategoryId?: string;
+    lastUpdated: Date;
   };
 }
 
 export interface ProductVariant {
-  id: string;
-  productId: string;
-  sku: string;
+  sku: string; // Variant SKU (styleID-color-size)
+  color: {
+    name: string;
+    code?: string;
+    hex?: string;
+    family?: string;
+  };
   size: string;
-  color: string;
-  colorCode?: string;
-  price: number;
-  stock: number;
-  available: boolean;
+  inStock: boolean;
+  quantity: number;
   imageUrl?: string;
+  warehouseLocation?: string;
 }
 
 export interface ProductColor {
@@ -105,12 +107,14 @@ export enum ProductCategory {
   POLOS = 'polos',
   HOODIES = 'hoodies',
   SWEATSHIRTS = 'sweatshirts',
-  HATS = 'hats',
+  HEADWEAR = 'headwear',
   BAGS = 'bags',
   OUTERWEAR = 'outerwear',
   ATHLETIC = 'athletic',
   WORKWEAR = 'workwear',
+  YOUTH = 'youth',
   ACCESSORIES = 'accessories',
+  OTHER = 'other',
 }
 
 /**

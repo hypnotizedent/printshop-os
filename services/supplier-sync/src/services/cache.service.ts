@@ -167,4 +167,11 @@ export class CacheService {
   async close(): Promise<void> {
     await this.redis.quit();
   }
+
+  /**
+   * Disconnect from Redis (alias for close)
+   */
+  async disconnect(): Promise<void> {
+    await this.close();
+  }
 }
