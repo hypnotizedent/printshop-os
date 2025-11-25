@@ -13,6 +13,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+<<<<<<< HEAD
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -27,4 +28,11 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "__tests__"]
+=======
+    "moduleResolution": "node",
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+>>>>>>> origin/copilot/build-sop-library-dashboard
 }

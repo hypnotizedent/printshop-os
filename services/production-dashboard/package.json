@@ -1,7 +1,7 @@
 {
   "name": "@printshop-os/production-dashboard",
   "version": "1.0.0",
-  "description": "Production Dashboard API - WebSocket + REST for real-time production updates",
+  "description": "PrintShop OS Production Dashboard - WebSocket, SOP Library, Time Tracking, Checklists",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -19,7 +19,9 @@
     "dashboard",
     "websocket",
     "real-time",
-    "socket.io"
+    "socket.io",
+    "sop",
+    "time-tracking"
   ],
   "author": "PrintShop OS Team",
   "license": "MIT",
