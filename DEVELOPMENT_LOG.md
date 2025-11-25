@@ -2,6 +2,41 @@
 
 ## 2025-11-25
 
+### Project Organization & Cleanup ✅
+
+#### Comprehensive Audit Completed
+- **Scope**: Audited all 218 .md files across entire project
+- **Discovery**: Found duplicate supplier-sync implementations:
+  - `/services/supplier-sync/` (Active TypeScript, AS Colour complete)
+  - `/services/api/supplier-sync/` (Legacy JavaScript with Redis cache)
+- **Legacy Analysis**: Legacy implementation contains unique features:
+  - Redis caching layer (117 tests, graceful fallback, cost tracking)
+  - Prisma ORM database models
+  - Express REST API server
+  - Cron job scheduling
+  - **Decision**: Archive legacy folder - new implementation already has cache.service.ts
+- **Daily Logs**: Consolidated TODAYS_WORK.md → DEVELOPMENT_LOG.md, deleted duplicate
+- **Documentation Strategy**: Established 2 master documents:
+  - `ENTERPRISE_FOUNDATION.md` - Organization structure & agent guidelines
+  - `DEVELOPMENT_LOG.md` - Daily work journal
+
+#### Cleanup Actions Executed
+- ✅ Moved `services/supplier-sync/TODAYS_WORK.md` content to this file
+- ✅ Deleted duplicate daily log
+- ✅ Audited legacy supplier-sync (495 lines code, 3 cache docs)
+- ✅ Confirmed new supplier-sync has cache.service.ts (Redis, TTL strategy)
+- 🚧 Ready to archive `/services/api/supplier-sync/` to `/docs/archive/`
+
+#### Organization Guidelines Established
+**Agent Rules** (prevent future duplication):
+1. **Service docs** → service folder (e.g., `/services/supplier-sync/docs/`)
+2. **Cross-service docs** → `/docs/` folder
+3. **Daily work** → `DEVELOPMENT_LOG.md` only (no service-specific logs)
+4. **Architecture decisions** → `ENTERPRISE_FOUNDATION.md`
+5. **Before creating new .md** → check if existing doc covers topic
+
+---
+
 ### Supplier Integrations – SanMar & AS Colour
 
 #### SanMar Integration ✅ (SFTP-Based)

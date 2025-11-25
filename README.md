@@ -184,16 +184,33 @@ nano .env  # or use your preferred editor
 
 ### 2. Start the System
 
+**Choose the appropriate docker-compose file for your use case:**
+
 ```bash
-# Start all services
+# Development (Appsmith + MongoDB + Redis)
+docker-compose -f docker-compose.local.yml up -d
+
+# Production (Strapi + PostgreSQL + all services)
 docker-compose up -d
 
-# View logs
-docker-compose logs -f
+# AI Services only (LLM + Vector DB)
+docker-compose -f docker-compose.ai.yml up -d
+
+# Label Formatter service
+docker-compose -f docker-compose.label-formatter.yml up -d
+
+# View logs for any configuration
+docker-compose -f <file> logs -f
 
 # Check service status
-docker-compose ps
+docker-compose -f <file> ps
 ```
+
+**Docker Compose Files:**
+- `docker-compose.yml` - **Production deployment** (Strapi, PostgreSQL, frontend, all services)
+- `docker-compose.local.yml` - **Local development** (Appsmith CE, MongoDB, Redis)
+- `docker-compose.ai.yml` - **AI services** (LLM service, vector database)
+- `docker-compose.label-formatter.yml` - **Label formatter** (Shipping label generation service)
 
 ### 3. Access the Components
 
