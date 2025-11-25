@@ -3,6 +3,7 @@ module.exports = {
   testEnvironment: 'node',
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/lib', '<rootDir>/src', '<rootDir>/src/__tests__'],
 =======
   roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/src'],
@@ -10,6 +11,9 @@ module.exports = {
 =======
   roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/routes'],
 >>>>>>> origin/copilot/add-order-history-view
+=======
+  roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/src'],
+>>>>>>> origin/copilot/add-quote-approval-system
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   moduleNameMapper: {
     '^@lib/(.*)$': '<rootDir>/lib/$1',
