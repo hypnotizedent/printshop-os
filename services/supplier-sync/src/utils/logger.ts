@@ -22,7 +22,18 @@ export const logger = winston.createLogger({
           ({ level, message, timestamp, service, ...meta }) => {
             let msg = `${timestamp} [${service}] ${level}: ${message}`;
             if (Object.keys(meta).length > 0) {
-              msg += ` ${JSON.stringify(meta)}`;
+              try {
+                // Safely stringify, avoiding circular references
+                msg += ` ${JSON.stringify(meta, (key, value) => {
+                  // Skip circular references and large objects
+                  if (key === 'config' || key === 'request' || key === 'response') {
+                    return '[Circular]';
+                  }
+                  return value;
+                })}`;
+              } catch (e) {
+                msg += ` [Error serializing metadata]`;
+              }
             }
             return msg;
           }

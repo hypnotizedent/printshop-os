@@ -59,13 +59,14 @@ export interface SSImage {
 
 export interface SSCategory {
   categoryID: number;
-  categoryName: string;
+  name: string;
+  image?: string;
   parentCategoryID?: number;
 }
 
 export interface SSBrand {
   brandID: number;
-  brandName: string;
+  name: string;
 }
 
 /**
@@ -282,12 +283,12 @@ export class SSActivewearClient {
   }
 
   /**
-   * Health check
+   * Health check - uses categories endpoint since there's no dedicated health endpoint
    */
   async healthCheck(): Promise<boolean> {
     try {
       await this.executeRequest(async () => {
-        await this.client.get('/v2/health');
+        await this.client.get('/v2/categories');
         return true;
       });
       return true;

@@ -152,7 +152,7 @@ class SSActivewearSync {
       console.log('\nAvailable Categories:');
       console.log('====================');
       categories.forEach((cat) => {
-        console.log(`  ${cat.categoryID}: ${cat.categoryName}`);
+        console.log(`  ${cat.categoryID}: ${cat.name}`);
       });
     } catch (error) {
       logger.error('Failed to list categories:', error);
@@ -169,7 +169,7 @@ class SSActivewearSync {
       console.log('\nAvailable Brands:');
       console.log('=================');
       brands.forEach((brand) => {
-        console.log(`  ${brand.brandID}: ${brand.brandName}`);
+        console.log(`  ${brand.brandID}: ${brand.name}`);
       });
     } catch (error) {
       logger.error('Failed to list brands:', error);

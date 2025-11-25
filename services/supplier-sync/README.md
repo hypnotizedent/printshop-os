@@ -1,14 +1,27 @@
 # Supplier Sync Service
 
-Product synchronization service for integrating with apparel suppliers (S&S Activewear, AS Colour, SanMar).
+**Version:** 1.0.0  
+**Status:** Production Ready (AS Colour) | In Progress (S&S, SanMar)
+
+Product synchronization service for integrating with apparel suppliers. Normalizes disparate supplier APIs into a unified schema with intelligent caching and rate limiting.
+
+## Quick Links
+
+- 📖 **[Complete Documentation](./COMPLETE_DOCUMENTATION.md)** - Comprehensive reference guide
+- 🏗️ **[Architecture](./ARCHITECTURE.md)** - System architecture overview
+- 🆕 **[Adding New Suppliers](./docs/ADDING_NEW_SUPPLIER.md)** - Step-by-step integration guide
+- 📦 **Supplier Docs:** [AS Colour](./docs/suppliers/ASCOLOUR.md) | S&S Activewear | SanMar
 
 ## Features
 
-- **Unified Product Schema**: Normalizes product data from multiple suppliers into a single format
-- **Redis Caching**: Intelligent 3-tier caching strategy (24h products, 1h pricing, 15min inventory)
-- **Rate Limiting**: Prevents API overage costs (~$500/month savings)
-- **CLI Tools**: Command-line sync tools for manual and automated syncs
-- **Incremental Sync**: Only sync products updated since last run
+- **✅ Multi-Supplier Support**: AS Colour (production), S&S Activewear, SanMar (in progress)
+- **✅ Unified Schema**: Single `UnifiedProduct` format for all suppliers
+- **✅ Smart Caching**: Redis 3-tier cache (24h products, 1h pricing, 15min inventory)
+- **✅ Rate Limiting**: Automatic retry with exponential backoff (~$500/month API savings)
+- **✅ Incremental Sync**: Only fetch products updated since last sync
+- **✅ Variant Enrichment**: Optional deep enrichment with size/color inventory
+- **✅ CLI Tools**: Command-line tools for manual and automated syncs
+- **✅ JSONL Storage**: Append-only persistence for incremental tracking
 
 ## Architecture
 
@@ -19,7 +32,7 @@ Strapi API (Product Management)
     ↓
 Redis Cache (3-tier TTL)
     ↓
-Sync Service
+Sync Service (CLI → Transformer → Client → Persistence)
     ↓
 Supplier APIs (S&S, AS Colour, SanMar)
 ```
@@ -111,12 +124,44 @@ npm run sync:ss -- --incremental --since 2024-11-20
 npm run sync:ss -- --dry-run
 ```
 
-### AS Colour & SanMar
+### AS Colour Sync
+
+**Status:** ✅ Production Ready
+
+**Quick dry run:**
+```bash
+npm run sync:ascolour
+```
+
+**Full sync with enrichment:**
+```bash
+npm run sync:ascolour:full
+```
+
+**Incremental sync (last 7 days):**
+```bash
+npm run sync:ascolour:incremental
+```
+
+**Custom options:**
+```bash
+npx ts-node src/cli/sync-as-colour.ts --dry-run --limit=50 --enrich-variants --enrich-prices
+```
+
+See [AS Colour Integration Guide](./docs/suppliers/ASCOLOUR.md) for details.
+
+### SanMar Sync
+
+**Status:** 🚧 In Progress
 
 Coming soon:
 ```bash
-npm run sync:ascolour
 npm run sync:sanmar
+```
+
+### Sync All Suppliers
+
+```bash
 npm run sync:all
 ```
 

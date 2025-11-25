@@ -1,5 +1,53 @@
 # Development Log
 
+## 2025-11-25
+
+### Supplier Integrations – SanMar & AS Colour
+
+#### SanMar Integration ✅ (SFTP-Based)
+- Discovered actual integration method uses SFTP + large CSV/TXT files (not REST).
+- Credentials verified (Account/Username: 180164). Successful SFTP connection to `ftp.sanmar.com:2200`.
+- Listed 16 files in `/SanMarPDD` including:
+  - `SanMar_EPDD.csv` (≈495MB) – Enhanced product & inventory data (daily)
+  - `sanmar_dip.txt` (≈170MB) – Hourly inventory updates
+  - `SanMar_SDL_N.csv` (≈181MB) – Alternate product data
+- Implemented:
+  - `sanmar-sftp.client.ts` (download, list, parse CSV)
+  - `sanmar-csv.transformer.ts` (EPDD, SDL_N, DIP transformers + inventory merge)
+  - Documentation: `SANMAR_INTEGRATION.md`, `SANMAR_IMPLEMENTATION_SUMMARY.md` updated with best practices, file schedule, performance profile.
+- Added resilient file detection (prefers `.csv` over zipped archives).
+- Confirmed partial download of `SanMar_EPDD.csv` (large file strategy: stream + batch transform planned).
+- Next for SanMar: implement streaming parser & incremental persistence; optional SOAP/WSDL client is low priority.
+
+#### AS Colour Integration 🚧 STARTED
+- Received API key: `1c27d1d97d234616923e7f8f275c66d1` (to be stored in `.env`).
+- Created task plan to implement:
+  - Environment variables (`ASCOLOUR_API_KEY`, `ASCOLOUR_BASE_URL`).
+  - API client (`as-colour.client.ts`) – fetch all products, single product, search, derived categories, health check.
+  - Transformer (`as-colour.transformer.ts`) mapping `ASColourProduct` → `UnifiedProduct` (variant generation from `stock`, color enrichment from `colours.swatch`).
+  - CLI sync script (`sync-as-colour.ts`).
+  - Documentation (`ASCOLOUR_INTEGRATION.md`).
+- Pending: Implementation & build verification.
+
+#### Rationale / Decisions
+- Chose SFTP ingestion for SanMar due to scale (hundreds MB) & completeness vs API cost/perf.
+- Deferred SOAP client until a specific real-time product endpoint need arises.
+- Will treat large SanMar CSV parsing as streaming to avoid memory pressure once full file downloaded.
+- AS Colour integration will follow lightweight REST approach (assuming standard JSON endpoints per provided guide; placeholders documented until endpoint confirmation).
+
+#### Risks / Mitigations
+- Large file (≈495MB) parsing: plan to implement line-stream & periodic flush to storage/Redis.
+- Inventory freshness: DIP hourly file strategy logged; cron scheduling needed.
+- Unknown AS Colour endpoint specifics: will abstract base URL + endpoints, refine after documentation review.
+
+#### Next Actions
+1. Finish AS Colour client + transformer.
+2. Add CLI + package.json scripts, run build.
+3. Implement SanMar streaming parser (optional after AS Colour).
+4. Add cron/job scheduling for DIP hourly updates.
+
+---
+
 ## 2025-11-22
 
 ### Phase 1 - Strapi Backend Setup ✅ COMPLETED
