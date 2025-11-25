@@ -21,6 +21,11 @@ The Pricing Service will provide intelligent quote calculation for print shop op
 - Phase execution plans
 - Repository architecture docs
 
+**Related Services:**
+- **supplier-sync:** ✅ Complete - Provides real-time supplier pricing (AS Colour, SanMar)
+- **job-estimator:** ✅ Complete - Proven pricing logic with JSON rules engine
+- Both services ready for integration into unified pricing system
+
 ---
 
 ## Planned Features
@@ -33,10 +38,13 @@ The Pricing Service will provide intelligent quote calculation for print shop op
 - Margin tracking and reporting
 
 ### Integration Points
-- **job-estimator:** Proven pricing logic from separate repository
-- **supplier-sync:** Real-time product pricing and availability
-- **Strapi API:** Quote storage and retrieval
-- **Frontend:** Customer-facing quote interface
+- **job-estimator:** ✅ Proven pricing logic (Task 2.3 Complete - JSON rules engine)
+- **supplier-sync:** ✅ Real-time supplier pricing (AS Colour, SanMar integrated)
+  - 522 AS Colour products with wholesale/retail pricing
+  - 415K SanMar products with multi-tier pricing (piece, dozen, case, MSRP)
+  - JSONL persistence + Redis caching
+- **Strapi API:** Quote storage and retrieval (planned)
+- **Frontend:** Customer-facing quote interface (planned)
 
 ---
 

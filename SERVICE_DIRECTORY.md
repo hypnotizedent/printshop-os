@@ -14,7 +14,7 @@ This document provides a precise map of where every component, service, and feat
 | Customer portal backend | `services/api/customer/` |
 | Analytics & reporting | `services/api/analytics/` |
 | AI quote optimizer | `services/customer-service-ai/` |
-| Supplier data sync | `services/api/supplier-sync/` |
+| Supplier data sync | `services/supplier-sync/` |
 | Frontend components | `frontend/src/components/` |
 | Strapi content types | `printshop-strapi/src/api/` |
 | Database schema | `printshop-strapi/schema.sql` |
@@ -570,7 +570,7 @@ printshop-os/
 | Customer-facing feature | `services/api/customer/` |
 | Analytics/reporting | `services/api/analytics/` |
 | AI-powered feature | `services/customer-service-ai/` |
-| Supplier integration | `services/api/supplier-sync/` |
+| Supplier integration | `services/supplier-sync/` |
 | Label formatting/automation | `services/label-formatter/` |
 | New data type | `printshop-strapi/src/api/` |
 | Frontend component | `frontend/src/components/` |
@@ -584,7 +584,7 @@ printshop-os/
 | Order history | `services/api/customer/src/routes/orders.ts` |
 | Analytics calculations | `services/api/analytics/src/services/` |
 | AI quote logic | `services/customer-service-ai/src/services/QuoteOptimizer.ts` |
-| Supplier API calls | `services/api/supplier-sync/src/suppliers/` |
+| Supplier API calls | `services/supplier-sync/src/clients/` |
 | WebSocket events | `services/production-dashboard/src/server.ts` |
 | Database schema | `printshop-strapi/src/api/*/content-types/*/schema.json` |
 

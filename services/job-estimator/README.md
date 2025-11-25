@@ -16,6 +16,12 @@ The Job Estimator provides a comprehensive, maintainable pricing system with JSO
 
 **Status**: ✅ **Task 2.3 Complete** - Flexible Pricing Engine with JSON Rules
 
+**Integration Ready:**
+- ✅ Supplier pricing available via [supplier-sync](/services/supplier-sync/) service
+- AS Colour: 522 products with real-time pricing
+- SanMar: 415K products with multi-tier pricing
+- Ready to integrate supplier costs into quote calculations
+
 ---
 
 ## 🚀 Quick Start
