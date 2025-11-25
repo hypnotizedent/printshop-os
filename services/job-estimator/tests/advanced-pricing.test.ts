@@ -45,25 +45,26 @@ describe('Advanced Pricing Engine', () => {
 
       const quote = generateQuote(options);
 
-      // Expected breakdown:
-      // Base: $4.00/unit
-      // Color: $0.50/unit
-      // Setup: $74.28
-      // Subtotal: (4.50 * 100) + 74.28 = $556.28
-      // Location (chest 1.0x): $556.28
-      // Rush (5-day, no premium): $556.28
+      // Expected breakdown (matching Excel "Platinum Pricing 35"):
+      // Base: $4.00/unit (screen printing)
+      // Color: $0.50/unit (1 color)
+      // Setup: $34.83 (M size / A5)
+      // Subtotal: (4.50 * 100) + 34.83 = $484.83
+      // Location (chest 1.0x): $484.83
+      // Rush (5-day, no premium): $484.83
       // AddOns: $0
-      // Margin (35%): $556.28 * 1.35 = $751.78
+      // NO volume discount (Excel doesn't use it)
+      // Margin (35%): $484.83 * 1.35 = $654.52
 
       expect(quote.unitPrice).toBeCloseTo(4.5, 1);
-      expect(quote.setupFee).toBeCloseTo(74.28, 1);
-      expect(quote.subtotal).toBeCloseTo(556.28, 1);
+      expect(quote.setupFee).toBeCloseTo(34.83, 1);
+      expect(quote.subtotal).toBeCloseTo(484.83, 1);
       expect(quote.locationMultiplier).toBe(1.0);
-      expect(quote.locationPrice).toBeCloseTo(556.28, 1);
+      expect(quote.locationPrice).toBeCloseTo(484.83, 1);
       expect(quote.rushMultiplier).toBe(1.0);
-      expect(quote.rushPrice).toBeCloseTo(556.28, 1);
+      expect(quote.rushPrice).toBeCloseTo(484.83, 1);
       expect(quote.profitMarginMultiplier).toBe(1.35);
-      expect(quote.finalRetailPrice).toBeCloseTo(751.78, 1);
+      expect(quote.finalRetailPrice).toBeCloseTo(654.52, 1);
     });
 
     it('should have correct breakdown details', () => {
@@ -84,7 +85,7 @@ describe('Advanced Pricing Engine', () => {
       expect(quote.colors).toBe(1);
       expect(quote.location).toBe('chest');
       expect(quote.addOns).toHaveLength(0);
-      expect(quote.volumeDiscount).toBe(0.08); // 100-249 qty range has 8% discount
+      expect(quote.volumeDiscount).toBe(0); // Volume discount disabled (Excel doesn't use it)
     });
   });
 

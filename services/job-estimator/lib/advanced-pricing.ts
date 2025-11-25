@@ -58,7 +58,7 @@ export interface QuoteBreakdown {
   printSize: PrintSize;
   rush: RushType;
   addOns: AddOnType[];
-  
+
   // Calculations
   unitPrice: number;
   setupFee: number;
@@ -149,8 +149,10 @@ export function generateQuote(options: QuoteOptions): QuoteBreakdown {
   const subtotalWithAddOns = rushPrice + addOnCost;
 
   // Step 6: Apply volume discount
-  const volumeDiscount = getVolumeDiscount(quantity);
-  const discountedPrice = subtotalWithAddOns * (1 - volumeDiscount);
+  // NOTE: Volume discount disabled to match Excel "Platinum Pricing 35" behavior
+  // Excel does not apply volume discounts - pricing is based on quantity breaks in price tables only
+  const volumeDiscount = 0; // getVolumeDiscount(quantity); // DISABLED
+  const discountedPrice = subtotalWithAddOns; // No discount applied
 
   // Step 7: Apply profit margin
   const profitMarginMultiplier = 1 + profitMargin;

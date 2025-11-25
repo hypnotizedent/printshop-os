@@ -72,7 +72,31 @@ export function calculateBasePrice(quantity: number, opts: PricingOptions) {
   const sizeMultiplier = PRINT_SIZE_MULTIPLIERS[opts.size ?? 'M'];
 
   // Setup fee (design setup or artwork prep)
-  let setupFee = opts.isNewDesign ? 74.28 : 0;
+  // Based on Excel "Platinum Pricing 35" - setup varies by print size and service
+  // A6 (S size) = $27.86, A5 (M) = $34.83, A4 (L) = $41.79, A3 (XL) = $48.76, A2 (Jumbo) = $62.69
+  let setupFee = 0;
+  if (opts.isNewDesign) {
+    const size = opts.size ?? 'M';
+    switch (size) {
+      case 'S':
+        setupFee = 27.86; // A6
+        break;
+      case 'M':
+        setupFee = 34.83; // A5
+        break;
+      case 'L':
+        setupFee = 41.79; // A4
+        break;
+      case 'XL':
+        setupFee = 48.76; // A3
+        break;
+      case 'Jumbo':
+        setupFee = 62.69; // A2
+        break;
+      default:
+        setupFee = 34.83; // Default to A5/M
+    }
+  }
 
   // Unit price before quantity/location/rush/addons
   const unitPrice = (base + colorSurcharge) * sizeMultiplier;
