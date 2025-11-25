@@ -14,6 +14,88 @@ export interface ColorVariant {
 }
 
 /**
+ * Product variant with full details
+ */
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  sku: string;
+  size?: string;
+  color?: string;
+  colorCode?: string;
+  style?: string;
+  price: number;
+  wholesaleCost: number;
+  inventory: {
+    quantity: number;
+    status: 'in_stock' | 'low_stock' | 'out_of_stock';
+    lastSync: Date;
+  };
+  specifications?: {
+    weight?: number;
+    dimensions?: string;
+    material?: string;
+  };
+  images: string[];
+  isActive: boolean;
+  supplierMappings: SupplierSKUMapping[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Supplier SKU mapping for a variant
+ */
+export interface SupplierSKUMapping {
+  id: string;
+  supplierId: string;
+  supplierName: string;
+  supplierSKU: string;
+  supplierPrice: number;
+  isPrimary: boolean;
+  leadTimeDays: number;
+  moq: number;
+  inStock: boolean;
+  lastUpdated: Date;
+}
+
+/**
+ * Variant search and filter options
+ */
+export interface VariantFilters {
+  productId?: string;
+  brand?: string;
+  size?: string;
+  color?: string;
+  status?: 'in_stock' | 'low_stock' | 'out_of_stock';
+  supplierId?: string;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  isActive?: boolean;
+}
+
+/**
+ * Bulk import request
+ */
+export interface BulkImportRequest {
+  supplierId: string;
+  productIdentifier: string;
+  mapToExistingProduct?: string;
+  markupPercentage?: number;
+}
+
+/**
+ * SKU generation options
+ */
+export interface SKUGenerationOptions {
+  baseSKU: string;
+  size?: string;
+  color?: string;
+  style?: string;
+}
+
+/**
  * Normalized product schema shared across all suppliers
  */
 export interface NormalizedProduct {

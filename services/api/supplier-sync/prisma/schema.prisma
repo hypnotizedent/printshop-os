@@ -1,6 +1,32 @@
+<<<<<<< HEAD
 generator client {
   provider = "prisma-client-js"
 }
+=======
+// Prisma schema for supplier sync service
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Supplier {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  supplierId  String
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+>>>>>>> origin/copilot/build-product-variants-system
 
 datasource db {
   provider = "postgresql"
@@ -32,15 +58,26 @@ model Product {
   imageUrls   String[]
   tags        String[]
   sizes       String[]
+<<<<<<< HEAD
   colors      Json
   description String?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   inventories SupplierInventory[]
+=======
+  colors      Json     // ✅ stores full color objects
+  description String?
+
+  variants    ProductVariant[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+>>>>>>> origin/copilot/build-product-variants-system
 
   @@unique([supplierId, styleId], name: "supplierId_styleId")
 }
 
+<<<<<<< HEAD
 model SupplierInventory {
   id                String    @id @default(cuid())
   variantId         String
@@ -105,4 +142,65 @@ model InventoryChange {
   @@index([detectedAt])
   @@index([changeType])
   @@index([notified])
+=======
+model ProductVariant {
+  id               String   @id @default(cuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  sku              String   @unique // Internal SKU
+  size             String?
+  color            String?
+  colorCode        String?  // Hex color for UI
+  style            String?  // "Crew Neck", "V-Neck", etc.
+
+  price            Float
+  wholesaleCost    Float
+
+  // Inventory tracking
+  inventoryQty     Int      @default(0)
+  inventoryStatus  String   @default("out_of_stock") // in_stock, low_stock, out_of_stock
+  lastSync         DateTime @default(now())
+
+  // Specifications
+  weight           Float?
+  dimensions       String?
+  materialInfo     String?
+
+  images           String[]
+  isActive         Boolean  @default(true)
+
+  supplierMappings SupplierSKU[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([productId])
+  @@index([sku])
+  @@index([size])
+  @@index([color])
+}
+
+model SupplierSKU {
+  id              String         @id @default(cuid())
+  variantId       String
+  variant         ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  supplierId      String
+  supplierName    String
+  supplierSKU     String
+  supplierPrice   Float
+  isPrimary       Boolean        @default(false)  // Preferred supplier
+  leadTimeDays    Int            @default(0)      // Lead time in days
+  moq             Int            @default(1)      // Minimum order quantity
+  inStock         Boolean        @default(true)
+  lastUpdated     DateTime       @default(now())
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([variantId, supplierId, supplierSKU])
+  @@index([variantId])
+  @@index([supplierSKU])
+>>>>>>> origin/copilot/build-product-variants-system
 }
