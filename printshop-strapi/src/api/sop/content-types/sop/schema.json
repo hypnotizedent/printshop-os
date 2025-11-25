@@ -92,5 +92,20 @@
     "favorites": {
       "type": "json"
     }
+    ,
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "active", "deprecated"],
+      "default": "draft"
+    },
+    "effectiveDate": {
+      "type": "date"
+    },
+    "revisionNotes": {
+      "type": "text"
+    },
+    "changelog": {
+      "type": "json"
+    }
   }
 }

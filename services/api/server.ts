@@ -7,6 +7,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import customerOrdersRouter from './routes/customer-orders';
+import colorsRouter from './routes/colors';
 
 const app = express();
 
@@ -31,6 +32,8 @@ app.get('/health', (_req: Request, res: Response) => {
 
 // Mount customer orders routes
 app.use('/api/customer', customerOrdersRouter);
+// Mount colors catalog routes
+app.use('/api/colors', colorsRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
@@ -58,6 +61,8 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`GET  http://localhost:${PORT}/api/customer/orders/:id`);
     console.log(`GET  http://localhost:${PORT}/api/customer/orders/:id/invoice`);
     console.log(`GET  http://localhost:${PORT}/api/customer/orders/:id/files`);
+    console.log(`GET  http://localhost:${PORT}/api/colors`);
+    console.log(`GET  http://localhost:${PORT}/api/colors/nearest?hex=#FF0000&limit=5`);
   });
 }
 

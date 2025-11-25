@@ -1,5 +1,259 @@
 # Development Log
 
+## 2025-11-25 (Continued)
+
+### [Complete] Color & SOP Integration Pipeline Execution ✅
+
+#### What Was Accomplished
+**Phase 1: Desktop Asset Migration**
+- Migrated `~/Desktop/Color-reference/` (ink + thread catalogs with 260+ color swatches) → `data/raw/colors/`
+- Migrated `~/Desktop/sop/` (8 operational procedures as PDFs/DOCX) → `data/raw/sops/`
+- Established single source of truth in repository; desktop folders now safe to delete
+
+**Phase 2: Color Catalog Processing**
+- Enhanced `import_colors.ts` to handle existing catalog format (adapted vendor mapping, Pantone code extraction)
+- Executed full ingestion: 260 raw records → 228 unique colors (32 duplicates merged)
+- Generated `data/processed/colors/colors.jsonl` (120KB, normalized with UUIDs, slugs, hex validation)
+- Created catalog manifest with SHA256 source file hashes
+
+**Phase 3: SOP Processing**
+- Created manifest-based ingestion script `import_sops_from_manifest.ts` (handles PDF metadata extraction via YAML manifest)
+- Processed 8 SOPs from `sop_manifest.yml` → `data/processed/sops/sops.jsonl` (5.7KB)
+- Categories: Processes (6), Machines (1), Suppliers (1)
+- Generated SOP manifest with source hashes and category breakdown
+
+**Phase 4: AI Knowledge Base Integration**
+- Converted JSONL SOPs to markdown with front-matter → `data/intelligence/knowledge_base/operational/sops/`
+- Created 8 markdown files ready for vector embedding (client-assets, embroidery, receiving, etc.)
+- Validated knowledge base structure: 18 total documents across 5 categories (operational now includes SOPs)
+- Set up Python virtual environment for customer-service-ai with sentence-transformers, chromadb dependencies
+
+**Phase 5: Strapi Seeding Infrastructure**
+- Created `seed_sops.ts` with batch prefetch optimization (mirrors colors seeding pattern)
+- Implemented upsert-by-slug logic with version tracking and revision notes
+- Dry-run validated: 8 SOPs ready for Strapi CMS seeding (requires STRAPI_API_TOKEN)
+
+#### File Inventory
+**Created:**
+- `services/supplier-sync/scripts/import_sops_from_manifest.ts` (manifest-driven SOP ingestion)
+- `services/supplier-sync/scripts/seed_sops.ts` (Strapi CMS seeding for SOPs)
+- `services/customer-service-ai/scripts/init_knowledge_base_simple.py` (KB validation script)
+- `data/intelligence/knowledge_base/operational/sops/*.md` (8 markdown SOPs)
+- `data/processed/colors/colors.jsonl` (228 colors)
+- `data/processed/sops/sops.jsonl` (8 SOPs)
+- Both manifest.json files with integrity hashes
+
+**Modified:**
+- `services/supplier-sync/scripts/import_colors.ts` (added format normalization for existing catalog structure)
+- `services/customer-service-ai/scripts/init_knowledge_base.py` (added ChromaDB import guard)
+
+#### Execution Results
+```
+Colors:     260 raw → 228 processed (32 duplicates merged, 0 errors)
+SOPs:       8 processed (0 errors)
+KB Files:   18 markdown documents across 5 categories
+Duration:   Color ingestion 2ms, SOP ingestion <1ms
+```
+
+#### Operational Commands
+**Color Seeding (Production):**
+```bash
+export STRAPI_API_TOKEN=<your-token>
+npx ts-node services/supplier-sync/scripts/seed_colors.ts \
+  --file data/processed/colors/colors.jsonl \
+  --concurrency 6
+```
+
+**SOP Seeding (Production):**
+```bash
+export STRAPI_API_TOKEN=<your-token>
+npx ts-node services/supplier-sync/scripts/seed_sops.ts \
+  --file data/processed/sops/sops.jsonl \
+  --concurrency 4
+```
+
+**AI Knowledge Base Validation:**
+```bash
+python3 services/customer-service-ai/scripts/init_knowledge_base_simple.py
+# Shows 18 files across operational/, technical/, case_studies/, email_history/, general/
+```
+
+#### Next Steps
+1. **Desktop Cleanup:** Safely delete `~/Desktop/Color-reference/` and `~/Desktop/sop/` after git commit
+2. **Strapi Deployment:** Seed colors + SOPs to production Strapi instance with API token
+3. **Vector DB Indexing:** Run full `init_knowledge_base.py` with ChromaDB service to embed SOPs for AI retrieval
+4. **API Testing:** Validate `/api/colors` and `/api/colors/nearest` endpoints with seeded data
+5. **PDF Content Extraction:** Enhance SOP ingestion to extract actual PDF text (currently uses metadata only)
+
+#### Design Patterns Established
+- **Single Source of Truth:** Raw assets in `data/raw/`, processed outputs in `data/processed/`, AI-ready in `data/intelligence/`
+- **Dual Persistence:** Strapi CMS for structured queries + AI knowledge base for semantic search
+- **Manifest Tracking:** SHA256 hashes enable change detection and auditability
+- **Batch Optimization:** Prefetch existing records in chunks to avoid N+1 API queries
+- **Exit Code Convention:** 0=success, 2=validation errors, 3=IO failure
+
+#### Metrics Achieved
+- Color ingestion: 2ms for 228 records (target: <2s per 1K records) ✅
+- Zero validation errors in both pipelines
+- Knowledge base ready for 18-document vector indexing
+
+---
+
+### [Catalog] Color Taxonomy & Ingestion Scaffold ✅
+
+#### What Was Implemented
+- Added canonical color taxonomy documentation at `docs/reference/colors.md` (schema, normalization rules, ingestion pipeline, future extensions).
+- Created TypeScript interfaces & helpers in `lib/ptavo/colors/types.ts` (normalization, slug generation, validation, duplicate merge, manifest hashing).
+- Scaffolded ingestion script `services/supplier-sync/scripts/import_colors.ts` with CLI flags (`--ink`, `--thread`, `--out`, `--manifest`, `--dry-run`, `--limit`).
+- Added raw catalog landing directory `data/raw/colors/` with README instructions for placing external `ink-catalog.json` and `thread-catalog.json` files.
+
+#### How To Use (Dry Run)
+```
+node services/supplier-sync/scripts/import_colors.ts \
+  --ink data/raw/colors/ink-catalog.json \
+  --thread data/raw/colors/thread-catalog.json \
+  --out data/processed/colors/colors.jsonl \
+  --manifest data/processed/colors/catalog-manifest.json \
+  --dry-run
+```
+
+#### Design Decisions
+- Placed ingestion under supplier-sync to avoid premature microservice sprawl; may elevate to dedicated catalog service if domain complexity grows.
+- Deferred LAB color space & similarity computation to a future batch job (keeps initial ingestion light and deterministic).
+- Chose JSONL for processed output to align with existing supplier product persistence strategy (stream-friendly, appendable).
+- Manifest includes SHA256 per source file for change detection and auditing.
+
+#### Next Steps
+- Populate `ink-catalog.json` / `thread-catalog.json` from external attachment sources.
+- Execute dry run → validate counts & duplicates.
+- Implement Strapi seeding (upsert by slug) in a follow-up script (`seed_colors.ts`).
+- Extend schema with optional LAB computation & similarity indexing.
+
+#### Metrics Target (Initial)
+- Ingestion duration: < 2s per 1K raw records (baseline).
+- Validation error rate: < 1% of total records.
+- Duplicate merge ratio: Logged for future tuning (expected low).
+
+#### Risks / Mitigations
+- Missing required fields → skipped with warning; summary enumerates first 10 errors.
+- Large vendor catalogs → use `--limit` during debugging to reduce iteration cycle time.
+- Slug collisions → deterministic merge strategy retains first record, enriches tags & meta.
+
+---
+### [SOP] Directory Structure & Ingestion Script Scaffold ✅
+
+#### Implemented
+- Created raw SOP directory `data/raw/sops/` with README outlining structure & front-matter conventions.
+- Added processed output directory `data/processed/sops/`.
+- Implemented ingestion script `services/customer-service-ai/scripts/import_sops.ts` (parses markdown/txt, extracts front-matter, steps, summary, writes JSONL + manifest).
+- Enhanced Strapi SOP content type with lifecycle fields (`status`, `effectiveDate`, `revisionNotes`, `changelog`).
+
+#### Usage (After adding SOP files)
+```
+npx ts-node services/customer-service-ai/scripts/import_sops.ts
+```
+Outputs:
+- `data/processed/sops/sops.jsonl`
+- `data/processed/sops/sop-manifest.json`
+
+#### Next Steps
+- Move desktop SOP files into `data/raw/sops/` preserving category folders.
+- Run ingestion and review manifest for counts & category mapping.
+- Create seeding script (similar to colors) for Strapi SOP upserts (status & version controlled).
+- Add embedding/indexing script for AI retrieval (chunking + vector store).
+
+#### Notes
+- Non-enumeration category names fall back to `Processes` mapping (adjust VALID_CATEGORIES as needed).
+- Front-matter optional; absence defaults `status=draft`, `version=1`.
+- Steps extraction uses numbered list pattern (e.g. `1. Do thing`).
+
+---
+### [Catalog] Strapi Color Content Type & Seeding Pathway ✅ (Initial)
+
+#### What Was Implemented
+- Added unified Strapi content type `color` at `printshop-strapi/src/api/color/content-types/color/schema.json` (single collection for ink/thread via `medium` enumeration) to avoid duplication of separate ink/thread types.
+- Implemented seeding script `services/supplier-sync/scripts/seed_colors.ts` (create/update by slug; concurrency, dry-run supported; requires `STRAPI_API_TOKEN`).
+- Established environment variable contract: `STRAPI_URL` (default `http://localhost:1337`), `STRAPI_API_TOKEN` (admin API token).
+- Updated TODOs: product impact assessment & data model design marked complete; seeding pathway in progress.
+
+#### Seeding Usage (Dry Run)
+```
+export STRAPI_API_TOKEN=***
+node services/supplier-sync/scripts/seed_colors.ts \
+  --file data/processed/colors/colors.jsonl \
+  --dry-run
+```
+
+#### Seeding Usage (Create/Update)
+```
+export STRAPI_API_TOKEN=***
+node services/supplier-sync/scripts/seed_colors.ts \
+  --file data/processed/colors/colors.jsonl \
+  --concurrency 6
+```
+
+#### Design Choices
+- Unified collection reduces field divergence risk and simplifies future similarity queries.
+- Upsert logic: GET by slug → PUT if exists else POST (future optimization: batch fetch slugs in chunks to reduce round-trips).
+- Concurrency default 4 to balance Strapi load; adjustable via flag.
+
+#### Next Steps
+- Populate raw catalogs and run ingestion to produce `colors.jsonl` before seeding.
+- Add API route exposure (`/api/colors`, `/api/colors/nearest`).
+- Implement batch slug prefetch optimization (reduce N+1 requests).
+- Add optional LAB & similarity post-processing job.
+
+#### Observability (Planned)
+- Add counters: `colors_seed_created_total`, `colors_seed_updated_total`, `colors_seed_failed_total` via future metrics endpoint.
+
+---
+### [Catalog] Ingestion Run + API Endpoints + Seeding Optimization ✅
+
+#### Ingestion Output
+- Ran ingestion script with sample `ink-catalog.json` & `thread-catalog.json` → produced `data/processed/colors/colors.jsonl` (6 records) + `catalog-manifest.json`.
+- Fixed write race (stream flush before process exit) by switching to synchronous write.
+
+#### API Endpoints Added
+- Mounted `GET /api/colors` (filters: medium, vendor, search, limit) and `GET /api/colors/nearest` (hex distance, optional medium) in `services/api/server.ts` via `routes/colors.ts`.
+- Distance metric: Euclidean RGB (LAB similarity deferred).
+
+#### Seeding Optimization
+- Refactored `seed_colors.ts` to batch prefetch existing slugs (`$in` filter, chunk size 50) and allow dry-run without token.
+- Dry-run validation successful (6 processed, 0 errors).
+
+#### SOP Schema Enhancements
+- Extended Strapi SOP content type (`schema.json`) with fields: `status` (draft|active|deprecated), `effectiveDate`, `revisionNotes`, `changelog`.
+- Prepares versioning & lifecycle management for future ingestion/parser work.
+
+#### Next Actions
+- Acquire real vendor catalogs and rerun ingestion (replace sample data).
+- Provide STRAPI_API_TOKEN to perform live seeding (verify create/update counts).
+- Implement LAB conversion + similarity precomputation job.
+- Add Prometheus metrics for colors & SOP seeding once monitoring stack active.
+
+#### Commands Reference
+```
+# Ingestion (sample catalogs)
+npx ts-node services/supplier-sync/scripts/import_colors.ts \
+  --ink data/raw/colors/ink-catalog.json \
+  --thread data/raw/colors/thread-catalog.json \
+  --out data/processed/colors/colors.jsonl \
+  --manifest data/processed/colors/catalog-manifest.json
+
+# Dry-run seeding (no token required)
+npx ts-node services/supplier-sync/scripts/seed_colors.ts \
+  --file data/processed/colors/colors.jsonl \
+  --dry-run
+
+# Live seeding (after setting STRAPI_API_TOKEN)
+export STRAPI_API_TOKEN=***
+npx ts-node services/supplier-sync/scripts/seed_colors.ts \
+  --file data/processed/colors/colors.jsonl \
+  --concurrency 6
+```
+
+---
+
 ## 2025-11-25
 
 ### [Supplier Integration] SanMar - Phase 3 Complete ✅
@@ -157,6 +411,34 @@
 2. Add CLI + package.json scripts, run build.
 3. Implement SanMar streaming parser (optional after AS Colour).
 4. Add cron/job scheduling for DIP hourly updates.
+
+### Infrastructure & Tooling Cleanup ✅
+
+#### Home Directory Git Repository Disabled
+- Detected unintended git repo in home directory (`/Users/ronnyworks/.git`, 42 tracked changes, remote `pricer-new.git`).
+- Action: Renamed to `.git_backup_20251125_171354` to remove 10K+ phantom changes from VS Code source control panel.
+- Added VS Code setting: `git.autoRepositoryDetection = "openedFolders"` in `.vscode/settings.json` to prevent future auto-detection of home folder.
+- Safe reversible change (backup retained). Next optional action: delete backup after 7 days if not needed.
+
+#### Printavo Image Scraper Sample Run ✅
+- Ran `scripts/scrape_image_urls.py` using virtualenv Python.
+- Resumed from prior checkpoint (40 orders) → processed total 180 orders.
+- Results: 180 orders, 165 with images, 803 image URLs (avg 4.5 per order), output file now 825 KB (`data/processed/orders_with_images.json`).
+- Confirmed storage impact minimal; estimated full run tonight: ~5–6 MB total, ~5 hours (12,674 remaining orders at ~1.5s each with polite delay).
+- Created helper script `scripts/run_full_printavo_scrape.sh` (nohup + caffeinate + resume support, checkpoints every 20 orders).
+
+#### Nightly Run Plan
+```
+./scripts/run_full_printavo_scrape.sh
+tail -f scraper.log   # Monitor progress
+```
+- Run before sleep; ensure laptop stays awake (caffeinate embedded). Safe to close terminal after launch.
+- Can halt with `kill <PID>` (progress preserved).
+
+#### Next Ops Tasks (Optional)
+- Delete home repo backup after verification.
+- Add simple image counting dashboard page (future).
+- Integrate scraped image URLs into Strapi (new media linkage model).
 
 ---
 

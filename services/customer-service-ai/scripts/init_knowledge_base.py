@@ -2,11 +2,18 @@
 """
 Initialize vector database with PrintShop OS knowledge base from Markdown files
 """
-import chromadb
-from chromadb.utils import embedding_functions
 import os
 import glob
 from typing import List, Dict
+
+# Try importing chromadb - if fails, skip vector DB
+try:
+    import chromadb
+    from chromadb.utils import embedding_functions
+    CHROMADB_AVAILABLE = True
+except ImportError:
+    print("⚠️  ChromaDB not available - will skip vector database initialization")
+    CHROMADB_AVAILABLE = False
 
 # Configuration
 # Determine project root relative to this script

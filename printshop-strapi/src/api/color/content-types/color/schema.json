@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "collectionName": "colors",
+  "info": {
+    "singularName": "color",
+    "pluralName": "colors",
+    "displayName": "Color",
+    "description": "Canonical production color (ink, thread, etc.)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": { "localized": false }
+  },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "slug": { "type": "uid", "targetField": "name", "required": true, "unique": true },
+    "medium": { "type": "enumeration", "enum": ["ink", "thread"], "required": true },
+    "vendor": { "type": "string", "required": true },
+    "hex": { "type": "string", "required": true },
+    "finish": { "type": "string" },
+    "tags": { "type": "json" },
+    "pantone": { "type": "string" },
+    "usageConstraints": { "type": "json" },
+    "similar": { "type": "json" },
+    "meta": { "type": "json" }
+  }
+}
