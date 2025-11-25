@@ -5,8 +5,11 @@ export { DashboardWidgets } from './DashboardWidgets'
 export { QuickActions } from './QuickActions'
 export { RecentOrders } from './RecentOrders'
 export { Notifications } from './Notifications'
+<<<<<<< HEAD
 export { InvoiceList } from './InvoiceList'
 export { InvoiceDetail } from './InvoiceDetail'
 export { PaymentMethods } from './PaymentMethods'
 export { PaymentHistory } from './PaymentHistory'
 export { BillingPage } from './BillingPage'
+=======
+>>>>>>> origin/copilot/build-customer-portal-dashboard

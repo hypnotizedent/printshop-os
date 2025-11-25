@@ -127,6 +127,7 @@ export interface CustomerUser {
   avatar?: string
   role: 'customer'
 }
+<<<<<<< HEAD
 
 // Billing & Invoicing Types
 export type InvoiceStatus = 'Paid' | 'Pending' | 'Overdue' | 'Void'
@@ -193,3 +194,5 @@ export interface AccountBalance {
   currentAmount: number
   invoiceCount: number
 }
+=======
+>>>>>>> origin/copilot/build-customer-portal-dashboard
