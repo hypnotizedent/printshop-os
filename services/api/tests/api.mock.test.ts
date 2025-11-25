@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { mockPrintavoSuccessResponses, mockPrintavoEdgeCases } from '../mocks/printavo-responses';
-import { mockStrapiSuccessResponses, mockStrapiEdgeCases } from '../mocks/strapi-responses';
+// import { mockStrapiSuccessResponses, mockStrapiEdgeCases } from '../mocks/strapi-responses';
 import { transformPrintavoToStrapi, transformPrintavoOrdersBatch } from '../lib/printavo-mapper';
 import { OrderStatus, validateStrapiOrder } from '../lib/strapi-schema';
 

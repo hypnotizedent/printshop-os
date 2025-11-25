@@ -32,7 +32,8 @@
     "lib/**/*",
     "scripts/**/*",
     "tests/**/*",
-    "mocks/**/*"
+    "mocks/**/*",
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

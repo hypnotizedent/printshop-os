@@ -679,7 +679,7 @@ export function getMockStrapiOrder(documentId: string): any {
   const allOrders = [
     ...Object.values(mockStrapiSuccessResponses),
     ...Object.values(mockStrapiEdgeCases),
-  ].filter((item) => item?.data?.documentId === documentId);
+  ].filter((item) => (item?.data as any)?.documentId === documentId);
 
   return allOrders.length > 0 ? allOrders[0].data : null;
 }

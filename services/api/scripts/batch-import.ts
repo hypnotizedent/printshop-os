@@ -6,7 +6,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import {
-  transformPrintavoToStrapi,
   transformPrintavoOrdersBatch,
   type PrintavoOrder,
 } from '../lib/printavo-mapper';
@@ -119,9 +118,8 @@ class ImportLogger {
 
     this.logs.push(entry);
 
-    const formattedMessage = `[${entry.timestamp.toISOString()}] [${level.toUpperCase()}] ${message}${
-      data ? ' ' + JSON.stringify(data) : ''
-    }`;
+    const formattedMessage = `[${entry.timestamp.toISOString()}] [${level.toUpperCase()}] ${message}${data ? ' ' + JSON.stringify(data) : ''
+      }`;
 
     // Use custom logger if provided
     if (this.customLogger) {
@@ -315,13 +313,7 @@ export class PrintavoBatchImporter {
     }
   }
 
-  /**
-   * Load Printavo orders from an array
-   */
-  private loadOrdersFromArray(orders: PrintavoOrder[]): PrintavoOrder[] {
-    this.logger.log('info', 'Orders loaded from array', { count: orders.length });
-    return orders;
-  }
+
 
   /**
    * Save successful orders to JSON file

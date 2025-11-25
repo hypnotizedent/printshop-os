@@ -1,7 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/lib', '<rootDir>/src'],
+  roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/lib', '<rootDir>/src', '<rootDir>/src/__tests__'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   moduleNameMapper: {
     '^@lib/(.*)$': '<rootDir>/lib/$1',
@@ -13,10 +13,11 @@ module.exports = {
     'lib/**/*.ts',
     'scripts/**/*.ts',
     'src/**/*.ts',
-    '!src/index.ts',
+
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/dist/**',
+    '!**/__tests__/**',
   ],
   coverageThreshold: {
     global: {

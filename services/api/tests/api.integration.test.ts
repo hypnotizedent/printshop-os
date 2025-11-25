@@ -6,15 +6,12 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import {
   mockPrintavoSuccessResponses,
-  mockPrintavoErrorResponses,
   mockPrintavoEdgeCases,
   getAllMockOrderIds,
 } from '../mocks/printavo-responses';
-import {
-  mockStrapiSuccessResponses,
-  mockStrapiErrorResponses,
-  mockStrapiEdgeCases,
-} from '../mocks/strapi-responses';
+// import {
+//   mockStrapiSuccessResponses,
+// } from '../mocks/strapi-responses';
 import { transformPrintavoToStrapi } from '../lib/printavo-mapper';
 import { OrderStatus } from '../lib/strapi-schema';
 
@@ -36,7 +33,7 @@ class MockAPIClient {
     this.errorCode = 200;
   }
 
-  async getOrders(params?: { page?: number; limit?: number }) {
+  async getOrders(_params?: { page?: number; limit?: number }) {
     if (this.shouldThrow) {
       throw new Error(`API Error ${this.errorCode}`);
     }
@@ -902,7 +899,7 @@ describe('Comprehensive API Integration Tests', () => {
       ];
 
       for (const order of edgeCaseOrders) {
-        expect(() => transformPrintavoToStrapi(order)).not.toThrow();
+        expect(() => transformPrintavoToStrapi(order as any)).not.toThrow();
       }
     });
   });
