@@ -15,6 +15,7 @@
     "sourceMap": true,
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -41,9 +42,19 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
+=======
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "paths": {
+      "@analytics/*": ["analytics/*"],
+      "@tests/*": ["__tests__/*"]
+>>>>>>> origin/copilot/build-productivity-dashboard
     }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
+<<<<<<< HEAD
 >>>>>>> origin/copilot/build-time-clock-job-detail
+=======
+>>>>>>> origin/copilot/build-productivity-dashboard
 }

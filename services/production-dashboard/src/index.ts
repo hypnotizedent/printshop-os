@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Production Dashboard Server
  * Main entry point for time clock and production tracking
@@ -88,3 +89,12 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
+=======
+// Production Dashboard Analytics Service Entry Point
+
+export { MetricsService } from './analytics/metrics.service';
+export { ReportsService } from './analytics/reports.service';
+export { AnalyticsController } from './analytics/analytics.controller';
+export * from './analytics/types';
+export { default as analyticsRoutes } from './analytics/analytics.routes';
+>>>>>>> origin/copilot/build-productivity-dashboard

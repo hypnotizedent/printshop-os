@@ -3,6 +3,7 @@ module.exports = {
   testEnvironment: 'node',
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   roots: ['<rootDir>'],
   testMatch: ['**/__tests__/**/*.test.ts'],
   moduleFileExtensions: ['ts', 'js', 'json'],
@@ -34,11 +35,21 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+=======
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  moduleNameMapper: {
+    '^@analytics/(.*)$': '<rootDir>/src/analytics/$1',
+    '^@tests/(.*)$': '<rootDir>/src/__tests__/$1',
+>>>>>>> origin/copilot/build-productivity-dashboard
   },
   collectCoverageFrom: [
     'src/**/*.ts',
     '!**/*.d.ts',
+<<<<<<< HEAD
 >>>>>>> origin/copilot/build-time-clock-job-detail
+=======
+>>>>>>> origin/copilot/build-productivity-dashboard
     '!**/node_modules/**',
     '!**/dist/**',
   ],
@@ -51,6 +62,7 @@ module.exports = {
     },
   },
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+<<<<<<< HEAD
   globals: {
     'ts-jest': {
       tsconfig: {
@@ -63,4 +75,6 @@ module.exports = {
 >>>>>>> origin/copilot/build-sop-library-dashboard
 =======
 >>>>>>> origin/copilot/build-time-clock-job-detail
+=======
+>>>>>>> origin/copilot/build-productivity-dashboard
 };
