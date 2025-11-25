@@ -1,7 +1,11 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+<<<<<<< HEAD
   roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/lib', '<rootDir>/src', '<rootDir>/src/__tests__'],
+=======
+  roots: ['<rootDir>/tests', '<rootDir>/scripts', '<rootDir>/src'],
+>>>>>>> origin/copilot/add-role-based-access-control
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   moduleNameMapper: {
     '^@lib/(.*)$': '<rootDir>/lib/$1',
@@ -13,7 +17,10 @@ module.exports = {
     'lib/**/*.ts',
     'scripts/**/*.ts',
     'src/**/*.ts',
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/copilot/add-role-based-access-control
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/dist/**',

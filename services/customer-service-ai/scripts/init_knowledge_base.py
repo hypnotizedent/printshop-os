@@ -9,9 +9,21 @@ import glob
 from typing import List, Dict
 
 # Configuration
+# Determine project root relative to this script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Go up 3 levels from scripts/ -> services/ -> customer-service-ai/ -> root/
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../../"))
+
+# Configuration
 KB_ROOT = "/app/data/intelligence/knowledge_base"  # Path inside Docker container
-# If running locally for testing, use relative path
+
+# If running locally (not in Docker), use calculated path
 if not os.path.exists(KB_ROOT):
+    KB_ROOT = os.path.join(PROJECT_ROOT, "data/intelligence/knowledge_base")
+
+if not os.path.exists(KB_ROOT):
+    print(f"⚠️  Warning: Knowledge base directory not found at {KB_ROOT}")
+    # Try one more fallback - current working directory
     KB_ROOT = os.path.join(os.getcwd(), "data/intelligence/knowledge_base")
 
 def read_markdown_file(file_path: str) -> str:

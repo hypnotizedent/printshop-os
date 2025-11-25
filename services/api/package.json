@@ -26,6 +26,7 @@
   "author": "PrintShop OS Team",
   "license": "MIT",
   "devDependencies": {
+    "@types/express": "^5.0.5",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "@types/supertest": "^6.0.3",
