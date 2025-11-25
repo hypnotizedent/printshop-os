@@ -127,3 +127,69 @@ export interface CustomerUser {
   avatar?: string
   role: 'customer'
 }
+
+// Billing & Invoicing Types
+export type InvoiceStatus = 'Paid' | 'Pending' | 'Overdue' | 'Void'
+export type PaymentStatus = 'Completed' | 'Pending' | 'Failed' | 'Refunded'
+export type PaymentMethodType = 'Card' | 'Bank ACH' | 'PayPal'
+
+export interface InvoiceItem {
+  id: string
+  description: string
+  quantity: number
+  unitPrice: number
+  total: number
+}
+
+export interface Payment {
+  id: string
+  date: string
+  amount: number
+  paymentMethod: string
+  status: PaymentStatus
+  transactionId?: string
+}
+
+export interface PaymentMethod {
+  id: string
+  type: PaymentMethodType
+  last4: string
+  expiryMonth?: number
+  expiryYear?: number
+  isDefault: boolean
+  token: string
+}
+
+export interface Invoice {
+  id: string
+  invoiceNumber: string
+  orderNumber: string
+  invoiceDate: string
+  dueDate: string
+  status: InvoiceStatus
+  subtotal: number
+  tax: number
+  shipping: number
+  total: number
+  amountPaid: number
+  balance: number
+  lineItems: InvoiceItem[]
+  paymentHistory: Payment[]
+  customerName: string
+  customerEmail: string
+  customerAddress?: {
+    street: string
+    street2?: string
+    city: string
+    state: string
+    zip: string
+    country?: string
+  }
+}
+
+export interface AccountBalance {
+  totalOutstanding: number
+  overdueAmount: number
+  currentAmount: number
+  invoiceCount: number
+}
