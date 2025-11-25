@@ -2,6 +2,27 @@
 
 ## 2025-11-25
 
+### [Supplier Integration] SanMar - Phase 3 Complete ✅
+
+#### Full Catalog Download and Validation
+- ✅ Downloaded full EPDD catalog (14.7 MB ZIP → 495 MB CSV, 415,941 records)
+- ✅ Performance validated: 10,000 records → 61 products in 8 seconds
+- ✅ Persistence tested: JSONL storage working correctly
+- ✅ Documentation complete: SANMAR.md (560 lines)
+
+#### Performance Metrics
+- 1,000 records → 18 products (7s parsing + transformation)
+- 10,000 records → 61 products (8s, 0.8ms per record)
+- Memory: ~700-800 MB peak (full file)
+- Download: ~90s for 14.7 MB ZIP
+
+#### Status Update
+- AS Colour: ✅ Production (522 products)
+- SanMar: ✅ Core Complete (415K records, SFTP+CSV working)
+- S&S Activewear: ⏳ Next
+
+---
+
 ### Phase 2 Organization Cleanup ✅ COMPLETE
 
 #### Implementation Completed
