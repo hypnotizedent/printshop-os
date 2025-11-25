@@ -19,7 +19,11 @@ module.exports = {
     '^@lib/(.*)$': '<rootDir>/lib/$1',
     '^@mocks/(.*)$': '<rootDir>/mocks/$1',
     '^@scripts/(.*)$': '<rootDir>/scripts/$1',
+<<<<<<< HEAD
     '^@/(.*)$': '<rootDir>/src/$1',
+=======
+    '^uuid$': '<rootDir>/node_modules/uuid/dist/index.js',
+>>>>>>> origin/copilot/build-press-ready-checklist-system
   },
   collectCoverageFrom: [
     'lib/**/*.ts',
