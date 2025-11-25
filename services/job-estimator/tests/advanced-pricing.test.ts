@@ -363,7 +363,9 @@ describe('Advanced Pricing Engine', () => {
   });
 
   // ========== VOLUME DISCOUNT TESTS ==========
-  describe('Volume Discounts', () => {
+  // NOTE: Volume discounts are DISABLED to match Excel "Platinum Pricing 35" behavior
+  // These tests verify that the discount function exists but returns 0 (disabled)
+  describe('Volume Discounts (DISABLED)', () => {
     const baseOptions: QuoteOptions = {
       quantity: 100,
       service: 'screen',
@@ -374,61 +376,38 @@ describe('Advanced Pricing Engine', () => {
       isNewDesign: false,
     };
 
-    it('qty 1-49 should have 0% discount', () => {
+    it('getVolumeDiscount function should return values (but not applied)', () => {
+      // Function still exists and returns discount values
       expect(getVolumeDiscount(1)).toBe(0.0);
-      expect(getVolumeDiscount(25)).toBe(0.0);
-      expect(getVolumeDiscount(49)).toBe(0.0);
-    });
-
-    it('qty 50-99 should have 5% discount', () => {
       expect(getVolumeDiscount(50)).toBe(0.05);
-      expect(getVolumeDiscount(75)).toBe(0.05);
-      expect(getVolumeDiscount(99)).toBe(0.05);
-    });
-
-    it('qty 100-249 should have 8% discount', () => {
       expect(getVolumeDiscount(100)).toBe(0.08);
-      expect(getVolumeDiscount(150)).toBe(0.08);
-      expect(getVolumeDiscount(249)).toBe(0.08);
-    });
-
-    it('qty 250-499 should have 10% discount', () => {
       expect(getVolumeDiscount(250)).toBe(0.1);
-      expect(getVolumeDiscount(350)).toBe(0.1);
-      expect(getVolumeDiscount(499)).toBe(0.1);
-    });
-
-    it('qty 500-999 should have 12% discount', () => {
       expect(getVolumeDiscount(500)).toBe(0.12);
-      expect(getVolumeDiscount(750)).toBe(0.12);
-      expect(getVolumeDiscount(999)).toBe(0.12);
-    });
-
-    it('qty 1000+ should have 15% discount', () => {
       expect(getVolumeDiscount(1000)).toBe(0.15);
-      expect(getVolumeDiscount(5000)).toBe(0.15);
-      expect(getVolumeDiscount(10000)).toBe(0.15);
     });
 
-    it('should apply discount to final price', () => {
+    it('quotes should have volumeDiscount set to 0 (disabled)', () => {
+      const quote50 = generateQuote({ ...baseOptions, quantity: 50 });
+      const quote100 = generateQuote({ ...baseOptions, quantity: 100 });
+      const quote500 = generateQuote({ ...baseOptions, quantity: 500 });
+
+      // All quotes should have 0 discount applied
+      expect(quote50.volumeDiscount).toBe(0);
+      expect(quote100.volumeDiscount).toBe(0);
+      expect(quote500.volumeDiscount).toBe(0);
+    });
+
+    it('pricing should NOT decrease with higher quantities (no bulk discount)', () => {
       const quote50 = generateQuote({ ...baseOptions, quantity: 50 });
       const quote100 = generateQuote({ ...baseOptions, quantity: 100 });
 
       const unitPrice50 = quote50.finalRetailPrice / 50;
       const unitPrice100 = quote100.finalRetailPrice / 100;
 
-      // 100 units should have lower per-unit price
-      expect(unitPrice100).toBeLessThan(unitPrice50);
-    });
-
-    it('should have larger savings at higher quantities', () => {
-      const quote100 = generateQuote({ ...baseOptions, quantity: 100 });
-      const quote500 = generateQuote({ ...baseOptions, quantity: 500 });
-
-      const unitPrice100 = quote100.finalRetailPrice / 100;
-      const unitPrice500 = quote500.finalRetailPrice / 500;
-
-      expect(unitPrice500).toBeLessThan(unitPrice100);
+      // Unit prices should be equal (no volume discount applied)
+      // Small difference allowed due to setup fee amortization
+      const difference = Math.abs(unitPrice100 - unitPrice50);
+      expect(difference).toBeLessThan(0.15); // Within 15 cents due to setup fee spread
     });
   });
 
@@ -527,7 +506,7 @@ describe('Advanced Pricing Engine', () => {
     it('should include setup fee when isNewDesign is true', () => {
       const quote = generateQuote({ ...baseOptions, isNewDesign: true });
       expect(quote.setupFee).toBeGreaterThan(0);
-      expect(quote.setupFee).toBeCloseTo(74.28, 1);
+      expect(quote.setupFee).toBeCloseTo(34.83, 1); // M size = $34.83
     });
 
     it('should not include setup fee when isNewDesign is false', () => {
@@ -539,10 +518,11 @@ describe('Advanced Pricing Engine', () => {
       const quote50 = generateQuote({ ...baseOptions, quantity: 50, isNewDesign: true });
       const quote100 = generateQuote({ ...baseOptions, quantity: 100, isNewDesign: true });
 
-      // Setup fee should be the same
-      expect(quote50.setupFee).toBeCloseTo(quote100.setupFee, 1);
+      // Setup fee should be the same (M size = $34.83)
+      expect(quote50.setupFee).toBeCloseTo(34.83, 1);
+      expect(quote100.setupFee).toBeCloseTo(34.83, 1);
 
-      // But subtotal per unit should be different
+      // But subtotal per unit should be different (setup fee amortization)
       expect(quote100.subtotal / 100).toBeLessThan(quote50.subtotal / 50);
     });
   });
@@ -747,7 +727,7 @@ describe('Advanced Pricing Engine', () => {
       expect(quote.addOnCost).toBeCloseTo(totalAddOnPrice, 1);
     });
 
-    it('should handle new design with high quantity discount', () => {
+    it('should handle new design with high quantity (no discount)', () => {
       const quote = generateQuote({
         quantity: 1000,
         service: 'screen',
@@ -755,8 +735,8 @@ describe('Advanced Pricing Engine', () => {
         isNewDesign: true,
       });
 
-      expect(quote.setupFee).toBeCloseTo(74.28, 1);
-      expect(quote.volumeDiscount).toBe(0.15);
+      expect(quote.setupFee).toBeCloseTo(34.83, 1); // M size default
+      expect(quote.volumeDiscount).toBe(0); // Volume discount disabled
       // Setup fee should be negligible per unit at 1000 qty
       expect(quote.subtotal / 1000).toBeLessThan(5.0);
     });
@@ -810,7 +790,8 @@ describe('Advanced Pricing Engine', () => {
   });
 
   // ========== BULK SAVINGS TESTS ==========
-  describe('Bulk Savings', () => {
+  // SKIPPED: Volume discounts disabled to match Excel pricing
+  describe.skip('Bulk Savings (DISABLED - No Volume Discounts)', () => {
     const baseOptions: QuoteOptions = {
       quantity: 100,
       service: 'screen',
@@ -854,7 +835,8 @@ describe('Advanced Pricing Engine', () => {
   });
 
   // ========== RUSH + DISCOUNT COMBINATION TESTS ==========
-  describe('Rush + Discount Combinations', () => {
+  // SKIPPED: Volume discounts disabled to match Excel pricing
+  describe.skip('Rush + Discount Combinations (DISABLED - No Volume Discounts)', () => {
     const baseOptions: QuoteOptions = {
       quantity: 100,
       service: 'screen',
