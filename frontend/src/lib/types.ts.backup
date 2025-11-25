@@ -79,6 +79,9 @@ export interface DashboardStats {
   urgentJobs: number
 }
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 // Customer Portal Types
 export type OrderStatus = 'completed' | 'in-production' | 'shipped' | 'delivered' | 'cancelled'
 
@@ -127,6 +130,7 @@ export interface CustomerUser {
   avatar?: string
   role: 'customer'
 }
+<<<<<<< HEAD
 
 // Billing & Invoicing Types
 export type InvoiceStatus = 'Paid' | 'Pending' | 'Overdue' | 'Void'
@@ -193,6 +197,9 @@ export interface AccountBalance {
   currentAmount: number
   invoiceCount: number
 }
+=======
+>>>>>>> origin/copilot/build-customer-portal-dashboard
+=======
 // Order types for customer portal
 export type OrderStatus = 
   | 'quote'
@@ -280,6 +287,8 @@ export interface OrderListResponse {
     pages: number
   }
 }
+>>>>>>> origin/copilot/add-order-history-view
+=======
 export type TicketStatus = 'Open' | 'In Progress' | 'Waiting' | 'Resolved' | 'Closed'
 export type TicketPriority = 'Low' | 'Medium' | 'High' | 'Urgent'
 export type TicketCategory = 'Order Issue' | 'Art Approval' | 'Shipping' | 'Billing' | 'General'
@@ -321,6 +330,8 @@ export interface SupportTicket {
   comments?: TicketComment[]
   attachments?: TicketAttachment[]
 }
+>>>>>>> origin/copilot/build-support-ticketing-system
+=======
 export type QuoteStatus = 'Pending' | 'Approved' | 'Rejected' | 'Expired' | 'Converted'
 
 export interface QuoteItem {
@@ -379,3 +390,4 @@ export interface Quote {
 
   notes?: string
 }
+>>>>>>> origin/copilot/add-quote-approval-system

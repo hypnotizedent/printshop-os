@@ -135,12 +135,12 @@ export class AuthController {
    */
   static async setupTwoFactor(req: AuthRequest, res: Response): Promise<void> {
     try {
-      if (!req.user) {
+      if (!req.authUser) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
 
-      const result = await AuthService.setupTwoFactor(req.user.userId);
+      const result = await AuthService.setupTwoFactor(req.authUser.userId);
 
       res.status(200).json({
         message: '2FA setup initiated. Please scan the QR code with your authenticator app.',
@@ -160,7 +160,7 @@ export class AuthController {
    */
   static async enableTwoFactor(req: AuthRequest, res: Response): Promise<void> {
     try {
-      if (!req.user) {
+      if (!req.authUser) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
@@ -172,7 +172,7 @@ export class AuthController {
         return;
       }
 
-      await AuthService.enableTwoFactor(req.user.userId, code);
+      await AuthService.enableTwoFactor(req.authUser.userId, code);
 
       res.status(200).json({
         message: '2FA enabled successfully',

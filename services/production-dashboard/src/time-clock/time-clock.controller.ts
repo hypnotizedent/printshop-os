@@ -115,7 +115,7 @@ export class TimeClockController {
    * Get active timers
    * GET /api/production/time-clock/active
    */
-  getActive = async (req: Request, res: Response): Promise<void> => {
+  getActive = async (_req: Request, res: Response): Promise<void> => {
     try {
       const entries = await this.service.getActiveEntries();
       res.status(200).json({ data: entries });

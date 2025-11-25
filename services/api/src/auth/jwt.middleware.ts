@@ -5,11 +5,15 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from './auth.service';
+import { Role } from '../production-dashboard/auth/roles';
 
 export interface AuthRequest extends Request {
-  user?: {
-    userId: string;
+  authUser?: {
+    id: string;
+    name: string;
     email: string;
+    role: Role;
+    userId: string; // Keep for backward compatibility
   };
 }
 
@@ -37,9 +41,18 @@ export function authenticateToken(
       return;
     }
 
-    req.user = {
-      userId: payload.userId,
-      email: payload.email,
+    const user = AuthService.getUserById(payload.userId);
+    if (!user) {
+      res.status(401).json({ error: 'User not found' });
+      return;
+    }
+
+    req.authUser = {
+      id: user.id,
+      userId: user.id,
+      email: user.email,
+      name: `${user.firstName} ${user.lastName}`,
+      role: user.role,
     };
 
     next();
@@ -63,10 +76,16 @@ export function optionalAuth(
     if (token) {
       const payload = AuthService.verifyToken(token);
       if (payload.type === 'access') {
-        req.user = {
-          userId: payload.userId,
-          email: payload.email,
-        };
+        const user = AuthService.getUserById(payload.userId);
+        if (user) {
+          req.authUser = {
+            id: user.id,
+            userId: user.id,
+            email: user.email,
+            name: `${user.firstName} ${user.lastName}`,
+            role: user.role,
+          };
+        }
       }
     }
     next();

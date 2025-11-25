@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-generator client {
-  provider = "prisma-client-js"
-}
-=======
 // Prisma schema for supplier sync service
 
 generator client {
@@ -15,28 +10,9 @@ datasource db {
 }
 
 model Supplier {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model Product {
-  id          String   @id @default(cuid())
-  supplierId  String
-  supplier    Supplier @relation(fields: [supplierId], references: [id])
->>>>>>> origin/copilot/build-product-variants-system
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-model Supplier {
   id                String              @id @default(cuid())
   name              String              @unique
-  code              String              @unique
+  code              String?             @unique
   apiUrl            String?
   isActive          Boolean             @default(true)
   createdAt         DateTime            @default(now())
@@ -58,26 +34,18 @@ model Product {
   imageUrls   String[]
   tags        String[]
   sizes       String[]
-<<<<<<< HEAD
-  colors      Json
+  colors      Json     // stores full color objects
   description String?
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  inventories SupplierInventory[]
-=======
-  colors      Json     // ✅ stores full color objects
-  description String?
-
+  
   variants    ProductVariant[]
+  inventories SupplierInventory[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
->>>>>>> origin/copilot/build-product-variants-system
 
   @@unique([supplierId, styleId], name: "supplierId_styleId")
 }
 
-<<<<<<< HEAD
 model SupplierInventory {
   id                String    @id @default(cuid())
   variantId         String
@@ -142,7 +110,8 @@ model InventoryChange {
   @@index([detectedAt])
   @@index([changeType])
   @@index([notified])
-=======
+}
+
 model ProductVariant {
   id               String   @id @default(cuid())
   productId        String
@@ -202,5 +171,4 @@ model SupplierSKU {
   @@unique([variantId, supplierId, supplierSKU])
   @@index([variantId])
   @@index([supplierSKU])
->>>>>>> origin/copilot/build-product-variants-system
 }

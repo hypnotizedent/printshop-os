@@ -130,7 +130,7 @@ export class AnalyticsController {
         45230,
         8
       );
-      
+
       res.json({
         success: true,
         data: overview,
@@ -151,7 +151,7 @@ export class AnalyticsController {
     try {
       const { id } = req.params;
       const period = (req.query.period as TimePeriod) || 'week';
-      
+
       const employee = mockTimeEntries.find(t => t.employeeId === id);
       if (!employee) {
         res.status(404).json({
@@ -188,7 +188,7 @@ export class AnalyticsController {
   static async getTeamMetrics(req: Request, res: Response): Promise<void> {
     try {
       const period = (req.query.period as TimePeriod) || 'week';
-      
+
       const teamMetrics = MetricsService.calculateTeamMetrics(
         period,
         mockJobEntries,
@@ -218,7 +218,7 @@ export class AnalyticsController {
       // Validate and sanitize query parameters to prevent injection
       const employeeId = req.query.employeeId as string | undefined;
       const jobType = req.query.jobType as string | undefined;
-      
+
       // Basic validation to prevent injection
       if (employeeId && !/^[a-zA-Z0-9-]+$/.test(employeeId)) {
         res.status(400).json({
@@ -227,7 +227,7 @@ export class AnalyticsController {
         });
         return;
       }
-      
+
       if (jobType && !/^[a-zA-Z0-9\s-]+$/.test(jobType)) {
         res.status(400).json({
           success: false,
@@ -235,9 +235,9 @@ export class AnalyticsController {
         });
         return;
       }
-      
+
       let efficiencyData = MetricsService.generateEfficiencyData(mockJobEntries);
-      
+
       // Apply filters
       if (employeeId) {
         efficiencyData = efficiencyData.filter(d => d.employeeId === employeeId);
@@ -265,7 +265,7 @@ export class AnalyticsController {
   static async getThroughput(req: Request, res: Response): Promise<void> {
     try {
       const period = (req.query.period as TimePeriod) || 'week';
-      
+
       const teamMetrics = MetricsService.calculateTeamMetrics(
         period,
         mockJobEntries,
@@ -297,7 +297,7 @@ export class AnalyticsController {
   static async getTrends(req: Request, res: Response): Promise<void> {
     try {
       const groupBy = (req.query.groupBy as 'day' | 'week' | 'month') || 'day';
-      
+
       const efficiencyData = MetricsService.generateEfficiencyData(mockJobEntries);
       const trends = MetricsService.generateTrendData(efficiencyData, groupBy);
 
@@ -317,7 +317,7 @@ export class AnalyticsController {
    * GET /api/production/metrics/leaderboard
    * Top performers leaderboard
    */
-  static async getLeaderboard(req: Request, res: Response): Promise<void> {
+  static async getLeaderboard(_req: Request, res: Response): Promise<void> {
     try {
       const leaderboard = MetricsService.generateLeaderboard(
         mockJobEntries,
@@ -343,7 +343,7 @@ export class AnalyticsController {
   static async generateReport(req: Request, res: Response): Promise<void> {
     try {
       const config: ReportConfig = req.body;
-      
+
       // Validate config
       if (!config.reportType || !config.dateRange || !config.format) {
         res.status(400).json({
@@ -417,7 +417,7 @@ export class AnalyticsController {
    * GET /api/production/metrics/alerts
    * Manager alerts for low efficiency
    */
-  static async getAlerts(req: Request, res: Response): Promise<void> {
+  static async getAlerts(_req: Request, res: Response): Promise<void> {
     try {
       const employeeMetrics = mockTimeEntries.map(emp =>
         MetricsService.calculateEmployeeMetrics(

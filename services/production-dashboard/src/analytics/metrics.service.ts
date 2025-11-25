@@ -2,7 +2,6 @@
 
 import {
   EmployeeMetrics,
-  EmployeeSummary,
   TeamMetrics,
   EfficiencyData,
   JobEntry,
@@ -160,7 +159,7 @@ export class MetricsService {
       const empJobs = completedJobs.filter(job => job.employeeId === empId);
       const empTime = timeEntries.filter(time => time.employeeId === empId);
       const empName = empTime[0]?.employeeName || 'Unknown';
-      
+
       const empEstimated = empJobs.reduce((sum, job) => sum + job.estimatedTime, 0);
       const empActual = empJobs.reduce((sum, job) => sum + job.actualTime, 0);
       const empEfficiency = this.calculateEfficiencyRate(empEstimated, empActual);
@@ -210,13 +209,13 @@ export class MetricsService {
   static generateDashboardOverview(
     period: TimePeriod,
     jobEntries: JobEntry[],
-    timeEntries: TimeEntry[],
+    _timeEntries: TimeEntry[],
     revenue: number,
     clockedInEmployees: number
   ): DashboardOverview {
     const completedJobs = jobEntries.filter(job => job.completed);
     const inProgressJobs = jobEntries.filter(job => !job.completed);
-    
+
     const totalEstimatedHours = completedJobs.reduce((sum, job) => sum + job.estimatedTime, 0);
     const totalActualHours = completedJobs.reduce((sum, job) => sum + job.actualTime, 0);
     const teamEfficiency = this.calculateEfficiencyRate(totalEstimatedHours, totalActualHours);
@@ -251,7 +250,7 @@ export class MetricsService {
       const empJobs = completedJobs.filter(job => job.employeeId === empId);
       const empTime = timeEntries.filter(time => time.employeeId === empId);
       const empName = empTime[0]?.employeeName || 'Unknown';
-      
+
       const empEstimated = empJobs.reduce((sum, job) => sum + job.estimatedTime, 0);
       const empActual = empJobs.reduce((sum, job) => sum + job.actualTime, 0);
       const empEfficiency = this.calculateEfficiencyRate(empEstimated, empActual);
@@ -287,7 +286,7 @@ export class MetricsService {
       .map(job => {
         const variance = this.calculateVariance(job.estimatedTime, job.actualTime);
         const variancePercent = this.calculateVariancePercent(job.estimatedTime, job.actualTime);
-        
+
         return {
           date: job.completedDate || new Date().toISOString(),
           employeeId: job.employeeId,
@@ -309,11 +308,11 @@ export class MetricsService {
   ): TrendDataPoint[] {
     // Group efficiency data by date
     const dataByDate = new Map<string, { total: number; count: number }>();
-    
+
     efficiencyData.forEach(data => {
       const date = new Date(data.date);
       let key: string;
-      
+
       if (groupBy === 'day') {
         key = date.toISOString().split('T')[0];
       } else if (groupBy === 'week') {
@@ -323,7 +322,7 @@ export class MetricsService {
       } else {
         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       }
-      
+
       const efficiency = this.calculateEfficiencyRate(data.estimatedTime, data.actualTime);
       const existing = dataByDate.get(key) || { total: 0, count: 0 };
       dataByDate.set(key, {

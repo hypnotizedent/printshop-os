@@ -8,7 +8,7 @@ import { SOPCreateInput, SOPUpdateInput, SOPSearchQuery } from './types';
 
 // Extend Express Request to include user property
 interface AuthenticatedRequest extends Request {
-  user?: {
+  authUser?: {
     id: string;
   };
 }
@@ -17,7 +17,7 @@ interface AuthenticatedRequest extends Request {
  * Helper to get user ID from request
  */
 function getUserId(req: Request): string | undefined {
-  return (req as AuthenticatedRequest).user?.id;
+  return (req as AuthenticatedRequest).authUser?.id;
 }
 
 export class SOPController {
@@ -69,11 +69,11 @@ export class SOPController {
   async create(req: Request, res: Response): Promise<Response> {
     try {
       const input: SOPCreateInput = req.body;
-      
+
       // Basic validation
       if (!input.title || !input.category || !input.summary || !input.content) {
-        return res.status(400).json({ 
-          error: 'Missing required fields: title, category, summary, content' 
+        return res.status(400).json({
+          error: 'Missing required fields: title, category, summary, content'
         });
       }
 
@@ -178,7 +178,7 @@ export class SOPController {
    * GET /api/production/sops/analytics
    * Get usage analytics
    */
-  async analytics(req: Request, res: Response): Promise<Response> {
+  async analytics(_req: Request, res: Response): Promise<Response> {
     try {
       const analytics = await sopService.getAnalytics();
       return res.status(200).json(analytics);

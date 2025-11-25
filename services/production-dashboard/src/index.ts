@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * Production Dashboard Server
  * Main entry point for time clock and production tracking
@@ -34,18 +33,19 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    res.sendStatus(200);
+    return;
   }
   next();
 });
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'production-dashboard' });
 });
 
 // Make services available via request object
-app.use((req: any, res: Response, next: NextFunction) => {
+app.use((req: any, _res: Response, next: NextFunction) => {
   req.services = services;
   next();
 });
@@ -57,7 +57,7 @@ app.use('/api/production', createTimeClockRoutes());
 wsService.initialize(server);
 
 // Error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
@@ -89,12 +89,10 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
-=======
-// Production Dashboard Analytics Service Entry Point
 
+// Production Dashboard Analytics Service Exports
 export { MetricsService } from './analytics/metrics.service';
 export { ReportsService } from './analytics/reports.service';
 export { AnalyticsController } from './analytics/analytics.controller';
 export * from './analytics/types';
 export { default as analyticsRoutes } from './analytics/analytics.routes';
->>>>>>> origin/copilot/build-productivity-dashboard

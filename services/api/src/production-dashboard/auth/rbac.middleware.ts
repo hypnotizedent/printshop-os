@@ -3,7 +3,8 @@
  * Express middleware for protecting routes based on permissions
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthRequest } from '../../auth/jwt.middleware';
 import { Permission } from './roles';
 import { permissionsService, User } from './permissions.service';
 import { auditService } from './audit.service';
@@ -21,20 +22,20 @@ declare global {
  * Middleware to require a specific permission
  */
 export const requirePermission = (permission: Permission) => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user;
-      
+      const user = req.authUser;
+
       if (!user) {
         res.status(401).json({ error: 'Unauthorized - No user found' });
         return;
       }
-      
+
       const hasPermission = await permissionsService.userHasPermission(
         user,
         permission
       );
-      
+
       if (!hasPermission) {
         // Log unauthorized attempt
         await auditService.log({
@@ -47,14 +48,14 @@ export const requirePermission = (permission: Permission) => {
           timestamp: new Date(),
           success: false
         });
-        
-        res.status(403).json({ 
+
+        res.status(403).json({
           error: 'Forbidden - Insufficient permissions',
-          required: permission 
+          required: permission
         });
         return;
       }
-      
+
       next();
     } catch (error) {
       console.error('Permission check error:', error);
@@ -67,20 +68,20 @@ export const requirePermission = (permission: Permission) => {
  * Middleware to require any of the specified permissions
  */
 export const requireAnyPermission = (permissions: Permission[]) => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user;
-      
+      const user = req.authUser;
+
       if (!user) {
         res.status(401).json({ error: 'Unauthorized - No user found' });
         return;
       }
-      
+
       const hasPermission = await permissionsService.userHasAnyPermission(
         user,
         permissions
       );
-      
+
       if (!hasPermission) {
         // Log unauthorized attempt
         await auditService.log({
@@ -93,14 +94,14 @@ export const requireAnyPermission = (permissions: Permission[]) => {
           timestamp: new Date(),
           success: false
         });
-        
-        res.status(403).json({ 
+
+        res.status(403).json({
           error: 'Forbidden - Insufficient permissions',
-          required: permissions 
+          required: permissions
         });
         return;
       }
-      
+
       next();
     } catch (error) {
       console.error('Permission check error:', error);
@@ -113,20 +114,20 @@ export const requireAnyPermission = (permissions: Permission[]) => {
  * Middleware to require all of the specified permissions
  */
 export const requireAllPermissions = (permissions: Permission[]) => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = req.user;
-      
+      const user = req.authUser;
+
       if (!user) {
         res.status(401).json({ error: 'Unauthorized - No user found' });
         return;
       }
-      
+
       const hasPermissions = await permissionsService.userHasAllPermissions(
         user,
         permissions
       );
-      
+
       if (!hasPermissions) {
         // Log unauthorized attempt
         await auditService.log({
@@ -139,14 +140,14 @@ export const requireAllPermissions = (permissions: Permission[]) => {
           timestamp: new Date(),
           success: false
         });
-        
-        res.status(403).json({ 
+
+        res.status(403).json({
           error: 'Forbidden - Insufficient permissions',
-          required: permissions 
+          required: permissions
         });
         return;
       }
-      
+
       next();
     } catch (error) {
       console.error('Permission check error:', error);
@@ -159,9 +160,9 @@ export const requireAllPermissions = (permissions: Permission[]) => {
  * Middleware to log successful access
  */
 export const logAccess = (action: string, resource: string) => {
-  return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-    const user = req.user;
-    
+  return async (req: AuthRequest, _res: Response, next: NextFunction): Promise<void> => {
+    const user = req.authUser;
+
     if (user) {
       await auditService.log({
         userId: user.id,
@@ -175,7 +176,7 @@ export const logAccess = (action: string, resource: string) => {
         success: true
       });
     }
-    
+
     next();
   };
 };

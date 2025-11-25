@@ -149,8 +149,8 @@ export class TimeClockService {
     }
 
     // Get employee hourly rate
-    const employeeResponse = await this.axiosInstance.get(`/api/employees/${request.employeeId}`);
-    const hourlyRate = employeeResponse.data.data.attributes.hourlyRate || DEFAULT_HOURLY_RATE;
+    // const employeeResponse = await this.axiosInstance.get(`/api/employees/${request.employeeId}`);
+    // const hourlyRate = employeeResponse.data.data.attributes.hourlyRate || DEFAULT_HOURLY_RATE;
 
     // Create new time entry
     const response = await this.axiosInstance.post('/api/time-clock-entries', {
@@ -192,9 +192,10 @@ export class TimeClockService {
     // Get employee hourly rate
     const employeeId = entry.employee?.id || entry.employee;
     const employeeResponse = await this.axiosInstance.get(`/api/employees/${employeeId}`);
+    // Calculate cost based on employee hourly rate (mocked for now)
     const hourlyRate = employeeResponse.data.data.attributes.hourlyRate || DEFAULT_HOURLY_RATE;
-
-    const laborCost = (productiveTime / 60) * hourlyRate;
+    const durationHours = productiveTime / 60;
+    const laborCost = durationHours * hourlyRate;
 
     const response = await this.axiosInstance.put(`/api/time-clock-entries/${request.entryId}`, {
       data: {

@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
+import { Role } from '../production-dashboard/auth/roles';
 import { PasswordService } from './password.service';
 
 // JWT configuration
@@ -20,6 +21,7 @@ export interface User {
   passwordHash: string;
   firstName: string;
   lastName: string;
+  role: Role;
   phone?: string;
   isActive: boolean;
   emailVerified: boolean;
@@ -104,6 +106,7 @@ export class AuthService {
       passwordHash,
       firstName: data.firstName,
       lastName: data.lastName,
+      role: Role.ADMIN, // Default to ADMIN for now for testing
       phone: data.phone,
       isActive: false, // Requires activation
       emailVerified: false,
@@ -503,5 +506,9 @@ export class AuthService {
 
   static getAllUsers(): User[] {
     return Array.from(users.values());
+  }
+
+  static getUserById(id: string): User | undefined {
+    return users.get(id);
   }
 }
