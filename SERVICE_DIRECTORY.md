@@ -351,6 +351,11 @@ printshop-strapi/
 │   │   │   ├── controllers/job.ts        # ✅ TypeScript
 │   │   │   ├── routes/job.ts             # ✅ TypeScript
 │   │   │   └── services/job.ts           # ✅ TypeScript
+│   │   ├── product/                      # ✅ Supplier Product Catalog
+│   │   │   ├── content-types/product/schema.json
+│   │   │   ├── controllers/product.ts
+│   │   │   ├── routes/product.ts
+│   │   │   └── services/product.ts
 │   │   ├── color/
 │   │   ├── sop/
 │   │   ├── price-calculation/
@@ -368,13 +373,14 @@ printshop-strapi/
 **Content Types (All Working):**
 | Content Type | API Endpoint | Status |
 |-------------|--------------|--------|
-| customer | `/api/customers` | ✅ 200 |
-| order | `/api/orders` | ✅ 200 |
+| customer | `/api/customers` | ✅ 336 records |
+| order | `/api/orders` | ✅ 831 records |
 | job | `/api/jobs` | ✅ 200 |
 | color | `/api/colors` | ✅ 200 |
 | sop | `/api/sops` | ✅ 200 |
 | price-calculation | `/api/price-calculations` | ✅ 200 |
 | pricing-rule | `/api/pricing-rules` | ✅ 200 |
+| product | `/api/products` | ✅ 18+ records (supplier SKUs) |
 
 **IMPORTANT:** Strapi 5 requires TypeScript files. JavaScript files are NOT compiled.  
 See: `docs/reference/STRAPI_TYPESCRIPT_API_FIX.md`
@@ -483,11 +489,23 @@ data/
 ```
 scripts/
 ├── import-products.js        # Import products to Strapi
+├── sync-products-to-strapi.js # ✅ Sync supplier SKUs to Strapi Product API
 ├── sync-suppliers.js         # Run supplier sync
+├── import-2025-customers.py  # ✅ Import 2025 Printavo customers
+├── import-2025-customers.sh  # Shell wrapper for customer import
+├── link-orders-customers.py  # ✅ Link orders to customer records
 ├── generate-test-data.js     # Create test fixtures
 ├── backup-db.sh              # Database backup
 └── deploy.sh                 # Deployment script
 ```
+
+**Key Import Scripts:**
+- `sync-products-to-strapi.js` - Syncs supplier products (JSONL) to Strapi Product API
+  - Usage: `node scripts/sync-products-to-strapi.js [--supplier sanmar|ascolour] [--limit N] [--dry-run]`
+  - Source: `services/supplier-sync/data/ascolour/products.jsonl`
+  - Transforms: variants, pricing, availability, images
+- `import-2025-customers.py` - Imports 2025 Printavo customer data (335 customers)
+- `link-orders-customers.py` - Links orders to customers via Printavo customer ID
 
 ---
 
@@ -720,6 +738,14 @@ Redis
 ---
 
 ## Recent Updates
+
+**November 26, 2025 (Session 2):**
+- ✅ Created Product content type for supplier SKU catalog
+- ✅ Added `sync-products-to-strapi.js` script for supplier product sync
+- ✅ Synced 18 supplier products (test run) with full variant/pricing data
+- ✅ Imported 335 customers from 2025 Printavo data
+- ✅ Imported 831 orders from 2025 Printavo data
+- ✅ All 8 Strapi APIs now operational
 
 **November 26, 2025:**
 - ✅ Fixed all Strapi APIs (JS→TypeScript conversion)

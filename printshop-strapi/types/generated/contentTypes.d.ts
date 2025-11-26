@@ -709,6 +709,66 @@ export interface ApiPricingRulePricingRule extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiProductProduct extends Struct.CollectionTypeSchema {
+  collectionName: 'products';
+  info: {
+    description: 'Supplier products (SanMar, AS Colour, S&S Activewear)';
+    displayName: 'Product';
+    pluralName: 'products';
+    singularName: 'product';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    availability: Schema.Attribute.JSON;
+    brand: Schema.Attribute.String;
+    category: Schema.Attribute.Enumeration<
+      [
+        't-shirts',
+        'polos',
+        'sweatshirts',
+        'jackets',
+        'pants',
+        'shorts',
+        'hats',
+        'bags',
+        'accessories',
+        'other',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'other'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    images: Schema.Attribute.JSON;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    lastSyncedAt: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::product.product'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    pricing: Schema.Attribute.JSON;
+    publishedAt: Schema.Attribute.DateTime;
+    sku: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    supplier: Schema.Attribute.Enumeration<
+      ['sanmar', 'ascolour', 'ssactivewear']
+    > &
+      Schema.Attribute.Required;
+    supplierProductId: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    variants: Schema.Attribute.JSON;
+  };
+}
+
 export interface ApiSopSop extends Struct.CollectionTypeSchema {
   collectionName: 'sops';
   info: {
@@ -1285,6 +1345,7 @@ declare module '@strapi/strapi' {
       'api::order.order': ApiOrderOrder;
       'api::price-calculation.price-calculation': ApiPriceCalculationPriceCalculation;
       'api::pricing-rule.pricing-rule': ApiPricingRulePricingRule;
+      'api::product.product': ApiProductProduct;
       'api::sop.sop': ApiSopSop;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

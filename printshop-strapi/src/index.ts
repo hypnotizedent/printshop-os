@@ -55,6 +55,12 @@ export default {
         'api::pricing-rule.pricing-rule.create',
         'api::pricing-rule.pricing-rule.update',
         'api::pricing-rule.pricing-rule.delete',
+        // Product permissions
+        'api::product.product.find',
+        'api::product.product.findOne',
+        'api::product.product.create',
+        'api::product.product.update',
+        'api::product.product.delete',
       ];
 
       for (const action of allPermissions) {
@@ -122,7 +128,16 @@ export default {
         { action: 'api::job.job.delete' }
       ];
 
-      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions]) {
+      // Enable all permissions for product content type
+      const productPermissions = [
+        { action: 'api::product.product.find' },
+        { action: 'api::product.product.findOne' },
+        { action: 'api::product.product.create' },
+        { action: 'api::product.product.update' },
+        { action: 'api::product.product.delete' }
+      ];
+
+      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions]) {
         const existing = await strapi.db.query('admin::api-token-permission').findOne({
           where: { action: perm.action, token: token.id }
         });

@@ -1,0 +1,82 @@
+{
+  "kind": "collectionType",
+  "collectionName": "products",
+  "info": {
+    "singularName": "product",
+    "pluralName": "products",
+    "displayName": "Product",
+    "description": "Supplier products (SanMar, AS Colour, S&S Activewear)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "sku": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "brand": {
+      "type": "string"
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "t-shirts",
+        "polos",
+        "sweatshirts",
+        "jackets",
+        "pants",
+        "shorts",
+        "hats",
+        "bags",
+        "accessories",
+        "other"
+      ],
+      "default": "other"
+    },
+    "supplier": {
+      "type": "enumeration",
+      "enum": [
+        "sanmar",
+        "ascolour",
+        "ssactivewear"
+      ],
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "variants": {
+      "type": "json",
+      "required": false
+    },
+    "pricing": {
+      "type": "json",
+      "required": false
+    },
+    "images": {
+      "type": "json",
+      "required": false
+    },
+    "availability": {
+      "type": "json",
+      "required": false
+    },
+    "supplierProductId": {
+      "type": "string"
+    },
+    "lastSyncedAt": {
+      "type": "datetime"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
