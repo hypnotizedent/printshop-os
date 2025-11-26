@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant C as 👥 Customer
+    participant FE as Frontend
+    participant API as Strapi API
+    participant Queue as Redis Queue
+    participant WS as WebSocket
+    participant PD as Production Team
+    
+    C->>FE: Create Order
+    FE->>API: POST /api/orders<br/>{items, customer, total}
+    
+    API->>API: Create Order Record
+    API->>Queue: Enqueue 'order.created' job
+    API-->>FE: {orderId, status: 'pending'}
+    
+    Queue->>Queue: Process job
+    Queue->>API: Update status → 'in-production'
+    
+    Queue->>WS: Emit 'order:assigned'
+    WS->>PD: Real-time notification
+    
+    Note over PD: Production team sees<br/>new order in queue
+    
+    PD->>FE: View order details
+    FE->>API: GET /api/orders/:id
+    API-->>FE: {order details}

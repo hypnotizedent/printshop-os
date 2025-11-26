@@ -1,0 +1,27 @@
+flowchart TD
+    User[👤 User Login] --> Creds[Submit Credentials]
+    Creds --> Validate[Strapi Auth API]
+    
+    Validate --> Success{Valid?}
+    Success -->|Yes| JWT[Generate JWT Token<br/>exp: 7d]
+    Success -->|No| Error[❌ 401 Unauthorized]
+    
+    JWT --> Store[Store in Memory<br/>NOT localStorage]
+    
+    Store --> Request[API Request]
+    Request --> Header[Attach Authorization:<br/>Bearer {token}]
+    
+    Header --> APIGateway[API Gateway]
+    APIGateway --> VerifyJWT{Verify JWT}
+    
+    VerifyJWT -->|Valid| RBAC[Check Role Permissions]
+    VerifyJWT -->|Invalid/Expired| Error
+    
+    RBAC --> Allowed{Authorized?}
+    Allowed -->|Yes| Access[✅ Allow Access]
+    Allowed -->|No| Forbidden[❌ 403 Forbidden]
+    
+    style Success fill:#4caf50
+    style Error fill:#f44336
+    style Access fill:#4caf50
+    style Forbidden fill:#ff9800

@@ -5,10 +5,12 @@
   "description": "A Strapi application",
   "scripts": {
     "build": "strapi build",
+    "build:no-strict": "tsc --noEmit false || true && strapi build",
     "console": "strapi console",
     "deploy": "strapi deploy",
     "dev": "strapi develop",
     "develop": "strapi develop",
+    "develop:quick": "NODE_ENV=development strapi develop --no-build",
     "start": "strapi start",
     "strapi": "strapi",
     "test": "jest",

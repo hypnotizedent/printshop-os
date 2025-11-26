@@ -1,0 +1,24 @@
+flowchart TB
+    Trigger[Scheduled Cron<br/>or Manual CLI] --> Check{Cache Valid?}
+    
+    Check -->|Yes| Skip[Skip sync<br/>use cached data]
+    Check -->|No| Fetch[Fetch from Supplier API]
+    
+    Fetch --> Transform[Transform to<br/>UnifiedProduct schema]
+    Transform --> Match[Fuzzy match existing<br/>products in Strapi]
+    
+    Match --> Decision{Match Found?}
+    Decision -->|Yes| Update[Update existing product<br/>PATCH /api/products/:id]
+    Decision -->|No| Create[Create new product<br/>POST /api/products]
+    
+    Update --> Cache[Update Redis cache<br/>TTL: 24h]
+    Create --> Cache
+    
+    Cache --> Persist[Append to JSONL<br/>data/processed/suppliers/]
+    Persist --> Complete[✅ Sync complete]
+    
+    Skip --> Complete
+    
+    style Trigger fill:#4caf50
+    style Cache fill:#ff9800
+    style Complete fill:#4caf50

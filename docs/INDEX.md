@@ -1,8 +1,42 @@
 # 📚 PrintShop OS Documentation Index
 
-**Last Updated:** November 23, 2025  
-**Total Documentation:** 7,000+ lines across 5 strategy documents  
+**Last Updated:** November 26, 2025  
+**Total Documentation:** 10,000+ lines including architecture overview  
 **Status:** Complete & Production-Ready
+
+---
+
+## 🆕 NEW: Architecture Documentation (November 26, 2025)
+
+### High-Level Blueprint Agent (HLBPA) Generated
+**[ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md)** ⭐ **NEW - START HERE FOR SYSTEM UNDERSTANDING**
+- Complete system architecture with Mermaid diagrams
+- Interface-focused documentation
+- Data flow patterns and failure modes
+- External dependencies and integration points
+- Security architecture and performance characteristics
+- **Reading Time:** 30-45 minutes
+- **For:** Architects, developers, team leads, new contributors
+
+### Visual Architecture Diagrams
+**[diagrams/](diagrams/)** - Standalone Mermaid diagram files
+- `system-context.mmd` - System context diagram
+- `component-architecture.mmd` - Strapi internal structure
+- `data-flow-*.mmd` - Order creation, time clock, AI quote, supplier sync
+- `security-auth-flow.mmd` - Authentication and authorization flow
+- **View:** Render in GitHub or [Mermaid Live Editor](https://mermaid.live/)
+
+### 🔄 Documentation Synchronization Tools
+**[../ARCHITECTURE_SYNC_CHECKLIST.md](../ARCHITECTURE_SYNC_CHECKLIST.md)** - Complete sync checklist (8-9 hours)
+**[../SYNC_ACTION_PLAN.md](../SYNC_ACTION_PLAN.md)** - Quick-start action plan (2-3 hours)
+**[../QUICK_REFERENCE.md](../QUICK_REFERENCE.md)** - Quick reference card (print this!)
+**[../scripts/validate-docs.sh](../scripts/validate-docs.sh)** - Automated validation script
+
+**Current Status:** 2 critical issues remaining (see validation report)
+```bash
+# Check synchronization status
+./scripts/validate-docs.sh
+```
 
 ---
 

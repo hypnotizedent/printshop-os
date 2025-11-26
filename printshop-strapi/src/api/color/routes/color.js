@@ -1,0 +1,48 @@
+/**
+ * color router
+ */
+
+module.exports = {
+  routes: [
+    {
+      method: 'GET',
+      path: '/colors',
+      handler: 'color.find',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/colors/:id',
+      handler: 'color.findOne',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/colors',
+      handler: 'color.create',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/colors/:id',
+      handler: 'color.update',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/colors/:id',
+      handler: 'color.delete',
+      config: {
+        policies: [],
+      },
+    },
+  ],
+};

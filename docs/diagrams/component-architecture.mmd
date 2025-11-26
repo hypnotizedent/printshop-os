@@ -1,0 +1,45 @@
+graph TB
+    subgraph Strapi["🚀 Strapi CMS (Port 1337)"]
+        direction TB
+        
+        Admin[👤 Admin Panel<br/>/admin]
+        REST[📡 REST API<br/>/api/*]
+        
+        subgraph ContentTypes["📦 Content Types"]
+            CT1[color]
+            CT2[sop]
+            CT3[price-calculation]
+            CT4[pricing-rule]
+            CT5[customer<br/>employee<br/>time-clock-entry]
+        end
+        
+        subgraph Controllers["🎮 Controllers"]
+            CTRL1[Custom Controllers]
+            CTRL2[Core Controllers]
+        end
+        
+        subgraph Services["⚙️ Services"]
+            SVC1[Notification Service]
+            SVC2[Auth Service]
+        end
+        
+        Bootstrap[🔧 Bootstrap<br/>API Token Permissions<br/>WebSocket Setup]
+        
+        Admin --> REST
+        REST --> Controllers
+        Controllers --> ContentTypes
+        Controllers --> Services
+        Bootstrap --> REST
+    end
+    
+    subgraph DB["💾 Data Storage"]
+        PG[(PostgreSQL<br/>Primary DB)]
+        Redis[(Redis<br/>Cache + Queue)]
+        Files[📁 File Storage]
+    end
+    
+    Strapi --> DB
+    
+    WS[🔌 Socket.io<br/>WebSocket Server] --> Strapi
+    
+    style Strapi fill:#8e75ff,stroke:#333,stroke-width:2px

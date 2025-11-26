@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant E as 👷 Employee
+    participant UI as Production UI
+    participant API as Dashboard API<br/>:3001
+    participant WS as WebSocket Server
+    participant DB as Strapi/PostgreSQL
+    
+    E->>UI: Enter PIN & Clock In
+    UI->>API: POST /api/production/time-clock/in<br/>{employeePin, jobId}
+    API->>DB: Validate PIN (bcrypt)
+    DB-->>API: Employee verified
+    API->>DB: Create time-clock-entry
+    DB-->>API: Entry created
+    API->>WS: Broadcast 'employee:clocked-in'
+    WS-->>UI: Update all connected clients
+    API-->>UI: {success, entryId}
+    
+    Note over E,DB: Timer runs with real-time updates
+    
+    E->>UI: Clock Out
+    UI->>API: POST /api/production/time-clock/out
+    API->>DB: Update entry with clockOut
+    API->>DB: Calculate laborCost<br/>(hours × hourlyRate)
+    DB-->>API: Entry updated
+    API->>WS: Broadcast 'employee:clocked-out'
+    WS-->>UI: Update all clients
+    API-->>UI: {success, totalTime, laborCost}

@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant C as Customer
+    participant FE as Frontend
+    participant AI as AI Service
+    participant OpenAI as OpenAI Vision
+    participant Cache as Redis Cache
+    participant API as Strapi API
+    
+    C->>FE: Upload design file
+    FE->>AI: POST /analyze-inquiry<br/>{file, context}
+    
+    AI->>Cache: Check cache (1h TTL)
+    Cache-->>AI: Cache miss
+    
+    AI->>OpenAI: Analyze image<br/>GPT-4 Vision API
+    OpenAI-->>AI: {resolution, colors,<br/>printability, issues}
+    
+    AI->>AI: Generate recommendations<br/>(print method, size, material)
+    AI->>AI: Estimate cost<br/>based on analysis
+    
+    AI->>Cache: Store result
+    AI-->>FE: {analysis, suggestions,<br/>estimated_cost}
+    
+    Note over FE: Customer reviews<br/>AI recommendations
+    
+    C->>FE: Approve quote
+    FE->>API: POST /api/quotes<br/>{...approved_items}
+    API-->>FE: Quote created

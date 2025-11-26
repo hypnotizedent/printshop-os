@@ -1,25 +1,49 @@
 import type { Core } from '@strapi/strapi';
 import { Server } from 'socket.io';
-import { initializeQueueProcessor, shutdownQueueProcessor } from './services/queue-processor';
 import { setWebSocketInstance } from './services/notification';
 
 export default {
-  /**
-   * An asynchronous register function that runs before
-   * your application is initialized.
-   *
-   * This gives you an opportunity to extend code.
-   */
   register(/* { strapi }: { strapi: Core.Strapi } */) {},
 
-  /**
-   * An asynchronous bootstrap function that runs before
-   * your application gets started.
-   *
-   * This gives you an opportunity to set up your data model,
-   * run jobs, or perform some special logic.
-   */
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
+    // Set up API Token permissions for color and sop content types
+    const fullAccessTokens = await strapi.db.query('admin::api-token').findMany({
+      where: { type: 'full-access' }
+    });
+
+    for (const token of fullAccessTokens) {
+      // Enable all permissions for color content type
+      const colorPermissions = [
+        { action: 'api::color.color.find' },
+        { action: 'api::color.color.findOne' },
+        { action: 'api::color.color.create' },
+        { action: 'api::color.color.update' },
+        { action: 'api::color.color.delete' }
+      ];
+
+      // Enable all permissions for sop content type
+      const sopPermissions = [
+        { action: 'api::sop.sop.find' },
+        { action: 'api::sop.sop.findOne' },
+        { action: 'api::sop.sop.create' },
+        { action: 'api::sop.sop.update' },
+        { action: 'api::sop.sop.delete' }
+      ];
+
+      for (const perm of [...colorPermissions, ...sopPermissions]) {
+        const existing = await strapi.db.query('admin::api-token-permission').findOne({
+          where: { action: perm.action, token: token.id }
+        });
+
+        if (!existing) {
+          await strapi.db.query('admin::api-token-permission').create({
+            data: { ...perm, token: token.id }
+          });
+          strapi.log.info(`✅ Enabled ${perm.action} for token ${token.name}`);
+        }
+      }
+    }
+
     // Initialize WebSocket server
     const io = new Server(strapi.server.httpServer, {
       cors: {
@@ -32,13 +56,11 @@ export default {
     io.on('connection', (socket) => {
       strapi.log.info(`WebSocket client connected: ${socket.id}`);
 
-      // Join production team room
       socket.on('join:production-team', () => {
         socket.join('production-team');
         strapi.log.info(`Socket ${socket.id} joined production-team room`);
       });
 
-      // Join customer room
       socket.on('join:customer', (customerId: string) => {
         socket.join(`customer:${customerId}`);
         strapi.log.info(`Socket ${socket.id} joined customer:${customerId} room`);
@@ -49,23 +71,14 @@ export default {
       });
     });
 
-    // Set WebSocket instance for notification service
     setWebSocketInstance(io);
-
-    // Store io instance on strapi for global access
     (strapi as any).io = io;
 
-    // Initialize Bull queue processor
-    initializeQueueProcessor(strapi);
-
-    strapi.log.info('✅ Workflow automation system initialized');
     strapi.log.info('✅ WebSocket server started');
-    strapi.log.info('✅ Queue processor started');
+    strapi.log.info('✅ API Token permissions configured');
 
-    // Graceful shutdown handlers
     const shutdownHandler = async (signal: string) => {
       strapi.log.info(`${signal} received, shutting down gracefully...`);
-      await shutdownQueueProcessor(strapi);
       process.exit(0);
     };
 

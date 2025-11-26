@@ -1,6 +1,17 @@
 # PrintShop OS - System Architecture
 
-**Last Updated:** November 24, 2025
+**Last Updated:** November 26, 2025
+
+> **📚 Related Documentation:**
+> - **[ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md)** ⭐ **START HERE** - High-level system design with Mermaid diagrams (30-45 min read)
+> - **[Diagrams](docs/diagrams/)** - Standalone Mermaid diagram files for embedding and reference
+> - **[ARCHITECTURE_SYNC_CHECKLIST.md](ARCHITECTURE_SYNC_CHECKLIST.md)** - Checklist for keeping documentation synchronized
+> - **[SERVICE_DIRECTORY.md](SERVICE_DIRECTORY.md)** - Service locations and responsibilities
+> - **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)** - Project status and goals
+>
+> 💡 **Documentation Philosophy:** This file contains technical implementation details. For interface-focused architectural understanding, see ARCHITECTURE_OVERVIEW.md first.
+
+---
 
 ## System Overview
 

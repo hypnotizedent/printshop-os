@@ -1,0 +1,54 @@
+graph TB
+    subgraph External["🌐 External Systems"]
+        C1[👥 Customers]
+        C2[👷 Production Team]
+        C3[👔 Admin/Management]
+        S1[📦 SS Activewear API]
+        S2[📦 SanMar API]
+        S3[📦 AS Colour API]
+        P1[🔄 Printavo API]
+        AI[🤖 OpenAI GPT-4 Vision]
+    end
+    
+    subgraph PrintShop["🖨️ PrintShop OS"]
+        FE[⚛️ React Frontend<br/>Port 3000]
+        API[🚀 Strapi CMS<br/>Port 1337]
+        PD[📊 Production Dashboard<br/>Port 3001]
+        CS[💬 Customer Service AI<br/>Port 3003]
+        SS[🔄 Supplier Sync<br/>CLI/Batch]
+        PR[💰 Pricing Engine<br/>Port 3002]
+    end
+    
+    subgraph Data["💾 Data Layer"]
+        PG[(PostgreSQL<br/>Primary DB)]
+        RD[(Redis<br/>Cache)]
+        FS[📁 File Storage]
+    end
+    
+    C1 --> FE
+    C2 --> FE
+    C3 --> FE
+    
+    FE --> API
+    FE --> PD
+    FE --> PR
+    
+    PD --> API
+    CS --> API
+    SS --> API
+    PR --> API
+    
+    API --> PG
+    API --> RD
+    API --> FS
+    
+    SS --> S1
+    SS --> S2
+    SS --> S3
+    SS --> P1
+    
+    CS --> AI
+    
+    style PrintShop fill:#e1f5ff
+    style External fill:#fff4e6
+    style Data fill:#f3e5f5

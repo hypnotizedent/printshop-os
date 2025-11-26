@@ -467,12 +467,13 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
-  collectionName: 'customers';
+export interface ApiColorColor extends Struct.CollectionTypeSchema {
+  collectionName: 'colors';
   info: {
-    displayName: 'Customer';
-    pluralName: 'customers';
-    singularName: 'customer';
+    description: 'Canonical production color (ink, thread, etc.)';
+    displayName: 'Color';
+    pluralName: 'colors';
+    singularName: 'color';
   };
   options: {
     draftAndPublish: false;
@@ -486,65 +487,128 @@ export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    email: Schema.Attribute.Email & Schema.Attribute.Unique;
+    finish: Schema.Attribute.String;
+    hex: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::color.color'> &
+      Schema.Attribute.Private;
+    medium: Schema.Attribute.Enumeration<['ink', 'thread']> &
+      Schema.Attribute.Required;
+    meta: Schema.Attribute.JSON;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    pantone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    similar: Schema.Attribute.JSON;
+    slug: Schema.Attribute.UID<'name'> &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    tags: Schema.Attribute.JSON;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    usageConstraints: Schema.Attribute.JSON;
+    vendor: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface ApiPriceCalculationPriceCalculation
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'price_calculations';
+  info: {
+    description: 'Pricing history and audit trail';
+    displayName: 'Price Calculation';
+    pluralName: 'price-calculations';
+    singularName: 'price-calculation';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    calculation_time_ms: Schema.Attribute.Integer;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customer_type: Schema.Attribute.String;
+    garment_id: Schema.Attribute.String;
+    input: Schema.Attribute.JSON & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
-      'api::customer.customer'
+      'api::price-calculation.price-calculation'
     > &
       Schema.Attribute.Private;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
+    margin_pct: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    notes: Schema.Attribute.Text;
+    order_id: Schema.Attribute.String;
+    output: Schema.Attribute.JSON & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Integer & Schema.Attribute.Required;
+    quote_id: Schema.Attribute.String;
+    rules_applied: Schema.Attribute.JSON;
+    service: Schema.Attribute.String;
+    total_price: Schema.Attribute.Decimal & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
   };
 }
 
-export interface ApiEmployeeEmployee extends Struct.CollectionTypeSchema {
-  collectionName: 'employees';
+export interface ApiPricingRulePricingRule extends Struct.CollectionTypeSchema {
+  collectionName: 'pricing_rules';
   info: {
-    displayName: 'Employee';
-    pluralName: 'employees';
-    singularName: 'employee';
+    description: 'JSON-based pricing rules with versioning';
+    displayName: 'Pricing Rule';
+    pluralName: 'pricing-rules';
+    singularName: 'pricing-rule';
   };
   options: {
     draftAndPublish: false;
   };
-  pluginOptions: {
-    i18n: {
-      localized: false;
-    };
-  };
   attributes: {
+    calculations: Schema.Attribute.JSON & Schema.Attribute.Required;
+    conditions: Schema.Attribute.JSON & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    hireDate: Schema.Attribute.Date;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    effective_date: Schema.Attribute.Date & Schema.Attribute.Required;
+    enabled: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<true>;
+    expiry_date: Schema.Attribute.Date;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
-      'api::employee.employee'
+      'api::pricing-rule.pricing-rule'
     > &
       Schema.Attribute.Private;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
-    position: Schema.Attribute.String;
+    notes: Schema.Attribute.Text;
+    priority: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<1>;
     publishedAt: Schema.Attribute.DateTime;
+    rule_id: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    version: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<1>;
   };
 }
 
-export interface ApiJobJob extends Struct.CollectionTypeSchema {
-  collectionName: 'jobs';
+export interface ApiSopSop extends Struct.CollectionTypeSchema {
+  collectionName: 'sops';
   info: {
-    displayName: 'Job';
-    pluralName: 'jobs';
-    singularName: 'job';
+    description: 'Standard Operating Procedure';
+    displayName: 'SOP';
+    pluralName: 'sops';
+    singularName: 'sop';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   pluginOptions: {
     i18n: {
@@ -552,54 +616,45 @@ export interface ApiJobJob extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    category: Schema.Attribute.Enumeration<
+      ['Machines', 'Processes', 'Troubleshooting', 'Safety']
+    > &
+      Schema.Attribute.Required;
+    changelog: Schema.Attribute.JSON;
+    content: Schema.Attribute.RichText;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.RichText;
+    difficulty: Schema.Attribute.Enumeration<
+      ['Beginner', 'Intermediate', 'Advanced']
+    > &
+      Schema.Attribute.DefaultTo<'Beginner'>;
+    effectiveDate: Schema.Attribute.Date;
+    estimatedTime: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    favorites: Schema.Attribute.JSON;
+    isPublished: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    lastViewed: Schema.Attribute.DateTime;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::job.job'> &
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::sop.sop'> &
       Schema.Attribute.Private;
+    machineId: Schema.Attribute.String;
+    media: Schema.Attribute.JSON;
     publishedAt: Schema.Attribute.DateTime;
+    relatedSOPs: Schema.Attribute.Relation<'manyToMany', 'api::sop.sop'>;
+    revisionNotes: Schema.Attribute.Text;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    status: Schema.Attribute.Enumeration<['draft', 'active', 'deprecated']> &
+      Schema.Attribute.DefaultTo<'draft'>;
+    steps: Schema.Attribute.JSON;
+    subcategory: Schema.Attribute.String;
+    summary: Schema.Attribute.Text;
+    tags: Schema.Attribute.JSON;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-  };
-}
-
-export interface ApiTimeClockEntryTimeClockEntry
-  extends Struct.CollectionTypeSchema {
-  collectionName: 'time-clock-entries';
-  info: {
-    displayName: 'Time Clock Entry';
-    pluralName: 'time-clock-entries';
-    singularName: 'time-clock-entry';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  pluginOptions: {
-    i18n: {
-      localized: false;
-    };
-  };
-  attributes: {
-    clockIn: Schema.Attribute.DateTime & Schema.Attribute.Required;
-    clockOut: Schema.Attribute.DateTime;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    employee: Schema.Attribute.Relation<'oneToOne', 'api::employee.employee'>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::time-clock-entry.time-clock-entry'
-    > &
-      Schema.Attribute.Private;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
+    version: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1>;
+    viewCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
   };
 }
 
@@ -1114,10 +1169,10 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
-      'api::customer.customer': ApiCustomerCustomer;
-      'api::employee.employee': ApiEmployeeEmployee;
-      'api::job.job': ApiJobJob;
-      'api::time-clock-entry.time-clock-entry': ApiTimeClockEntryTimeClockEntry;
+      'api::color.color': ApiColorColor;
+      'api::price-calculation.price-calculation': ApiPriceCalculationPriceCalculation;
+      'api::pricing-rule.pricing-rule': ApiPricingRulePricingRule;
+      'api::sop.sop': ApiSopSop;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
