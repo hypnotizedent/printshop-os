@@ -8,6 +8,21 @@ This document provides a precise map of where every component, service, and feat
 
 ## Recent Updates
 
+### November 26, 2025 (Session 7 - Phase 2 & 3 Implementation)
+✅ **PHASE 2 COMPLETE: Schema Enhancement**
+- Added payment fields to Order: `amountPaid`, `amountOutstanding`, `salesTax`, `discount`
+- Added `productionNotes` and `customerPO` fields to Order
+- Configured order status enumeration (QUOTE, QUOTE_SENT, QUOTE_APPROVED, IN_PRODUCTION, 
+  COMPLETE, READY_FOR_PICKUP, PAYMENT_NEEDED, INVOICE_PAID, CANCELLED)
+
+✅ **PHASE 3 COMPLETE: Strapi Auth Routes**
+- Implemented `/api/auth/customer/login` (JWT with bcrypt)
+- Implemented `/api/auth/customer/signup` (creates/activates customer)
+- Implemented `/api/auth/employee/validate-pin` (PIN → JWT)
+- Implemented `/api/auth/verify` (token verification)
+- Updated frontend AuthContext for JWT token storage
+- All auth endpoints tested and working
+
 ### November 26, 2025 (Session 6 - System Verification & Bug Fixes)
 ✅ **SYSTEM VERIFICATION COMPLETE**
 - Verified Strapi 5.31.2 Enterprise operational (336 customers, 831 orders, 18 products)
