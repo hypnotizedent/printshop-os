@@ -2,11 +2,13 @@
  * Pricing API Server
  * 
  * REST API for pricing calculations with full audit trail
+ * Supports both in-memory (testing) and Strapi (production) storage
  */
 
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { PricingAPIService, InMemoryRuleStorage, InMemoryCalculationHistory } from './pricing-api';
+import { StrapiRuleStorage, StrapiCalculationHistory, StrapiConfig } from './strapi-storage';
 import { PricingInput, PricingRule } from './pricing-rules-engine';
 import fs from 'fs';
 import path from 'path';
@@ -27,21 +29,41 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 let apiService: PricingAPIService;
 
 function initializeServices() {
-  // Load sample rules from file
-  const rulesPath = path.join(__dirname, '../data/sample-pricing-rules.json');
-  let rules: PricingRule[] = [];
+  const useStrapi = process.env.USE_STRAPI === 'true' || process.env.STRAPI_URL;
   
-  if (fs.existsSync(rulesPath)) {
-    const rulesData = fs.readFileSync(rulesPath, 'utf8');
-    rules = JSON.parse(rulesData);
-    console.log(`Loaded ${rules.length} pricing rules from ${rulesPath}`);
+  if (useStrapi) {
+    // Production: Use Strapi for storage
+    const strapiConfig: StrapiConfig = {
+      baseUrl: process.env.STRAPI_URL || 'http://localhost:1337',
+      apiToken: process.env.STRAPI_API_TOKEN,
+    };
+    
+    console.log(`🔌 Connecting to Strapi at ${strapiConfig.baseUrl}`);
+    
+    const ruleStorage = new StrapiRuleStorage(strapiConfig);
+    const calculationHistory = new StrapiCalculationHistory(strapiConfig);
+    apiService = new PricingAPIService(ruleStorage, calculationHistory);
+    
+    console.log('✅ Using Strapi storage (rules + calculation history)');
   } else {
-    console.log('No rules file found, starting with empty rules');
-  }
+    // Development: Use in-memory storage with sample rules
+    const rulesPath = path.join(__dirname, '../data/sample-pricing-rules.json');
+    let rules: PricingRule[] = [];
+    
+    if (fs.existsSync(rulesPath)) {
+      const rulesData = fs.readFileSync(rulesPath, 'utf8');
+      rules = JSON.parse(rulesData);
+      console.log(`📦 Loaded ${rules.length} pricing rules from ${rulesPath}`);
+    } else {
+      console.log('⚠️  No rules file found, starting with empty rules');
+    }
 
-  const ruleStorage = new InMemoryRuleStorage(rules);
-  const calculationHistory = new InMemoryCalculationHistory();
-  apiService = new PricingAPIService(ruleStorage, calculationHistory);
+    const ruleStorage = new InMemoryRuleStorage(rules);
+    const calculationHistory = new InMemoryCalculationHistory();
+    apiService = new PricingAPIService(ruleStorage, calculationHistory);
+    
+    console.log('✅ Using in-memory storage (for development/testing)');
+  }
 
   // Set some default garment costs (these would come from supplier data in production)
   apiService.setGarmentCost('ss-activewear-6001', 4.5);

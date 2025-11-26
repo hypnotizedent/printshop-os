@@ -1,0 +1,282 @@
+{
+  "description": "Golden test fixtures for pricing engine validation - values derived from actual engine behavior",
+  "version": "1.0.1",
+  "created": "2025-11-26",
+  "updated": "2025-11-27",
+  "notes": "Default margin is 40% unless premium-garment-margin rule applies. Golden values captured from actual engine output.",
+  "test_cases": [
+    {
+      "id": "basic-tshirt-50-units",
+      "description": "Basic t-shirt order, 50 units, front print, 1 color",
+      "input": {
+        "garment_id": "ss-activewear-6001",
+        "quantity": 50,
+        "service": "screen",
+        "print_locations": ["front"],
+        "color_count": 1,
+        "customer_type": "standard"
+      },
+      "garment_cost": 4.5,
+      "expected": {
+        "subtotal": 315.25,
+        "margin_pct": 40,
+        "breakdown": {
+          "base_cost": 225,
+          "location_surcharges": 100,
+          "color_adjustments": 0
+        },
+        "rules_applied_contains": ["location-surcharges-v1"]
+      }
+    },
+    {
+      "id": "volume-discount-100-units",
+      "description": "100 unit order triggers 10% volume discount",
+      "input": {
+        "garment_id": "bella-canvas-3001",
+        "quantity": 100,
+        "service": "screen",
+        "print_locations": ["front"],
+        "color_count": 1,
+        "customer_type": "standard"
+      },
+      "garment_cost": 5.0,
+      "expected": {
+        "subtotal": 630,
+        "margin_pct": 40,
+        "breakdown": {
+          "base_cost": 500,
+          "location_surcharges": 200,
+          "volume_discounts": 70
+        },
+        "rules_applied_contains": ["volume-discount-100-499-v1"]
+      }
+    },
+    {
+      "id": "volume-discount-500-units",
+      "description": "500 unit order triggers 20% volume discount",
+      "input": {
+        "garment_id": "next-level-3600",
+        "quantity": 500,
+        "service": "screen",
+        "print_locations": ["front"],
+        "color_count": 1,
+        "customer_type": "standard"
+      },
+      "garment_cost": 4.8,
+      "expected": {
+        "margin_pct": 40,
+        "breakdown": {
+          "base_cost": 2400,
+          "location_surcharges": 1000,
+          "volume_discounts": 680
+        },
+        "rules_applied_contains": ["volume-discount-500-plus-v1"]
+      }
+    },
+    {
+      "id": "multi-color-screen-print",
+      "description": "4-color screen print with color multiplier",
+      "input": {
+        "garment_id": "ss-activewear-6001",
+        "quantity": 50,
+        "service": "screen",
+        "print_locations": ["front"],
+        "color_count": 4,
+        "customer_type": "standard"
+      },
+      "garment_cost": 4.5,
+      "expected": {
+        "margin_pct": 40,
+        "breakdown": {
+          "base_cost": 225,
+          "location_surcharges": 100
+        },
+        "rules_applied_contains": ["color-multipliers-screenprint-v1"]
+      },
+      "assertions": {
+        "color_adjustments_gt": 0
+      }
+    },
+    {
+      "id": "multi-location-front-back",
+      "description": "Front and back print locations",
+      "input": {
+        "garment_id": "ss-activewear-6001",
+        "quantity": 50,
+        "service": "screen",
+        "print_locations": ["front", "back"],
+        "color_count": 1,
+        "customer_type": "standard"
+      },
+      "garment_cost": 4.5,
+      "expected": {
+        "breakdown": {
+          "base_cost": 225,
+          "location_surcharges": 250
+        },
+        "rules_applied_contains": ["location-surcharges-v1"]
+      }
+    },
+    {
+      "id": "embroidery-5000-stitches",
+      "description": "Embroidery order with 5000 stitches",
+      "input": {
+        "garment_id": "ss-activewear-6001",
+        "quantity": 24,
+        "service": "embroidery",
+        "stitch_count": 5000,
+        "print_locations": ["left-chest"],
+        "customer_type": "standard"
+      },
+      "garment_cost": 4.5,
+      "expected": {
+        "margin_pct": 40,
+        "breakdown": {
+          "base_cost": 108,
+          "location_surcharges": 0
+        },
+        "rules_applied_contains": ["embroidery-pricing-v1"]
+      },
+      "assertions": {
+        "total_price_gt": 150,
+        "line_items_contains_description": "Embroidery (5000 stitches)"
+      }
+    },
+    {
+      "id": "repeat-customer-discount",
+      "description": "Repeat customer gets 5% discount",
+      "input": {
+        "garment_id": "ss-activewear-6001",
+        "quantity": 50,
+        "service": "screen",
+        "print_locations": ["front"],
+        "color_count": 1,
+        "customer_type": "repeat_customer"
+      },
+      "garment_cost": 4.5,
+      "expected": {
+        "margin_pct": 40,
+        "rules_applied_contains": ["repeat-customer-discount-v1"]
+      },
+      "assertions": {
+        "total_price_gt": 0
+      }
+    },
+    {
+      "id": "premium-garment-margin",
+      "description": "Premium garment gets 40% margin",
+      "input": {
+        "garment_id": "organic-tee-001",
+        "quantity": 50,
+        "service": "screen",
+        "print_locations": ["front"],
+        "color_count": 1,
+        "customer_type": "standard",
+        "garment_type": "premium"
+      },
+      "garment_cost": 8.0,
+      "expected": {
+        "margin_pct": 40,
+        "breakdown": {
+          "base_cost": 400,
+          "location_surcharges": 100
+        },
+        "rules_applied_contains": ["premium-garment-margin-v1"]
+      }
+    },
+    {
+      "id": "ss-activewear-supplier-discount",
+      "description": "SS Activewear supplier with 50+ units gets 3% discount",
+      "input": {
+        "garment_id": "ss-activewear-6001",
+        "quantity": 75,
+        "service": "screen",
+        "print_locations": ["front"],
+        "color_count": 1,
+        "customer_type": "standard",
+        "supplier": "ss-activewear"
+      },
+      "garment_cost": 4.5,
+      "expected": {
+        "margin_pct": 40,
+        "rules_applied_contains": ["ss-activewear-discount-v1"]
+      },
+      "assertions": {
+        "volume_discounts_gt": 0
+      }
+    },
+    {
+      "id": "complex-order-all-features",
+      "description": "Complex order: 200 units, front+back, 3 colors, repeat customer, premium garment",
+      "input": {
+        "garment_id": "organic-tee-001",
+        "quantity": 200,
+        "service": "screen",
+        "print_locations": ["front", "back"],
+        "color_count": 3,
+        "customer_type": "repeat_customer",
+        "garment_type": "premium"
+      },
+      "garment_cost": 8.0,
+      "expected": {
+        "margin_pct": 40,
+        "breakdown": {
+          "base_cost": 1600,
+          "location_surcharges": 1000
+        },
+        "rules_applied_contains": [
+          "premium-garment-margin-v1",
+          "volume-discount-100-499-v1",
+          "color-multipliers-screenprint-v1",
+          "location-surcharges-v1"
+        ]
+      },
+      "assertions": {
+        "color_adjustments_gt": 0,
+        "volume_discounts_gt": 0,
+        "total_price_gt": 3000
+      }
+    },
+    {
+      "id": "minimum-order-24-units",
+      "description": "Small order with no volume discount",
+      "input": {
+        "garment_id": "ss-activewear-6001",
+        "quantity": 24,
+        "service": "screen",
+        "print_locations": ["left-chest"],
+        "color_count": 1,
+        "customer_type": "standard"
+      },
+      "garment_cost": 4.5,
+      "expected": {
+        "margin_pct": 40,
+        "breakdown": {
+          "base_cost": 108,
+          "location_surcharges": 0,
+          "volume_discounts": 0
+        }
+      }
+    },
+    {
+      "id": "sleeve-print-surcharge",
+      "description": "Sleeve print location surcharge",
+      "input": {
+        "garment_id": "ss-activewear-6001",
+        "quantity": 50,
+        "service": "screen",
+        "print_locations": ["front", "sleeve"],
+        "color_count": 1,
+        "customer_type": "standard"
+      },
+      "garment_cost": 4.5,
+      "expected": {
+        "breakdown": {
+          "base_cost": 225,
+          "location_surcharges": 175
+        },
+        "rules_applied_contains": ["location-surcharges-v1"]
+      }
+    }
+  ]
+}

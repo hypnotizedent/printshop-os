@@ -9,10 +9,12 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:golden": "jest tests/golden.test.ts",
     "dev": "ts-node lib/estimator.ts",
     "start": "node build/estimator.js",
     "api:dev": "ts-node lib/api-server.ts",
     "api:start": "node build/api-server.js",
+    "seed:rules": "ts-node scripts/seed-pricing-rules.ts",
     "lint": "eslint lib tests --ext .ts",
     "format": "prettier --write \"lib/**/*.ts\" \"tests/**/*.ts\""
   },
