@@ -10,30 +10,14 @@
   "options": {
     "draftAndPublish": false
   },
-  "pluginOptions": {
-    "i18n": {
-      "localized": false
-    }
-  },
+  "pluginOptions": {},
   "attributes": {
     "orderNumber": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": true
     },
     "status": {
-      "type": "enumeration",
-      "enum": [
-        "Pending",
-        "Approved",
-        "InProduction",
-        "Complete",
-        "Shipped",
-        "Delivered",
-        "Cancelled"
-      ],
-      "default": "Pending",
-      "required": true
+      "type": "string"
     },
     "customer": {
       "type": "relation",
@@ -41,74 +25,26 @@
       "target": "api::customer.customer",
       "inversedBy": "orders"
     },
-    "job": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::job.job",
-      "mappedBy": "order"
-    },
-    "items": {
-      "type": "json",
-      "required": true
-    },
     "totalAmount": {
-      "type": "decimal",
-      "required": true
-    },
-    "depositAmount": {
-      "type": "decimal",
-      "default": 0
-    },
-    "paidAmount": {
-      "type": "decimal",
-      "default": 0
-    },
-    "paymentStatus": {
-      "type": "enumeration",
-      "enum": [
-        "Unpaid",
-        "DepositPaid",
-        "FullyPaid",
-        "Refunded"
-      ],
-      "default": "Unpaid"
+      "type": "decimal"
     },
     "dueDate": {
       "type": "date"
     },
-    "rushOrder": {
-      "type": "boolean",
-      "default": false
-    },
-    "customerNotes": {
+    "notes": {
       "type": "text"
     },
-    "productionNotes": {
-      "type": "text"
-    },
-    "internalNotes": {
-      "type": "text"
-    },
-    "shippingAddress": {
+    "items": {
       "type": "json"
     },
-    "shippingMethod": {
+    "printavoId": {
       "type": "string"
     },
-    "trackingNumber": {
-      "type": "string"
-    },
-    "shippedAt": {
-      "type": "datetime"
-    },
-    "deliveredAt": {
-      "type": "datetime"
-    },
-    "completedAt": {
-      "type": "datetime"
-    },
-    "tags": {
-      "type": "json"
+    "jobs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::job.job",
+      "mappedBy": "order"
     }
   }
 }

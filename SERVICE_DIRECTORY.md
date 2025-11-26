@@ -329,47 +329,55 @@ services/label-formatter/
 
 ### 7. Strapi CMS
 
-**Location:** `printshop-strapi/`
+**Location:** `printshop-strapi/`  
+**Status:** ✅ All APIs Operational (Fixed Nov 26, 2025)
 
 ```
 printshop-strapi/
 ├── src/
-│   ├── api/                  # Content types
-│   │   ├── order/
-│   │   │   ├── content-types/
-│   │   │   │   └── order/
-│   │   │   │       └── schema.json
-│   │   │   ├── controllers/
-│   │   │   │   └── order.ts
-│   │   │   ├── routes/
-│   │   │   │   └── order.ts
-│   │   │   └── services/
-│   │   │       └── order.ts
+│   ├── api/                  # Content types (ALL TYPESCRIPT)
 │   │   ├── customer/
-│   │   ├── product/
-│   │   ├── employee/
-│   │   ├── time-clock-entry/
-│   │   ├── support-ticket/
-│   │   └── sop/
-│   ├── extensions/           # Strapi extensions
-│   └── middlewares/          # Custom middleware
+│   │   │   ├── content-types/customer/schema.json
+│   │   │   ├── controllers/customer.ts   # ✅ TypeScript
+│   │   │   ├── routes/customer.ts        # ✅ TypeScript
+│   │   │   └── services/customer.ts      # ✅ TypeScript
+│   │   ├── order/
+│   │   │   ├── content-types/order/schema.json
+│   │   │   ├── controllers/order.ts      # ✅ TypeScript
+│   │   │   ├── routes/order.ts           # ✅ TypeScript
+│   │   │   └── services/order.ts         # ✅ TypeScript
+│   │   ├── job/
+│   │   │   ├── content-types/job/schema.json
+│   │   │   ├── controllers/job.ts        # ✅ TypeScript
+│   │   │   ├── routes/job.ts             # ✅ TypeScript
+│   │   │   └── services/job.ts           # ✅ TypeScript
+│   │   ├── color/
+│   │   ├── sop/
+│   │   ├── price-calculation/
+│   │   └── pricing-rule/
+│   ├── index.ts              # Bootstrap with auto-permissions
+│   └── services/
+│       └── notification.ts   # WebSocket service
 ├── config/
-│   ├── database.ts           # PostgreSQL config
-│   ├── server.ts
-│   └── plugins.ts
-├── public/
-│   └── uploads/              # File uploads
-└── schema.sql                # Database schema
+│   ├── database.ts           # SQLite (dev) / PostgreSQL (prod)
+│   └── server.ts
+└── .tmp/
+    └── data.db               # SQLite database (dev)
 ```
 
-**Content Types (Main):**
-- `order` - Customer orders
-- `customer` - Customer accounts
-- `product` - Product catalog
-- `employee` - Staff management
-- `time-clock-entry` - Time tracking
-- `support-ticket` - Support tickets
-- `sop` - Standard Operating Procedures
+**Content Types (All Working):**
+| Content Type | API Endpoint | Status |
+|-------------|--------------|--------|
+| customer | `/api/customers` | ✅ 200 |
+| order | `/api/orders` | ✅ 200 |
+| job | `/api/jobs` | ✅ 200 |
+| color | `/api/colors` | ✅ 200 |
+| sop | `/api/sops` | ✅ 200 |
+| price-calculation | `/api/price-calculations` | ✅ 200 |
+| pricing-rule | `/api/pricing-rules` | ✅ 200 |
+
+**IMPORTANT:** Strapi 5 requires TypeScript files. JavaScript files are NOT compiled.  
+See: `docs/reference/STRAPI_TYPESCRIPT_API_FIX.md`
 
 **Port:** 1337
 
@@ -705,13 +713,19 @@ Redis
 
 ---
 
-**Last Updated:** November 25, 2025  
+**Last Updated:** November 26, 2025  
 **Maintained By:** Development team  
 **Next Review:** When project structure changes
 
 ---
 
 ## Recent Updates
+
+**November 26, 2025:**
+- ✅ Fixed all Strapi APIs (JS→TypeScript conversion)
+- ✅ All 7 content types now operational: customer, order, job, color, sop, price-calculation, pricing-rule
+- ✅ Public API permissions auto-enabled via bootstrap
+- 📄 Added `docs/reference/STRAPI_TYPESCRIPT_API_FIX.md` for agent reference
 
 **November 25, 2025:**
 - Updated Supplier Sync Service with SanMar completion status

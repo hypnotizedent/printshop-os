@@ -514,7 +514,7 @@ export interface ApiColorColor extends Struct.CollectionTypeSchema {
 export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
   collectionName: 'customers';
   info: {
-    description: 'Customer accounts and contact information';
+    description: 'Customer accounts';
     displayName: 'Customer';
     pluralName: 'customers';
     singularName: 'customer';
@@ -522,28 +522,15 @@ export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
   options: {
     draftAndPublish: false;
   };
-  pluginOptions: {
-    i18n: {
-      localized: false;
-    };
-  };
   attributes: {
-    accountBalance: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     address: Schema.Attribute.Text;
     city: Schema.Attribute.String;
     company: Schema.Attribute.String;
-    country: Schema.Attribute.String & Schema.Attribute.DefaultTo<'USA'>;
+    country: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    creditLimit: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
-    customerType: Schema.Attribute.Enumeration<
-      ['Individual', 'Business', 'Wholesale', 'Retail']
-    > &
-      Schema.Attribute.DefaultTo<'Individual'>;
-    email: Schema.Attribute.Email &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
     jobs: Schema.Attribute.Relation<'oneToMany', 'api::job.job'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -554,18 +541,10 @@ export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String & Schema.Attribute.Required;
     notes: Schema.Attribute.Text;
     orders: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
-    paymentTerms: Schema.Attribute.String;
     phone: Schema.Attribute.String;
-    preferredContactMethod: Schema.Attribute.Enumeration<
-      ['Email', 'Phone', 'Text']
-    > &
-      Schema.Attribute.DefaultTo<'Email'>;
+    printavoId: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     state: Schema.Attribute.String;
-    status: Schema.Attribute.Enumeration<['Active', 'Inactive', 'Suspended']> &
-      Schema.Attribute.DefaultTo<'Active'>;
-    taxExempt: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    taxId: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -584,70 +563,24 @@ export interface ApiJobJob extends Struct.CollectionTypeSchema {
   options: {
     draftAndPublish: false;
   };
-  pluginOptions: {
-    i18n: {
-      localized: false;
-    };
-  };
   attributes: {
-    actualHours: Schema.Attribute.Decimal;
-    artFileUrls: Schema.Attribute.JSON;
-    assignedTo: Schema.Attribute.String;
-    completedAt: Schema.Attribute.DateTime;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
-    dueDate: Schema.Attribute.Date & Schema.Attribute.Required;
-    estimatedHours: Schema.Attribute.Decimal;
-    imprintLocations: Schema.Attribute.JSON;
-    inkColors: Schema.Attribute.JSON;
-    internalNotes: Schema.Attribute.Text;
-    jobNumber: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique;
+    dueDate: Schema.Attribute.Date;
+    jobNumber: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::job.job'> &
       Schema.Attribute.Private;
-    mockupUrls: Schema.Attribute.JSON;
-    order: Schema.Attribute.Relation<'oneToOne', 'api::order.order'>;
-    priority: Schema.Attribute.Enumeration<
-      ['Low', 'Normal', 'High', 'Urgent']
-    > &
-      Schema.Attribute.DefaultTo<'Normal'>;
+    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    printavoId: Schema.Attribute.String;
     productDescription: Schema.Attribute.Text;
-    productionMethod: Schema.Attribute.Enumeration<
-      [
-        'ScreenPrinting',
-        'DTG',
-        'Embroidery',
-        'HeatTransfer',
-        'Sublimation',
-        'Other',
-      ]
-    >;
     productionNotes: Schema.Attribute.Text;
-    productType: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    quantity: Schema.Attribute.Integer & Schema.Attribute.Required;
-    rushJob: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    startedAt: Schema.Attribute.DateTime;
-    status: Schema.Attribute.Enumeration<
-      [
-        'PendingArtwork',
-        'ArtworkReceived',
-        'Pending',
-        'Ready',
-        'InProduction',
-        'Complete',
-        'OnHold',
-        'Cancelled',
-      ]
-    > &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'PendingArtwork'>;
-    tags: Schema.Attribute.JSON;
-    title: Schema.Attribute.String & Schema.Attribute.Required;
+    quantity: Schema.Attribute.Integer;
+    status: Schema.Attribute.String;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -665,57 +598,23 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
   options: {
     draftAndPublish: false;
   };
-  pluginOptions: {
-    i18n: {
-      localized: false;
-    };
-  };
   attributes: {
-    completedAt: Schema.Attribute.DateTime;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
-    customerNotes: Schema.Attribute.Text;
-    deliveredAt: Schema.Attribute.DateTime;
-    depositAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     dueDate: Schema.Attribute.Date;
-    internalNotes: Schema.Attribute.Text;
-    items: Schema.Attribute.JSON & Schema.Attribute.Required;
-    job: Schema.Attribute.Relation<'oneToOne', 'api::job.job'>;
+    items: Schema.Attribute.JSON;
+    jobs: Schema.Attribute.Relation<'oneToMany', 'api::job.job'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
       Schema.Attribute.Private;
-    orderNumber: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique;
-    paidAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
-    paymentStatus: Schema.Attribute.Enumeration<
-      ['Unpaid', 'DepositPaid', 'FullyPaid', 'Refunded']
-    > &
-      Schema.Attribute.DefaultTo<'Unpaid'>;
-    productionNotes: Schema.Attribute.Text;
+    notes: Schema.Attribute.Text;
+    orderNumber: Schema.Attribute.String & Schema.Attribute.Required;
+    printavoId: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    rushOrder: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    shippedAt: Schema.Attribute.DateTime;
-    shippingAddress: Schema.Attribute.JSON;
-    shippingMethod: Schema.Attribute.String;
-    status: Schema.Attribute.Enumeration<
-      [
-        'Pending',
-        'Approved',
-        'InProduction',
-        'Complete',
-        'Shipped',
-        'Delivered',
-        'Cancelled',
-      ]
-    > &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'Pending'>;
-    tags: Schema.Attribute.JSON;
-    totalAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
-    trackingNumber: Schema.Attribute.String;
+    status: Schema.Attribute.String;
+    totalAmount: Schema.Attribute.Decimal;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

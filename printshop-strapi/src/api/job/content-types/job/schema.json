@@ -10,35 +10,23 @@
   "options": {
     "draftAndPublish": false
   },
-  "pluginOptions": {
-    "i18n": {
-      "localized": false
-    }
-  },
+  "pluginOptions": {},
   "attributes": {
     "jobNumber": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": true
     },
     "title": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "status": {
-      "type": "enumeration",
-      "enum": [
-        "PendingArtwork",
-        "ArtworkReceived",
-        "Pending",
-        "Ready",
-        "InProduction",
-        "Complete",
-        "OnHold",
-        "Cancelled"
-      ],
-      "default": "PendingArtwork",
-      "required": true
+      "type": "string"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::order.order",
+      "inversedBy": "jobs"
     },
     "customer": {
       "type": "relation",
@@ -46,86 +34,20 @@
       "target": "api::customer.customer",
       "inversedBy": "jobs"
     },
-    "order": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::order.order",
-      "inversedBy": "job"
-    },
     "quantity": {
-      "type": "integer",
-      "required": true
+      "type": "integer"
     },
-    "productType": {
-      "type": "string"
+    "dueDate": {
+      "type": "date"
     },
     "productDescription": {
       "type": "text"
     },
-    "mockupUrls": {
-      "type": "json"
-    },
-    "artFileUrls": {
-      "type": "json"
-    },
-    "inkColors": {
-      "type": "json"
-    },
-    "imprintLocations": {
-      "type": "json"
-    },
-    "productionMethod": {
-      "type": "enumeration",
-      "enum": [
-        "ScreenPrinting",
-        "DTG",
-        "Embroidery",
-        "HeatTransfer",
-        "Sublimation",
-        "Other"
-      ]
-    },
-    "dueDate": {
-      "type": "date",
-      "required": true
-    },
-    "rushJob": {
-      "type": "boolean",
-      "default": false
-    },
     "productionNotes": {
       "type": "text"
     },
-    "internalNotes": {
-      "type": "text"
-    },
-    "assignedTo": {
+    "printavoId": {
       "type": "string"
-    },
-    "startedAt": {
-      "type": "datetime"
-    },
-    "completedAt": {
-      "type": "datetime"
-    },
-    "estimatedHours": {
-      "type": "decimal"
-    },
-    "actualHours": {
-      "type": "decimal"
-    },
-    "priority": {
-      "type": "enumeration",
-      "enum": [
-        "Low",
-        "Normal",
-        "High",
-        "Urgent"
-      ],
-      "default": "Normal"
-    },
-    "tags": {
-      "type": "json"
     }
   }
 }

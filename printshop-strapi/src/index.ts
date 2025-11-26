@@ -6,6 +6,71 @@ export default {
   register(/* { strapi }: { strapi: Core.Strapi } */) {},
 
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
+    // Enable public permissions for all content types
+    const publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({
+      where: { type: 'public' }
+    });
+
+    if (publicRole) {
+      const allPermissions = [
+        // Customer permissions
+        'api::customer.customer.find',
+        'api::customer.customer.findOne',
+        'api::customer.customer.create',
+        'api::customer.customer.update',
+        'api::customer.customer.delete',
+        // Order permissions
+        'api::order.order.find',
+        'api::order.order.findOne',
+        'api::order.order.create',
+        'api::order.order.update',
+        'api::order.order.delete',
+        // Job permissions
+        'api::job.job.find',
+        'api::job.job.findOne',
+        'api::job.job.create',
+        'api::job.job.update',
+        'api::job.job.delete',
+        // Color permissions
+        'api::color.color.find',
+        'api::color.color.findOne',
+        'api::color.color.create',
+        'api::color.color.update',
+        'api::color.color.delete',
+        // SOP permissions
+        'api::sop.sop.find',
+        'api::sop.sop.findOne',
+        'api::sop.sop.create',
+        'api::sop.sop.update',
+        'api::sop.sop.delete',
+        // Price Calculation permissions
+        'api::price-calculation.price-calculation.find',
+        'api::price-calculation.price-calculation.findOne',
+        'api::price-calculation.price-calculation.create',
+        'api::price-calculation.price-calculation.update',
+        'api::price-calculation.price-calculation.delete',
+        // Pricing Rule permissions
+        'api::pricing-rule.pricing-rule.find',
+        'api::pricing-rule.pricing-rule.findOne',
+        'api::pricing-rule.pricing-rule.create',
+        'api::pricing-rule.pricing-rule.update',
+        'api::pricing-rule.pricing-rule.delete',
+      ];
+
+      for (const action of allPermissions) {
+        const existing = await strapi.db.query('plugin::users-permissions.permission').findOne({
+          where: { action, role: publicRole.id }
+        });
+
+        if (!existing) {
+          await strapi.db.query('plugin::users-permissions.permission').create({
+            data: { action, role: publicRole.id }
+          });
+          strapi.log.info(`✅ Enabled public permission: ${action}`);
+        }
+      }
+    }
+
     // Set up API Token permissions for color and sop content types
     const fullAccessTokens = await strapi.db.query('admin::api-token').findMany({
       where: { type: 'full-access' }
@@ -30,7 +95,34 @@ export default {
         { action: 'api::sop.sop.delete' }
       ];
 
-      for (const perm of [...colorPermissions, ...sopPermissions]) {
+      // Enable all permissions for customer content type
+      const customerPermissions = [
+        { action: 'api::customer.customer.find' },
+        { action: 'api::customer.customer.findOne' },
+        { action: 'api::customer.customer.create' },
+        { action: 'api::customer.customer.update' },
+        { action: 'api::customer.customer.delete' }
+      ];
+
+      // Enable all permissions for order content type
+      const orderPermissions = [
+        { action: 'api::order.order.find' },
+        { action: 'api::order.order.findOne' },
+        { action: 'api::order.order.create' },
+        { action: 'api::order.order.update' },
+        { action: 'api::order.order.delete' }
+      ];
+
+      // Enable all permissions for job content type
+      const jobPermissions = [
+        { action: 'api::job.job.find' },
+        { action: 'api::job.job.findOne' },
+        { action: 'api::job.job.create' },
+        { action: 'api::job.job.update' },
+        { action: 'api::job.job.delete' }
+      ];
+
+      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions]) {
         const existing = await strapi.db.query('admin::api-token-permission').findOne({
           where: { action: perm.action, token: token.id }
         });
