@@ -1,0 +1,71 @@
+{
+  "kind": "collectionType",
+  "collectionName": "employees",
+  "info": {
+    "singularName": "employee",
+    "pluralName": "employees",
+    "displayName": "Employee",
+    "description": "Production floor employees for time clock and job tracking"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "unique": true
+    },
+    "pin": {
+      "type": "string",
+      "private": true,
+      "minLength": 4,
+      "maxLength": 60
+    },
+    "hourlyRate": {
+      "type": "decimal",
+      "default": 20.00
+    },
+    "role": {
+      "type": "enumeration",
+      "enum": [
+        "operator",
+        "supervisor",
+        "admin"
+      ],
+      "default": "operator"
+    },
+    "department": {
+      "type": "enumeration",
+      "enum": [
+        "screen-printing",
+        "embroidery",
+        "dtg",
+        "finishing",
+        "shipping",
+        "design"
+      ]
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "hireDate": {
+      "type": "date"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+---
+alt: "Production Dashboard System Architecture"
+---
+flowchart TB
+    accTitle: Production Dashboard Architecture
+    accDescr: High-level architecture showing Production Dashboard components, data flows, and integrations
+
+    subgraph Frontend["Frontend (React + Vite)"]
+        UI_TC[TimeClock.tsx]
+        UI_SOP[SOPLibrary.tsx]
+        UI_METRICS[MetricsDashboard.tsx]
+        UI_CHECKLIST[Checklist.tsx]
+    end
+
+    subgraph ProdService["Production Dashboard Service (Port 3001)"]
+        API_TC["/api/production/time-clock/*"]
+        API_SOP["/api/production/sops/*"]
+        API_QUEUE["/api/production/queue"]
+        API_ANALYTICS["/api/production/analytics/*"]
+        WS[WebSocket Server]
+    end
+
+    subgraph Services["Business Logic"]
+        SVC_TC[TimeClockService]
+        SVC_SOP[SOPService]
+        SVC_METRICS[MetricsService]
+    end
+
+    subgraph Strapi["Strapi CMS (Port 1337)"]
+        CT_EMP[employee]
+        CT_TCE[time-clock-entry]
+        CT_JOB[job]
+        CT_SOP[sop]
+    end
+
+    UI_TC --> API_TC
+    UI_SOP --> API_SOP
+    UI_METRICS --> API_ANALYTICS
+    UI_CHECKLIST --> API_QUEUE
+
+    API_TC --> SVC_TC
+    API_SOP --> SVC_SOP
+    API_ANALYTICS --> SVC_METRICS
+
+    SVC_TC --> CT_EMP
+    SVC_TC --> CT_TCE
+    SVC_TC --> CT_JOB
+    SVC_SOP --> CT_SOP
+
+    WS -.->|Real-time updates| Frontend
+
+    style CT_EMP fill:#ff6b6b,stroke:#333,color:#fff
+    style CT_TCE fill:#ff6b6b,stroke:#333,color:#fff

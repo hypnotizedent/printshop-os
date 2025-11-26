@@ -1,0 +1,97 @@
+{
+  "kind": "collectionType",
+  "collectionName": "time_clock_entries",
+  "info": {
+    "singularName": "time-clock-entry",
+    "pluralName": "time-clock-entries",
+    "displayName": "Time Clock Entry",
+    "description": "Employee time clock entries for job tracking and labor cost calculation"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "employee": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::employee.employee"
+    },
+    "job": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::job.job"
+    },
+    "taskType": {
+      "type": "enumeration",
+      "enum": [
+        "setup",
+        "production",
+        "cleanup",
+        "break",
+        "maintenance",
+        "training"
+      ],
+      "default": "production"
+    },
+    "machineId": {
+      "type": "string"
+    },
+    "clockIn": {
+      "type": "datetime",
+      "required": true
+    },
+    "clockOut": {
+      "type": "datetime"
+    },
+    "pausedAt": {
+      "type": "datetime"
+    },
+    "totalTime": {
+      "type": "integer",
+      "default": 0
+    },
+    "breakTime": {
+      "type": "integer",
+      "default": 0
+    },
+    "productiveTime": {
+      "type": "integer",
+      "default": 0
+    },
+    "laborCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "notes": {
+      "type": "text"
+    },
+    "issues": {
+      "type": "text"
+    },
+    "editedBy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::employee.employee"
+    },
+    "editApprovedBy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::employee.employee"
+    },
+    "editReason": {
+      "type": "text"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "Active",
+        "Paused",
+        "Completed",
+        "Edited",
+        "PendingApproval"
+      ],
+      "default": "Active"
+    }
+  }
+}

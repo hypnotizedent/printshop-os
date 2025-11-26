@@ -61,6 +61,18 @@ export default {
         'api::product.product.create',
         'api::product.product.update',
         'api::product.product.delete',
+        // Employee permissions (Production Dashboard)
+        'api::employee.employee.find',
+        'api::employee.employee.findOne',
+        'api::employee.employee.create',
+        'api::employee.employee.update',
+        'api::employee.employee.delete',
+        // Time Clock Entry permissions (Production Dashboard)
+        'api::time-clock-entry.time-clock-entry.find',
+        'api::time-clock-entry.time-clock-entry.findOne',
+        'api::time-clock-entry.time-clock-entry.create',
+        'api::time-clock-entry.time-clock-entry.update',
+        'api::time-clock-entry.time-clock-entry.delete',
       ];
 
       for (const action of allPermissions) {
@@ -137,7 +149,25 @@ export default {
         { action: 'api::product.product.delete' }
       ];
 
-      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions]) {
+      // Enable all permissions for employee content type (Production Dashboard)
+      const employeePermissions = [
+        { action: 'api::employee.employee.find' },
+        { action: 'api::employee.employee.findOne' },
+        { action: 'api::employee.employee.create' },
+        { action: 'api::employee.employee.update' },
+        { action: 'api::employee.employee.delete' }
+      ];
+
+      // Enable all permissions for time-clock-entry content type (Production Dashboard)
+      const timeClockEntryPermissions = [
+        { action: 'api::time-clock-entry.time-clock-entry.find' },
+        { action: 'api::time-clock-entry.time-clock-entry.findOne' },
+        { action: 'api::time-clock-entry.time-clock-entry.create' },
+        { action: 'api::time-clock-entry.time-clock-entry.update' },
+        { action: 'api::time-clock-entry.time-clock-entry.delete' }
+      ];
+
+      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions, ...employeePermissions, ...timeClockEntryPermissions]) {
         const existing = await strapi.db.query('admin::api-token-permission').findOne({
           where: { action: perm.action, token: token.id }
         });

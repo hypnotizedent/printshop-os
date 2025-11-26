@@ -1,6 +1,6 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 25, 2025
+**Last Updated:** November 26, 2025
 
 ## Purpose
 
@@ -381,6 +381,8 @@ printshop-strapi/
 | price-calculation | `/api/price-calculations` | ✅ 200 |
 | pricing-rule | `/api/pricing-rules` | ✅ 200 |
 | product | `/api/products` | ✅ 18+ records (supplier SKUs) |
+| employee | `/api/employees` | ✅ Production Dashboard |
+| time-clock-entry | `/api/time-clock-entries` | ✅ Production Dashboard |
 
 **IMPORTANT:** Strapi 5 requires TypeScript files. JavaScript files are NOT compiled.  
 See: `docs/reference/STRAPI_TYPESCRIPT_API_FIX.md`
@@ -738,6 +740,13 @@ Redis
 ---
 
 ## Recent Updates
+
+**November 26, 2025 (Session 3):**
+- ✅ Created `employee` content type for Production Dashboard
+- ✅ Created `time-clock-entry` content type for time tracking
+- ✅ Added HLBPA-style architecture documentation: `docs/PRODUCTION_DASHBOARD_ARCHITECTURE.md`
+- ✅ Created Mermaid diagrams in `docs/diagrams/`
+- ✅ All 10 Strapi APIs now operational
 
 **November 26, 2025 (Session 2):**
 - ✅ Created Product content type for supplier SKU catalog

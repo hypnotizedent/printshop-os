@@ -1,0 +1,38 @@
+---
+alt: "Time Clock Data Flow"
+---
+sequenceDiagram
+    accTitle: Time Clock Clock-In Flow
+    accDescr: Sequence diagram showing the complete clock-in process from PIN entry to Strapi persistence
+
+    actor Employee
+    participant UI as TimeClock.tsx
+    participant API as /api/production/time-clock
+    participant SVC as TimeClockService
+    participant Strapi as Strapi CMS
+
+    Employee->>UI: Enter 4-digit PIN
+    UI->>API: POST /clock-in {employeeId, pin, jobId, taskType}
+    API->>SVC: clockIn(request)
+    
+    SVC->>Strapi: GET /api/employees/{id}
+    Strapi-->>SVC: Employee record (with hashed PIN)
+    
+    SVC->>SVC: bcrypt.compare(pin, hashedPin)
+    
+    alt PIN Valid
+        SVC->>Strapi: GET /api/time-clock-entries?employee={id}&status=Active
+        Strapi-->>SVC: [] (no active entry)
+        
+        SVC->>Strapi: POST /api/time-clock-entries
+        Note right of Strapi: Creates entry with<br/>clockIn: now()<br/>status: Active
+        Strapi-->>SVC: New TimeClockEntry
+        
+        SVC-->>API: TimeClockEntry
+        API-->>UI: 200 OK {entry}
+        UI-->>Employee: ✅ Clocked In
+    else PIN Invalid
+        SVC-->>API: Error: Invalid PIN
+        API-->>UI: 401 Unauthorized
+        UI-->>Employee: ❌ Invalid PIN
+    end

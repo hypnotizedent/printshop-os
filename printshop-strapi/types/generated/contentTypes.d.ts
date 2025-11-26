@@ -552,6 +552,60 @@ export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiEmployeeEmployee extends Struct.CollectionTypeSchema {
+  collectionName: 'employees';
+  info: {
+    description: 'Production floor employees for time clock and job tracking';
+    displayName: 'Employee';
+    pluralName: 'employees';
+    singularName: 'employee';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    department: Schema.Attribute.Enumeration<
+      [
+        'screen-printing',
+        'embroidery',
+        'dtg',
+        'finishing',
+        'shipping',
+        'design',
+      ]
+    >;
+    email: Schema.Attribute.Email & Schema.Attribute.Unique;
+    firstName: Schema.Attribute.String & Schema.Attribute.Required;
+    hireDate: Schema.Attribute.Date;
+    hourlyRate: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<20>;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    lastName: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::employee.employee'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    phone: Schema.Attribute.String;
+    pin: Schema.Attribute.String &
+      Schema.Attribute.Private &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 60;
+        minLength: 4;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.Enumeration<['operator', 'supervisor', 'admin']> &
+      Schema.Attribute.DefaultTo<'operator'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiJobJob extends Struct.CollectionTypeSchema {
   collectionName: 'jobs';
   info: {
@@ -825,6 +879,61 @@ export interface ApiSopSop extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     version: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1>;
     viewCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+  };
+}
+
+export interface ApiTimeClockEntryTimeClockEntry
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'time_clock_entries';
+  info: {
+    description: 'Employee time clock entries for job tracking and labor cost calculation';
+    displayName: 'Time Clock Entry';
+    pluralName: 'time-clock-entries';
+    singularName: 'time-clock-entry';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    breakTime: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    clockIn: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    clockOut: Schema.Attribute.DateTime;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    editApprovedBy: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::employee.employee'
+    >;
+    editedBy: Schema.Attribute.Relation<'manyToOne', 'api::employee.employee'>;
+    editReason: Schema.Attribute.Text;
+    employee: Schema.Attribute.Relation<'manyToOne', 'api::employee.employee'>;
+    issues: Schema.Attribute.Text;
+    job: Schema.Attribute.Relation<'manyToOne', 'api::job.job'>;
+    laborCost: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::time-clock-entry.time-clock-entry'
+    > &
+      Schema.Attribute.Private;
+    machineId: Schema.Attribute.String;
+    notes: Schema.Attribute.Text;
+    pausedAt: Schema.Attribute.DateTime;
+    productiveTime: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<
+      ['Active', 'Paused', 'Completed', 'Edited', 'PendingApproval']
+    > &
+      Schema.Attribute.DefaultTo<'Active'>;
+    taskType: Schema.Attribute.Enumeration<
+      ['setup', 'production', 'cleanup', 'break', 'maintenance', 'training']
+    > &
+      Schema.Attribute.DefaultTo<'production'>;
+    totalTime: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -1341,12 +1450,14 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser;
       'api::color.color': ApiColorColor;
       'api::customer.customer': ApiCustomerCustomer;
+      'api::employee.employee': ApiEmployeeEmployee;
       'api::job.job': ApiJobJob;
       'api::order.order': ApiOrderOrder;
       'api::price-calculation.price-calculation': ApiPriceCalculationPriceCalculation;
       'api::pricing-rule.pricing-rule': ApiPricingRulePricingRule;
       'api::product.product': ApiProductProduct;
       'api::sop.sop': ApiSopSop;
+      'api::time-clock-entry.time-clock-entry': ApiTimeClockEntryTimeClockEntry;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

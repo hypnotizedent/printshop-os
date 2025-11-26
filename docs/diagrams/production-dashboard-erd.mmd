@@ -1,0 +1,67 @@
+---
+alt: "Production Dashboard Entity Relationships"
+---
+erDiagram
+    accTitle: Production Dashboard Entity Relationships
+    accDescr: Entity relationship diagram showing employee, time-clock-entry, job, and sop content types
+
+    EMPLOYEE {
+        int id PK
+        string firstName
+        string lastName
+        string email UK
+        string pin "bcrypt hashed"
+        decimal hourlyRate
+        enum role "operator|supervisor|admin"
+        boolean isActive
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    TIME_CLOCK_ENTRY {
+        int id PK
+        int employee FK
+        int job FK
+        enum taskType "setup|production|cleanup|break"
+        string machineId
+        datetime clockIn
+        datetime clockOut
+        datetime pausedAt
+        int totalTime "minutes"
+        int breakTime "minutes"
+        int productiveTime "minutes"
+        decimal laborCost
+        text notes
+        text issues
+        int editedBy FK
+        int editApprovedBy FK
+        text editReason
+        enum status "Active|Paused|Completed|Edited|PendingApproval"
+    }
+
+    JOB {
+        int id PK
+        string jobNumber UK
+        int order FK
+        enum status
+        datetime dueDate
+        text productionNotes
+    }
+
+    SOP {
+        int id PK
+        string title
+        string slug UK
+        enum category
+        text content
+        json steps
+        enum difficulty "Beginner|Intermediate|Advanced"
+        int estimatedTime "minutes"
+        int viewCount
+        boolean isPublished
+    }
+
+    EMPLOYEE ||--o{ TIME_CLOCK_ENTRY : "clocks"
+    JOB ||--o{ TIME_CLOCK_ENTRY : "tracks"
+    EMPLOYEE ||--o{ TIME_CLOCK_ENTRY : "edits"
+    EMPLOYEE ||--o{ TIME_CLOCK_ENTRY : "approves"
