@@ -1,0 +1,78 @@
+{
+  "kind": "collectionType",
+  "collectionName": "machines",
+  "info": {
+    "singularName": "machine",
+    "pluralName": "machines",
+    "displayName": "Machine",
+    "description": "Production equipment for time tracking and job assignment"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "machineId": {
+      "type": "string",
+      "unique": true,
+      "required": true
+    },
+    "department": {
+      "type": "enumeration",
+      "enum": [
+        "screen-printing",
+        "embroidery",
+        "digital",
+        "admin",
+        "finishing",
+        "shipping"
+      ],
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "auto-press",
+        "manual-press",
+        "dryer",
+        "embroidery-head",
+        "dtg-printer",
+        "dtf-printer",
+        "sublimation",
+        "heat-press",
+        "label-printer",
+        "vinyl-cutter",
+        "other"
+      ]
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "active",
+        "maintenance",
+        "offline",
+        "retired"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "lastMaintenanceDate": {
+      "type": "date"
+    },
+    "nextMaintenanceDate": {
+      "type": "date"
+    }
+  }
+}

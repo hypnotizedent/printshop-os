@@ -641,6 +641,73 @@ export interface ApiJobJob extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiMachineMachine extends Struct.CollectionTypeSchema {
+  collectionName: 'machines';
+  info: {
+    description: 'Production equipment for time tracking and job assignment';
+    displayName: 'Machine';
+    pluralName: 'machines';
+    singularName: 'machine';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    department: Schema.Attribute.Enumeration<
+      [
+        'screen-printing',
+        'embroidery',
+        'digital',
+        'admin',
+        'finishing',
+        'shipping',
+      ]
+    > &
+      Schema.Attribute.Required;
+    lastMaintenanceDate: Schema.Attribute.Date;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::machine.machine'
+    > &
+      Schema.Attribute.Private;
+    machineId: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    manufacturer: Schema.Attribute.String;
+    model: Schema.Attribute.String;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    nextMaintenanceDate: Schema.Attribute.Date;
+    notes: Schema.Attribute.Text;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<
+      ['active', 'maintenance', 'offline', 'retired']
+    > &
+      Schema.Attribute.DefaultTo<'active'>;
+    type: Schema.Attribute.Enumeration<
+      [
+        'auto-press',
+        'manual-press',
+        'dryer',
+        'embroidery-head',
+        'dtg-printer',
+        'dtf-printer',
+        'sublimation',
+        'heat-press',
+        'label-printer',
+        'vinyl-cutter',
+        'other',
+      ]
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
   collectionName: 'orders';
   info: {
@@ -1452,6 +1519,7 @@ declare module '@strapi/strapi' {
       'api::customer.customer': ApiCustomerCustomer;
       'api::employee.employee': ApiEmployeeEmployee;
       'api::job.job': ApiJobJob;
+      'api::machine.machine': ApiMachineMachine;
       'api::order.order': ApiOrderOrder;
       'api::price-calculation.price-calculation': ApiPriceCalculationPriceCalculation;
       'api::pricing-rule.pricing-rule': ApiPricingRulePricingRule;

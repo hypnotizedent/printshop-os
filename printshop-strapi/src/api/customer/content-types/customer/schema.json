@@ -47,6 +47,10 @@
     "printavoId": {
       "type": "string"
     },
+    "passwordHash": {
+      "type": "string",
+      "private": true
+    },
     "orders": {
       "type": "relation",
       "relation": "oneToMany",

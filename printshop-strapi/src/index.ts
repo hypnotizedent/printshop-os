@@ -73,6 +73,12 @@ export default {
         'api::time-clock-entry.time-clock-entry.create',
         'api::time-clock-entry.time-clock-entry.update',
         'api::time-clock-entry.time-clock-entry.delete',
+        // Machine permissions (Production Dashboard)
+        'api::machine.machine.find',
+        'api::machine.machine.findOne',
+        'api::machine.machine.create',
+        'api::machine.machine.update',
+        'api::machine.machine.delete',
       ];
 
       for (const action of allPermissions) {
@@ -167,7 +173,16 @@ export default {
         { action: 'api::time-clock-entry.time-clock-entry.delete' }
       ];
 
-      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions, ...employeePermissions, ...timeClockEntryPermissions]) {
+      // Enable all permissions for machine content type (Production Dashboard)
+      const machinePermissions = [
+        { action: 'api::machine.machine.find' },
+        { action: 'api::machine.machine.findOne' },
+        { action: 'api::machine.machine.create' },
+        { action: 'api::machine.machine.update' },
+        { action: 'api::machine.machine.delete' }
+      ];
+
+      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions, ...employeePermissions, ...timeClockEntryPermissions, ...machinePermissions]) {
         const existing = await strapi.db.query('admin::api-token-permission').findOne({
           where: { action: perm.action, token: token.id }
         });
