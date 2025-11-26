@@ -1,5 +1,4 @@
-import { useState } from "react"
-import { useKV } from "@github/spark/hooks"
+import { useState, useEffect } from "react"
 import { Toaster } from "@/components/ui/sonner"
 import { AppSidebar } from "./components/layout/AppSidebar"
 import { DashboardPage } from "./components/dashboard/DashboardPage"
@@ -11,19 +10,115 @@ import { ReportsPage } from "./components/reports/ReportsPage"
 import { SettingsPage } from "./components/settings/SettingsPage"
 import { ProductionPage } from "./components/production/ProductionPage"
 import LabelsDemo from "./pages/LabelsDemo"
+import { QuoteForm } from "./components/quotes/QuoteForm"
+import { ProductCatalog } from "./components/products/ProductCatalog"
+import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
 function App() {
   const [currentPage, setCurrentPage] = useState("dashboard")
-  const [jobs] = useKV<Job[]>("jobs", [])
-  const [customers] = useKV<Customer[]>("customers", [])
-  const [machines] = useKV<Machine[]>("machines", [])
-  const [files] = useKV<FileItem[]>("files", [])
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [machines] = useState<Machine[]>([])
+  const [files] = useState<FileItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const jobsList = jobs || []
-  const customersList = customers || []
-  const machinesList = machines || []
-  const filesList = files || []
+  // Fetch customers from Strapi
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch customers
+        const customersRes = await fetch(`${API_BASE}/api/customers?pagination[limit]=500`);
+        if (customersRes.ok) {
+          const customersData = await customersRes.json();
+          const transformedCustomers: Customer[] = (customersData.data || []).map((c: any) => ({
+            id: c.documentId || c.id.toString(),
+            name: c.name || 'Unknown',
+            email: c.email || '',
+            phone: c.phone || '',
+            company: c.company || '',
+            totalOrders: 0, // Will be calculated from orders
+            totalRevenue: 0,
+            lastOrderDate: c.updatedAt || new Date().toISOString(),
+            status: 'active' as const,
+          }));
+          setCustomers(transformedCustomers);
+        }
+
+        // Fetch orders and transform to jobs for the Kanban board
+        const ordersRes = await fetch(`${API_BASE}/api/orders?populate=customer&pagination[limit]=100`);
+        if (ordersRes.ok) {
+          const ordersData = await ordersRes.json();
+          const transformedJobs: Job[] = (ordersData.data || []).map((o: any) => {
+            // Map Strapi order status to Job status
+            const statusMap: Record<string, Job['status']> = {
+              'QUOTE': 'quote',
+              'QUOTE_SENT': 'quote',
+              'Quote Out For Approval - Email': 'quote',
+              'PENDING': 'design',
+              'IN_PRODUCTION': 'printing',
+              'READY_TO_SHIP': 'finishing',
+              'SHIPPED': 'delivery',
+              'DELIVERED': 'completed',
+              'COMPLETED': 'completed',
+              'INVOICE PAID': 'completed',
+              'CANCELLED': 'cancelled',
+            };
+            
+            return {
+              id: o.documentId || o.id.toString(),
+              title: `Order #${o.orderNumber}`,
+              customer: o.customer?.name || 'Unknown Customer',
+              customerId: o.customer?.documentId || '',
+              status: statusMap[o.status] || 'quote',
+              priority: 'normal' as const,
+              dueDate: o.dueDate || new Date().toISOString(),
+              createdAt: o.createdAt,
+              description: o.notes || '',
+              quantity: o.items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0,
+              fileCount: 0,
+              estimatedCost: o.totalAmount || 0,
+              progress: o.status === 'COMPLETED' || o.status === 'INVOICE PAID' ? 100 : 50,
+            };
+          });
+          setJobs(transformedJobs);
+
+          // Update customer order counts
+          const customerOrderCounts: Record<string, { count: number; revenue: number }> = {};
+          (ordersData.data || []).forEach((o: any) => {
+            const custId = o.customer?.documentId;
+            if (custId) {
+              if (!customerOrderCounts[custId]) {
+                customerOrderCounts[custId] = { count: 0, revenue: 0 };
+              }
+              customerOrderCounts[custId].count++;
+              customerOrderCounts[custId].revenue += o.totalAmount || 0;
+            }
+          });
+
+          setCustomers(prev => prev.map(c => ({
+            ...c,
+            totalOrders: customerOrderCounts[c.id]?.count || 0,
+            totalRevenue: customerOrderCounts[c.id]?.revenue || 0,
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const jobsList = jobs
+  const customersList = customers
+  const machinesList = machines
+  const filesList = files
 
   const stats: DashboardStats = {
     activeJobs: jobsList.filter(j => j.status !== 'completed' && j.status !== 'cancelled').length,
@@ -60,6 +155,12 @@ function App() {
         return <SettingsPage />
       case "labels-demo":
         return <LabelsDemo />
+      case "quotes":
+        return <QuoteForm />
+      case "products":
+        return <ProductCatalog />
+      case "shipping":
+        return <ShippingLabelForm />
       default:
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} />
     }

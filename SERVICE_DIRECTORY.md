@@ -8,6 +8,30 @@ This document provides a precise map of where every component, service, and feat
 
 ## Recent Updates
 
+### November 27, 2025 (Session 8 - Priority Features)
+✅ **Priority 1: Quote Workflow UI**
+- Created `frontend/src/components/quotes/QuoteForm.tsx` - Full quote creation form
+  - Customer info, line items, print categories, location toggles
+  - Price calculation logic (volume discounts, location surcharges)
+  - Saves to Strapi with QUOTE/QUOTE_SENT status
+
+✅ **Priority 2: Product Catalog UI**
+- Created `frontend/src/components/products/ProductCatalog.tsx` - Product browsing
+  - Fetches from `/api/products` (supplier SKUs)
+  - Filters: search, brand, category, supplier, color
+  - Product detail dialog with variant info
+
+✅ **Priority 3: Shipping Labels UI**
+- Created `frontend/src/components/shipping/ShippingLabelForm.tsx` - Shipping labels
+  - From/To address forms with state dropdowns
+  - Package dimensions with preset box sizes
+  - Rate shopping (simulated EasyPost integration)
+  - Label purchase and print/download
+
+✅ **App Routing & Navigation**
+- Updated `App.tsx` with new routes: quotes, products, shipping
+- Updated `AppSidebar.tsx` with Quotes, Products, Shipping nav items
+
 ### November 26, 2025 (Session 7 - Phase 2 & 3 Implementation)
 ✅ **PHASE 2 COMPLETE: Schema Enhancement**
 - Added payment fields to Order: `amountPaid`, `amountOutstanding`, `salesTax`, `discount`
@@ -445,6 +469,12 @@ frontend/
 │   │   │   ├── OrderDetails.tsx
 │   │   │   ├── SupportTickets.tsx
 │   │   │   └── QuoteManager.tsx
+│   │   ├── quotes/           # Quote creation UI ✅ NEW
+│   │   │   └── QuoteForm.tsx         # Full quote workflow
+│   │   ├── products/         # Product catalog UI ✅ NEW
+│   │   │   └── ProductCatalog.tsx    # Supplier SKU browsing
+│   │   ├── shipping/         # Shipping labels UI ✅ NEW
+│   │   │   └── ShippingLabelForm.tsx # EasyPost integration
 │   │   ├── labels/           # Label formatter UI (planned)
 │   │   │   ├── LabelUploader.tsx
 │   │   │   ├── LabelPreview.tsx
@@ -480,8 +510,8 @@ frontend/
 ```
 
 **Framework:** React 19 + TypeScript + Vite  
-**UI:** Tailwind CSS + Radix UI + shadcn/ui  
-**Port:** 5173 (dev)
+**UI:** Tailwind CSS + Radix UI + shadcn/ui + Phosphor Icons  
+**Port:** 5000 (dev)
 
 ---
 

@@ -1,12 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { saveTimeEntryOffline } from '../../../offline/offline-storage';
 import { useOffline } from '../../../hooks/useOffline';
-import { v4 as uuidv4 } from 'uuid';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+
+interface Employee {
+  id: number;
+  documentId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  hourlyRate: number;
+  role: string;
+  department: string;
+  isActive: boolean;
+  pin?: string;
+}
+
+interface TimeClockEntry {
+  id: number;
+  documentId: string;
+  clockIn: string;
+  clockOut: string | null;
+  status: string;
+}
 
 export const MobileTimeClock = () => {
   const [pin, setPin] = useState('');
   const [isClockingIn, setIsClockingIn] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [currentEmployee, setCurrentEmployee] = useState<Employee | null>(null);
+  const [activeEntry, setActiveEntry] = useState<TimeClockEntry | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const { isOnline } = useOffline();
+
+  // Fetch employees on mount
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/employees`);
+        const json = await res.json();
+        setEmployees(json.data || []);
+      } catch (err) {
+        console.error('Failed to fetch employees:', err);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
   const handlePinInput = (digit: string) => {
     if (pin.length < 4) {
@@ -18,6 +58,18 @@ export const MobileTimeClock = () => {
     setPin(pin.slice(0, -1));
   };
 
+  const showMessage = (type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  // Find employee by PIN (for demo, using last 4 digits of employee ID or a simple lookup)
+  const findEmployeeByPin = (enteredPin: string): Employee | null => {
+    // Demo: Match PIN to employee ID (e.g., PIN 0001 = employee ID 1, PIN 0002 = employee ID 2)
+    const employeeId = parseInt(enteredPin, 10);
+    return employees.find(e => e.id === employeeId && e.isActive) || null;
+  };
+
   const handleClockIn = async () => {
     if (pin.length !== 4) {
       return;
@@ -25,33 +77,84 @@ export const MobileTimeClock = () => {
 
     setIsClockingIn(true);
     try {
-      // SECURITY NOTE: In production, this PIN should be validated against a secure backend
-      // and exchanged for a proper user identifier. Never use the PIN directly as a user ID.
-      // This is a demo implementation showing the UI/UX flow only.
-      // TODO: Implement secure PIN validation: 
-      //   1. Hash PIN before sending to backend
-      //   2. Backend validates against secure storage
-      //   3. Backend returns JWT or session token with user ID
-      //   4. Use token for authenticated requests
+      // Find employee by PIN
+      const employee = findEmployeeByPin(pin);
       
-      const entry = {
-        id: uuidv4(),
-        userId: `temp-${pin}`, // Temporary - replace with validated user ID from backend
-        timestamp: Date.now(),
-        type: 'clock-in' as const,
-        synced: false
-      };
+      if (!employee) {
+        showMessage('error', 'Invalid PIN. Please try again.');
+        setPin('');
+        setIsClockingIn(false);
+        return;
+      }
 
-      await saveTimeEntryOffline(entry);
+      setCurrentEmployee(employee);
+
+      // Check if employee has active clock-in (online mode)
+      if (isOnline) {
+        const existingRes = await fetch(
+          `${API_URL}/api/time-clock-entries?filters[employee][id][$eq]=${employee.id}&filters[status][$eq]=Active&filters[clockOut][$null]=true`
+        );
+        const existingJson = await existingRes.json();
+        
+        if (existingJson.data && existingJson.data.length > 0) {
+          // Employee already clocked in - clock them out
+          const entry = existingJson.data[0];
+          const clockOutRes = await fetch(`${API_URL}/api/time-clock-entries/${entry.documentId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                clockOut: new Date().toISOString(),
+                status: 'Completed'
+              }
+            })
+          });
+          
+          if (clockOutRes.ok) {
+            showMessage('success', `${employee.firstName} clocked OUT!`);
+          } else {
+            throw new Error('Failed to clock out');
+          }
+        } else {
+          // Clock in - create new entry
+          const clockInRes = await fetch(`${API_URL}/api/time-clock-entries`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                employee: employee.id,
+                clockIn: new Date().toISOString(),
+                status: 'Active',
+                taskType: 'production'
+              }
+            })
+          });
+          
+          if (clockInRes.ok) {
+            showMessage('success', `${employee.firstName} clocked IN!`);
+          } else {
+            throw new Error('Failed to clock in');
+          }
+        }
+      } else {
+        // Offline mode - save locally
+        await saveTimeEntryOffline({
+          id: crypto.randomUUID(),
+          userId: employee.documentId,
+          timestamp: Date.now(),
+          type: 'clock-in',
+          synced: false
+        });
+        showMessage('success', `${employee.firstName} clocked in (offline)`);
+      }
       
-      // Show success message
-      alert('Clocked in successfully!');
       setPin('');
     } catch (error) {
-      console.error('Clock in failed:', error);
-      alert('Failed to clock in. Please try again.');
+      console.error('Clock in/out failed:', error);
+      showMessage('error', 'Failed. Please try again.');
     } finally {
       setIsClockingIn(false);
+      setTimeout(() => setCurrentEmployee(null), 3000);
     }
   };
 
@@ -68,9 +171,26 @@ export const MobileTimeClock = () => {
         )}
       </div>
 
+      {/* Message Display */}
+      {message && (
+        <div className={`mb-4 px-4 py-3 rounded-md text-center text-lg font-semibold ${
+          message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          {message.text}
+        </div>
+      )}
+
+      {/* Employee Display */}
+      {currentEmployee && (
+        <div className="mb-4 text-center text-lg font-semibold text-blue-600">
+          {currentEmployee.firstName} {currentEmployee.lastName}
+        </div>
+      )}
+
       {/* PIN Input Display */}
       <div className="mb-8 text-center">
-        <p className="text-lg mb-4">Enter PIN:</p>
+        <p className="text-lg mb-4">Enter Employee PIN:</p>
+        <p className="text-sm text-gray-500 mb-4">(Use 0001 for ID 1, 0002 for ID 2)</p>
         <div className="flex justify-center gap-2 mb-6">
           {[0, 1, 2, 3].map((i) => (
             <div

@@ -135,6 +135,15 @@ graph LR
 - `GET /api/orders` → Strapi CMS
 - `WS /production` → Production Dashboard
 - `POST /pricing/calculate` → Pricing Engine
+- `POST /api/orders` → Create orders/quotes
+- `GET /api/products` → Product catalog
+
+**Key UI Components (Nov 2025):**
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `QuoteForm.tsx` | `components/quotes/` | Create quotes with line items, pricing, print locations |
+| `ProductCatalog.tsx` | `components/products/` | Browse supplier products with filters |
+| `ShippingLabelForm.tsx` | `components/shipping/` | Create shipping labels via EasyPost |
 
 **Design Patterns:**
 - Component-based architecture (React)
@@ -516,6 +525,37 @@ flowchart LR
 ---
 
 ## Data Flow Patterns
+
+### Pattern 0: Quote Creation Workflow (UI)
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 Staff User
+    participant QF as QuoteForm.tsx
+    participant API as Strapi API
+    participant PC as ProductCatalog
+    
+    U->>QF: Open Quotes Page
+    QF->>QF: Initialize empty form
+    
+    U->>QF: Fill customer info
+    U->>QF: Add line items<br/>(garment, qty, colors, sizes)
+    U->>QF: Select print locations<br/>(front, back, sleeve, etc.)
+    
+    QF->>QF: Calculate pricing<br/>• Volume discounts<br/>• Location surcharges<br/>• Color multipliers
+    
+    QF-->>U: Display estimated total
+    
+    U->>QF: Click "Save Quote"
+    QF->>API: POST /api/orders<br/>{status: QUOTE, items, total}
+    API-->>QF: {orderId, createdAt}
+    
+    Note over QF: Quote saved with<br/>QUOTE status
+    
+    U->>QF: Click "Send to Customer"
+    QF->>API: PATCH /api/orders/:id<br/>{status: QUOTE_SENT}
+    API-->>QF: Updated
+```
 
 ### Pattern 1: Order Creation & Production Assignment
 

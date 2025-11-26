@@ -24,6 +24,7 @@
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
+    "@easypost/api": "^8.4.0",
     "@strapi/plugin-cloud": "5.31.2",
     "@strapi/plugin-users-permissions": "5.31.2",
     "@strapi/strapi": "5.31.2",
