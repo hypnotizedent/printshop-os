@@ -49,12 +49,12 @@ export function EmployeePINLogin({ onSuccess }: EmployeePINLoginProps) {
     setError(null);
 
     try {
-      const success = await validateEmployeePIN({ pin: pinValue });
+      const result = await validateEmployeePIN({ pin: pinValue });
       
-      if (success) {
+      if (result.success) {
         onSuccess?.();
       } else {
-        setError('Invalid PIN. Please try again.');
+        setError(result.error || 'Invalid PIN. Please try again.');
         setPinValue(''); // Clear PIN on error
       }
     } catch (err) {

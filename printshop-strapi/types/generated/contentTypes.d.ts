@@ -721,10 +721,14 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    amountOutstanding: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    amountPaid: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
+    customerPO: Schema.Attribute.String;
+    discount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     dueDate: Schema.Attribute.Date;
     items: Schema.Attribute.JSON;
     jobs: Schema.Attribute.Relation<'oneToMany', 'api::job.job'>;
@@ -734,9 +738,24 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     notes: Schema.Attribute.Text;
     orderNumber: Schema.Attribute.String & Schema.Attribute.Required;
     printavoId: Schema.Attribute.String;
+    productionNotes: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
-    status: Schema.Attribute.String;
-    totalAmount: Schema.Attribute.Decimal;
+    salesTax: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    status: Schema.Attribute.Enumeration<
+      [
+        'QUOTE',
+        'QUOTE_SENT',
+        'QUOTE_APPROVED',
+        'IN_PRODUCTION',
+        'COMPLETE',
+        'READY_FOR_PICKUP',
+        'PAYMENT_NEEDED',
+        'INVOICE_PAID',
+        'CANCELLED',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'QUOTE'>;
+    totalAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

@@ -51,12 +51,18 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
     setError(null);
 
     try {
-      const success = await signupCustomer({ name: data.name, email: data.email });
+      const result = await signupCustomer({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+        company: data.company,
+      });
       
-      if (success) {
+      if (result.success) {
         onSuccess?.();
       } else {
-        setError('Signup failed. Please try again.');
+        setError(result.error || 'Signup failed. Please try again.');
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');

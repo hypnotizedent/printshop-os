@@ -44,12 +44,12 @@ export function LoginForm({ onSwitchToSignup, onSuccess }: LoginFormProps) {
     setError(null);
 
     try {
-      const success = await loginCustomer({ email: data.email });
+      const result = await loginCustomer({ email: data.email, password: data.password });
       
-      if (success) {
+      if (result.success) {
         onSuccess?.();
       } else {
-        setError('Login failed. Please check your email and try again.');
+        setError(result.error || 'Login failed. Please check your credentials and try again.');
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');

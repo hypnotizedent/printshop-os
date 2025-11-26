@@ -17,7 +17,19 @@
       "required": true
     },
     "status": {
-      "type": "string"
+      "type": "enumeration",
+      "enum": [
+        "QUOTE",
+        "QUOTE_SENT",
+        "QUOTE_APPROVED",
+        "IN_PRODUCTION",
+        "COMPLETE",
+        "READY_FOR_PICKUP",
+        "PAYMENT_NEEDED",
+        "INVOICE_PAID",
+        "CANCELLED"
+      ],
+      "default": "QUOTE"
     },
     "customer": {
       "type": "relation",
@@ -26,13 +38,36 @@
       "inversedBy": "orders"
     },
     "totalAmount": {
-      "type": "decimal"
+      "type": "decimal",
+      "default": 0
+    },
+    "amountPaid": {
+      "type": "decimal",
+      "default": 0
+    },
+    "amountOutstanding": {
+      "type": "decimal",
+      "default": 0
+    },
+    "salesTax": {
+      "type": "decimal",
+      "default": 0
+    },
+    "discount": {
+      "type": "decimal",
+      "default": 0
     },
     "dueDate": {
       "type": "date"
     },
     "notes": {
       "type": "text"
+    },
+    "productionNotes": {
+      "type": "text"
+    },
+    "customerPO": {
+      "type": "string"
     },
     "items": {
       "type": "json"
