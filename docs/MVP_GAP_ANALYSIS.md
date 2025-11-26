@@ -1,6 +1,6 @@
 # PrintShop OS - Minimum Viable Operations Gap Analysis
 
-**Date:** November 26, 2025  
+**Date:** November 26, 2025 (Updated Session 6)  
 **Goal:** Cancel Printavo subscription and operate fully on PrintShop OS
 
 ---
@@ -9,15 +9,18 @@
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Strapi CMS | ✅ Running | Port 1337, SQLite database |
-| Customer API | ✅ Working | 338 customers imported |
-| Order API | ✅ Working | Ready for data |
+| Strapi CMS | ✅ Running | Port 1337, SQLite database, Enterprise 5.31.2 |
+| Customer API | ✅ Working | **336 customers imported** |
+| Order API | ✅ Working | **831 orders imported with line items** |
 | Job API | ✅ Working | Ready for data |
+| Product API | ✅ Working | **18 products imported** |
+| Employee API | ✅ Working | **1 employee** |
 | Color API | ✅ Working | Empty, needs data |
 | SOP API | ✅ Working | Empty, needs data |
 | Price Calculation API | ✅ Working | Empty |
 | Pricing Rule API | ✅ Working | Empty |
 | Admin UI | ✅ Working | http://localhost:1337/admin |
+| Frontend Auth | ✅ Working | LoginForm, SignupForm, EmployeePINLogin components |
 
 ---
 
@@ -108,36 +111,44 @@ These can wait until after you're operational:
 
 ## 📋 ACTION PLAN (Priority Order)
 
-### Phase 1: Data Import (TODAY)
-1. ✅ Import 2025 customers (338 done)
-2. ⬜ Import 2025 orders (831 orders)
-3. ⬜ Verify data in Strapi Admin
+### Phase 1: Data Import (COMPLETE ✅)
+1. ✅ Import 2025 customers (336 done)
+2. ✅ Import 2025 orders (831 orders with line items)
+3. ✅ Verify data in Strapi Admin
 
 ### Phase 2: Schema Enhancement (THIS WEEK)
-1. ⬜ Add payment fields to Order
-2. ⬜ Configure order statuses
+1. ⬜ Add payment fields to Order (amountPaid, amountOutstanding, salesTax)
+2. ⬜ Configure order statuses enumeration
 3. ⬜ Test order creation workflow
 
-### Phase 3: Operational Testing (NEXT WEEK)
-1. ⬜ Create new order manually
-2. ⬜ Update order status
+### Phase 3: Strapi Auth Routes (NEXT)
+1. ⬜ Implement `/auth/customer/login` endpoint
+2. ⬜ Implement `/auth/customer/signup` endpoint  
+3. ⬜ Implement `/auth/employee/validate-pin` endpoint
+4. ⬜ Wire frontend to Strapi auth
+
+### Phase 4: Operational Testing (PARALLEL RUN)
+1. ⬜ Create new order manually in Strapi
+2. ⬜ Update order status workflow
 3. ⬜ Link jobs to orders
 4. ⬜ Complete full workflow test
+5. ⬜ Run parallel with Printavo for 1 week
 
 ---
 
 ## 🎯 VERDICT
 
-**Can you cancel Printavo today?** Not quite.
+**Can you cancel Printavo today?** Almost!
 
 **What's needed first:**
-1. Import 2025 orders (~1 hour)
-2. Test creating a new order in Strapi (~30 min)
-3. Confirm you can track order status changes
+1. ✅ Import 2025 orders - DONE (831 orders with line items)
+2. ⬜ Implement Strapi auth routes (~2 hours)
+3. ⬜ Test creating a new order in Strapi (~30 min)
+4. ⬜ Confirm you can track order status changes
 
-**Estimated time to MVP:** 2-3 hours
+**Estimated time to MVP:** 3-4 hours
 
-**Recommendation:** Import the 2025 orders now, test for a day or two running both systems in parallel, then cancel Printavo.
+**Recommendation:** Implement the Strapi auth routes, test for a day running both systems in parallel, then cancel Printavo.
 
 ---
 

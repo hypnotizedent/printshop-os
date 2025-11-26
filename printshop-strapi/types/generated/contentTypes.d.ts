@@ -541,6 +541,7 @@ export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String & Schema.Attribute.Required;
     notes: Schema.Attribute.Text;
     orders: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
+    passwordHash: Schema.Attribute.String & Schema.Attribute.Private;
     phone: Schema.Attribute.String;
     printavoId: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;

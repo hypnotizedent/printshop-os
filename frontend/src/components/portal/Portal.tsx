@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Navigation } from "./Navigation"
 import { Dashboard } from "./Dashboard"
 import type { 
@@ -254,26 +255,28 @@ export function Portal() {
             <Route 
               path="/portal" 
               element={
-                <Dashboard
-                  stats={mockStats}
-                  recentOrders={mockOrders}
-                  notifications={mockNotifications}
-                  pendingQuotes={mockPendingQuotes}
-                  userName={mockUser.name.split(' ')[0]}
-                />
+                <ProtectedRoute allowedUserTypes={["customer"]}>
+                  <Dashboard
+                    stats={mockStats}
+                    recentOrders={mockOrders}
+                    notifications={mockNotifications}
+                    pendingQuotes={mockPendingQuotes}
+                    userName={mockUser.name.split(' ')[0]}
+                  />
+                </ProtectedRoute>
               } 
             />
-            <Route path="/portal/orders/history" element={<OrderHistory />} />
-            <Route path="/portal/orders/track" element={<TrackOrders />} />
-            <Route path="/portal/quotes/request" element={<RequestQuote />} />
-            <Route path="/portal/quotes/pending" element={<PendingQuotes />} />
-            <Route path="/portal/quotes/history" element={<QuoteHistory />} />
-            <Route path="/portal/account/profile" element={<Profile />} />
-            <Route path="/portal/account/addresses" element={<Addresses />} />
-            <Route path="/portal/account/payment" element={<PaymentMethods />} />
-            <Route path="/portal/account/notifications" element={<NotificationSettings />} />
-            <Route path="/portal/support/contact" element={<ContactSupport />} />
-            <Route path="/portal/support/tickets" element={<SupportTickets />} />
+            <Route path="/portal/orders/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><OrderHistory /></ProtectedRoute>} />
+            <Route path="/portal/orders/track" element={<ProtectedRoute allowedUserTypes={["customer"]}><TrackOrders /></ProtectedRoute>} />
+            <Route path="/portal/quotes/request" element={<ProtectedRoute allowedUserTypes={["customer"]}><RequestQuote /></ProtectedRoute>} />
+            <Route path="/portal/quotes/pending" element={<ProtectedRoute allowedUserTypes={["customer"]}><PendingQuotes /></ProtectedRoute>} />
+            <Route path="/portal/quotes/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><QuoteHistory /></ProtectedRoute>} />
+            <Route path="/portal/account/profile" element={<ProtectedRoute allowedUserTypes={["customer"]}><Profile /></ProtectedRoute>} />
+            <Route path="/portal/account/addresses" element={<ProtectedRoute allowedUserTypes={["customer"]}><Addresses /></ProtectedRoute>} />
+            <Route path="/portal/account/payment" element={<ProtectedRoute allowedUserTypes={["customer"]}><PaymentMethods /></ProtectedRoute>} />
+            <Route path="/portal/account/notifications" element={<ProtectedRoute allowedUserTypes={["customer"]}><NotificationSettings /></ProtectedRoute>} />
+            <Route path="/portal/support/contact" element={<ProtectedRoute allowedUserTypes={["customer"]}><ContactSupport /></ProtectedRoute>} />
+            <Route path="/portal/support/tickets" element={<ProtectedRoute allowedUserTypes={["customer"]}><SupportTickets /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/portal" replace />} />
           </Routes>
         </main>

@@ -79,9 +79,7 @@ export interface DashboardStats {
   urgentJobs: number
 }
 
-// Customer Portal Types
-export type OrderStatus = 'completed' | 'in-production' | 'shipped' | 'delivered' | 'cancelled'
-
+// Customer Portal Types - CustomerOrder uses full OrderStatus defined below
 export interface CustomerOrder {
   id: string
   orderNumber: string

@@ -1,10 +1,14 @@
+/**
+ * Example showing how to integrate authentication into the main app
+ */
+
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from "react-error-boundary";
 import "@github/spark/spark"
 
 import App from './App.tsx'
-import { AuthProvider } from '@/contexts/AuthContext'
 import { ErrorFallback } from './ErrorFallback.tsx'
+import { AuthProvider } from './contexts/AuthContext.tsx'
 
 import "./main.css"
 import "./styles/theme.css"
@@ -25,9 +29,9 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <AuthProvider>
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+  <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <AuthProvider>
       <App />
-    </ErrorBoundary>
-  </AuthProvider>
+    </AuthProvider>
+   </ErrorBoundary>
 )
