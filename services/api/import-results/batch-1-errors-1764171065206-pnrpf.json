@@ -1,0 +1,62 @@
+[
+  {
+    "orderId": 21171246,
+    "error": "Error mapping Printavo order 21171246.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 20507877,
+    "error": "Error mapping Printavo order 20507877.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 20295433,
+    "error": "Error mapping Printavo order 20295433.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 19678986,
+    "error": "Error mapping Printavo order 19678986.customer: Invalid email: \"\""
+  },
+  {
+    "orderId": 19548088,
+    "error": "Error mapping Printavo order 19548088.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 19543473,
+    "error": "Error mapping Printavo order 19543473.customer: Customer name is required"
+  },
+  {
+    "orderId": 18779252,
+    "error": "Error mapping Printavo order 18779252.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 18149760,
+    "error": "Error mapping Printavo order 18149760.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 18149711,
+    "error": "Error mapping Printavo order 18149711.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 18129131,
+    "error": "Error mapping Printavo order 18129131.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 18064372,
+    "error": "Error mapping Printavo order 18064372.customer: Invalid email: \"\""
+  },
+  {
+    "orderId": 17540871,
+    "error": "Error mapping Printavo order 17540871.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 17390936,
+    "error": "Error mapping Printavo order 17390936.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 17121871,
+    "error": "Error mapping Printavo order 17121871.customer: Invalid email: \"derekhochadel@gmail.com, Punktbruch@outlook.com\""
+  },
+  {
+    "orderId": 16999533,
+    "error": "Error mapping Printavo order 16999533.customer: Invalid email: \"\""
+  }
+]

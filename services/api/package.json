@@ -12,7 +12,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "sync:printavo": "ts-node scripts/sync-printavo-live.ts",
-    "import:historical": "ts-node scripts/import-historical-orders.ts",
+    "import:historical": "ts-node scripts/run-import.ts",
+    "import:batch": "ts-node scripts/run-import.ts",
+    "upload:strapi": "ts-node scripts/upload-to-strapi.ts",
     "lint": "tsc --noEmit"
   },
   "keywords": [

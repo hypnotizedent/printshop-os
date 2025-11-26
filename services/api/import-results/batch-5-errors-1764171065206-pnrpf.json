@@ -1,0 +1,38 @@
+[
+  {
+    "orderId": 9884121,
+    "error": "Error mapping Printavo order 9884121.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 9844033,
+    "error": "Error mapping Printavo order 9844033.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+  },
+  {
+    "orderId": 9693224,
+    "error": "Error mapping Printavo order 9693224.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+  },
+  {
+    "orderId": 9438064,
+    "error": "Error mapping Printavo order 9438064.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+  },
+  {
+    "orderId": 9438018,
+    "error": "Error mapping Printavo order 9438018.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+  },
+  {
+    "orderId": 9438015,
+    "error": "Error mapping Printavo order 9438015.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+  },
+  {
+    "orderId": 9316592,
+    "error": "Error mapping Printavo order 9316592.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 8715357,
+    "error": "Error mapping Printavo order 8715357.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 8612957,
+    "error": "Error mapping Printavo order 8612957.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  }
+]

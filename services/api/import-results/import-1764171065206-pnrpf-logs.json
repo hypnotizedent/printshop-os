@@ -1,0 +1,925 @@
+[
+  {
+    "timestamp": "2025-11-26T15:31:05.207Z",
+    "level": "info",
+    "message": "Import session started",
+    "data": {
+      "sessionId": "1764171065206-pnrpf"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.208Z",
+    "level": "info",
+    "message": "Batch importer initialized",
+    "data": {
+      "batchSize": 1000,
+      "skipDuplicates": true,
+      "maxRetries": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.208Z",
+    "level": "info",
+    "message": "Loading orders from file",
+    "data": {
+      "filePath": "/Users/ronnyworks/Projects/printshop-os/data/processed/orders_with_images.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.307Z",
+    "level": "info",
+    "message": "Orders loaded successfully",
+    "data": {
+      "count": 11340
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.307Z",
+    "level": "info",
+    "message": "Starting import process",
+    "data": {
+      "totalOrders": 11340
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.307Z",
+    "level": "info",
+    "message": "Import plan created",
+    "data": {
+      "totalBatches": 12,
+      "ordersPerBatch": 1000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.307Z",
+    "level": "info",
+    "message": "Processing batch 1",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 0,
+      "endIndex": 1000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.313Z",
+    "level": "info",
+    "message": "Batch 1 completed",
+    "data": {
+      "successful": 985,
+      "errors": 15,
+      "duplicates": 0,
+      "processingTimeMs": 6
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.313Z",
+    "level": "warn",
+    "message": "Batch 1 had errors",
+    "data": {
+      "errorCount": 15,
+      "errors": [
+        {
+          "orderId": 21171246,
+          "error": "Error mapping Printavo order 21171246.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 20507877,
+          "error": "Error mapping Printavo order 20507877.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+        },
+        {
+          "orderId": 20295433,
+          "error": "Error mapping Printavo order 20295433.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 19678986,
+          "error": "Error mapping Printavo order 19678986.customer: Invalid email: \"\""
+        },
+        {
+          "orderId": 19548088,
+          "error": "Error mapping Printavo order 19548088.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.319Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 1",
+    "data": {
+      "filepath": "import-results/batch-1-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.319Z",
+    "level": "info",
+    "message": "Saved error report for batch 1",
+    "data": {
+      "filepath": "import-results/batch-1-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.319Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "1/12",
+      "progressPercent": "8.3",
+      "successful": 985,
+      "errors": 15,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.319Z",
+    "level": "info",
+    "message": "Processing batch 2",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 1000,
+      "endIndex": 2000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.331Z",
+    "level": "info",
+    "message": "Batch 2 completed",
+    "data": {
+      "successful": 971,
+      "errors": 29,
+      "duplicates": 0,
+      "processingTimeMs": 12
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.331Z",
+    "level": "warn",
+    "message": "Batch 2 had errors",
+    "data": {
+      "errorCount": 29,
+      "errors": [
+        {
+          "orderId": 16883015,
+          "error": "Error mapping Printavo order 16883015.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 16872063,
+          "error": "Error mapping Printavo order 16872063.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 16732372,
+          "error": "Error mapping Printavo order 16732372.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 16419487,
+          "error": "Error mapping Printavo order 16419487.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 16294428,
+          "error": "Error mapping Printavo order 16294428.customer: Invalid email: \"derekhochadel@gmail.com, Punktbruch@outlook.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.337Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 2",
+    "data": {
+      "filepath": "import-results/batch-2-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.337Z",
+    "level": "info",
+    "message": "Saved error report for batch 2",
+    "data": {
+      "filepath": "import-results/batch-2-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.337Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "2/12",
+      "progressPercent": "16.7",
+      "successful": 1956,
+      "errors": 44,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.337Z",
+    "level": "info",
+    "message": "Processing batch 3",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 2000,
+      "endIndex": 3000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.340Z",
+    "level": "info",
+    "message": "Batch 3 completed",
+    "data": {
+      "successful": 962,
+      "errors": 38,
+      "duplicates": 0,
+      "processingTimeMs": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.340Z",
+    "level": "warn",
+    "message": "Batch 3 had errors",
+    "data": {
+      "errorCount": 38,
+      "errors": [
+        {
+          "orderId": 13399224,
+          "error": "Error mapping Printavo order 13399224.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 13268999,
+          "error": "Error mapping Printavo order 13268999.customer: Invalid email: \"tom@toconnormd.com, kim@toconnormd.com\""
+        },
+        {
+          "orderId": 13128969,
+          "error": "Error mapping Printavo order 13128969.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+        },
+        {
+          "orderId": 12972734,
+          "error": "Error mapping Printavo order 12972734.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+        },
+        {
+          "orderId": 12942157,
+          "error": "Error mapping Printavo order 12942157.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.347Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 3",
+    "data": {
+      "filepath": "import-results/batch-3-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.347Z",
+    "level": "info",
+    "message": "Saved error report for batch 3",
+    "data": {
+      "filepath": "import-results/batch-3-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.347Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "3/12",
+      "progressPercent": "25.0",
+      "successful": 2918,
+      "errors": 82,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.347Z",
+    "level": "info",
+    "message": "Processing batch 4",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 3000,
+      "endIndex": 4000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.350Z",
+    "level": "info",
+    "message": "Batch 4 completed",
+    "data": {
+      "successful": 995,
+      "errors": 5,
+      "duplicates": 0,
+      "processingTimeMs": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.350Z",
+    "level": "warn",
+    "message": "Batch 4 had errors",
+    "data": {
+      "errorCount": 5,
+      "errors": [
+        {
+          "orderId": 10739457,
+          "error": "Error mapping Printavo order 10739457.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 10631472,
+          "error": "Error mapping Printavo order 10631472.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 10528270,
+          "error": "Error mapping Printavo order 10528270.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 10407881,
+          "error": "Error mapping Printavo order 10407881.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 10356061,
+          "error": "Error mapping Printavo order 10356061.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.356Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 4",
+    "data": {
+      "filepath": "import-results/batch-4-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.357Z",
+    "level": "info",
+    "message": "Saved error report for batch 4",
+    "data": {
+      "filepath": "import-results/batch-4-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.357Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "4/12",
+      "progressPercent": "33.3",
+      "successful": 3913,
+      "errors": 87,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.357Z",
+    "level": "info",
+    "message": "Processing batch 5",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 4000,
+      "endIndex": 5000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.360Z",
+    "level": "info",
+    "message": "Batch 5 completed",
+    "data": {
+      "successful": 991,
+      "errors": 9,
+      "duplicates": 0,
+      "processingTimeMs": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.360Z",
+    "level": "warn",
+    "message": "Batch 5 had errors",
+    "data": {
+      "errorCount": 9,
+      "errors": [
+        {
+          "orderId": 9884121,
+          "error": "Error mapping Printavo order 9884121.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 9844033,
+          "error": "Error mapping Printavo order 9844033.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+        },
+        {
+          "orderId": 9693224,
+          "error": "Error mapping Printavo order 9693224.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+        },
+        {
+          "orderId": 9438064,
+          "error": "Error mapping Printavo order 9438064.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+        },
+        {
+          "orderId": 9438018,
+          "error": "Error mapping Printavo order 9438018.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.368Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 5",
+    "data": {
+      "filepath": "import-results/batch-5-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.368Z",
+    "level": "info",
+    "message": "Saved error report for batch 5",
+    "data": {
+      "filepath": "import-results/batch-5-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.368Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "5/12",
+      "progressPercent": "41.7",
+      "successful": 4904,
+      "errors": 96,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.368Z",
+    "level": "info",
+    "message": "Processing batch 6",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 5000,
+      "endIndex": 6000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.371Z",
+    "level": "info",
+    "message": "Batch 6 completed",
+    "data": {
+      "successful": 961,
+      "errors": 39,
+      "duplicates": 0,
+      "processingTimeMs": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.371Z",
+    "level": "warn",
+    "message": "Batch 6 had errors",
+    "data": {
+      "errorCount": 39,
+      "errors": [
+        {
+          "orderId": 8477836,
+          "error": "Error mapping Printavo order 8477836.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 8374602,
+          "error": "Error mapping Printavo order 8374602.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 8360183,
+          "error": "Error mapping Printavo order 8360183.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+        },
+        {
+          "orderId": 8295711,
+          "error": "Error mapping Printavo order 8295711.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+        },
+        {
+          "orderId": 8054960,
+          "error": "Error mapping Printavo order 8054960.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.379Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 6",
+    "data": {
+      "filepath": "import-results/batch-6-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.379Z",
+    "level": "info",
+    "message": "Saved error report for batch 6",
+    "data": {
+      "filepath": "import-results/batch-6-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.379Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "6/12",
+      "progressPercent": "50.0",
+      "successful": 5865,
+      "errors": 135,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.379Z",
+    "level": "info",
+    "message": "Processing batch 7",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 6000,
+      "endIndex": 7000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.381Z",
+    "level": "info",
+    "message": "Batch 7 completed",
+    "data": {
+      "successful": 995,
+      "errors": 5,
+      "duplicates": 0,
+      "processingTimeMs": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.382Z",
+    "level": "warn",
+    "message": "Batch 7 had errors",
+    "data": {
+      "errorCount": 5,
+      "errors": [
+        {
+          "orderId": 6578399,
+          "error": "Error mapping Printavo order 6578399.customer: Invalid email: \"ray@8and9.com, ray@rollingloud.com\""
+        },
+        {
+          "orderId": 6462119,
+          "error": "Error mapping Printavo order 6462119.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 6090598,
+          "error": "Error mapping Printavo order 6090598.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 5796586,
+          "error": "Error mapping Printavo order 5796586.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 5700270,
+          "error": "Error mapping Printavo order 5700270.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.387Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 7",
+    "data": {
+      "filepath": "import-results/batch-7-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.388Z",
+    "level": "info",
+    "message": "Saved error report for batch 7",
+    "data": {
+      "filepath": "import-results/batch-7-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.388Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "7/12",
+      "progressPercent": "58.3",
+      "successful": 6860,
+      "errors": 140,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.388Z",
+    "level": "info",
+    "message": "Processing batch 8",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 7000,
+      "endIndex": 8000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.390Z",
+    "level": "info",
+    "message": "Batch 8 completed",
+    "data": {
+      "successful": 995,
+      "errors": 5,
+      "duplicates": 0,
+      "processingTimeMs": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.390Z",
+    "level": "warn",
+    "message": "Batch 8 had errors",
+    "data": {
+      "errorCount": 5,
+      "errors": [
+        {
+          "orderId": 4995830,
+          "error": "Error mapping Printavo order 4995830.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 4949674,
+          "error": "Error mapping Printavo order 4949674.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 4631007,
+          "error": "Error mapping Printavo order 4631007.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 4549429,
+          "error": "Error mapping Printavo order 4549429.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        },
+        {
+          "orderId": 4456113,
+          "error": "Error mapping Printavo order 4456113.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.397Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 8",
+    "data": {
+      "filepath": "import-results/batch-8-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.397Z",
+    "level": "info",
+    "message": "Saved error report for batch 8",
+    "data": {
+      "filepath": "import-results/batch-8-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.397Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "8/12",
+      "progressPercent": "66.7",
+      "successful": 7855,
+      "errors": 145,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.397Z",
+    "level": "info",
+    "message": "Processing batch 9",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 8000,
+      "endIndex": 9000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.399Z",
+    "level": "info",
+    "message": "Batch 9 completed",
+    "data": {
+      "successful": 1000,
+      "errors": 0,
+      "duplicates": 0,
+      "processingTimeMs": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.405Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 9",
+    "data": {
+      "filepath": "import-results/batch-9-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.405Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "9/12",
+      "progressPercent": "75.0",
+      "successful": 8855,
+      "errors": 145,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.406Z",
+    "level": "info",
+    "message": "Processing batch 10",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 9000,
+      "endIndex": 10000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.408Z",
+    "level": "info",
+    "message": "Batch 10 completed",
+    "data": {
+      "successful": 996,
+      "errors": 4,
+      "duplicates": 0,
+      "processingTimeMs": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.408Z",
+    "level": "warn",
+    "message": "Batch 10 had errors",
+    "data": {
+      "errorCount": 4,
+      "errors": [
+        {
+          "orderId": 2353514,
+          "error": "Error mapping Printavo order 2353514.customer: Invalid email: \"ec_harrison@me.com@me.com\""
+        },
+        {
+          "orderId": 2351432,
+          "error": "Error mapping Printavo order 2351432.customer: Invalid email: \"ec_harrison@me.com@me.com\""
+        },
+        {
+          "orderId": 2285458,
+          "error": "Error mapping Printavo order 2285458.customer: Invalid email: \"ec_harrison@me.com@me.com\""
+        },
+        {
+          "orderId": 2238129,
+          "error": "Error mapping Printavo order 2238129.customer: Invalid email: \"harshtee@gmail.com, info@almprinting.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.414Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 10",
+    "data": {
+      "filepath": "import-results/batch-10-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.414Z",
+    "level": "info",
+    "message": "Saved error report for batch 10",
+    "data": {
+      "filepath": "import-results/batch-10-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.414Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "10/12",
+      "progressPercent": "83.3",
+      "successful": 9851,
+      "errors": 149,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.414Z",
+    "level": "info",
+    "message": "Processing batch 11",
+    "data": {
+      "orderCount": 1000,
+      "startIndex": 10000,
+      "endIndex": 11000
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.416Z",
+    "level": "info",
+    "message": "Batch 11 completed",
+    "data": {
+      "successful": 1000,
+      "errors": 0,
+      "duplicates": 0,
+      "processingTimeMs": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.422Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 11",
+    "data": {
+      "filepath": "import-results/batch-11-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.422Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "11/12",
+      "progressPercent": "91.7",
+      "successful": 10851,
+      "errors": 149,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.422Z",
+    "level": "info",
+    "message": "Processing batch 12",
+    "data": {
+      "orderCount": 340,
+      "startIndex": 11000,
+      "endIndex": 11340
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.424Z",
+    "level": "info",
+    "message": "Batch 12 completed",
+    "data": {
+      "successful": 339,
+      "errors": 1,
+      "duplicates": 0,
+      "processingTimeMs": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.424Z",
+    "level": "warn",
+    "message": "Batch 12 had errors",
+    "data": {
+      "errorCount": 1,
+      "errors": [
+        {
+          "orderId": 1199758,
+          "error": "Error mapping Printavo order 1199758.customer: Invalid email: \"rmksales.onmicrosoft.com\""
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.426Z",
+    "level": "info",
+    "message": "Saved successful orders for batch 12",
+    "data": {
+      "filepath": "import-results/batch-12-successful-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.426Z",
+    "level": "info",
+    "message": "Saved error report for batch 12",
+    "data": {
+      "filepath": "import-results/batch-12-errors-1764171065206-pnrpf.json"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.426Z",
+    "level": "info",
+    "message": "Progress update",
+    "data": {
+      "batch": "12/12",
+      "progressPercent": "100.0",
+      "successful": 11190,
+      "errors": 150,
+      "duplicates": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.426Z",
+    "level": "info",
+    "message": "Import process completed",
+    "data": {
+      "totalSuccessful": 11190,
+      "totalErrors": 150,
+      "totalDuplicates": 0,
+      "durationMs": 218,
+      "durationSeconds": "0.22"
+    }
+  },
+  {
+    "timestamp": "2025-11-26T15:31:05.426Z",
+    "level": "info",
+    "message": "Session summary saved",
+    "data": {
+      "filepath": "import-results/session-summary-1764171065206-pnrpf.json"
+    }
+  }
+]

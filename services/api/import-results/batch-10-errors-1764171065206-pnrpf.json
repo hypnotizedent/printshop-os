@@ -1,0 +1,18 @@
+[
+  {
+    "orderId": 2353514,
+    "error": "Error mapping Printavo order 2353514.customer: Invalid email: \"ec_harrison@me.com@me.com\""
+  },
+  {
+    "orderId": 2351432,
+    "error": "Error mapping Printavo order 2351432.customer: Invalid email: \"ec_harrison@me.com@me.com\""
+  },
+  {
+    "orderId": 2285458,
+    "error": "Error mapping Printavo order 2285458.customer: Invalid email: \"ec_harrison@me.com@me.com\""
+  },
+  {
+    "orderId": 2238129,
+    "error": "Error mapping Printavo order 2238129.customer: Invalid email: \"harshtee@gmail.com, info@almprinting.com\""
+  }
+]

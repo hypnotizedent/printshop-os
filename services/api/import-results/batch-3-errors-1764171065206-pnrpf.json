@@ -1,0 +1,154 @@
+[
+  {
+    "orderId": 13399224,
+    "error": "Error mapping Printavo order 13399224.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 13268999,
+    "error": "Error mapping Printavo order 13268999.customer: Invalid email: \"tom@toconnormd.com, kim@toconnormd.com\""
+  },
+  {
+    "orderId": 13128969,
+    "error": "Error mapping Printavo order 13128969.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12972734,
+    "error": "Error mapping Printavo order 12972734.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12942157,
+    "error": "Error mapping Printavo order 12942157.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12941269,
+    "error": "Error mapping Printavo order 12941269.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 12914264,
+    "error": "Error mapping Printavo order 12914264.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12760443,
+    "error": "Error mapping Printavo order 12760443.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12760426,
+    "error": "Error mapping Printavo order 12760426.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12759515,
+    "error": "Error mapping Printavo order 12759515.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12759392,
+    "error": "Error mapping Printavo order 12759392.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12759297,
+    "error": "Error mapping Printavo order 12759297.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12759035,
+    "error": "Error mapping Printavo order 12759035.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12758422,
+    "error": "Error mapping Printavo order 12758422.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12757902,
+    "error": "Error mapping Printavo order 12757902.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12752812,
+    "error": "Error mapping Printavo order 12752812.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12740862,
+    "error": "Error mapping Printavo order 12740862.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12724845,
+    "error": "Error mapping Printavo order 12724845.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12724764,
+    "error": "Error mapping Printavo order 12724764.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12724536,
+    "error": "Error mapping Printavo order 12724536.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12718333,
+    "error": "Error mapping Printavo order 12718333.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12432017,
+    "error": "Error mapping Printavo order 12432017.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 12347888,
+    "error": "Error mapping Printavo order 12347888.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12347684,
+    "error": "Error mapping Printavo order 12347684.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12347559,
+    "error": "Error mapping Printavo order 12347559.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12347365,
+    "error": "Error mapping Printavo order 12347365.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12326710,
+    "error": "Error mapping Printavo order 12326710.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12326638,
+    "error": "Error mapping Printavo order 12326638.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12326630,
+    "error": "Error mapping Printavo order 12326630.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12292918,
+    "error": "Error mapping Printavo order 12292918.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12292851,
+    "error": "Error mapping Printavo order 12292851.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12286009,
+    "error": "Error mapping Printavo order 12286009.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 12285701,
+    "error": "Error mapping Printavo order 12285701.customer: Invalid email: \"khartofilis@whelchelpartners.com, events@covebrewery.com\""
+  },
+  {
+    "orderId": 11854736,
+    "error": "Error mapping Printavo order 11854736.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 11598282,
+    "error": "Error mapping Printavo order 11598282.customer: Invalid email: \"tom@toconnormd.com, kim@toconnormd.com\""
+  },
+  {
+    "orderId": 11589304,
+    "error": "Error mapping Printavo order 11589304.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 11531190,
+    "error": "Error mapping Printavo order 11531190.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 11453416,
+    "error": "Error mapping Printavo order 11453416.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  }
+]

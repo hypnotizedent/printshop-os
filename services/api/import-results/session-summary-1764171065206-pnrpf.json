@@ -1,0 +1,110 @@
+{
+  "sessionId": "1764171065206-pnrpf",
+  "startTime": "2025-11-26T15:31:05.208Z",
+  "endTime": "2025-11-26T15:31:05.426Z",
+  "durationMs": 218,
+  "totalOrdersProcessed": 11340,
+  "totalSuccessful": 11190,
+  "totalErrors": 150,
+  "totalDuplicates": 0,
+  "successRate": "98.68",
+  "batchCount": 12,
+  "batches": [
+    {
+      "batchNumber": 1,
+      "totalOrders": 1000,
+      "successCount": 985,
+      "errorCount": 15,
+      "duplicateCount": 0,
+      "processingTimeMs": 6
+    },
+    {
+      "batchNumber": 2,
+      "totalOrders": 1000,
+      "successCount": 971,
+      "errorCount": 29,
+      "duplicateCount": 0,
+      "processingTimeMs": 12
+    },
+    {
+      "batchNumber": 3,
+      "totalOrders": 1000,
+      "successCount": 962,
+      "errorCount": 38,
+      "duplicateCount": 0,
+      "processingTimeMs": 3
+    },
+    {
+      "batchNumber": 4,
+      "totalOrders": 1000,
+      "successCount": 995,
+      "errorCount": 5,
+      "duplicateCount": 0,
+      "processingTimeMs": 3
+    },
+    {
+      "batchNumber": 5,
+      "totalOrders": 1000,
+      "successCount": 991,
+      "errorCount": 9,
+      "duplicateCount": 0,
+      "processingTimeMs": 3
+    },
+    {
+      "batchNumber": 6,
+      "totalOrders": 1000,
+      "successCount": 961,
+      "errorCount": 39,
+      "duplicateCount": 0,
+      "processingTimeMs": 3
+    },
+    {
+      "batchNumber": 7,
+      "totalOrders": 1000,
+      "successCount": 995,
+      "errorCount": 5,
+      "duplicateCount": 0,
+      "processingTimeMs": 2
+    },
+    {
+      "batchNumber": 8,
+      "totalOrders": 1000,
+      "successCount": 995,
+      "errorCount": 5,
+      "duplicateCount": 0,
+      "processingTimeMs": 2
+    },
+    {
+      "batchNumber": 9,
+      "totalOrders": 1000,
+      "successCount": 1000,
+      "errorCount": 0,
+      "duplicateCount": 0,
+      "processingTimeMs": 2
+    },
+    {
+      "batchNumber": 10,
+      "totalOrders": 1000,
+      "successCount": 996,
+      "errorCount": 4,
+      "duplicateCount": 0,
+      "processingTimeMs": 2
+    },
+    {
+      "batchNumber": 11,
+      "totalOrders": 1000,
+      "successCount": 1000,
+      "errorCount": 0,
+      "duplicateCount": 0,
+      "processingTimeMs": 2
+    },
+    {
+      "batchNumber": 12,
+      "totalOrders": 340,
+      "successCount": 339,
+      "errorCount": 1,
+      "duplicateCount": 0,
+      "processingTimeMs": 2
+    }
+  ]
+}

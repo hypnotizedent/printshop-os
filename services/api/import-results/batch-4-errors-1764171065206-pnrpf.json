@@ -1,0 +1,22 @@
+[
+  {
+    "orderId": 10739457,
+    "error": "Error mapping Printavo order 10739457.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 10631472,
+    "error": "Error mapping Printavo order 10631472.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 10528270,
+    "error": "Error mapping Printavo order 10528270.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 10407881,
+    "error": "Error mapping Printavo order 10407881.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  },
+  {
+    "orderId": 10356061,
+    "error": "Error mapping Printavo order 10356061.customer: Invalid email: \"kyle@warpedcigars.com, kg@urbanwolfllc.com\""
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "orderId": 4995830,
+    "error": "Error mapping Printavo order 4995830.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 4949674,
+    "error": "Error mapping Printavo order 4949674.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 4631007,
+    "error": "Error mapping Printavo order 4631007.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 4549429,
+    "error": "Error mapping Printavo order 4549429.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  },
+  {
+    "orderId": 4456113,
+    "error": "Error mapping Printavo order 4456113.customer: Invalid email: \"info@johnnyjigs.com, Peter@johnnyjigs.com\""
+  }
+]
