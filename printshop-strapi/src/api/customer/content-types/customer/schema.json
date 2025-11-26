@@ -1,0 +1,112 @@
+{
+  "kind": "collectionType",
+  "collectionName": "customers",
+  "info": {
+    "singularName": "customer",
+    "pluralName": "customers",
+    "displayName": "Customer",
+    "description": "Customer accounts and contact information"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "phone": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "address": {
+      "type": "text"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zipCode": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string",
+      "default": "USA"
+    },
+    "customerType": {
+      "type": "enumeration",
+      "enum": [
+        "Individual",
+        "Business",
+        "Wholesale",
+        "Retail"
+      ],
+      "default": "Individual"
+    },
+    "taxExempt": {
+      "type": "boolean",
+      "default": false
+    },
+    "taxId": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order.order",
+      "mappedBy": "customer"
+    },
+    "jobs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::job.job",
+      "mappedBy": "customer"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "Active",
+        "Inactive",
+        "Suspended"
+      ],
+      "default": "Active"
+    },
+    "accountBalance": {
+      "type": "decimal",
+      "default": 0
+    },
+    "creditLimit": {
+      "type": "decimal",
+      "default": 0
+    },
+    "paymentTerms": {
+      "type": "string"
+    },
+    "preferredContactMethod": {
+      "type": "enumeration",
+      "enum": [
+        "Email",
+        "Phone",
+        "Text"
+      ],
+      "default": "Email"
+    }
+  }
+}

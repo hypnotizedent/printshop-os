@@ -1,0 +1,114 @@
+{
+  "kind": "collectionType",
+  "collectionName": "orders",
+  "info": {
+    "singularName": "order",
+    "pluralName": "orders",
+    "displayName": "Order",
+    "description": "Customer orders"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "orderNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "Pending",
+        "Approved",
+        "InProduction",
+        "Complete",
+        "Shipped",
+        "Delivered",
+        "Cancelled"
+      ],
+      "default": "Pending",
+      "required": true
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer",
+      "inversedBy": "orders"
+    },
+    "job": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::job.job",
+      "mappedBy": "order"
+    },
+    "items": {
+      "type": "json",
+      "required": true
+    },
+    "totalAmount": {
+      "type": "decimal",
+      "required": true
+    },
+    "depositAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "paidAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "paymentStatus": {
+      "type": "enumeration",
+      "enum": [
+        "Unpaid",
+        "DepositPaid",
+        "FullyPaid",
+        "Refunded"
+      ],
+      "default": "Unpaid"
+    },
+    "dueDate": {
+      "type": "date"
+    },
+    "rushOrder": {
+      "type": "boolean",
+      "default": false
+    },
+    "customerNotes": {
+      "type": "text"
+    },
+    "productionNotes": {
+      "type": "text"
+    },
+    "internalNotes": {
+      "type": "text"
+    },
+    "shippingAddress": {
+      "type": "json"
+    },
+    "shippingMethod": {
+      "type": "string"
+    },
+    "trackingNumber": {
+      "type": "string"
+    },
+    "shippedAt": {
+      "type": "datetime"
+    },
+    "deliveredAt": {
+      "type": "datetime"
+    },
+    "completedAt": {
+      "type": "datetime"
+    },
+    "tags": {
+      "type": "json"
+    }
+  }
+}
