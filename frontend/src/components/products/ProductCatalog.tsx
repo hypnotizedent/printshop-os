@@ -48,9 +48,28 @@ interface FilterState {
   supplier: string;
 }
 
-const BRANDS = ['All Brands', 'Gildan', 'Bella+Canvas', 'Next Level', 'AS Colour', 'Comfort Colors', 'Champion', 'Hanes', 'Port & Company'];
-const CATEGORIES = ['All Categories', 'T-Shirts', 'Hoodies', 'Polos', 'Tanks', 'Long Sleeves', 'Sweatshirts', 'Jackets', 'Hats', 'Bags'];
-const SUPPLIERS = ['All Suppliers', 'AS Colour', 'SanMar', 'S&S Activewear'];
+const BRANDS = ['All Brands', 'Gildan', 'Bella+Canvas', 'Next Level', 'AS Colour', 'Comfort Colors', 'Champion', 'Hanes', 'Port & Company', 'Port Authority', 'Sport-Tek'];
+const CATEGORIES = ['All Categories', 't-shirts', 'hoodies', 'polos', 'sweatshirts', 'jackets', 'hats', 'bags', 'accessories'];
+const SUPPLIERS = ['All Suppliers', 'ascolour', 'sanmar', 'ssactivewear'];
+
+// Map for display names
+const SUPPLIER_DISPLAY: Record<string, string> = {
+  'ascolour': 'AS Colour',
+  'sanmar': 'SanMar',
+  'ssactivewear': 'S&S Activewear'
+};
+
+const CATEGORY_DISPLAY: Record<string, string> = {
+  't-shirts': 'T-Shirts',
+  'hoodies': 'Hoodies',
+  'polos': 'Polos',
+  'sweatshirts': 'Sweatshirts',
+  'jackets': 'Jackets',
+  'hats': 'Hats',
+  'bags': 'Bags',
+  'accessories': 'Accessories',
+  'other': 'Other'
+};
 
 export function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -200,6 +219,15 @@ export function ProductCatalog() {
       if (filters.supplier !== 'All Suppliers' && product.supplier !== filters.supplier) {
         return false;
       }
+
+      // Category filter - match against lowercase enum value
+      if (filters.category !== 'All Categories') {
+        const productCategory = product.category?.toLowerCase();
+        const filterCategory = filters.category.toLowerCase();
+        if (productCategory !== filterCategory) {
+          return false;
+        }
+      }
       
       // Color filter
       if (filters.color && !product.colors.some(c => 
@@ -285,11 +313,13 @@ export function ProductCatalog() {
                 onValueChange={(v) => setFilters(prev => ({ ...prev, category: v }))}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{filters.category === 'All Categories' ? 'All Categories' : (CATEGORY_DISPLAY[filters.category] || filters.category)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    <SelectItem key={cat} value={cat}>
+                      {cat === 'All Categories' ? cat : (CATEGORY_DISPLAY[cat] || cat)}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -302,11 +332,13 @@ export function ProductCatalog() {
                 onValueChange={(v) => setFilters(prev => ({ ...prev, supplier: v }))}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{filters.supplier === 'All Suppliers' ? 'All Suppliers' : (SUPPLIER_DISPLAY[filters.supplier] || filters.supplier)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {SUPPLIERS.map(sup => (
-                    <SelectItem key={sup} value={sup}>{sup}</SelectItem>
+                    <SelectItem key={sup} value={sup}>
+                      {sup === 'All Suppliers' ? sup : (SUPPLIER_DISPLAY[sup] || sup)}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -386,7 +418,7 @@ export function ProductCatalog() {
                       </div>
                     )}
                     <Badge className="absolute top-2 right-2" variant="secondary">
-                      {product.supplier}
+                      {SUPPLIER_DISPLAY[product.supplier] || product.supplier}
                     </Badge>
                   </div>
                   <CardContent className="pt-4">
@@ -397,7 +429,7 @@ export function ProductCatalog() {
                       <span className="text-lg font-bold text-primary">
                         ${product.basePrice.toFixed(2)}
                       </span>
-                      <Badge variant="outline">{product.category}</Badge>
+                      <Badge variant="outline">{CATEGORY_DISPLAY[product.category] || product.category}</Badge>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {product.colors.slice(0, 4).map(color => (
