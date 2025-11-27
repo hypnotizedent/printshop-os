@@ -1,18 +1,28 @@
 # Supplier Sync Service
 
-**Version:** 1.0.0  
-**Status:** Production Ready (AS Colour) | In Progress (S&S, SanMar)
+**Version:** 2.0.0  
+**Status:** ✅ All APIs Verified Working | ⏳ Awaiting Strapi Admin Access  
+**Last Verified:** November 27, 2025
 
 Product synchronization service for integrating with apparel suppliers. Normalizes disparate supplier APIs into a unified schema with intelligent caching and rate limiting.
 
 ## Quick Links
 
 - 📖 **[Complete Documentation](./COMPLETE_DOCUMENTATION.md)** - Comprehensive reference guide
-- 🏗️ **[Architecture](./ARCHITECTURE.md)** - System architecture overview
+- 🏗️ **[Architecture Overview](./docs/ARCHITECTURE_OVERVIEW.md)** - System architecture (HLBPA style)
+- ✅ **[Completion Checklist](./docs/COMPLETION_CHECKLIST.md)** - What's done, what's remaining
 - 🆕 **[Adding New Suppliers](./docs/ADDING_NEW_SUPPLIER.md)** - Step-by-step integration guide
-- 📦 **Supplier Docs:** [AS Colour](./docs/suppliers/ASCOLOUR.md) | S&S Activewear | SanMar
+- 📦 **Supplier Docs:** [AS Colour](./docs/suppliers/ASCOLOUR.md) | [SanMar](./docs/SANMAR_INTEGRATION.md)
 
-## Features
+## Current Status
+
+| Supplier | API | Transformer | CLI | Products | Status |
+|----------|:---:|:-----------:|:---:|----------|--------|
+| **AS Colour** | ✅ | ✅ | ✅ | 522 | Ready for sync |
+| **S&S Activewear** | ✅ | ✅ | ✅ | 211K+ | Ready for sync |
+| **SanMar** | ✅ | ✅ | ✅ | 415K+ | 494MB EPDD ready |
+
+**Blocking Item:** Strapi admin access needed to create API token for database sync.
 
 - **✅ Multi-Supplier Support**: AS Colour (production), S&S Activewear, SanMar (in progress)
 - **✅ Unified Schema**: Single `UnifiedProduct` format for all suppliers

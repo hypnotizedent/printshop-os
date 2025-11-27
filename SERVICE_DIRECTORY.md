@@ -82,22 +82,25 @@ This document provides a precise map of where every component, service, and feat
 - PostgreSQL 15 + Redis 7 containers running
 - **Blocker:** Vite host restriction prevents Tailscale access - needs on-site setup
 
-✅ **S&S Activewear Integration**
-- API connection verified (211K+ products available)
-- Fixed `ss-activewear.transformer.ts` - null checks for colors, sizes, inventory, images
-- Transformer handles all edge cases in API responses
+✅ **ALL 3 Supplier APIs Verified Working (Nov 27 Evening)**
+- **AS Colour:** 522 products, REST API with dual auth (Subscription-Key + Bearer JWT)
+- **S&S Activewear:** 211K+ products, REST API with Basic Auth
+- **SanMar:** 415K+ records, SFTP verified, 494MB EPDD.csv ready for download
 
-✅ **SanMar SFTP Integration**
-- SFTP connection verified (16 files on server, 494MB EPDD.csv available)
-- Fixed `sync-sanmar.ts` - added dotenv loading, prefers .csv over .zip files
-- Ready for full product sync once Strapi admin configured
+✅ **Supplier Sync Documentation (HLBPA Pattern)**
+- Created `services/supplier-sync/docs/ARCHITECTURE_OVERVIEW.md`
+- Created `services/supplier-sync/docs/COMPLETION_CHECKLIST.md`
+- Updated README with current status and quick links
+- Fixed JSONL persistence to support per-supplier directories
 
-⚠️ **AS Colour Integration**
-- API returning 401 Unauthorized - subscription key expired/invalid
-- Needs credential refresh from AS Colour portal
+✅ **Uptime Kuma Monitors Fixed**
+- Ntfy: `/v1/health` → 🟢 Green
+- Traefik: `/api/overview` → 🟢 Green
+- Proxmox: HTTPS + ignore SSL → 🟢 Green
+- PrintShop Strapi: Monitoring at 5.4%
 
-✅ **Printavo Image Scrape**
-- **COMPLETE**: 12,854 orders with scraped image URLs
+✅ **Printavo Image Scrape Complete**
+- 12,854 orders with scraped image URLs
 - Saved to `data/processed/orders_with_images.json` (66MB)
 - Resume-capable scraper worked as designed
 
