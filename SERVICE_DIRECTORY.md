@@ -1,37 +1,34 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 27, 2025 (Session 13 - Supplier Products)
+**Last Updated:** November 27, 2025 (Session 13 - Supplier Sync Complete)
 
 ---
 
 ## 🚀 Homelab Deployment
 
-**Status:** ✅ FULLY OPERATIONAL - All Data Imported + Supplier Products
+**Status:** ✅ FULLY OPERATIONAL - All Data Imported + 210 Supplier Products
 
 ### Running Services
 
 | Service | URL | Status | Data |
 |---------|-----|--------|------|
-| **Strapi CMS** | http://100.92.156.118:1337 | ✅ Running (v5.31.2 Enterprise) | 3,317 customers, 12,854 orders, 10 products |
+| **Strapi CMS** | http://100.92.156.118:1337 | ✅ Running (v5.31.2 Enterprise) | 3,317 customers, 12,854 orders, **210 products** |
 | **PostgreSQL** | 100.92.156.118:5432 | ✅ Running | Production data |
 | **Redis** | 100.92.156.118:6379 | ✅ Running | Cache ready |
 
-### Session 13 Notes (Nov 27, 2025 - Supplier Product Catalog)
-- ✅ **Product content type deployed** with full schema:
-  - SKU, name, brand, category (enum), supplier (enum)
-  - Variants (JSON: size/color/inventory), Pricing (JSON: breaks)
-  - Images (JSON array), Availability (JSON: inStock/quantity)
-- ✅ **Sample products imported** - 10 products from 3 suppliers:
-  - AS Colour: 2 products (Staple Tee, Supply Hood)
-  - SanMar: 5 products (Essential-T, Competitor Tee, Hoodie, Trucker Cap, Polo)
-  - S&S Activewear: 3 products (Gildan G500, Bella+Canvas 3001, Gildan 18500)
-- ✅ **Live pricing/inventory available via API** - No auth required for reads
-- ✅ **Frontend ProductCatalog updated** - Category/supplier enum mapping, display names
-- ⚠️ **Supplier APIs need credentials verified**:
-  - AS Colour: 401 auth error - password may have changed
-  - S&S Activewear: 401 auth denied
-  - SanMar SFTP: Credentials present, not tested yet
-- 📁 **Import script**: `scripts/import-sample-products.py`
+### Session 13 Notes (Nov 27, 2025 - Supplier Sync COMPLETE ✅)
+- ✅ **ALL SUPPLIER APIs WORKING** - dotenv loading bug fixed
+- ✅ **210 products synced to Strapi:**
+  - **AS Colour:** 102 products (t-shirts, hoodies, bags, accessories)
+  - **S&S Activewear:** 103 products (Gildan, Bella+Canvas, Next Level, etc.)
+  - **SanMar:** 5 sample products
+- ✅ **Root cause fixed:** CLI scripts weren't loading `.env` before importing clients
+  - Added `dotenv.config({ path: ... })` at top of sync-as-colour.ts
+  - Moved dotenv.config() before imports in sync-ss-activewear.ts
+- ✅ **New sync script:** `scripts/sync-suppliers-to-strapi.py`
+  - Usage: `python scripts/sync-suppliers-to-strapi.py --all --limit 200`
+  - Supports: AS Colour, S&S Activewear (SanMar via SFTP separate)
+- ✅ **Frontend ProductCatalog** - Live product browsing from Strapi API
 
 ### Session 12 Notes (Nov 27, 2025 - Printavo API Complete Extraction)
 - ✅ **COMPLETE Printavo API extraction** - ALL accessible data exported:
