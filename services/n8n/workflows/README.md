@@ -1,6 +1,6 @@
 # n8n Workflows for PrintShop OS
 
-This directory contains n8n workflow automation for PrintShop OS, including custom print-shop-specific workflows and access to the comprehensive Zie619/n8n-workflows collection (4,343+ workflows).
+This directory contains n8n workflow automation for PrintShop OS, including custom print-shop-specific workflows and access to the comprehensive Zie619/n8n-workflows collection (4,000+ workflows).
 
 ## Directory Structure
 

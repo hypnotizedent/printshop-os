@@ -95,7 +95,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"data\": {\n    \"amountPaid\": {{$node['Get Recent Payments'].json.amount}},\n    \"paymentDate\": \"{{$node['Get Recent Payments'].json.date}}\",\n    \"paymentMethod\": \"{{$node['Get Recent Payments'].json.type}}\",\n    \"paymentStatus\": \"{{$node['Get Recent Payments'].json.amount >= $node['Get Recent Payments'].json.invoice_amount ? 'PAID' : 'PARTIAL'}}\"\n  }\n}",
+        "jsonBody": "={\n  \"data\": {\n    \"amountPaid\": {{$node['Get Recent Payments'].json.amount}},\n    \"paymentDate\": \"{{$node['Get Recent Payments'].json.date}}\",\n    \"paymentMethod\": \"{{$node['Get Recent Payments'].json.type}}\",\n    \"paymentStatus\": \"{{$json.data[0].attributes.total && $node['Get Recent Payments'].json.amount >= $json.data[0].attributes.total ? 'PAID' : 'PARTIAL'}}\"\n  }\n}",
         "options": {}
       },
       "id": "update-order-payment",

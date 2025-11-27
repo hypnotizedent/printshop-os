@@ -73,14 +73,8 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "data",
-              "value": "={\"invoiceId\": \"{{$json.data.id}}\", \"invoiceNumber\": \"{{$json.data.number}}\", \"status\": \"INVOICED\"}"
-            }
-          ]
-        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"invoiceId\": \"{{$json.data.id}}\",\n    \"invoiceNumber\": \"{{$json.data.number}}\",\n    \"status\": \"INVOICED\"\n  }\n}",
         "options": {}
       },
       "id": "update-strapi-quote",

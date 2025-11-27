@@ -199,8 +199,25 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.attributes.espoCrmId !== null && $json.attributes.espoCrmId !== undefined && $json.attributes.espoCrmId !== ''}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "has-espocrm-id",
+      "name": "Has EspoCRM ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
         "method": "PUT",
-        "url": "={{$env.ESPOCRM_URL}}/api/v1/Contact/{{$node['Split Strapi Customers'].json.espoCrmId}}",
+        "url": "={{$env.ESPOCRM_URL}}/api/v1/Contact/{{$node['Split Strapi Customers'].json.attributes.espoCrmId}}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
@@ -212,13 +229,21 @@
       "name": "Update EspoCRM Contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [850, 400],
+      "position": [1050, 400],
       "credentials": {
         "httpHeaderAuth": {
           "id": "espocrm-api-key",
           "name": "EspoCRM API Key"
         }
       }
+    },
+    {
+      "parameters": {},
+      "id": "skip-espocrm-update",
+      "name": "Skip - No EspoCRM ID",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1050, 550]
     }
   ],
   "connections": {
@@ -275,7 +300,25 @@
       "main": [
         [
           {
+            "node": "Has EspoCRM ID?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has EspoCRM ID?": {
+      "main": [
+        [
+          {
             "node": "Update EspoCRM Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip - No EspoCRM ID",
             "type": "main",
             "index": 0
           }
