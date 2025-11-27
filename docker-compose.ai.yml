@@ -2,10 +2,99 @@
 # PrintShop OS - AI Services Docker Compose Configuration
 # =============================================================================
 # AI Assistant services for customer service automation, marketing, and finance
+# Includes Milvus vector database for semantic search and RAG
 # Phase 4: Week 12-15
 # =============================================================================
 
 services:
+  # ---------------------------------------------------------------------------
+  # Milvus Vector Database Stack
+  # ---------------------------------------------------------------------------
+  # etcd: Metadata storage for Milvus
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: printshop-etcd
+    restart: unless-stopped
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+    volumes:
+      - etcd_data:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    networks:
+      - printshop_network
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # milvus-minio: Object storage for Milvus
+  milvus-minio:
+    image: minio/minio:latest
+    container_name: printshop-milvus-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ACCESS_KEY: ${MILVUS_MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MILVUS_MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "9010:9000"
+      - "9011:9001"
+    volumes:
+      - milvus_minio_data:/data
+    command: minio server /data --console-address ":9001"
+    networks:
+      - printshop_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # milvus: High-performance vector database
+  milvus:
+    image: milvusdb/milvus:latest
+    container_name: printshop-milvus
+    restart: unless-stopped
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: milvus-minio:9000
+    volumes:
+      - milvus_data:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    networks:
+      - printshop_network
+    depends_on:
+      etcd:
+        condition: service_healthy
+      milvus-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # attu: Milvus Web UI for visual management
+  attu:
+    image: zilliz/attu:latest
+    container_name: printshop-attu
+    restart: unless-stopped
+    environment:
+      MILVUS_URL: milvus:19530
+    ports:
+      - "8001:3000"
+    networks:
+      - printshop_network
+    depends_on:
+      milvus:
+        condition: service_healthy
+
   # ---------------------------------------------------------------------------
   # LLM Service (Ollama)
   # ---------------------------------------------------------------------------
@@ -148,6 +237,20 @@ networks:
 # Volumes - Persistent data storage
 # =============================================================================
 volumes:
+  # Milvus stack volumes
+  etcd_data:
+    name: printshop_etcd_data
+    driver: local
+  
+  milvus_minio_data:
+    name: printshop_milvus_minio_data
+    driver: local
+  
+  milvus_data:
+    name: printshop_milvus_data
+    driver: local
+
+  # LLM and other AI service volumes
   ollama_models:
     name: printshop_ollama_models
     driver: local
@@ -180,18 +283,25 @@ volumes:
 # 4. Initialize knowledge base:
 #    docker exec -it printshop-cs-ai python scripts/init_knowledge_base.py
 #
-# 5. Access services:
+# 5. Initialize Milvus vector collections:
+#    npx ts-node scripts/init-vector-collections.ts
+#
+# 6. Access services:
+#    - Milvus Vector DB: localhost:19530 (gRPC)
+#    - Attu (Milvus UI): http://localhost:8001
+#    - Milvus Metrics: http://localhost:9091/healthz
+#    - Milvus MinIO Console: http://localhost:9011
 #    - Customer Service AI API: http://localhost:5000/docs
-#    - Vector Database: http://localhost:8000
+#    - ChromaDB: http://localhost:8000
 #    - LLM Service: http://localhost:11434
 #    - Prometheus: http://localhost:9090
 #    - Grafana: http://localhost:3001
 #
-# 6. View logs:
+# 7. View logs:
 #    docker-compose -f docker-compose.ai.yml logs -f [service-name]
 #
-# 7. Stop all AI services:
+# 8. Stop all AI services:
 #    docker-compose -f docker-compose.ai.yml down
 #
-# For detailed setup instructions, see /docs/phases/phase-4-customer-service-assistant.md
+# For detailed setup instructions, see docs/VECTOR_DATABASE.md
 # =============================================================================
