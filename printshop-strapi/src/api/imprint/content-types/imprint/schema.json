@@ -1,0 +1,103 @@
+{
+  "kind": "collectionType",
+  "collectionName": "imprints",
+  "info": {
+    "singularName": "imprint",
+    "pluralName": "imprints",
+    "displayName": "Imprint",
+    "description": "Decoration/imprint details for line items (screen print, embroidery, etc.)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "imprintNumber": {
+      "type": "string",
+      "required": true
+    },
+    "lineItem": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::line-item.line-item",
+      "inversedBy": "imprints"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::order.order"
+    },
+    "location": {
+      "type": "enumeration",
+      "enum": [
+        "Full Front",
+        "Full Back",
+        "Left Chest",
+        "Right Chest",
+        "Left Sleeve",
+        "Right Sleeve",
+        "Nape",
+        "Pocket",
+        "Left Leg",
+        "Right Leg",
+        "Other"
+      ]
+    },
+    "locationSize": {
+      "type": "enumeration",
+      "enum": [
+        "Small",
+        "Medium",
+        "Large",
+        "Extra Large",
+        "Custom"
+      ]
+    },
+    "width": {
+      "type": "decimal"
+    },
+    "height": {
+      "type": "decimal"
+    },
+    "colorCount": {
+      "type": "integer",
+      "default": 1
+    },
+    "colors": {
+      "type": "text"
+    },
+    "description": {
+      "type": "text"
+    },
+    "hasUnderbase": {
+      "type": "boolean",
+      "default": false
+    },
+    "decorationType": {
+      "type": "enumeration",
+      "enum": [
+        "Screen Print",
+        "Embroidery",
+        "DTG",
+        "DTF",
+        "Vinyl",
+        "Sublimation",
+        "Other"
+      ],
+      "default": "Screen Print"
+    },
+    "stitchCount": {
+      "type": "integer"
+    },
+    "setupComplete": {
+      "type": "boolean",
+      "default": false
+    },
+    "artworkUrl": {
+      "type": "string"
+    },
+    "printavoId": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "kind": "collectionType",
+  "collectionName": "line_items",
+  "info": {
+    "singularName": "line-item",
+    "pluralName": "line-items",
+    "displayName": "Line Item",
+    "description": "Order line items with individual size quantities - matches Printavo data model"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "printavoId": {
+      "type": "string",
+      "unique": true
+    },
+    "orderId": {
+      "type": "biginteger"
+    },
+    "orderVisualId": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "styleNumber": {
+      "type": "string"
+    },
+    "styleDescription": {
+      "type": "text"
+    },
+    "color": {
+      "type": "string"
+    },
+    "sizeXS": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeS": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeM": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeL": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeXL": {
+      "type": "integer",
+      "default": 0
+    },
+    "size2XL": {
+      "type": "integer",
+      "default": 0
+    },
+    "size3XL": {
+      "type": "integer",
+      "default": 0
+    },
+    "size4XL": {
+      "type": "integer",
+      "default": 0
+    },
+    "size5XL": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeOther": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeYXS": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeYS": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeYM": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeYL": {
+      "type": "integer",
+      "default": 0
+    },
+    "sizeYXL": {
+      "type": "integer",
+      "default": 0
+    },
+    "size6M": {
+      "type": "integer",
+      "default": 0
+    },
+    "size12M": {
+      "type": "integer",
+      "default": 0
+    },
+    "size18M": {
+      "type": "integer",
+      "default": 0
+    },
+    "size24M": {
+      "type": "integer",
+      "default": 0
+    },
+    "size2T": {
+      "type": "integer",
+      "default": 0
+    },
+    "size3T": {
+      "type": "integer",
+      "default": 0
+    },
+    "size4T": {
+      "type": "integer",
+      "default": 0
+    },
+    "size5T": {
+      "type": "integer",
+      "default": 0
+    },
+    "totalQuantity": {
+      "type": "integer",
+      "default": 0
+    },
+    "unitCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "totalCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "taxable": {
+      "type": "boolean",
+      "default": true
+    },
+    "goodsStatus": {
+      "type": "string"
+    }
+  }
+}

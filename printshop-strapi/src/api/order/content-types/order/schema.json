@@ -16,6 +16,9 @@
       "type": "string",
       "required": true
     },
+    "orderNickname": {
+      "type": "string"
+    },
     "status": {
       "type": "enumeration",
       "enum": [
@@ -25,6 +28,7 @@
         "IN_PRODUCTION",
         "COMPLETE",
         "READY_FOR_PICKUP",
+        "SHIPPED",
         "PAYMENT_NEEDED",
         "INVOICE_PAID",
         "CANCELLED"
@@ -36,6 +40,12 @@
       "relation": "manyToOne",
       "target": "api::customer.customer",
       "inversedBy": "orders"
+    },
+    "lineItems": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::line-item.line-item",
+      "mappedBy": "order"
     },
     "totalAmount": {
       "type": "decimal",
@@ -57,8 +67,33 @@
       "type": "decimal",
       "default": 0
     },
+    "fees": {
+      "type": "decimal",
+      "default": 0
+    },
     "dueDate": {
       "type": "date"
+    },
+    "customerDueDate": {
+      "type": "date"
+    },
+    "productionDueDate": {
+      "type": "date"
+    },
+    "invoiceDate": {
+      "type": "date"
+    },
+    "paymentDueDate": {
+      "type": "date"
+    },
+    "deliveryMethod": {
+      "type": "enumeration",
+      "enum": [
+        "pickup",
+        "ship",
+        "delivery",
+        "other"
+      ]
     },
     "notes": {
       "type": "text"
@@ -69,10 +104,23 @@
     "customerPO": {
       "type": "string"
     },
+    "approved": {
+      "type": "boolean",
+      "default": false
+    },
+    "approvedBy": {
+      "type": "string"
+    },
+    "approvedAt": {
+      "type": "datetime"
+    },
     "items": {
       "type": "json"
     },
     "printavoId": {
+      "type": "string"
+    },
+    "publicHash": {
       "type": "string"
     },
     "jobs": {
@@ -80,6 +128,12 @@
       "relation": "oneToMany",
       "target": "api::job.job",
       "mappedBy": "order"
+    },
+    "billingAddress": {
+      "type": "json"
+    },
+    "shippingAddress": {
+      "type": "json"
     }
   }
 }

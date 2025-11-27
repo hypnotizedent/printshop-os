@@ -79,6 +79,12 @@ export default {
         'api::machine.machine.create',
         'api::machine.machine.update',
         'api::machine.machine.delete',
+        // Line Item permissions
+        'api::line-item.line-item.find',
+        'api::line-item.line-item.findOne',
+        'api::line-item.line-item.create',
+        'api::line-item.line-item.update',
+        'api::line-item.line-item.delete',
       ];
 
       for (const action of allPermissions) {
@@ -182,7 +188,16 @@ export default {
         { action: 'api::machine.machine.delete' }
       ];
 
-      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions, ...employeePermissions, ...timeClockEntryPermissions, ...machinePermissions]) {
+      // Enable all permissions for line-item content type
+      const lineItemPermissions = [
+        { action: 'api::line-item.line-item.find' },
+        { action: 'api::line-item.line-item.findOne' },
+        { action: 'api::line-item.line-item.create' },
+        { action: 'api::line-item.line-item.update' },
+        { action: 'api::line-item.line-item.delete' }
+      ];
+
+      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions, ...employeePermissions, ...timeClockEntryPermissions, ...machinePermissions, ...lineItemPermissions]) {
         const existing = await strapi.db.query('admin::api-token-permission').findOne({
           where: { action: perm.action, token: token.id }
         });

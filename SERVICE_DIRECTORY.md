@@ -1,25 +1,45 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 27, 2025 (Session 10)
+**Last Updated:** November 27, 2025 (Session 11 - Updated)
 
 ---
 
 ## 🚀 Homelab Deployment
 
-**Status:** ✅ Deployed to docker-host (100.92.156.118)
+**Status:** ✅ FULLY OPERATIONAL - All Data Imported
 
 ### Running Services
 
-| Service | URL | Status |
-|---------|-----|--------|
-| **Strapi CMS** | http://100.92.156.118:1337 | ✅ Running (v5.31.2 Enterprise) |
-| **PostgreSQL** | 100.92.156.118:5432 | ✅ Running |
-| **Redis** | 100.92.156.118:6379 | ✅ Running |
+| Service | URL | Status | Data |
+|---------|-----|--------|------|
+| **Strapi CMS** | http://100.92.156.118:1337 | ✅ Running (v5.31.2 Enterprise) | 3,317 customers, 12,854 orders |
+| **PostgreSQL** | 100.92.156.118:5432 | ✅ Running | Production data |
+| **Redis** | 100.92.156.118:6379 | ✅ Running | Cache ready |
 
-### Session 10 Notes (Nov 27, 2025)
-- Strapi deployed and running on docker-host
-- Web UI not accessible via Tailscale (Vite host restriction) - needs on-site setup
-- Admin account creation pending (requires direct network access)
+### Session 12 Notes (Nov 27, 2025 - Printavo API Complete Extraction)
+- ✅ **COMPLETE Printavo API extraction** - ALL accessible data exported:
+  - **12,867 orders** (61 MB) with 44,158 embedded line items (23 MB)
+  - **3,358 customers** (3.8 MB)
+  - **1,463 tasks**, 297 expenses, 105 products, 25 statuses
+  - Categories, delivery methods, payment terms, inquiries, users
+- ✅ **V2 GraphQL API tested** - Schema accessible but data queries return "Unauthorized"
+- ✅ **Comprehensive API documentation created**: `docs/reference/PRINTAVO_API.md`
+  - All V1 endpoints documented with fields and examples
+  - V2 GraphQL schema introspection results
+  - Field mapping to Strapi content types
+- ⚠️ **Imprints NOT accessible** - V1 `/lineitemgroups` returns 500, V2 unauthorized
+- 📁 **Export location**: `data/raw/printavo-exports/complete_2025-11-27_14-20-05/`
+
+### Session 11 Notes (Nov 27, 2025)
+- ✅ Admin account created and operational
+- ✅ API token generated for imports
+- ✅ **FULL Printavo data import complete (deduplicated):**
+  - **3,317 customers** (all with valid emails)
+  - **12,854 orders** (entire order history - all years)
+  - Duplicates cleaned: 2,485 customers + 1,331 orders removed
+  - Status mapping: QUOTE, COMPLETE, PAYMENT_NEEDED, INVOICE_PAID, etc.
+- ✅ Repository audit complete - 26 stale branches deleted
+- ✅ Root docs consolidated to 10 files (HLBPA compliant)
 
 ### Infrastructure Tools (Same Host)
 
@@ -61,9 +81,10 @@ ssh docker-host 'cd ~/stacks/printshop-os && docker-compose restart strapi'
    - Add labels to printshop containers for domain routing
    - Set up SSL with Let's Encrypt
 
-4. **Import Production Data**
-   - Run customer import: `node scripts/import-2025-customers.py`
-   - Run order import: `node scripts/import-2025-orders.sh`
+4. **Import Production Data** ✅ COMPLETE
+   - 5,802 customers imported
+   - 14,185 orders imported (full history)
+   - Script: `scripts/import-all-orders.py`
 
 ---
 
@@ -688,6 +709,18 @@ data/
 - Normalized product catalogs
 - Import files for Strapi
 - AI training data (planned)
+- **Printavo exports** (12,867 orders, 3,358 customers, 44,158 line items)
+
+---
+
+## Documentation Reference
+
+| Doc | Location | Description |
+|-----|----------|-------------|
+| Printavo API | `docs/reference/PRINTAVO_API.md` | V1/V2 API reference, field mapping |
+| Strapi TypeScript Fix | `docs/reference/STRAPI_TYPESCRIPT_API_FIX.md` | Agent reference for Strapi 5 |
+| Production Dashboard | `docs/PRODUCTION_DASHBOARD_ARCHITECTURE.md` | WebSocket + time clock design |
+| Supplier Integration | `docs/SUPPLIER_INTEGRATION_READINESS.md` | AS Colour, SanMar, S&S status |
 
 ---
 
