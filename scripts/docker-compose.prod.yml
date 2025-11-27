@@ -1,0 +1,102 @@
+# =============================================================================
+# PrintShop OS - Production Docker Compose (Minimal)
+# =============================================================================
+# This is a minimal production setup - just Postgres, Redis, and Strapi
+# Add more services as needed
+# =============================================================================
+
+version: "3.8"
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: printshop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-strapi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-printshop}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - printshop
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-strapi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis - For caching
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: printshop-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - printshop
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Strapi - Headless CMS & API
+  # ---------------------------------------------------------------------------
+  strapi:
+    build:
+      context: ./printshop-strapi
+      dockerfile: Dockerfile
+    container_name: printshop-strapi
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DB:-printshop}
+      DATABASE_USERNAME: ${POSTGRES_USER:-strapi}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_SSL: "false"
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      APP_KEYS: ${APP_KEYS}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+    volumes:
+      - strapi_uploads:/srv/app/public/uploads
+    ports:
+      - "1337:1337"
+    networks:
+      - printshop
+      - homelab
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.printshop.rule=Host(`printshop.local`)"
+      - "traefik.http.services.printshop.loadbalancer.server.port=1337"
+
+networks:
+  printshop:
+    name: printshop
+    driver: bridge
+  homelab:
+    external: true
+
+volumes:
+  postgres_data:
+    name: printshop_postgres
+  redis_data:
+    name: printshop_redis
+  strapi_uploads:
+    name: printshop_uploads

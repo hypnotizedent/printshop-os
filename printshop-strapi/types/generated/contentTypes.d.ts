@@ -762,6 +762,70 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPaymentPayment extends Struct.CollectionTypeSchema {
+  collectionName: 'payments';
+  info: {
+    description: 'Payment records for orders';
+    displayName: 'Payment';
+    pluralName: 'payments';
+    singularName: 'payment';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amount: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    checkoutUrl: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::payment.payment'
+    > &
+      Schema.Attribute.Private;
+    metadata: Schema.Attribute.JSON;
+    notes: Schema.Attribute.Text;
+    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    paidAt: Schema.Attribute.DateTime;
+    paymentMethod: Schema.Attribute.Enumeration<
+      ['stripe', 'cash', 'check', 'bank_transfer', 'other']
+    > &
+      Schema.Attribute.DefaultTo<'stripe'>;
+    paymentType: Schema.Attribute.Enumeration<
+      ['deposit', 'balance', 'full', 'refund']
+    > &
+      Schema.Attribute.DefaultTo<'full'>;
+    publishedAt: Schema.Attribute.DateTime;
+    receiptUrl: Schema.Attribute.String;
+    refundAmount: Schema.Attribute.Decimal;
+    refundedAt: Schema.Attribute.DateTime;
+    refundReason: Schema.Attribute.Text;
+    status: Schema.Attribute.Enumeration<
+      [
+        'pending',
+        'processing',
+        'paid',
+        'failed',
+        'refunded',
+        'expired',
+        'cancelled',
+      ]
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    stripeCheckoutSessionId: Schema.Attribute.String;
+    stripeCustomerId: Schema.Attribute.String;
+    stripePaymentIntentId: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiPriceCalculationPriceCalculation
   extends Struct.CollectionTypeSchema {
   collectionName: 'price_calculations';
@@ -907,6 +971,82 @@ export interface ApiProductProduct extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     variants: Schema.Attribute.JSON;
+  };
+}
+
+export interface ApiQuoteQuote extends Struct.CollectionTypeSchema {
+  collectionName: 'quotes';
+  info: {
+    description: 'Customer quotes with approval workflow';
+    displayName: 'Quote';
+    pluralName: 'quotes';
+    singularName: 'quote';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    approvalToken: Schema.Attribute.String & Schema.Attribute.Private;
+    approvedAt: Schema.Attribute.DateTime;
+    approvedBy: Schema.Attribute.String;
+    approverSignature: Schema.Attribute.Text;
+    attachments: Schema.Attribute.Media<'images' | 'files', true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
+    customerNotes: Schema.Attribute.Text;
+    depositAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    depositPercent: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<50>;
+    depositRequired: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
+    discount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    discountType: Schema.Attribute.Enumeration<['percentage', 'fixed']> &
+      Schema.Attribute.DefaultTo<'fixed'>;
+    expiresAt: Schema.Attribute.DateTime;
+    internalNotes: Schema.Attribute.Text;
+    lineItems: Schema.Attribute.JSON & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::quote.quote'> &
+      Schema.Attribute.Private;
+    mockupUrls: Schema.Attribute.JSON;
+    order: Schema.Attribute.Relation<'oneToOne', 'api::order.order'>;
+    parentQuote: Schema.Attribute.Relation<'oneToOne', 'api::quote.quote'>;
+    publishedAt: Schema.Attribute.DateTime;
+    quoteNumber: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    rejectedAt: Schema.Attribute.DateTime;
+    rejectionReason: Schema.Attribute.Text;
+    revisionNumber: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1>;
+    sentAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<
+      [
+        'draft',
+        'sent',
+        'viewed',
+        'approved',
+        'rejected',
+        'expired',
+        'converted',
+      ]
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'draft'>;
+    subtotal: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    taxAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    taxRate: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    terms: Schema.Attribute.RichText;
+    total: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    validDays: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<30>;
+    viewedAt: Schema.Attribute.DateTime;
   };
 }
 
@@ -1541,9 +1681,11 @@ declare module '@strapi/strapi' {
       'api::job.job': ApiJobJob;
       'api::machine.machine': ApiMachineMachine;
       'api::order.order': ApiOrderOrder;
+      'api::payment.payment': ApiPaymentPayment;
       'api::price-calculation.price-calculation': ApiPriceCalculationPriceCalculation;
       'api::pricing-rule.pricing-rule': ApiPricingRulePricingRule;
       'api::product.product': ApiProductProduct;
+      'api::quote.quote': ApiQuoteQuote;
       'api::sop.sop': ApiSopSop;
       'api::time-clock-entry.time-clock-entry': ApiTimeClockEntryTimeClockEntry;
       'plugin::content-releases.release': PluginContentReleasesRelease;

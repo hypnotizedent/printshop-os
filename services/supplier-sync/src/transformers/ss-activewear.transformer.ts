@@ -16,20 +16,22 @@ export class SSActivewearTransformer {
    */
   static transformProduct(ssProduct: SSProduct): UnifiedProduct {
     const variants = this.transformVariants(ssProduct);
-    const images = ssProduct.images.map((img) => img.url);
+    const images = (ssProduct.images || []).map((img) => img.url);
+    const pricing = ssProduct.pricing || [];
+    const inventory = ssProduct.inventory || [];
 
     return {
-      sku: ssProduct.styleID,
-      name: ssProduct.styleName,
-      brand: ssProduct.brandName,
-      description: ssProduct.description,
+      sku: ssProduct.styleID || 'UNKNOWN',
+      name: ssProduct.styleName || 'Unnamed Product',
+      brand: ssProduct.brandName || 'Unknown Brand',
+      description: ssProduct.description || '',
       category: this.mapCategory(ssProduct.categoryName),
       supplier: SupplierName.SS_ACTIVEWEAR,
       
       variants,
       images,
       
-      pricing: this.transformPricing(ssProduct.pricing),
+      pricing: this.transformPricing(pricing),
       
       specifications: {
         weight: ssProduct.pieceWeight,
@@ -43,14 +45,14 @@ export class SSActivewearTransformer {
       },
       
       availability: {
-        inStock: this.calculateInStock(ssProduct.inventory),
-        totalQuantity: this.calculateTotalQuantity(ssProduct.inventory),
+        inStock: this.calculateInStock(inventory),
+        totalQuantity: this.calculateTotalQuantity(inventory),
       },
       
       metadata: {
-        supplierProductId: ssProduct.styleID,
-        supplierBrandId: ssProduct.brandID.toString(),
-        supplierCategoryId: ssProduct.categoryID.toString(),
+        supplierProductId: ssProduct.styleID || '',
+        supplierBrandId: ssProduct.brandID?.toString() || '',
+        supplierCategoryId: ssProduct.categoryID?.toString() || '',
         lastUpdated: new Date(),
       },
     };
@@ -62,16 +64,34 @@ export class SSActivewearTransformer {
   private static transformVariants(ssProduct: SSProduct): ProductVariant[] {
     const variants: ProductVariant[] = [];
 
+    // Handle missing colors or sizes arrays
+    const colors = ssProduct.colors || [];
+    const sizes = ssProduct.sizes || [];
+    const inventory = ssProduct.inventory || [];
+    const images = ssProduct.images || [];
+
+    // If no colors/sizes, create a single variant with just the style ID
+    if (colors.length === 0 || sizes.length === 0) {
+      variants.push({
+        sku: ssProduct.styleID,
+        color: { name: 'Default', hex: '#000000' },
+        size: sizes[0] || 'OS',
+        inStock: inventory.length > 0 ? inventory.some(inv => inv.qty > 0) : false,
+        quantity: inventory.reduce((sum, inv) => sum + (inv.qty || 0), 0),
+      });
+      return variants;
+    }
+
     // Create a variant for each color/size combination
-    ssProduct.colors.forEach((color) => {
-      ssProduct.sizes.forEach((size) => {
+    colors.forEach((color) => {
+      sizes.forEach((size) => {
         // Find inventory for this color/size combo
-        const inventory = ssProduct.inventory.find(
-          (inv) => inv.colorName === color.colorName && inv.size === size
+        const inv = inventory.find(
+          (i) => i.colorName === color.colorName && i.size === size
         );
 
         // Find image for this color
-        const colorImage = ssProduct.images.find(
+        const colorImage = images.find(
           (img) => img.color === color.colorName || img.type === 'front'
         );
 
@@ -80,14 +100,14 @@ export class SSActivewearTransformer {
           color: {
             name: color.colorName,
             code: color.colorCode,
-            hex: color.hexCode,
+            hex: color.hexCode || '#000000',
             family: color.colorFamilyName,
           },
           size: size,
-          inStock: inventory ? inventory.qty > 0 : false,
-          quantity: inventory?.qty || 0,
+          inStock: inv ? inv.qty > 0 : false,
+          quantity: inv?.qty || 0,
           imageUrl: colorImage?.url,
-          warehouseLocation: inventory?.warehouseLocation,
+          warehouseLocation: inv?.warehouseLocation,
         });
       });
     });
@@ -99,6 +119,10 @@ export class SSActivewearTransformer {
    * Transform S&S pricing breaks
    */
   private static transformPricing(ssPricing: SSPricing[]): UnifiedProduct['pricing'] {
+    if (!ssPricing || ssPricing.length === 0) {
+      return { basePrice: 0, breaks: [], currency: 'USD' };
+    }
+
     const breaks = ssPricing.map((priceBreak) => ({
       quantity: priceBreak.quantity,
       price: priceBreak.price,
@@ -118,7 +142,9 @@ export class SSActivewearTransformer {
   /**
    * Map S&S category to unified category
    */
-  private static mapCategory(ssCategory: string): ProductCategory {
+  private static mapCategory(ssCategory: string | undefined): ProductCategory {
+    if (!ssCategory) return ProductCategory.OTHER;
+
     const categoryMap: Record<string, ProductCategory> = {
       't-shirts': ProductCategory.T_SHIRTS,
       'tshirts': ProductCategory.T_SHIRTS,
@@ -147,6 +173,7 @@ export class SSActivewearTransformer {
    * Calculate if product is in stock (any variant has quantity)
    */
   private static calculateInStock(inventory: SSInventory[]): boolean {
+    if (!inventory || inventory.length === 0) return false;
     return inventory.some((item) => item.qty > 0);
   }
 
@@ -154,7 +181,8 @@ export class SSActivewearTransformer {
    * Calculate total quantity across all variants
    */
   private static calculateTotalQuantity(inventory: SSInventory[]): number {
-    return inventory.reduce((total, item) => total + item.qty, 0);
+    if (!inventory || inventory.length === 0) return 0;
+    return inventory.reduce((total, item) => total + (item.qty || 0), 0);
   }
 
   /**

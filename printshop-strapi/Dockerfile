@@ -14,11 +14,11 @@ RUN npm install --no-audit --legacy-peer-deps
 # Copy application files
 COPY . .
 
-# Build TypeScript config
-RUN npm run build 2>/dev/null || echo "Build step skipped"
+# Skip build - Strapi will build admin on first run in develop mode
+# For production, pre-build locally and copy the build folder
 
 # Expose port
 EXPOSE 1337
 
-# Start Strapi in development
+# Start Strapi in development (auto-builds admin panel)
 CMD ["npm", "run", "develop"]

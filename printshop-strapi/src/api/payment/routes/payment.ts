@@ -1,44 +1,7 @@
-{
-  "routes": [
-    {
-      "method": "GET",
-      "path": "/payments",
-      "handler": "payment.find",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/payments/:id",
-      "handler": "payment.findOne",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/payments",
-      "handler": "payment.create",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "PUT",
-      "path": "/payments/:id",
-      "handler": "payment.update",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "DELETE",
-      "path": "/payments/:id",
-      "handler": "payment.delete",
-      "config": {
-        "policies": []
-      }
-    }
-  ]
-}
+/**
+ * payment router
+ */
+
+import { factories } from '@strapi/strapi';
+
+export default factories.createCoreRouter('api::payment.payment');

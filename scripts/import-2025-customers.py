@@ -2,14 +2,35 @@
 """
 Import 2025 Printavo Customers to Strapi
 A minimal test import to validate the system before full migration.
+Uses only stdlib (no requests dependency).
 """
 
 import json
-import requests
+import os
+import subprocess
 from datetime import datetime
 
-STRAPI_URL = "http://localhost:1337"
+# Use environment variable or default to docker-host
+STRAPI_URL = os.environ.get("STRAPI_URL", "http://100.92.156.118:1337")
 DATA_FILE = "data/processed/orders_with_images.json"
+
+def curl_get(url):
+    """Make GET request using curl."""
+    result = subprocess.run(
+        ['curl', '-s', url],
+        capture_output=True, text=True
+    )
+    return json.loads(result.stdout) if result.stdout else None
+
+def curl_post(url, data):
+    """Make POST request using curl."""
+    result = subprocess.run(
+        ['curl', '-s', '-X', 'POST', url,
+         '-H', 'Content-Type: application/json',
+         '-d', json.dumps(data)],
+        capture_output=True, text=True
+    )
+    return '"id":' in result.stdout or '"documentId":' in result.stdout
 
 def extract_2025_customers():
     """Extract unique customers from 2025 orders."""
@@ -58,27 +79,12 @@ def upload_customers(customers):
         # Clean the data - remove None values
         clean_data = {k: v for k, v in customer.items() if v is not None}
         
-        try:
-            response = requests.post(
-                f"{STRAPI_URL}/api/customers",
-                json={"data": clean_data},
-                headers={"Content-Type": "application/json"},
-                timeout=10
-            )
-            
-            if response.status_code in [200, 201]:
-                success += 1
-                if success % 50 == 0:
-                    print(f"  Progress: {success}/{len(customers)} customers imported...")
-            else:
-                failed += 1
-                if failed <= 3:  # Show first 3 errors
-                    print(f"  ❌ Failed: {customer.get('name')} - {response.text[:100]}")
-                    
-        except Exception as e:
+        if curl_post(f"{STRAPI_URL}/api/customers", {"data": clean_data}):
+            success += 1
+            if success % 50 == 0:
+                print(f"  Progress: {success}/{len(customers)} customers imported...")
+        else:
             failed += 1
-            if failed <= 3:
-                print(f"  ❌ Error: {customer.get('name')} - {str(e)[:100]}")
     
     return success, failed
 
@@ -89,16 +95,14 @@ def main():
     print()
     
     # Check Strapi is running
-    try:
-        response = requests.get(f"{STRAPI_URL}/api/customers", timeout=5)
-        if response.status_code != 200:
-            print("❌ Strapi not responding properly")
-            return
-        existing = response.json().get('meta', {}).get('pagination', {}).get('total', 0)
-        print(f"✅ Strapi is running ({existing} existing customers)")
-    except Exception as e:
-        print(f"❌ Cannot connect to Strapi: {e}")
+    response = curl_get(f"{STRAPI_URL}/api/customers")
+    if not response:
+        print(f"❌ Cannot connect to Strapi at {STRAPI_URL}")
+        print("   Make sure Strapi is running on docker-host")
         return
+    
+    existing = response.get('meta', {}).get('pagination', {}).get('total', 0)
+    print(f"✅ Strapi is running ({existing} existing customers)")
     
     print()
     print("📊 Extracting 2025 data...")

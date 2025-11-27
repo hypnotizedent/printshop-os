@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Strapi Production Deployment** (Nov 27): Full deployment to docker-host R730XD via Tailscale
+  - PostgreSQL 15, Redis 7, Strapi 5.31.2 Enterprise running
+  - Removed AI SDK packages (ai, @ai-sdk/*) due to zod/v4 compatibility issues
+  
+- **S&S Activewear Integration** (Nov 27): Full API integration tested
+  - 211K+ products accessible via REST API
+  - Fixed transformer null handling for colors, sizes, inventory, images
+  
+- **SanMar SFTP Integration** (Nov 27): SFTP client ready for production
+  - 494MB EPDD.csv available (full product catalog)
+  - Fixed dotenv loading and file type preferences in sync CLI
+  
+- **Printavo Image URL Scrape** (Complete): 12,854 orders scraped
+  - Resume-capable scraper with 20-order checkpoints
+  - 66MB `orders_with_images.json` output file
+  
 - **Redis Caching Layer** (PR #104): Decorator pattern for supplier API caching, $500/month cost savings, 117 tests
 - **Production Dashboard Config** (PR #102): Appsmith dashboard configuration, Strapi integration, sample data generators
 - Initial repository structure and documentation

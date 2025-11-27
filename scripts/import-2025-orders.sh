@@ -4,7 +4,7 @@
 # Links orders to existing customers
 #
 
-STRAPI_URL="http://localhost:1337"
+STRAPI_URL="${STRAPI_URL:-http://100.92.156.118:1337}"
 DATA_FILE="data/processed/orders_with_images.json"
 
 echo "============================================================"
@@ -26,10 +26,11 @@ echo ""
 echo "📊 Extracting 2025 orders and importing..."
 python3 << 'PYTHON_SCRIPT'
 import json
+import os
 import subprocess
 from datetime import datetime
 
-STRAPI_URL = "http://localhost:1337"
+STRAPI_URL = os.environ.get("STRAPI_URL", "http://100.92.156.118:1337")
 DATA_FILE = "data/processed/orders_with_images.json"
 
 def get_customer_map():

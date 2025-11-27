@@ -1,12 +1,105 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 26, 2025
+**Last Updated:** November 27, 2025 (Session 10)
+
+---
+
+## 🚀 Homelab Deployment
+
+**Status:** ✅ Deployed to docker-host (100.92.156.118)
+
+### Running Services
+
+| Service | URL | Status |
+|---------|-----|--------|
+| **Strapi CMS** | http://100.92.156.118:1337 | ✅ Running (v5.31.2 Enterprise) |
+| **PostgreSQL** | 100.92.156.118:5432 | ✅ Running |
+| **Redis** | 100.92.156.118:6379 | ✅ Running |
+
+### Session 10 Notes (Nov 27, 2025)
+- Strapi deployed and running on docker-host
+- Web UI not accessible via Tailscale (Vite host restriction) - needs on-site setup
+- Admin account creation pending (requires direct network access)
+
+### Infrastructure Tools (Same Host)
+
+| Tool | URL | Purpose |
+|------|-----|---------|
+| Uptime Kuma | http://100.92.156.118:3001 | Monitoring |
+| Dozzle | http://100.92.156.118:9999 | Docker logs |
+| Traefik | http://100.92.156.118:8080 | Reverse proxy |
+| MinIO | http://100.92.156.118:9001 | S3 storage |
+| Ntfy | http://100.92.156.118:8088 | Notifications |
+
+### Deployment Commands
+
+```bash
+# Deploy/redeploy
+./scripts/deploy-to-homelab.sh
+
+# View logs
+ssh docker-host 'cd ~/stacks/printshop-os && docker-compose logs -f strapi'
+
+# Check status
+ssh docker-host 'docker ps | grep printshop'
+
+# Restart a service
+ssh docker-host 'cd ~/stacks/printshop-os && docker-compose restart strapi'
+```
+
+### Next Steps After Deployment
+
+1. **Create Strapi Admin Account**
+   - Visit http://100.92.156.118:1337/admin
+   - Create first admin user
+
+2. **Add to Uptime Kuma**
+   - Add monitor for Strapi: `http://printshop-strapi:1337`
+   - Add monitor for Postgres: `tcp://printshop-postgres:5432`
+
+3. **Configure Traefik (Optional)**
+   - Add labels to printshop containers for domain routing
+   - Set up SSL with Let's Encrypt
+
+4. **Import Production Data**
+   - Run customer import: `node scripts/import-2025-customers.py`
+   - Run order import: `node scripts/import-2025-orders.sh`
+
+---
 
 ## Purpose
 
 This document provides a precise map of where every component, service, and feature lives in the codebase. Use this to avoid creating duplicate files or searching aimlessly.
 
 ## Recent Updates
+
+### November 27, 2025 (Session 10 - Supplier Sync & Deployment)
+
+✅ **Strapi Production Deployment**
+- Deployed Strapi 5.31.2 Enterprise to docker-host (100.92.156.118)
+- Fixed AI SDK package conflicts (removed `ai`, `@ai-sdk/*` causing zod/v4 errors)
+- Fixed `payment/routes/payment.ts` malformed TypeScript
+- PostgreSQL 15 + Redis 7 containers running
+- **Blocker:** Vite host restriction prevents Tailscale access - needs on-site setup
+
+✅ **S&S Activewear Integration**
+- API connection verified (211K+ products available)
+- Fixed `ss-activewear.transformer.ts` - null checks for colors, sizes, inventory, images
+- Transformer handles all edge cases in API responses
+
+✅ **SanMar SFTP Integration**
+- SFTP connection verified (16 files on server, 494MB EPDD.csv available)
+- Fixed `sync-sanmar.ts` - added dotenv loading, prefers .csv over .zip files
+- Ready for full product sync once Strapi admin configured
+
+⚠️ **AS Colour Integration**
+- API returning 401 Unauthorized - subscription key expired/invalid
+- Needs credential refresh from AS Colour portal
+
+✅ **Printavo Image Scrape**
+- **COMPLETE**: 12,854 orders with scraped image URLs
+- Saved to `data/processed/orders_with_images.json` (66MB)
+- Resume-capable scraper worked as designed
 
 ### November 28, 2025 (Session 9 - Customer Journey Implementation)
 ✅ **Stripe Payment Integration**

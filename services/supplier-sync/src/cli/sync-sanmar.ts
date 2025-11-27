@@ -1,5 +1,8 @@
 #!/usr/bin/env ts-node
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { SanMarSFTPClient } from '../clients/sanmar-sftp.client';
 import { SanMarCSVTransformer } from '../transformers/sanmar-csv.transformer';
 import { persistProducts } from '../persistence/productPersistence';
@@ -58,8 +61,28 @@ async function downloadFile(client: SanMarSFTPClient, fileType: string): Promise
   await client.connect();
   const files = await client.listFiles();
   
-  // Find the most recent file of the requested type
-  const targetFile = files.find(f => f.type === fileType);
+  // Find uncompressed CSV first, then fall back to any matching type
+  // Prefer: SanMar_EPDD.csv over SanMar_EPDD_csv.zip
+  let targetFile = files.find(f => 
+    f.type === fileType && 
+    f.filename.toLowerCase().endsWith('.csv') && 
+    !f.filename.includes('.zip')
+  );
+  
+  // Fallback to SDL_N.csv for SDL_N type
+  if (!targetFile && fileType === 'SDL_N') {
+    targetFile = files.find(f => f.filename === 'SanMar_SDL_N.csv');
+  }
+  
+  // Fallback to txt for DIP
+  if (!targetFile && fileType === 'DIP') {
+    targetFile = files.find(f => f.filename === 'sanmar_dip.txt');
+  }
+  
+  // Last resort: any file of this type
+  if (!targetFile) {
+    targetFile = files.find(f => f.type === fileType);
+  }
   
   if (!targetFile) {
     throw new Error(`No ${fileType} file found on SFTP server`);
@@ -213,7 +236,7 @@ async function main() {
       });
     } else {
       logger.info('Persisting products...');
-      persistProducts(products);
+      persistProducts(products, 'sanmar');
       logger.info(`✅ Persisted ${products.length} SanMar products`);
     }
 
