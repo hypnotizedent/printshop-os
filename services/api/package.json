@@ -40,6 +40,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/s3-request-presigner": "^3.940.0",
+    "@sendgrid/mail": "^8.1.6",
     "@types/archiver": "^7.0.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
@@ -49,6 +52,7 @@
     "@types/pg": "^8.15.6",
     "@types/qrcode": "^1.5.6",
     "@types/speakeasy": "^2.0.10",
+    "@types/stripe": "^8.0.416",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "^10.0.0",
     "archiver": "^7.0.1",
@@ -65,6 +69,7 @@
     "qrcode": "^1.5.4",
     "redis": "^5.10.0",
     "speakeasy": "^2.0.0",
+    "stripe": "^20.0.0",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0"
   },

@@ -8,6 +8,51 @@ This document provides a precise map of where every component, service, and feat
 
 ## Recent Updates
 
+### November 28, 2025 (Session 9 - Customer Journey Implementation)
+✅ **Stripe Payment Integration**
+- Created `services/api/src/payments/stripe.service.ts` - Full Stripe SDK integration
+  - Payment intents, checkout sessions, deposits, refunds
+  - Customer management, receipt URLs
+- Created `services/api/src/payments/webhook.handler.ts` - Webhook processing
+  - Payment succeeded/failed handlers
+  - Automatic Strapi payment record updates
+
+✅ **SendGrid Email Service**
+- Created `services/api/src/email/sendgrid.service.ts` - Transactional emails
+  - Quote emails with line items and approval links
+  - Order confirmation and status updates
+  - Payment receipts with styled HTML templates
+
+✅ **Quote & Payment Content Types (Strapi)**
+- Created `printshop-strapi/src/api/quote/` - Quote approval workflow
+  - Full schema: lineItems, deposits, expiration, approval tokens
+  - Public approval/reject endpoints (token-based, no auth)
+  - Auto-generate quote numbers and tokens
+- Created `printshop-strapi/src/api/payment/` - Payment tracking
+  - Status tracking: pending → paid → refunded
+  - Stripe integration fields: paymentIntentId, checkoutSessionId
+
+✅ **Customer-Facing Pages (Frontend)**
+- Created `frontend/src/pages/QuoteApproval.tsx` - Quote review & approval
+  - Public page with token-based access
+  - Mockup viewer, line item details, approval signature
+  - Integrated payment buttons (deposit/full)
+- Created `frontend/src/pages/OrderStatus.tsx` - Order tracking
+  - Real-time status with progress steps
+  - Tracking number integration (EasyPost)
+  - Balance payment option
+
+✅ **File Storage Service**
+- Created `services/api/src/storage/file.service.ts` - S3/MinIO/local storage
+  - Presigned upload/download URLs
+  - Order-based file organization
+  - Support for artwork, mockups, proofs, documents
+
+✅ **Environment Configuration**
+- Updated `printshop-strapi/.env.example` with all integration variables
+  - PostgreSQL config for production
+  - Stripe, SendGrid, S3, Twilio settings
+
 ### November 27, 2025 (Session 8 - Priority Features)
 ✅ **Priority 1: Quote Workflow UI**
 - Created `frontend/src/components/quotes/QuoteForm.tsx` - Full quote creation form

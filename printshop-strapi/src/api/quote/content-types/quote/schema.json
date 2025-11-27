@@ -1,0 +1,149 @@
+{
+  "kind": "collectionType",
+  "collectionName": "quotes",
+  "info": {
+    "singularName": "quote",
+    "pluralName": "quotes",
+    "displayName": "Quote",
+    "description": "Customer quotes with approval workflow"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "quoteNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "draft",
+        "sent",
+        "viewed",
+        "approved",
+        "rejected",
+        "expired",
+        "converted"
+      ],
+      "default": "draft",
+      "required": true
+    },
+    "lineItems": {
+      "type": "json",
+      "required": true
+    },
+    "subtotal": {
+      "type": "decimal",
+      "required": true,
+      "default": 0
+    },
+    "taxRate": {
+      "type": "decimal",
+      "default": 0
+    },
+    "taxAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "discount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "discountType": {
+      "type": "enumeration",
+      "enum": [
+        "percentage",
+        "fixed"
+      ],
+      "default": "fixed"
+    },
+    "total": {
+      "type": "decimal",
+      "required": true,
+      "default": 0
+    },
+    "depositRequired": {
+      "type": "boolean",
+      "default": true
+    },
+    "depositPercent": {
+      "type": "decimal",
+      "default": 50
+    },
+    "depositAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "expiresAt": {
+      "type": "datetime"
+    },
+    "sentAt": {
+      "type": "datetime"
+    },
+    "viewedAt": {
+      "type": "datetime"
+    },
+    "approvedAt": {
+      "type": "datetime"
+    },
+    "rejectedAt": {
+      "type": "datetime"
+    },
+    "approvalToken": {
+      "type": "string",
+      "private": true
+    },
+    "approvedBy": {
+      "type": "string"
+    },
+    "approverSignature": {
+      "type": "text"
+    },
+    "rejectionReason": {
+      "type": "text"
+    },
+    "customerNotes": {
+      "type": "text"
+    },
+    "internalNotes": {
+      "type": "text"
+    },
+    "terms": {
+      "type": "richtext"
+    },
+    "validDays": {
+      "type": "integer",
+      "default": 30
+    },
+    "mockupUrls": {
+      "type": "json"
+    },
+    "attachments": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images", "files"]
+    },
+    "revisionNumber": {
+      "type": "integer",
+      "default": 1
+    },
+    "parentQuote": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::quote.quote"
+    }
+  }
+}

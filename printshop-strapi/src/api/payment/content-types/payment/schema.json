@@ -1,0 +1,94 @@
+{
+  "kind": "collectionType",
+  "collectionName": "payments",
+  "info": {
+    "singularName": "payment",
+    "pluralName": "payments",
+    "displayName": "Payment",
+    "description": "Payment records for orders"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "order": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::order.order"
+    },
+    "amount": {
+      "type": "decimal",
+      "required": true,
+      "default": 0
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "processing",
+        "paid",
+        "failed",
+        "refunded",
+        "expired",
+        "cancelled"
+      ],
+      "default": "pending",
+      "required": true
+    },
+    "paymentType": {
+      "type": "enumeration",
+      "enum": [
+        "deposit",
+        "balance",
+        "full",
+        "refund"
+      ],
+      "default": "full"
+    },
+    "paymentMethod": {
+      "type": "enumeration",
+      "enum": [
+        "stripe",
+        "cash",
+        "check",
+        "bank_transfer",
+        "other"
+      ],
+      "default": "stripe"
+    },
+    "stripePaymentIntentId": {
+      "type": "string"
+    },
+    "stripeCheckoutSessionId": {
+      "type": "string"
+    },
+    "stripeCustomerId": {
+      "type": "string"
+    },
+    "paidAt": {
+      "type": "datetime"
+    },
+    "refundedAt": {
+      "type": "datetime"
+    },
+    "refundAmount": {
+      "type": "decimal"
+    },
+    "refundReason": {
+      "type": "text"
+    },
+    "checkoutUrl": {
+      "type": "string"
+    },
+    "receiptUrl": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}
