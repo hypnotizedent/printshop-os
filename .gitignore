@@ -146,3 +146,9 @@ docs/reference/inspiration/**/*.mov
 docs/reference/inspiration/**/*.MOV
 docs/reference/legacy_web_assets/**/*.mov
 docs/reference/legacy_web_assets/**/*.MOV
+
+# Temporary files (added by audit Nov 28, 2025)
+*.log
+issues.csv
+validation-report.txt
+docs/archive/legacy-supplier-sync/node_modules/
