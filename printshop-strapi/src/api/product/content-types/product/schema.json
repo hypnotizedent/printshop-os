@@ -5,7 +5,7 @@
     "singularName": "product",
     "pluralName": "products",
     "displayName": "Product",
-    "description": "Supplier products (SanMar, AS Colour, S&S Activewear)"
+    "description": "Curated supplier products catalog. Live inventory via /api/inventory/check/:sku"
   },
   "options": {
     "draftAndPublish": false
@@ -52,21 +52,17 @@
     "description": {
       "type": "text"
     },
-    "variants": {
-      "type": "json",
-      "required": false
+    "basePrice": {
+      "type": "decimal"
     },
-    "pricing": {
-      "type": "json",
-      "required": false
+    "colors": {
+      "type": "json"
+    },
+    "sizes": {
+      "type": "json"
     },
     "images": {
-      "type": "json",
-      "required": false
-    },
-    "availability": {
-      "type": "json",
-      "required": false
+      "type": "json"
     },
     "supplierProductId": {
       "type": "string"
@@ -77,6 +73,10 @@
     "isActive": {
       "type": "boolean",
       "default": true
+    },
+    "isFavorite": {
+      "type": "boolean",
+      "default": false
     }
   }
 }
