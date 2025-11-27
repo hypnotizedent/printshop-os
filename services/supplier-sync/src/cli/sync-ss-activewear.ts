@@ -12,12 +12,15 @@
  */
 
 import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables FIRST - must specify path when running from compiled dist
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 import { SSActivewearClient } from '../clients/ss-activewear.client';
 import { SSActivewearTransformer } from '../transformers/ss-activewear.transformer';
 import { CacheService } from '../services/cache.service';
 import { logger } from '../utils/logger';
-
-dotenv.config();
 
 interface SyncOptions {
   categoryId?: number;

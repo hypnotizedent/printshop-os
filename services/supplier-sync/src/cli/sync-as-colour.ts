@@ -1,4 +1,10 @@
 #!/usr/bin/env ts-node
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables FIRST
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 import { ASColourClient, ASColourVariant, ASColourInventoryItem, ASColourPriceListItem } from '../clients/as-colour.client';
 import { ASColourTransformer } from '../transformers/as-colour.transformer';
 import { logger } from '../utils/logger';
