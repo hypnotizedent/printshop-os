@@ -1,17 +1,38 @@
 # GitHub Copilot Instructions for PrintShop OS
 
+## Session Context (READ FIRST!)
+
+**Before doing anything, check `.vscode/session-state.json`** - it contains:
+- Current git branch and recent commits
+- Active services and their status
+- Project structure summary
+- Current priorities
+
+This file is auto-generated on workspace open. If it's stale, run: `node .vscode/scripts/generate-context.js`
+
 ## Project Context
 PrintShop OS is an enterprise print shop management system replacing Printavo. This is a **monorepo** containing all services, frontend, and backend.
+
+## Infrastructure Context
+- **Local Dev:** MacBook Pro M4 Max (`macbook` @ 100.85.186.7)
+- **Production:** Dell R730XD running Proxmox (`pve` @ 100.96.211.33)
+- **Docker Host:** VM on R730XD (`docker-host` @ 100.92.156.118) ← **ALL CONTAINERS HERE**
+- **Homelab Repo:** `../homelab/homelab-infrastructure` (sibling directory)
+- **Device Registry:** `homelab-infrastructure/DOCS/DEVICE_REGISTRY.md` (SINGLE SOURCE OF TRUTH for IPs)
+- **Docker Compose:** `stacks/business-stack/printshop-os/docker-compose.yml`
+- **Volumes:** `/mnt/primary/docker/volumes/printshop-os/` on docker-host
+- **Network:** `homelab-network` (Traefik reverse proxy)
 
 ## Critical Rules
 
 ### 1. Single Source of Truth
 Before creating ANYTHING, consult these files IN ORDER:
-1. `SERVICE_DIRECTORY.md` - Where is everything?
-2. `ARCHITECTURE.md` - How does it work?
-3. `PROJECT_OVERVIEW.md` - What is this project?
+1. `.vscode/session-state.json` - What's the current state?
+2. `SERVICE_DIRECTORY.md` - Where is everything?
+3. `ARCHITECTURE.md` - How does it work?
+4. `PROJECT_OVERVIEW.md` - What is this project?
 
-**Never create files that duplicate information in these three documents.**
+**Never create files that duplicate information in these documents.**
 
 ### 2. Service Structure (ONLY 4 ALLOWED)
 ```
@@ -209,8 +230,36 @@ This is an **enterprise platform**. That means:
 - Working code over perfect code
 - Incremental progress over big rewrites
 
+## Homelab Integration
+
+### Deploy Commands
+```bash
+# Deploy to docker-host (via Tailscale)
+rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/
+ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'
+
+# View logs
+ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose logs -f printshop-strapi'
+
+# Quick status check
+ssh docker-host 'docker ps --format "table {{.Names}}\t{{.Status}}"'
+
+# Access via Tailscale (direct to docker-host)
+# Strapi: http://docker-host:1337 or https://printshop.ronny.works
+# Frontend: http://docker-host:5173 or https://app.printshop.ronny.works
+```
+
+### SSH Quick Reference
+```bash
+ssh pve           # Proxmox host (100.96.211.33) - for VM management
+ssh docker-host   # Docker VM (100.92.156.118) - for container management
+```
+
+### Multi-Root Workspace
+When working with homelab integration, open `~/Projects/printshop-homelab.code-workspace` to access both repos.
+
 ---
 
-**Last Updated:** November 26, 2025  
+**Last Updated:** November 27, 2025  
 **Maintainer:** @ronnyworks  
 **Repo:** github.com/hypnotizedent/printshop-os
