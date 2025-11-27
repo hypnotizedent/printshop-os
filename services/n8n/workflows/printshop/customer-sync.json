@@ -1,0 +1,332 @@
+{
+  "name": "PrintShop: Customer Sync (EspoCRM ↔ Strapi)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule: Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ESPOCRM_URL}}/api/v1/Contact",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "where[0][type]",
+              "value": "after"
+            },
+            {
+              "name": "where[0][attribute]",
+              "value": "modifiedAt"
+            },
+            {
+              "name": "where[0][value]",
+              "value": "={{$now.minus({hours: 2}).toISO()}}"
+            },
+            {
+              "name": "maxSize",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-espocrm-contacts",
+      "name": "Get Updated EspoCRM Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "espocrm-api-key",
+          "name": "EspoCRM API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.STRAPI_URL}}/api/customers",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filters[updatedAt][$gte]",
+              "value": "={{$now.minus({hours: 2}).toISO()}}"
+            },
+            {
+              "name": "pagination[limit]",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-strapi-customers",
+      "name": "Get Updated Strapi Customers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-espocrm",
+      "name": "Split EspoCRM Contacts",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-strapi",
+      "name": "Split Strapi Customers",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.STRAPI_URL}}/api/customers?filters[espoCrmId][$eq]={{$json.id}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "find-strapi-customer",
+      "name": "Find Customer in Strapi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.data.length > 0}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "customer-exists",
+      "name": "Customer Exists in Strapi?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{$env.STRAPI_URL}}/api/customers/{{$json.data[0].id}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"firstName\": \"{{$node['Split EspoCRM Contacts'].json.firstName}}\",\n    \"lastName\": \"{{$node['Split EspoCRM Contacts'].json.lastName}}\",\n    \"email\": \"{{$node['Split EspoCRM Contacts'].json.emailAddress}}\",\n    \"phone\": \"{{$node['Split EspoCRM Contacts'].json.phoneNumber}}\",\n    \"company\": \"{{$node['Split EspoCRM Contacts'].json.accountName}}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "update-strapi-customer",
+      "name": "Update Strapi Customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.STRAPI_URL}}/api/customers",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"firstName\": \"{{$node['Split EspoCRM Contacts'].json.firstName}}\",\n    \"lastName\": \"{{$node['Split EspoCRM Contacts'].json.lastName}}\",\n    \"email\": \"{{$node['Split EspoCRM Contacts'].json.emailAddress}}\",\n    \"phone\": \"{{$node['Split EspoCRM Contacts'].json.phoneNumber}}\",\n    \"company\": \"{{$node['Split EspoCRM Contacts'].json.accountName}}\",\n    \"espoCrmId\": \"{{$node['Split EspoCRM Contacts'].json.id}}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "create-strapi-customer",
+      "name": "Create Strapi Customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{$env.ESPOCRM_URL}}/api/v1/Contact/{{$node['Split Strapi Customers'].json.espoCrmId}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"firstName\": \"{{$node['Split Strapi Customers'].json.attributes.firstName}}\",\n  \"lastName\": \"{{$node['Split Strapi Customers'].json.attributes.lastName}}\",\n  \"emailAddress\": \"{{$node['Split Strapi Customers'].json.attributes.email}}\",\n  \"phoneNumber\": \"{{$node['Split Strapi Customers'].json.attributes.phone}}\"\n}",
+        "options": {}
+      },
+      "id": "update-espocrm-contact",
+      "name": "Update EspoCRM Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "espocrm-api-key",
+          "name": "EspoCRM API Key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule: Every Hour": {
+      "main": [
+        [
+          {
+            "node": "Get Updated EspoCRM Contacts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Updated Strapi Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Updated EspoCRM Contacts": {
+      "main": [
+        [
+          {
+            "node": "Split EspoCRM Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Updated Strapi Customers": {
+      "main": [
+        [
+          {
+            "node": "Split Strapi Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split EspoCRM Contacts": {
+      "main": [
+        [
+          {
+            "node": "Find Customer in Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Strapi Customers": {
+      "main": [
+        [
+          {
+            "node": "Update EspoCRM Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Customer in Strapi": {
+      "main": [
+        [
+          {
+            "node": "Customer Exists in Strapi?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Exists in Strapi?": {
+      "main": [
+        [
+          {
+            "node": "Update Strapi Customer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Strapi Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "PrintShop",
+      "id": "printshop-tag"
+    },
+    {
+      "name": "CRM",
+      "id": "crm-tag"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-27T00:00:00.000Z",
+  "versionId": "1"
+}

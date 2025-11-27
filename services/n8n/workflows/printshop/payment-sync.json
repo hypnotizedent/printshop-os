@@ -1,0 +1,203 @@
+{
+  "name": "PrintShop: Payment Sync (Invoice Ninja → Strapi)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule: Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "resource": "payment",
+        "operation": "getAll",
+        "limit": 50,
+        "filters": {
+          "updatedAt": "={{$now.minus({minutes: 10}).toISO()}}"
+        }
+      },
+      "id": "get-payments",
+      "name": "Get Recent Payments",
+      "type": "n8n-nodes-base.invoiceNinja",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "invoiceNinjaApi": {
+          "id": "invoice-ninja-api",
+          "name": "Invoice Ninja API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-batches",
+      "name": "Split Into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.STRAPI_URL}}/api/orders?filters[invoiceNumber][$eq]={{$json.invoice_number}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "find-order",
+      "name": "Find Order in Strapi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.data.length > 0}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-order-exists",
+      "name": "Order Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{$env.STRAPI_URL}}/api/orders/{{$json.data[0].id}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"amountPaid\": {{$node['Get Recent Payments'].json.amount}},\n    \"paymentDate\": \"{{$node['Get Recent Payments'].json.date}}\",\n    \"paymentMethod\": \"{{$node['Get Recent Payments'].json.type}}\",\n    \"paymentStatus\": \"{{$node['Get Recent Payments'].json.amount >= $node['Get Recent Payments'].json.invoice_amount ? 'PAID' : 'PARTIAL'}}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "update-order-payment",
+      "name": "Update Order Payment Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "no-match",
+      "name": "No Matching Order",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1250, 400]
+    }
+  ],
+  "connections": {
+    "Schedule: Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Payments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Payments": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Find Order in Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Order in Strapi": {
+      "main": [
+        [
+          {
+            "node": "Order Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Exists?": {
+      "main": [
+        [
+          {
+            "node": "Update Order Payment Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Matching Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "PrintShop",
+      "id": "printshop-tag"
+    },
+    {
+      "name": "Payments",
+      "id": "payments-tag"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-27T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,390 @@
+{
+  "name": "PrintShop: Order Status Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "order-status-changed",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-order-status",
+      "name": "Webhook: Order Status Changed",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.STRAPI_URL}}/api/orders/{{$json.body.orderId}}?populate=customer",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "get-order-details",
+      "name": "Get Order Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.body.newStatus}}",
+                    "rightValue": "IN_PRODUCTION",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "in_production"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.body.newStatus}}",
+                    "rightValue": "READY_FOR_PICKUP",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "ready_pickup"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.body.newStatus}}",
+                    "rightValue": "SHIPPED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "shipped"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.body.newStatus}}",
+                    "rightValue": "COMPLETE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "complete"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-status",
+      "name": "Switch on Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "channel": "#production",
+        "text": "=🏭 *Order In Production*\n\n*Order:* #{{$node['Get Order Details'].json.data.attributes.orderNumber}}\n*Customer:* {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.firstName}} {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.lastName}}\n*Description:* {{$node['Get Order Details'].json.data.attributes.description}}\n*Due Date:* {{$node['Get Order Details'].json.data.attributes.dueDate}}",
+        "otherOptions": {}
+      },
+      "id": "slack-in-production",
+      "name": "Slack: In Production",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [900, 100],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-api",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#production",
+        "text": "=✅ *Order Ready for Pickup*\n\n*Order:* #{{$node['Get Order Details'].json.data.attributes.orderNumber}}\n*Customer:* {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.firstName}} {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.lastName}}\n*Phone:* {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.phone}}",
+        "otherOptions": {}
+      },
+      "id": "slack-ready-pickup",
+      "name": "Slack: Ready for Pickup",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [900, 250],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-api",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$node['Get Order Details'].json.data.attributes.customer.data.attributes.email}}",
+        "subject": "=Your order #{{$node['Get Order Details'].json.data.attributes.orderNumber}} is ready for pickup!",
+        "message": "=Hi {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.firstName}},\n\nGreat news! Your order #{{$node['Get Order Details'].json.data.attributes.orderNumber}} is ready for pickup.\n\nPickup Location: Your Print Shop Address\nPickup Hours: Mon-Fri 9am-5pm\n\nIf you have any questions, please don't hesitate to contact us.\n\nThank you for your business!\n\n- The PrintShop Team"
+      },
+      "id": "email-ready-pickup",
+      "name": "Email: Ready for Pickup",
+      "type": "n8n-nodes-base.sendEmail",
+      "typeVersion": 2.1,
+      "position": [1100, 250],
+      "credentials": {
+        "smtp": {
+          "id": "smtp",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#production",
+        "text": "=📦 *Order Shipped*\n\n*Order:* #{{$node['Get Order Details'].json.data.attributes.orderNumber}}\n*Customer:* {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.firstName}} {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.lastName}}\n*Tracking:* {{$node['Webhook: Order Status Changed'].json.body.trackingNumber || 'N/A'}}",
+        "otherOptions": {}
+      },
+      "id": "slack-shipped",
+      "name": "Slack: Shipped",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [900, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-api",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$node['Get Order Details'].json.data.attributes.customer.data.attributes.email}}",
+        "subject": "=Your order #{{$node['Get Order Details'].json.data.attributes.orderNumber}} has shipped!",
+        "message": "=Hi {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.firstName}},\n\nYour order #{{$node['Get Order Details'].json.data.attributes.orderNumber}} has been shipped!\n\nTracking Number: {{$node['Webhook: Order Status Changed'].json.body.trackingNumber || 'Tracking information will be sent separately'}}\n\nYou can track your package at: {{$node['Webhook: Order Status Changed'].json.body.trackingUrl || 'N/A'}}\n\nThank you for your business!\n\n- The PrintShop Team"
+      },
+      "id": "email-shipped",
+      "name": "Email: Shipped",
+      "type": "n8n-nodes-base.sendEmail",
+      "typeVersion": 2.1,
+      "position": [1100, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp",
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#production",
+        "text": "=🎉 *Order Complete*\n\n*Order:* #{{$node['Get Order Details'].json.data.attributes.orderNumber}}\n*Customer:* {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.firstName}} {{$node['Get Order Details'].json.data.attributes.customer.data.attributes.lastName}}\n*Total:* ${{$node['Get Order Details'].json.data.attributes.total}}",
+        "otherOptions": {}
+      },
+      "id": "slack-complete",
+      "name": "Slack: Complete",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [900, 550],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-api",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\": true, \"message\": \"Notifications sent\"}"
+      },
+      "id": "respond-success",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1300, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Order Status Changed": {
+      "main": [
+        [
+          {
+            "node": "Get Order Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order Details": {
+      "main": [
+        [
+          {
+            "node": "Switch on Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch on Status": {
+      "main": [
+        [
+          {
+            "node": "Slack: In Production",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Ready for Pickup",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Shipped",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Ready for Pickup": {
+      "main": [
+        [
+          {
+            "node": "Email: Ready for Pickup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Shipped": {
+      "main": [
+        [
+          {
+            "node": "Email: Shipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: In Production": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Ready for Pickup": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Shipped": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Complete": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "PrintShop",
+      "id": "printshop-tag"
+    },
+    {
+      "name": "Notifications",
+      "id": "notifications-tag"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-27T00:00:00.000Z",
+  "versionId": "1"
+}

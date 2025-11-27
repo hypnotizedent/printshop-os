@@ -656,6 +656,61 @@ frontend/
 
 ---
 
+### 8. n8n Workflow Library
+
+**Location:** `services/n8n/` + `services/n8n-workflows/` (submodule)
+
+**Source:** https://github.com/Zie619/n8n-workflows (4,343+ workflows, 365+ integrations)
+
+```
+services/n8n/
+├── workflows/
+│   ├── README.md                    # Overview and usage guide
+│   └── printshop/                   # Custom PrintShop workflows
+│       ├── quote-to-invoice.json    # Strapi quote → Invoice Ninja
+│       ├── payment-sync.json        # Invoice Ninja → Strapi
+│       ├── customer-sync.json       # EspoCRM ↔ Strapi
+│       ├── order-notifications.json # Status → Slack/Email
+│       └── document-ocr.json        # Paperless → Strapi metadata
+├── scripts/
+│   ├── import-workflows.sh          # Bulk import to n8n instance
+│   ├── export-workflows.sh          # Export workflows from n8n
+│   └── search-workflows.py          # Search the workflow database
+└── docs/
+    └── N8N_INTEGRATION.md           # Complete integration guide
+
+services/n8n-workflows/              # Git submodule (4,343 workflows)
+├── workflows.db                     # SQLite FTS5 searchable database
+├── workflows/                       # Workflow JSON files by category
+└── README.md                        # Collection documentation
+```
+
+**Key Workflows:**
+
+| Workflow | Trigger | Description |
+|----------|---------|-------------|
+| Quote to Invoice | Webhook | Creates Invoice Ninja invoice when quote approved |
+| Payment Sync | Schedule (5min) | Syncs payment status to Strapi |
+| Customer Sync | Schedule (hourly) | Syncs EspoCRM ↔ Strapi customers |
+| Order Notifications | Webhook | Sends Slack/email on status change |
+| Document OCR | Webhook | Extracts metadata from scanned docs |
+
+**Port:** n8n runs on 5678
+
+**Quick Start:**
+```bash
+# Start n8n
+docker-compose -f docker-compose.business-services.yml up -d n8n
+
+# Import PrintShop workflows
+cd services/n8n && ./scripts/import-workflows.sh
+
+# Search for more workflows
+python scripts/search-workflows.py "invoice"
+```
+
+---
+
 ## Data Files
 
 **Location:** `data/`
@@ -915,6 +970,7 @@ Redis
 | Label Formatter | 3003 | HTTP (planned) |
 | Frontend Dev Server | 5173 | HTTP |
 | PostgreSQL | 5432 | TCP |
+| n8n Workflow Engine | 5678 | HTTP |
 | Redis | 6379 | TCP |
 
 ---

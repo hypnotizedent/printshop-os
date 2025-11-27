@@ -1,0 +1,318 @@
+{
+  "name": "PrintShop: Document OCR (Paperless-ngx → Strapi)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "paperless-document-consumed",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-paperless",
+      "name": "Webhook: Document Consumed",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.PAPERLESS_URL}}/api/documents/{{$json.body.document_id}}/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "get-paperless-document",
+      "name": "Get Paperless Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperless-api-key",
+          "name": "Paperless API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract relevant metadata from Paperless document\nconst doc = $input.item.json;\n\n// Try to extract order number from title or content\nconst orderNumberMatch = (doc.title + ' ' + (doc.content || '')).match(/(?:order|invoice|po)[\\s#:-]*(\\d{4,})/i);\nconst orderNumber = orderNumberMatch ? orderNumberMatch[1] : null;\n\n// Try to extract customer name\nconst customerMatch = (doc.content || '').match(/(?:customer|client|bill to)[:\\s]+([A-Za-z\\s]+?)(?:\\n|,|$)/i);\nconst customerName = customerMatch ? customerMatch[1].trim() : null;\n\n// Extract any dollar amounts\nconst amountMatch = (doc.content || '').match(/\\$([\\d,]+\\.\\d{2})/g);\nconst amounts = amountMatch ? amountMatch.map(a => parseFloat(a.replace(/[$,]/g, ''))) : [];\n\n// Get document type from tags\nconst tags = doc.tags || [];\nlet documentType = 'OTHER';\nif (tags.includes('invoice')) documentType = 'INVOICE';\nelse if (tags.includes('quote')) documentType = 'QUOTE';\nelse if (tags.includes('purchase_order')) documentType = 'PURCHASE_ORDER';\nelse if (tags.includes('artwork')) documentType = 'ARTWORK';\nelse if (tags.includes('shipping')) documentType = 'SHIPPING';\n\nreturn {\n  json: {\n    paperlessId: doc.id,\n    title: doc.title,\n    created: doc.created,\n    correspondent: doc.correspondent_name,\n    documentType: documentType,\n    extractedData: {\n      orderNumber,\n      customerName,\n      amounts,\n      totalAmount: amounts.length > 0 ? Math.max(...amounts) : null\n    },\n    tags: doc.tags_name || [],\n    archiveUrl: `${$env.PAPERLESS_URL}/documents/${doc.id}/download/`,\n    thumbnailUrl: `${$env.PAPERLESS_URL}/documents/${doc.id}/thumb/`\n  }\n};"
+      },
+      "id": "extract-metadata",
+      "name": "Extract OCR Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.extractedData.orderNumber !== null}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "has-order-number",
+      "name": "Has Order Number?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.STRAPI_URL}}/api/orders?filters[orderNumber][$eq]={{$json.extractedData.orderNumber}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "find-order",
+      "name": "Find Order in Strapi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1050, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.data.length > 0}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "order-found",
+      "name": "Order Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{$env.STRAPI_URL}}/api/orders/{{$json.data[0].id}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"documents\": [\n      {\n        \"paperlessId\": {{$node['Extract OCR Metadata'].json.paperlessId}},\n        \"type\": \"{{$node['Extract OCR Metadata'].json.documentType}}\",\n        \"title\": \"{{$node['Extract OCR Metadata'].json.title}}\",\n        \"archiveUrl\": \"{{$node['Extract OCR Metadata'].json.archiveUrl}}\",\n        \"thumbnailUrl\": \"{{$node['Extract OCR Metadata'].json.thumbnailUrl}}\",\n        \"addedAt\": \"{{$now.toISO()}}\"\n      }\n    ]\n  }\n}",
+        "options": {}
+      },
+      "id": "attach-to-order",
+      "name": "Attach Document to Order",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.STRAPI_URL}}/api/documents",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"paperlessId\": {{$node['Extract OCR Metadata'].json.paperlessId}},\n    \"title\": \"{{$node['Extract OCR Metadata'].json.title}}\",\n    \"type\": \"{{$node['Extract OCR Metadata'].json.documentType}}\",\n    \"correspondent\": \"{{$node['Extract OCR Metadata'].json.correspondent}}\",\n    \"archiveUrl\": \"{{$node['Extract OCR Metadata'].json.archiveUrl}}\",\n    \"thumbnailUrl\": \"{{$node['Extract OCR Metadata'].json.thumbnailUrl}}\",\n    \"extractedOrderNumber\": \"{{$node['Extract OCR Metadata'].json.extractedData.orderNumber || ''}}\",\n    \"extractedCustomerName\": \"{{$node['Extract OCR Metadata'].json.extractedData.customerName || ''}}\",\n    \"extractedAmount\": {{$node['Extract OCR Metadata'].json.extractedData.totalAmount || 'null'}},\n    \"tags\": {{JSON.stringify($node['Extract OCR Metadata'].json.tags)}},\n    \"processedAt\": \"{{$now.toISO()}}\",\n    \"status\": \"UNMATCHED\"\n  }\n}",
+        "options": {}
+      },
+      "id": "create-document-record",
+      "name": "Create Unmatched Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.STRAPI_URL}}/api/documents",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"paperlessId\": {{$node['Extract OCR Metadata'].json.paperlessId}},\n    \"title\": \"{{$node['Extract OCR Metadata'].json.title}}\",\n    \"type\": \"{{$node['Extract OCR Metadata'].json.documentType}}\",\n    \"correspondent\": \"{{$node['Extract OCR Metadata'].json.correspondent}}\",\n    \"archiveUrl\": \"{{$node['Extract OCR Metadata'].json.archiveUrl}}\",\n    \"thumbnailUrl\": \"{{$node['Extract OCR Metadata'].json.thumbnailUrl}}\",\n    \"tags\": {{JSON.stringify($node['Extract OCR Metadata'].json.tags)}},\n    \"processedAt\": \"{{$now.toISO()}}\",\n    \"status\": \"NEEDS_REVIEW\"\n  }\n}",
+        "options": {}
+      },
+      "id": "create-review-document",
+      "name": "Create Document for Review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1050, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\": true, \"documentId\": {{$node['Extract OCR Metadata'].json.paperlessId}}, \"message\": \"Document processed\"}"
+      },
+      "id": "respond-success",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Document Consumed": {
+      "main": [
+        [
+          {
+            "node": "Get Paperless Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Paperless Document": {
+      "main": [
+        [
+          {
+            "node": "Extract OCR Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract OCR Metadata": {
+      "main": [
+        [
+          {
+            "node": "Has Order Number?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Order Number?": {
+      "main": [
+        [
+          {
+            "node": "Find Order in Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Document for Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Order in Strapi": {
+      "main": [
+        [
+          {
+            "node": "Order Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Found?": {
+      "main": [
+        [
+          {
+            "node": "Attach Document to Order",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Unmatched Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Document to Order": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Unmatched Document": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Document for Review": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "PrintShop",
+      "id": "printshop-tag"
+    },
+    {
+      "name": "OCR",
+      "id": "ocr-tag"
+    },
+    {
+      "name": "Documents",
+      "id": "documents-tag"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-27T00:00:00.000Z",
+  "versionId": "1"
+}

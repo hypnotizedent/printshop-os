@@ -1,0 +1,173 @@
+{
+  "name": "PrintShop: Quote Approved → Create Invoice",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "quote-approved",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-quote-approved",
+      "name": "Webhook: Quote Approved",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.STRAPI_URL}}/api/quotes/{{$json.body.quoteId}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "get-quote-strapi",
+      "name": "Get Quote from Strapi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "invoice",
+        "operation": "create",
+        "clientId": "={{$json.body.data.attributes.customer.data.attributes.invoiceNinjaClientId}}",
+        "amount": "={{$json.body.data.attributes.total}}",
+        "additionalFields": {
+          "invoiceNumber": "={{$json.body.data.attributes.quoteNumber}}",
+          "poNumber": "={{$json.body.data.attributes.customerPO}}",
+          "discount": "={{$json.body.data.attributes.discount || 0}}",
+          "publicNotes": "Quote #{{$json.body.data.attributes.quoteNumber}} - {{$json.body.data.attributes.description}}",
+          "privateNotes": "Created from PrintShop OS quote workflow"
+        }
+      },
+      "id": "create-invoice-ninja",
+      "name": "Create Invoice in Invoice Ninja",
+      "type": "n8n-nodes-base.invoiceNinja",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "invoiceNinjaApi": {
+          "id": "invoice-ninja-api",
+          "name": "Invoice Ninja API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{$env.STRAPI_URL}}/api/quotes/{{$node['Webhook: Quote Approved'].json.body.quoteId}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={\"invoiceId\": \"{{$json.data.id}}\", \"invoiceNumber\": \"{{$json.data.number}}\", \"status\": \"INVOICED\"}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "update-strapi-quote",
+      "name": "Update Strapi Quote Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "strapi-api-key",
+          "name": "Strapi API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\": true, \"invoiceId\": \"{{$json.data.id}}\", \"invoiceNumber\": \"{{$node['Create Invoice in Invoice Ninja'].json.data.number}}\", \"message\": \"Invoice created successfully\"}"
+      },
+      "id": "respond-success",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Quote Approved": {
+      "main": [
+        [
+          {
+            "node": "Get Quote from Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Quote from Strapi": {
+      "main": [
+        [
+          {
+            "node": "Create Invoice in Invoice Ninja",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Invoice in Invoice Ninja": {
+      "main": [
+        [
+          {
+            "node": "Update Strapi Quote Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Strapi Quote Status": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "PrintShop",
+      "id": "printshop-tag"
+    },
+    {
+      "name": "Invoicing",
+      "id": "invoicing-tag"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-27T00:00:00.000Z",
+  "versionId": "1"
+}
