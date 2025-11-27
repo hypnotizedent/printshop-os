@@ -39,9 +39,15 @@ export interface RAGOptions {
 
 /**
  * Estimate token count (rough approximation)
+ *
+ * Note: This is a simple character-based estimation (1 token ≈ 4 chars).
+ * For production use with strict token limits, consider using a proper
+ * tokenizer library like tiktoken for accurate OpenAI token counting.
+ * This approximation works well for English text but may be less accurate
+ * for other languages or specialized content.
  */
 function estimateTokens(text: string): number {
-  // Rough estimate: 1 token ≈ 4 characters
+  // Rough estimate: 1 token ≈ 4 characters for English text
   return Math.ceil(text.length / 4);
 }
 

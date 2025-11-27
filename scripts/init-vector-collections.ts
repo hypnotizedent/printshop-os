@@ -14,18 +14,17 @@
  */
 
 import { config } from 'dotenv';
-config();
+import * as path from 'path';
 
-// Change to vector-store service directory for proper module resolution
-process.chdir(__dirname + '/../services/vector-store');
+// Load environment variables from root .env file
+config({ path: path.resolve(__dirname, '../.env') });
 
 async function main() {
   console.log('🚀 PrintShop OS - Milvus Vector Collection Initializer\n');
 
-  // Dynamic import after changing directory
-  const { initAllCollections, checkHealth, listCollections } = await import(
-    '../services/vector-store/src/index'
-  );
+  // Dynamic import to use the vector-store service
+  const vectorStoreModule = await import('../services/vector-store/src/index');
+  const { initAllCollections, checkHealth, listCollections } = vectorStoreModule;
 
   // Check health
   const health = await checkHealth();
@@ -44,7 +43,7 @@ async function main() {
   // List collections
   console.log('\n📋 Available collections:');
   const collections = await listCollections();
-  collections.forEach((col) => console.log(`   - ${col}`));
+  collections.forEach((col: string) => console.log(`   - ${col}`));
 
   console.log('\n✨ Initialization complete!\n');
   console.log('Next steps:');

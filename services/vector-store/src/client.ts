@@ -16,6 +16,9 @@ const MILVUS_ADDRESS = process.env.MILVUS_ADDRESS || 'localhost:19530';
  */
 let _milvusClient: MilvusClient | null = null;
 
+/**
+ * Get the Milvus client instance (lazy initialization)
+ */
 export function getMilvusClient(): MilvusClient {
   if (!_milvusClient) {
     _milvusClient = new MilvusClient({
@@ -24,13 +27,6 @@ export function getMilvusClient(): MilvusClient {
   }
   return _milvusClient;
 }
-
-// Export for backwards compatibility (note: this will still initialize on access)
-export const milvusClient = {
-  get instance() {
-    return getMilvusClient();
-  },
-};
 
 /**
  * Collection configuration

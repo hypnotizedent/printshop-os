@@ -16,11 +16,9 @@
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
-    "@types/uuid": "^10.0.0",
     "@zilliz/milvus2-sdk-node": "^2.4.4",
     "dotenv": "^16.3.0",
     "openai": "^4.47.1",
-    "uuid": "^13.0.0",
     "winston": "^3.11.0",
     "zod": "^3.22.0"
   },
