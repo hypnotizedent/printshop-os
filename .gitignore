@@ -54,7 +54,9 @@ out/
 .tern-port
 
 # IDE and Editor files
-.vscode/
+# .vscode/ - now tracked for session continuity
+!.vscode/
+.vscode/session-state.json
 .idea/
 *.swp
 *.swo

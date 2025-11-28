@@ -1,0 +1,167 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Generate Session Context",
+      "type": "shell",
+      "command": "node",
+      "args": ["${workspaceFolder}/.vscode/scripts/generate-context.js"],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "showReuseMessage": false
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start All Services (Dev)",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.local.yml up -d && cd frontend && npm run dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start Strapi (Dev)",
+      "type": "shell",
+      "command": "cd printshop-strapi && npm run develop",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Start Frontend (Dev)",
+      "type": "shell",
+      "command": "cd frontend && npm run dev",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Run All Tests",
+      "type": "shell",
+      "command": "npm test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Sync Printavo Data",
+      "type": "shell",
+      "command": "cd services/api && npm run sync:printavo",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Deploy to Homelab",
+      "type": "shell",
+      "command": "rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/ && ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "View Homelab Logs",
+      "type": "shell",
+      "command": "ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose logs -f --tail=100'",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Check Homelab Status",
+      "type": "shell",
+      "command": "ssh docker-host 'docker ps --format \"table {{.Names}}\\t{{.Status}}\\t{{.Ports}}\" | grep printshop'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "📊 Check Database Counts",
+      "type": "shell",
+      "command": "ssh docker-host 'docker exec printshop-postgres psql -U strapi -d printshop -c \"SELECT (SELECT COUNT(*) FROM customers) as customers, (SELECT COUNT(*) FROM orders) as orders, (SELECT COUNT(*) FROM line_items) as line_items, (SELECT COUNT(*) FROM products) as products;\"'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "📦 Import Line Items",
+      "type": "shell",
+      "command": "source .venv/bin/activate && python scripts/sync-line-items.py",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "🎨 Upload Artwork to MinIO",
+      "type": "shell",
+      "command": "source .venv/bin/activate && python scripts/sync-artwork-minio.py",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "🔄 Sync Both (Parallel)",
+      "type": "shell",
+      "command": "bash scripts/sync-all-parallel.sh",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "📋 Open Daily Task Log",
+      "type": "shell",
+      "command": "code DAILY_TASK_LOG.md",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent"
+      }
+    },
+    {
+      "label": "📜 View Session History",
+      "type": "shell",
+      "command": "tail -20 data/session-history.jsonl | jq .",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}
