@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { StatusTimeline } from "./StatusTimeline"
 import { 
   Download, 
   Package, 
@@ -55,6 +56,12 @@ export function OrderDetails({ order, onDownloadInvoice, onDownloadFiles }: Orde
           {formatStatus(attributes.status)}
         </Badge>
       </div>
+
+      {/* Status Timeline */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Order Status</h3>
+        <StatusTimeline status={attributes.status} />
+      </Card>
 
       {/* Order Information */}
       <Card className="p-6">
