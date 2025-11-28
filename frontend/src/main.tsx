@@ -4,6 +4,7 @@ import "@github/spark/spark"
 
 import App from './App.tsx'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 import { ErrorFallback } from './ErrorFallback.tsx'
 
 import "./main.css"
@@ -25,9 +26,11 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <AuthProvider>
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <App />
-    </ErrorBoundary>
-  </AuthProvider>
+  <ThemeProvider>
+    <AuthProvider>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <App />
+      </ErrorBoundary>
+    </AuthProvider>
+  </ThemeProvider>
 )

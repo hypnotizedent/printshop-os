@@ -59,11 +59,28 @@
       "type": "enumeration",
       "enum": [
         "active",
+        "idle",
+        "running",
         "maintenance",
         "offline",
         "retired"
       ],
       "default": "active"
+    },
+    "hotFolderIncoming": {
+      "type": "string"
+    },
+    "hotFolderProcessing": {
+      "type": "string"
+    },
+    "hotFolderCompleted": {
+      "type": "string"
+    },
+    "networkAddress": {
+      "type": "string"
+    },
+    "lastSeen": {
+      "type": "datetime"
     },
     "notes": {
       "type": "text"

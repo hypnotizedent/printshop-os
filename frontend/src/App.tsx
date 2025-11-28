@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { AppSidebar } from "./components/layout/AppSidebar"
 import { DashboardPage } from "./components/dashboard/DashboardPage"
 import { JobsPage } from "./components/jobs/JobsPage"
-import { MachinesPage } from "./components/machines/MachinesPage"
+import { ProductionScheduleView } from "./components/machines/ProductionScheduleView"
 import { CustomersPage } from "./components/customers/CustomersPage"
 import { FilesPage } from "./components/files/FilesPage"
 import { ReportsPage } from "./components/reports/ReportsPage"
@@ -144,7 +144,7 @@ function App() {
       case "jobs":
         return <JobsPage jobs={jobsList} onUpdateJob={handleUpdateJob} />
       case "machines":
-        return <MachinesPage machines={machinesList} />
+        return <ProductionScheduleView />
       case "customers":
         return <CustomersPage customers={customersList} />
       case "files":

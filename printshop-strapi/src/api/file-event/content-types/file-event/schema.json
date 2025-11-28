@@ -1,0 +1,77 @@
+{
+  "kind": "collectionType",
+  "collectionName": "file_events",
+  "info": {
+    "singularName": "file-event",
+    "pluralName": "file-events",
+    "displayName": "File Event",
+    "description": "Audit log for production file movements (hot folder system)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "eventType": {
+      "type": "enumeration",
+      "enum": [
+        "uploaded",
+        "approved",
+        "sent_to_machine",
+        "started_processing",
+        "completed",
+        "archived",
+        "error",
+        "deleted"
+      ],
+      "required": true
+    },
+    "filePath": {
+      "type": "string",
+      "required": true
+    },
+    "fileName": {
+      "type": "string",
+      "required": true
+    },
+    "fileSize": {
+      "type": "biginteger"
+    },
+    "fileType": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "orderNumber": {
+      "type": "string"
+    },
+    "machineId": {
+      "type": "string"
+    },
+    "machineName": {
+      "type": "string"
+    },
+    "operatorId": {
+      "type": "string"
+    },
+    "operatorName": {
+      "type": "string"
+    },
+    "sourceLocation": {
+      "type": "string"
+    },
+    "destinationLocation": {
+      "type": "string"
+    },
+    "processingDuration": {
+      "type": "integer"
+    },
+    "errorMessage": {
+      "type": "text"
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}

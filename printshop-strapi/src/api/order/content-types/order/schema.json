@@ -118,6 +118,13 @@
       "type": "json"
     },
     "printavoId": {
+      "type": "string",
+      "unique": true
+    },
+    "printavoCustomerId": {
+      "type": "string"
+    },
+    "visualId": {
       "type": "string"
     },
     "publicHash": {

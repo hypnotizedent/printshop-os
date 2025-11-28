@@ -356,30 +356,34 @@ ssh docker-host 'docker logs printshop-strapi -f --tail 100'
 
 ### Completed ✅
 
-1. **Data Migration**: All Printavo data imported to Strapi
-2. **Supplier API**: Inventory API deployed with AS Colour working
+1. **Data Migration**: All Printavo data imported to Strapi (3,317 customers, 12,854+ orders)
+2. **Supplier API**: Inventory API deployed with AS Colour working (dual-auth)
 3. **Infrastructure**: Docker containers running on homelab
-4. **Artwork Archival**: Scraping in progress (510/12,867 orders)
+4. **Frontend**: React frontend deployed (dark mode, production schedule view)
+5. **SSL/HTTPS**: Traefik + Cloudflare configured for printshop.ronny.works
+6. **Health Monitoring**: health-check.sh with auto-recovery and ntfy notifications
 
 ### In Progress 🔄
 
-1. **Artwork Scrape**: ~12GB downloaded, ~60 hours remaining
+1. **Data Import**: robust-import.py running with progress bars, checkpoints, retry logic
 2. **SanMar SFTP**: Needs initial sync to populate product cache
 
 ### Not Started 🔴
 
-1. **Frontend MVP**: React portal for customers
-2. **Production Dashboard**: Real-time order tracking
-3. **Automated Backups**: PostgreSQL backup scripts
-4. **SSL Certificates**: Traefik + Cloudflare configuration
+1. **Production Dashboard**: Real-time WebSocket order tracking
+2. **Automated Backups**: PostgreSQL backup scripts
+3. **Email Notifications**: Customer order updates
 
 ---
 
-## Information Requested
+## Recent Changes (Nov 28, 2025)
 
-- **TBD**: Frontend deployment strategy (Vercel vs self-hosted)
-- **TBD**: Backup retention policy
-- **TBD**: SanMar SFTP scheduled sync frequency
+- Added `printavoCustomerId` and `visualId` fields to Order schema
+- Fixed line-item schema with proper `order` and `imprints` relations
+- Created `scripts/config.py` - canonical configuration
+- Created `scripts/robust-import.py` - import with progress bars, retry, checkpoints
+- Created `scripts/health-check.sh` - auto-recovery monitoring
+- Created `scripts/check-import.sh` - quick status check
 
 ---
 

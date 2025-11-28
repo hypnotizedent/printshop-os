@@ -1,5 +1,6 @@
 import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/ui/ThemeToggle"
 
 interface NavItem {
   icon: React.ElementType
@@ -23,7 +24,7 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
     { icon: Truck, label: "Shipping", href: "shipping" },
     { icon: FolderOpen, label: "Files", href: "files" },
     { icon: Users, label: "Customers", href: "customers" },
-    { icon: Printer, label: "Machines", href: "machines" },
+    { icon: Printer, label: "Schedule", href: "machines" },
     { icon: ChartBar, label: "Reports", href: "reports" },
     { icon: Gear, label: "Settings", href: "settings" },
   ]
@@ -75,7 +76,11 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-2">
+        <div className="flex items-center justify-between px-3 py-2">
+          <span className="text-sm font-medium text-muted-foreground">Theme</span>
+          <ThemeToggle />
+        </div>
         <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground hover:bg-muted transition-colors">
           <Bell size={20} />
           <span className="font-medium text-sm">Notifications</span>

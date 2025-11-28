@@ -144,6 +144,18 @@
     },
     "goodsStatus": {
       "type": "string"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::order.order",
+      "inversedBy": "lineItems"
+    },
+    "imprints": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::imprint.imprint",
+      "mappedBy": "lineItem"
     }
   }
 }
