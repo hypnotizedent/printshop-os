@@ -1,6 +1,6 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 27, 2025 (Session 14 - Inventory API + Artwork Scrape)
+**Last Updated:** November 27, 2025 (Session 15 - AS Colour Auth Fix)
 
 ---
 
@@ -17,6 +17,17 @@
 | **Redis** | 100.92.156.118:6379 | ✅ Running | Cache ready |
 | **Inventory API** | http://100.92.156.118:3001 | 🔄 Deploy pending | Supplier integration |
 | **MinIO** | http://100.92.156.118:9001 | ✅ Running | Artwork bucket ready |
+
+### Session 15 Notes (Nov 27, 2025 - AS Colour Auth Fix)
+- ✅ **FIXED: AS Colour dual authentication**
+  - Subscription-Key header for catalog/inventory
+  - JWT Bearer token from email/password for pricing
+  - Client now auto-authenticates on first request
+- ✅ **Updated `services/api/src/inventory/clients.ts`**
+  - `ASColourInventoryClient` now accepts email/password
+  - Automatic JWT token refresh (23-hour expiry)
+- ✅ **Updated `services/api/.env`** - Added ASCOLOUR_EMAIL/PASSWORD
+- ✅ **Documentation updated:** `docs/SUPPLIER_INTEGRATION.md` with dual-auth details
 
 ### Session 14 Notes (Nov 27, 2025 - Inventory API + Artwork)
 - ✅ **Line Items COMPLETE:** 49,216 imported to Strapi

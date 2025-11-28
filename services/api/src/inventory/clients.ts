@@ -6,11 +6,25 @@
 import axios, { AxiosInstance } from 'axios';
 import { SupplierInventoryResult, InventoryItem } from './types';
 
-// AS Colour Client
+// AS Colour Client - Requires DUAL AUTH:
+// 1. Subscription-Key header for basic API access
+// 2. Bearer token from email/password login for price list and some endpoints
 export class ASColourInventoryClient {
   private client: AxiosInstance;
+  private email?: string;
+  private password?: string;
+  private bearerToken?: string;
+  private tokenExpiry?: Date;
 
-  constructor(apiKey: string, baseURL = 'https://api.ascolour.com') {
+  constructor(
+    apiKey: string, 
+    email?: string, 
+    password?: string,
+    baseURL = 'https://api.ascolour.com'
+  ) {
+    this.email = email;
+    this.password = password;
+    
     this.client = axios.create({
       baseURL,
       timeout: 15000,
@@ -22,10 +36,56 @@ export class ASColourInventoryClient {
   }
 
   /**
+   * Authenticate with AS Colour to get Bearer token
+   * Required for price list and some other endpoints
+   */
+  async authenticate(): Promise<boolean> {
+    if (!this.email || !this.password) {
+      console.warn('AS Colour: email/password not provided, some features may not work');
+      return false;
+    }
+
+    try {
+      const res = await this.client.post('/v1/api/authentication', {
+        email: this.email,
+        password: this.password,
+      });
+
+      const token = res.data?.token || res.data?.accessToken || res.data?.authorization;
+      if (token) {
+        this.bearerToken = token;
+        this.client.defaults.headers['Authorization'] = `Bearer ${token}`;
+        // Tokens typically last 24 hours, refresh after 23
+        this.tokenExpiry = new Date(Date.now() + 23 * 60 * 60 * 1000);
+        console.log('AS Colour: Bearer token obtained');
+        return true;
+      }
+      
+      console.error('AS Colour: Authentication response missing token');
+      return false;
+    } catch (error: any) {
+      console.error('AS Colour authentication failed:', error.message);
+      return false;
+    }
+  }
+
+  /**
+   * Ensure we have a valid Bearer token
+   */
+  private async ensureAuthenticated(): Promise<void> {
+    if (!this.bearerToken || (this.tokenExpiry && new Date() > this.tokenExpiry)) {
+      await this.authenticate();
+    }
+  }
+
+  /**
    * Get inventory for a specific SKU
    * SKU format: AC-{styleCode} or just styleCode
    */
   async getInventory(sku: string): Promise<SupplierInventoryResult> {
+    // Ensure we have Bearer token for full API access
+    await this.ensureAuthenticated();
+    
     try {
       // Extract style code (remove AC- prefix if present)
       const styleCode = sku.replace(/^AC-/i, '');

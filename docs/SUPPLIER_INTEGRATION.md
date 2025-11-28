@@ -55,13 +55,30 @@ PrintShop OS integrates with three major apparel suppliers to provide:
 
 ## Supplier Credentials (Configured ✅)
 
-### AS Colour
-| Field | Value |
-|-------|-------|
-| API Key | `1c27d1d97d234616923e7f8f275c66d1` |
-| Base URL | `https://api.ascolour.com` |
-| Auth | Subscription-Key header |
-| Account Email | `info@mintprints.com` |
+### AS Colour ⚠️ DUAL AUTH REQUIRED
+AS Colour requires **two authentication methods**:
+1. `Subscription-Key` header for catalog/inventory endpoints
+2. JWT Bearer token (from email/password login) for pricing endpoints
+
+| Field | Value | Required For |
+|-------|-------|--------------|
+| Subscription Key | `1c27d1d97d234616923e7f8f275c66d1` | All endpoints |
+| Email | `info@mintprints.com` | JWT login |
+| Password | `2022MintTeam!` | JWT login |
+| Base URL | `https://api.ascolour.com` | - |
+
+**Authentication Flow:**
+```typescript
+// 1. Create client with Subscription-Key
+client = axios.create({ headers: { 'Subscription-Key': apiKey } });
+
+// 2. Login to get JWT Bearer token
+const res = await client.post('/v1/api/authentication', { email, password });
+const token = res.data.token;
+
+// 3. Add Bearer token for subsequent requests
+client.defaults.headers['Authorization'] = `Bearer ${token}`;
+```
 
 ### S&S Activewear  
 | Field | Value |

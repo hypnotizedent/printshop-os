@@ -114,11 +114,16 @@ function getSupplierClient(supplier: SupplierType): ASColourInventoryClient | SS
     case 'as-colour':
       if (!asColourClient) {
         const apiKey = process.env.ASCOLOUR_API_KEY || process.env.ASCOLOUR_SUBSCRIPTION_KEY;
+        const email = process.env.ASCOLOUR_EMAIL;
+        const password = process.env.ASCOLOUR_PASSWORD;
         if (!apiKey) {
           console.error('AS Colour API key not configured');
           return null;
         }
-        asColourClient = new ASColourInventoryClient(apiKey);
+        if (!email || !password) {
+          console.warn('AS Colour email/password not configured - some features may not work');
+        }
+        asColourClient = new ASColourInventoryClient(apiKey, email, password);
       }
       return asColourClient;
 
