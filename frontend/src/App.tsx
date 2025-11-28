@@ -9,6 +9,7 @@ import { FilesPage } from "./components/files/FilesPage"
 import { ReportsPage } from "./components/reports/ReportsPage"
 import { SettingsPage } from "./components/settings/SettingsPage"
 import { ProductionPage } from "./components/production/ProductionPage"
+import { ProductionBoard } from "./components/production/board"
 import LabelsDemo from "./pages/LabelsDemo"
 import { QuoteForm } from "./components/quotes/QuoteForm"
 import { ProductCatalog } from "./components/products/ProductCatalog"
@@ -141,6 +142,8 @@ function App() {
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} />
       case "production":
         return <ProductionPage />
+      case "production-board":
+        return <ProductionBoard />
       case "jobs":
         return <JobsPage jobs={jobsList} onUpdateJob={handleUpdateJob} />
       case "machines":

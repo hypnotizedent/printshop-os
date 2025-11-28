@@ -14,4 +14,8 @@ export { ChecklistTemplate } from './ChecklistTemplate';
 export { PhotoCapture } from './PhotoCapture';
 export { ChecklistSignature } from './ChecklistSignature';
 
+// Production Board Components
+export { ProductionBoard, ProductionStats, JobCard, JobDetail } from './board';
+export type { ProductionJob, ProductionStatus, ProductionStatsType } from './board';
+
 export type { ChecklistData, ChecklistStepData } from './Checklist';
