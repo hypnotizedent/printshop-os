@@ -10,6 +10,7 @@ import { ReportsPage } from "./components/reports/ReportsPage"
 import { SettingsPage } from "./components/settings/SettingsPage"
 import { ProductionPage } from "./components/production/ProductionPage"
 import LabelsDemo from "./pages/LabelsDemo"
+import OrderComponentsDemo from "./pages/OrderComponentsDemo"
 import { QuoteForm } from "./components/quotes/QuoteForm"
 import { ProductCatalog } from "./components/products/ProductCatalog"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
@@ -161,6 +162,8 @@ function App() {
         return <ProductCatalog />
       case "shipping":
         return <ShippingLabelForm />
+      case "order-demo":
+        return <OrderComponentsDemo />
       default:
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} />
     }

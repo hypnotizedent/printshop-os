@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { StatusTimeline } from '../StatusTimeline'
 import { OrderCard } from '../OrderCard'
 import type { Order, OrderStatus } from '@/lib/types'
@@ -131,9 +130,7 @@ describe('OrderCard Component', () => {
 
   it('renders order information correctly', () => {
     render(
-      <BrowserRouter>
-        <OrderCard order={mockOrder} />
-      </BrowserRouter>
+      <OrderCard order={mockOrder} onViewDetails={mockViewDetails} />
     )
     
     // Order number
@@ -157,9 +154,7 @@ describe('OrderCard Component', () => {
 
   it('renders view button and handles click', () => {
     render(
-      <BrowserRouter>
-        <OrderCard order={mockOrder} onViewDetails={mockViewDetails} />
-      </BrowserRouter>
+      <OrderCard order={mockOrder} onViewDetails={mockViewDetails} />
     )
     
     const viewButton = screen.getByRole('button', { name: /view/i })
@@ -171,9 +166,7 @@ describe('OrderCard Component', () => {
 
   it('renders compact version correctly', () => {
     render(
-      <BrowserRouter>
-        <OrderCard order={mockOrder} compact />
-      </BrowserRouter>
+      <OrderCard order={mockOrder} compact onViewDetails={mockViewDetails} />
     )
     
     // Order number should still be visible
@@ -191,9 +184,7 @@ describe('OrderCard Component', () => {
 
   it('shows timeline when showTimeline is true', () => {
     render(
-      <BrowserRouter>
-        <OrderCard order={mockOrder} showTimeline />
-      </BrowserRouter>
+      <OrderCard order={mockOrder} showTimeline onViewDetails={mockViewDetails} />
     )
     
     // The timeline component should be rendered
@@ -223,9 +214,7 @@ describe('OrderCard Component', () => {
       }
       
       const { unmount } = render(
-        <BrowserRouter>
-          <OrderCard order={orderWithStatus} />
-        </BrowserRouter>
+        <OrderCard order={orderWithStatus} onViewDetails={mockViewDetails} />
       )
       
       // Verify badge is rendered with correct text
@@ -240,9 +229,7 @@ describe('OrderCard Component', () => {
 
   it('shows line items count correctly', () => {
     render(
-      <BrowserRouter>
-        <OrderCard order={mockOrder} />
-      </BrowserRouter>
+      <OrderCard order={mockOrder} onViewDetails={mockViewDetails} />
     )
     
     expect(screen.getByText('1 item')).toBeInTheDocument()
@@ -250,9 +237,7 @@ describe('OrderCard Component', () => {
 
   it('shows due date when available', () => {
     render(
-      <BrowserRouter>
-        <OrderCard order={mockOrder} />
-      </BrowserRouter>
+      <OrderCard order={mockOrder} onViewDetails={mockViewDetails} />
     )
     
     // Due date should be displayed
@@ -273,9 +258,7 @@ describe('OrderCard Component', () => {
     }
     
     render(
-      <BrowserRouter>
-        <OrderCard order={paidOrder} />
-      </BrowserRouter>
+      <OrderCard order={paidOrder} onViewDetails={mockViewDetails} />
     )
     
     expect(screen.queryByText(/Balance:/i)).not.toBeInTheDocument()
@@ -283,11 +266,11 @@ describe('OrderCard Component', () => {
 })
 
 describe('OrderCard Accessibility', () => {
+  const mockViewDetails = vi.fn()
+  
   it('view button is accessible', () => {
     render(
-      <BrowserRouter>
-        <OrderCard order={mockOrder} />
-      </BrowserRouter>
+      <OrderCard order={mockOrder} onViewDetails={mockViewDetails} />
     )
     
     const viewButton = screen.getByRole('button', { name: /view/i })

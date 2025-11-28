@@ -16,36 +16,18 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { OrderSearch } from "./OrderSearch"
 import { OrderFilters, type OrderFilterState } from "./OrderFilters"
 import { OrderDetails } from "./OrderDetails"
+import { orderStatusColors, formatOrderStatus } from "./order-utils"
 import { 
   CaretLeft, 
   CaretRight, 
   Eye,
   Package
 } from "@phosphor-icons/react"
-import type { Order, OrderStatus, OrderListResponse } from "@/lib/types"
+import type { Order, OrderListResponse } from "@/lib/types"
 import { format } from "date-fns"
 
 interface OrderHistoryProps {
   customerId?: string
-}
-
-const statusColors: Record<OrderStatus, string> = {
-  quote: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
-  pending: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-300",
-  in_production: "bg-purple-500/10 text-purple-700 dark:text-purple-300",
-  ready_to_ship: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300",
-  shipped: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300",
-  delivered: "bg-green-500/10 text-green-700 dark:text-green-300",
-  completed: "bg-green-500/10 text-green-700 dark:text-green-300",
-  cancelled: "bg-red-500/10 text-red-700 dark:text-red-300",
-  invoice_paid: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  payment_due: "bg-orange-500/10 text-orange-700 dark:text-orange-300",
-}
-
-const formatStatus = (status: OrderStatus): string => {
-  return status.split('_').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ')
 }
 
 export function OrderHistory({ customerId }: OrderHistoryProps) {
@@ -252,8 +234,8 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
                       {format(new Date(order.attributes.timeline.createdAt), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell>
-                      <Badge className={statusColors[order.attributes.status]}>
-                        {formatStatus(order.attributes.status)}
+                      <Badge className={orderStatusColors[order.attributes.status]}>
+                        {formatOrderStatus(order.attributes.status)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -295,8 +277,8 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
                         </p>
                       )}
                     </div>
-                    <Badge className={statusColors[order.attributes.status]}>
-                      {formatStatus(order.attributes.status)}
+                    <Badge className={orderStatusColors[order.attributes.status]}>
+                      {formatOrderStatus(order.attributes.status)}
                     </Badge>
                   </div>
                   

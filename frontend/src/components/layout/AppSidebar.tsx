@@ -1,4 +1,4 @@
-import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck } from "@phosphor-icons/react"
+import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, Eye } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
 interface NavItem {
@@ -26,6 +26,7 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
     { icon: Printer, label: "Machines", href: "machines" },
     { icon: ChartBar, label: "Reports", href: "reports" },
     { icon: Gear, label: "Settings", href: "settings" },
+    { icon: Eye, label: "Order Demo", href: "order-demo" },
   ]
 
   return (

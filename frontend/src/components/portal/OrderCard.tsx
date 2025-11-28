@@ -1,15 +1,15 @@
-import { useNavigate } from "react-router-dom"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StatusTimeline } from "./StatusTimeline"
+import { orderStatusColors, formatOrderStatus } from "./order-utils"
 import { 
   Eye, 
   Package,
   CalendarBlank,
   CurrencyDollar
 } from "@phosphor-icons/react"
-import type { Order, OrderStatus } from "@/lib/types"
+import type { Order } from "@/lib/types"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
@@ -20,41 +20,20 @@ interface OrderCardProps {
   compact?: boolean
 }
 
-// Status colors following issue requirements (quote=blue, production=yellow, complete=green)
-const statusColors: Record<OrderStatus, string> = {
-  quote: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-  pending: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20",
-  in_production: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20",
-  ready_to_ship: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/20",
-  shipped: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
-  delivered: "bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/20",
-  completed: "bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/20",
-  cancelled: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
-  invoice_paid: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
-  payment_due: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20",
-}
-
-const formatStatus = (status: OrderStatus): string => {
-  return status.split('_').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ')
-}
-
 export function OrderCard({ 
   order, 
   onViewDetails, 
   showTimeline = false,
   compact = false 
 }: OrderCardProps) {
-  const navigate = useNavigate()
   const { attributes } = order
 
   const handleViewClick = () => {
     if (onViewDetails) {
       onViewDetails(order.id)
-    } else {
-      navigate(`/portal/orders/${order.id}`)
     }
+    // When no onViewDetails handler is provided, clicking does nothing
+    // Navigation should be handled by the parent component with a router context
   }
 
   if (compact) {
@@ -69,8 +48,8 @@ export function OrderCard({
               <span className="font-semibold text-foreground">
                 #{attributes.printavoId}
               </span>
-              <Badge className={cn("text-xs border", statusColors[attributes.status])}>
-                {formatStatus(attributes.status)}
+              <Badge className={cn("text-xs border", orderStatusColors[attributes.status])}>
+                {formatOrderStatus(attributes.status)}
               </Badge>
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -97,8 +76,8 @@ export function OrderCard({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-lg">#{attributes.printavoId}</h3>
-              <Badge className={cn("border", statusColors[attributes.status])}>
-                {formatStatus(attributes.status)}
+              <Badge className={cn("border", orderStatusColors[attributes.status])}>
+                {formatOrderStatus(attributes.status)}
               </Badge>
             </div>
             {attributes.orderNickname && (

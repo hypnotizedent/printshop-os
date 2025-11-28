@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Navigation } from "./Navigation"
 import { Dashboard } from "./Dashboard"
+import { OrderHistory } from "./OrderHistory"
 import type { 
   CustomerUser, 
   CustomerDashboardStats, 
@@ -130,14 +131,6 @@ const mockPendingQuotes: QuoteRequest[] = [
 ]
 
 // Placeholder components for other routes
-function OrderHistory() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Order History</h1>
-      <p className="text-muted-foreground mt-2">View all your past orders</p>
-    </div>
-  )
-}
 
 function TrackOrders() {
   return (
