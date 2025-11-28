@@ -3,6 +3,7 @@
  * Main entry point for the Express API server with analytics and authentication
  */
 
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
@@ -13,7 +14,7 @@ import { inventoryRouter } from './inventory';
 import { swaggerDocument } from './swagger';
 
 const app = express();
-const PORT = process.env.API_PORT || 3002;
+const PORT = process.env.PORT || process.env.API_PORT || 3001;
 
 // Middleware
 app.use(cors());

@@ -1,34 +1,40 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 27, 2025 (Session 13 - Supplier Sync Complete)
+**Last Updated:** November 27, 2025 (Session 14 - Inventory API + Artwork Scrape)
 
 ---
 
 ## 🚀 Homelab Deployment
 
-**Status:** ✅ FULLY OPERATIONAL - All Data Imported + 210 Supplier Products
+**Status:** ✅ FULLY OPERATIONAL - All Data Imported + Inventory API Ready
 
 ### Running Services
 
 | Service | URL | Status | Data |
 |---------|-----|--------|------|
-| **Strapi CMS** | http://100.92.156.118:1337 | ✅ Running (v5.31.2 Enterprise) | 3,317 customers, 12,854 orders, **210 products** |
-| **PostgreSQL** | 100.92.156.118:5432 | ✅ Running | Production data |
+| **Strapi CMS** | http://100.92.156.118:1337 | ✅ Running (v5.31.2 Enterprise) | 3,317 customers, 12,867 orders, 500 products |
+| **PostgreSQL** | 100.92.156.118:5432 | ✅ Running | 49,216 line items |
 | **Redis** | 100.92.156.118:6379 | ✅ Running | Cache ready |
+| **Inventory API** | http://100.92.156.118:3001 | 🔄 Deploy pending | Supplier integration |
+| **MinIO** | http://100.92.156.118:9001 | ✅ Running | Artwork bucket ready |
 
-### Session 13 Notes (Nov 27, 2025 - Supplier Sync COMPLETE ✅)
-- ✅ **ALL SUPPLIER APIs WORKING** - dotenv loading bug fixed
-- ✅ **210 products synced to Strapi:**
-  - **AS Colour:** 102 products (t-shirts, hoodies, bags, accessories)
-  - **S&S Activewear:** 103 products (Gildan, Bella+Canvas, Next Level, etc.)
-  - **SanMar:** 5 sample products
-- ✅ **Root cause fixed:** CLI scripts weren't loading `.env` before importing clients
-  - Added `dotenv.config({ path: ... })` at top of sync-as-colour.ts
-  - Moved dotenv.config() before imports in sync-ss-activewear.ts
-- ✅ **New sync script:** `scripts/sync-suppliers-to-strapi.py`
-  - Usage: `python scripts/sync-suppliers-to-strapi.py --all --limit 200`
-  - Supports: AS Colour, S&S Activewear (SanMar via SFTP separate)
-- ✅ **Frontend ProductCatalog** - Live product browsing from Strapi API
+### Session 14 Notes (Nov 27, 2025 - Inventory API + Artwork)
+- ✅ **Line Items COMPLETE:** 49,216 imported to Strapi
+- ✅ **Top 500 Products:** Imported for autocomplete
+- ✅ **Inventory API built:** `services/api/src/inventory/`
+  - Real-time inventory checks across AS Colour, S&S, SanMar
+  - Redis caching (15-min TTL)
+  - SKU pattern detection for supplier routing
+- ✅ **All supplier credentials configured:** See `docs/SUPPLIER_INTEGRATION.md`
+- 🔄 **Artwork scrape running:** ~12,867 orders (~7 hours)
+  - Customer-organized structure: `by_customer/{slug}/{year}/{order}/`
+  - Symlinks: `by_order/{visual_id}/`
+  - MinIO sync script ready: `scripts/sync-artwork-to-minio.sh`
+- ✅ **Documentation updated:**
+  - `docs/SUPPLIER_INTEGRATION.md` - Full supplier API docs
+  - `docs/ARTWORK_ARCHIVE_STRATEGY.md` - Artwork storage design
+  - `docs/PRINTAVO_MIGRATION_STATUS.md` - Overall progress
+  - `docs/AGENT_SESSION_CONTEXT.md` - LLM context sync
 
 ### Session 12 Notes (Nov 27, 2025 - Printavo API Complete Extraction)
 - ✅ **COMPLETE Printavo API extraction** - ALL accessible data exported:
