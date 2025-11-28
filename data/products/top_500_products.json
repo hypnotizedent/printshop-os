@@ -1,0 +1,3502 @@
+[
+  {
+    "rank": 1,
+    "styleCode": "NL3600",
+    "description": "Next Level Apparel - Next Level Apparel Adult Cotton Tee. NL3600",
+    "totalOrdered": 1952,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 2,
+    "styleCode": "G2000",
+    "description": "Gildan - Ultra Cotton Adult Tee",
+    "totalOrdered": 868,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 3,
+    "styleCode": "B3001",
+    "description": "Bella+Canvas - Unisex Jersey Short Sleeve Tee",
+    "totalOrdered": 612,
+    "sampleColor": "Natural"
+  },
+  {
+    "rank": 4,
+    "styleCode": "AL1301",
+    "description": "Client Supplied White Alstyle tee",
+    "totalOrdered": 569,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 5,
+    "styleCode": "IND400",
+    "description": "Independent Trading Co. - Heavyweight Hooded Sweatshirt - IND4000",
+    "totalOrdered": 402,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 6,
+    "styleCode": "1801GD",
+    "description": "Los Angeles Apparel 1801gd\r\nS/S Grmnt Dye Crew Neck 6.5oz",
+    "totalOrdered": 324,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 7,
+    "styleCode": "SM0100",
+    "description": "Paragon - Adult Solid Mesh Polo",
+    "totalOrdered": 246,
+    "sampleColor": "white"
+  },
+  {
+    "rank": 8,
+    "styleCode": "G5000",
+    "description": "Gildan Heavy Cotton Tee",
+    "totalOrdered": 223,
+    "sampleColor": "Azelia"
+  },
+  {
+    "rank": 9,
+    "styleCode": "SM0210",
+    "description": "Paragon - Long Islander Performance Long Sleeve T-Shirt ",
+    "totalOrdered": 206,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 10,
+    "styleCode": "1717",
+    "description": "Comfort Colors - COMFORT COLORS Heavyweight Ring Spun Tee. 1717",
+    "totalOrdered": 178,
+    "sampleColor": "Island Reef"
+  },
+  {
+    "rank": 11,
+    "styleCode": "CC1717",
+    "description": "\t\r\nComfort Colors - Garment-Dyed Heavyweight T-Shirt",
+    "totalOrdered": 154,
+    "sampleColor": "Ivory"
+  },
+  {
+    "rank": 12,
+    "styleCode": "1301",
+    "description": "American Apparel - Unisex Heavyweight Cotton Tee - 1301",
+    "totalOrdered": 146,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 13,
+    "styleCode": "NL6010",
+    "description": "Next Level Triblend Short Sleeve Crew T-Shirts",
+    "totalOrdered": 145,
+    "sampleColor": "Premium Heather Grey"
+  },
+  {
+    "rank": 14,
+    "styleCode": "G18500",
+    "description": "Gildan - Heavy Blend Adult Hooded Sweatshirt",
+    "totalOrdered": 141,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 15,
+    "styleCode": "G2400",
+    "description": "Gildan Ultra Cotton Adult Long Sleeve T-Shirt",
+    "totalOrdered": 127,
+    "sampleColor": "Royal Blue"
+  },
+  {
+    "rank": 16,
+    "styleCode": "NL3601",
+    "description": "Next Level Men's Cotton Long Sleeve Tee\r\n\r\n\r\n*Need Client Size Breakdowns*",
+    "totalOrdered": 127,
+    "sampleColor": ""
+  },
+  {
+    "rank": 17,
+    "styleCode": "NL1533",
+    "description": "Next Level - Women's Ideal Racerback Tank",
+    "totalOrdered": 123,
+    "sampleColor": "Tahiti Blue"
+  },
+  {
+    "rank": 18,
+    "styleCode": "5000",
+    "description": "Gildan Unisex Heavy Cotton\u2122 T-Shirt - 5000",
+    "totalOrdered": 122,
+    "sampleColor": "Maroon"
+  },
+  {
+    "rank": 19,
+    "styleCode": "NL6210",
+    "description": "Next Level - CVC tee",
+    "totalOrdered": 117,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 20,
+    "styleCode": "3001",
+    "description": "BELLA + CANVAS - Jersey Tee - 3001",
+    "totalOrdered": 107,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 21,
+    "styleCode": "39-165",
+    "description": "OTTO CAP 5 Panel High Crown Mesh Back Trucker Hat",
+    "totalOrdered": 107,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 22,
+    "styleCode": "ST350",
+    "description": "Sport-Tek - Sport-Tek PosiCharge Competitor Tee. ST350",
+    "totalOrdered": 101,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 23,
+    "styleCode": "ST350LS",
+    "description": "Sport-Tek - Sport-Tek Long Sleeve PosiCharge Competitor Tee. ST350LS",
+    "totalOrdered": 95,
+    "sampleColor": "Purple"
+  },
+  {
+    "rank": 24,
+    "styleCode": "3600",
+    "description": "Next Level Ringspun Tee",
+    "totalOrdered": 90,
+    "sampleColor": "Heather Grey"
+  },
+  {
+    "rank": 25,
+    "styleCode": "JHA001",
+    "description": "Just Hoods By AWDis Men's Midweight College Hooded Sweatshirt ",
+    "totalOrdered": 88,
+    "sampleColor": "Heather Grey"
+  },
+  {
+    "rank": 26,
+    "styleCode": "IND4000",
+    "description": "Independent Trading Co. - Unisex Heavyweight Hooded Sweatshirt - IND4000",
+    "totalOrdered": 86,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 27,
+    "styleCode": "G8000",
+    "description": "Gildan Dryblend tee ",
+    "totalOrdered": 83,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 28,
+    "styleCode": "210",
+    "description": "Paragon - Unisex Long Islander Performance Long Sleeve T-Shirt - 210",
+    "totalOrdered": 82,
+    "sampleColor": "Medium Grey"
+  },
+  {
+    "rank": 29,
+    "styleCode": "SS4500",
+    "description": "Independent Trading Co. - Unisex Midweight Hooded Sweatshirt - SS4500",
+    "totalOrdered": 77,
+    "sampleColor": "Cement"
+  },
+  {
+    "rank": 30,
+    "styleCode": "SM0200",
+    "description": "Paragon - Islander Performance T-Shirt \r\n\r\n(Only gets LC and FB Prints)",
+    "totalOrdered": 77,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 31,
+    "styleCode": "B3413",
+    "description": "Bella Canvas Tri-Blend",
+    "totalOrdered": 77,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 32,
+    "styleCode": "5001",
+    "description": "Staple Shark Tee (Men\u2019s)\r\nAS Colour \u2014 Staple Tee \u2014 5001 (Coal)",
+    "totalOrdered": 76,
+    "sampleColor": "Coal"
+  },
+  {
+    "rank": 33,
+    "styleCode": "NL3200",
+    "description": "Next Level - Cotton V-Neck T-Shirt - 3200",
+    "totalOrdered": 71,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 34,
+    "styleCode": "SM0104",
+    "description": "Paragon Saratoga Ladies Mini Mesh Performance Polo",
+    "totalOrdered": 68,
+    "sampleColor": "Royal"
+  },
+  {
+    "rank": 35,
+    "styleCode": "G64000",
+    "description": "Gildan Softstyle Adult T-Shirt",
+    "totalOrdered": 67,
+    "sampleColor": "Dark Heather"
+  },
+  {
+    "rank": 36,
+    "styleCode": "NL1540",
+    "description": "Next Level Apparel\u00ae Women\u2019s Ideal V-Neck Tee",
+    "totalOrdered": 65,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 37,
+    "styleCode": "NL3900",
+    "description": "Next Level - Women\u2019s Cotton Short Sleeve Boyfriend Crew ",
+    "totalOrdered": 64,
+    "sampleColor": "Indigo"
+  },
+  {
+    "rank": 38,
+    "styleCode": "6245CM",
+    "description": "YP Classics - Adult Low-Profile Cotton Twill Dad Cap",
+    "totalOrdered": 62,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 39,
+    "styleCode": "200",
+    "description": "Paragon - Unisex Islander Performance T-Shirt - 200",
+    "totalOrdered": 59,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 40,
+    "styleCode": "2000",
+    "description": "Gildan - Gildan - Ultra Cotton 100% US Cotton T-Shirt. 2000",
+    "totalOrdered": 55,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 41,
+    "styleCode": "6210M",
+    "description": "Next Level - Unisex CVC T-Shirt - 6210",
+    "totalOrdered": 54,
+    "sampleColor": "Sand"
+  },
+  {
+    "rank": 42,
+    "styleCode": "NL3310",
+    "description": "YOUTH SIZES",
+    "totalOrdered": 48,
+    "sampleColor": "Midnight "
+  },
+  {
+    "rank": 43,
+    "styleCode": "KC8100",
+    "description": "KC Caps Deluxe Cotton Washed Brushed Gap Cap",
+    "totalOrdered": 48,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 44,
+    "styleCode": "32-467",
+    "description": "Client Supplied Hat",
+    "totalOrdered": 47,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 45,
+    "styleCode": "G2300",
+    "description": "Gildan Ultra Cotton Adult T-Shirt with Pocket",
+    "totalOrdered": 47,
+    "sampleColor": "Sport Grey"
+  },
+  {
+    "rank": 46,
+    "styleCode": "GH000",
+    "description": "Gildan Hammer Tee",
+    "totalOrdered": 47,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 47,
+    "styleCode": "g2000",
+    "description": "DTG printing left chest + Full back on white gildan tee",
+    "totalOrdered": 47,
+    "sampleColor": "white"
+  },
+  {
+    "rank": 48,
+    "styleCode": "3413",
+    "description": "BELLA + CANVAS - Triblend Tee - 3413",
+    "totalOrdered": 46,
+    "sampleColor": "Solid Carolina Blue Triblend"
+  },
+  {
+    "rank": 49,
+    "styleCode": "G200",
+    "description": "Gildan - Adult Ultra Cotton\u00ae T-Shirt",
+    "totalOrdered": 45,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 50,
+    "styleCode": "LA3321",
+    "description": "Rabbit Skins Toddler Fine Jersey Tee\r\n(XS as a placeholder for 7T)\r\n\r\n",
+    "totalOrdered": 45,
+    "sampleColor": "Royal"
+  },
+  {
+    "rank": 51,
+    "styleCode": "100",
+    "description": "Paragon\r\nMen's Saratoga Performance Mini Mesh Polo - 100\r\n\r\n** left chest only **",
+    "totalOrdered": 42,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 52,
+    "styleCode": "G5000B",
+    "description": "Gildan - Heavy Cotton\u2122 Youth T-Shirt ",
+    "totalOrdered": 41,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 53,
+    "styleCode": "AL5301",
+    "description": "Alstyle Ultimate Ringspun Adult Tee\r\nLeft Chest\r\nScuba Logo\r\nFull Back\r\nFAU Scuba Dive Club",
+    "totalOrdered": 41,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 54,
+    "styleCode": "5051",
+    "description": "AS colour Basic Tee",
+    "totalOrdered": 38,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 55,
+    "styleCode": "G2000B",
+    "description": "Gildan - Ultra Cotton Youth Tee",
+    "totalOrdered": 37,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 56,
+    "styleCode": "B3501",
+    "description": "Cotton LS",
+    "totalOrdered": 37,
+    "sampleColor": "Kelly"
+  },
+  {
+    "rank": 57,
+    "styleCode": "6210",
+    "description": "Next Level Apparel\u00ae Unisex CVC Tee",
+    "totalOrdered": 36,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 58,
+    "styleCode": "AL1304",
+    "description": "Alstyle Longsleeve tee \r\nLeft chest + Full back DTG",
+    "totalOrdered": 36,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 59,
+    "styleCode": "G3800",
+    "description": "Gildan - Ultra Cotton\u00ae Piqu\u00e9 Sport Shirt - 3800",
+    "totalOrdered": 35,
+    "sampleColor": "Sport Grey"
+  },
+  {
+    "rank": 60,
+    "styleCode": "1533",
+    "description": "Next Level - Women's Ideal Racerback Tank - 1533",
+    "totalOrdered": 35,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 61,
+    "styleCode": "Q611",
+    "description": "Q-Tees - 25L Zippered Tote - Q611",
+    "totalOrdered": 34,
+    "sampleColor": "Natural"
+  },
+  {
+    "rank": 62,
+    "styleCode": "A4N3165",
+    "description": "A4 - A4 Cooling Performance Long Sleeve Tee A4N3165",
+    "totalOrdered": 31,
+    "sampleColor": "Light Blue"
+  },
+  {
+    "rank": 63,
+    "styleCode": "G72800",
+    "description": "Gildan DryBlend Adult Double Pique Sport Shirt\r\nWhite Letters",
+    "totalOrdered": 31,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 64,
+    "styleCode": "B6682",
+    "description": "B+C Women's Racerback Cropped Top",
+    "totalOrdered": 31,
+    "sampleColor": "Heather Orchid"
+  },
+  {
+    "rank": 65,
+    "styleCode": "5026",
+    "description": "AS Color 5026",
+    "totalOrdered": 30,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 66,
+    "styleCode": "Nl3600",
+    "description": "Client Supplied White tees",
+    "totalOrdered": 30,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 67,
+    "styleCode": "N1533",
+    "description": "Next Level Apparel - Ladies' Ideal Racerback Tank",
+    "totalOrdered": 29,
+    "sampleColor": "Tahiti Blue"
+  },
+  {
+    "rank": 68,
+    "styleCode": "AL1701",
+    "description": "Alstyle Premium Adult Tee\r\n",
+    "totalOrdered": 29,
+    "sampleColor": "Sport Grey"
+  },
+  {
+    "rank": 69,
+    "styleCode": "SHGD",
+    "description": "Shaka Wear\r\nGarment-Dyed Crewneck T-Shirt - SHGD",
+    "totalOrdered": 28,
+    "sampleColor": "shadow"
+  },
+  {
+    "rank": 70,
+    "styleCode": "220",
+    "description": "Client Supplied\r\nParagon - Bahama Performance Hooded Long Sleeve T-Shirt - 220",
+    "totalOrdered": 28,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 71,
+    "styleCode": "6089M",
+    "description": "YP Classics - Premium Flat Bill Snapback Cap - 6089M",
+    "totalOrdered": 28,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 72,
+    "styleCode": "9384",
+    "description": "Next Level Apparel - Ladies' Cropped Pullover Hooded Sweatshirt",
+    "totalOrdered": 28,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 73,
+    "styleCode": "G18000",
+    "description": "Gildan 18000 - Heavy Blend\u2122 Crewneck Sweatshirt",
+    "totalOrdered": 28,
+    "sampleColor": "Forrest Green"
+  },
+  {
+    "rank": 74,
+    "styleCode": "B3001CVC",
+    "description": "BELLA+CANVAS Unisex Heather CVC Short Sleeve Tee",
+    "totalOrdered": 28,
+    "sampleColor": "Black Heather"
+  },
+  {
+    "rank": 75,
+    "styleCode": "G82800",
+    "description": "Gildan Premium Cotton Adult Double Pique Sport Shirt",
+    "totalOrdered": 28,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 76,
+    "styleCode": "G2000L",
+    "description": "Gildan Ultra Cotton Ladies' Tee",
+    "totalOrdered": 28,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 77,
+    "styleCode": "NL6633",
+    "description": "Next Level Women's Jersey Racerback Tank",
+    "totalOrdered": 28,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 78,
+    "styleCode": "IND20SRT",
+    "description": "Independent Trading Co. - Midweight Fleece Shorts \r\n\r\nLeft Leg Screen Print\r\n3.45\"w x 3.6\"t\r\nForrest Green 350C\r\n\"Africa\"\r\n\r\nRight Leg Screen Print\r\n3.2\"w x 3.1\"t\r\nForrest Green 350C\r\n\"PBM\"",
+    "totalOrdered": 27,
+    "sampleColor": "WHITE"
+  },
+  {
+    "rank": 79,
+    "styleCode": "FF6245CM",
+    "description": "YP Classics Dad Cap",
+    "totalOrdered": 27,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 80,
+    "styleCode": "LST356",
+    "description": "Sport-Tek\u00ae Ladies PosiCharge\u00ae Competitor\u2122 Racerback Tank\r\n",
+    "totalOrdered": 26,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 81,
+    "styleCode": "8000",
+    "description": "Gildan - Gildan DryBlend 50 Cotton/50 Poly T-Shirt. 8000",
+    "totalOrdered": 25,
+    "sampleColor": "Light Pink "
+  },
+  {
+    "rank": 82,
+    "styleCode": "N1510",
+    "description": "Next Level Apparel - Ladies' Ideal T-Shirt",
+    "totalOrdered": 24,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 83,
+    "styleCode": "LP101",
+    "description": "Adams Optimum Pigment Dyed-Cap",
+    "totalOrdered": 24,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 84,
+    "styleCode": "CP80",
+    "description": "Port & Company - Port & Company Six-Panel Twill Cap. CP80",
+    "totalOrdered": 23,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 85,
+    "styleCode": "IND20PNT",
+    "description": "Independent Trading Co. - Midweight Fleece Pants",
+    "totalOrdered": 23,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 86,
+    "styleCode": "B3006",
+    "description": "BELLA+CANVAS Mens Long Body Urban Tee",
+    "totalOrdered": 23,
+    "sampleColor": "Heather Olive"
+  },
+  {
+    "rank": 87,
+    "styleCode": "B3719",
+    "description": "BELLA+CANVAS Unisex Sponge Fleece Pullover Hoodie\r\nFull Front\r\nDenva Creative (blk)",
+    "totalOrdered": 23,
+    "sampleColor": "Gold"
+  },
+  {
+    "rank": 88,
+    "styleCode": "32-285",
+    "description": "OTTO CAP 5 Panel Mid Profile Mesh Back Trucker Hat\r\n\r\n",
+    "totalOrdered": 22,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 89,
+    "styleCode": "6682",
+    "description": "Bella + Canvas - Ladies' Racerback Cropped Tank heather",
+    "totalOrdered": 22,
+    "sampleColor": "Hthr "
+  },
+  {
+    "rank": 90,
+    "styleCode": "G5400",
+    "description": "Port & Company\u00ae Core Cotton \r\nAdult Longsleeve Tee\r\nLeft Chest 3.5\"\r\nPBIS Logo",
+    "totalOrdered": 22,
+    "sampleColor": "Gold"
+  },
+  {
+    "rank": 91,
+    "styleCode": "Al1301",
+    "description": "Alstyle 1301 Heavy Cotton Tee",
+    "totalOrdered": 22,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 92,
+    "styleCode": "A156",
+    "description": "White EMB - Purple Tye Dye Hats - Front - YEET!",
+    "totalOrdered": 22,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 93,
+    "styleCode": "A146",
+    "description": "ANVIL Solid Low-Profile Twill Cap",
+    "totalOrdered": 22,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 94,
+    "styleCode": "NL330L",
+    "description": "Next Level Women's Perfect Tee",
+    "totalOrdered": 22,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 95,
+    "styleCode": "64000",
+    "description": "Gildan - Gildan Softstyle T-Shirt. 64000",
+    "totalOrdered": 21,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 96,
+    "styleCode": "SHMHSS",
+    "description": "Shaka Wear - Unisex Max Heavyweight T-Shirt - SHMHSS",
+    "totalOrdered": 21,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 97,
+    "styleCode": "112",
+    "description": "Richardson - Snapback Trucker Cap - 112",
+    "totalOrdered": 21,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 98,
+    "styleCode": "K540",
+    "description": "Port Authority - Port Authority Silk Touch Performance Polo. K540",
+    "totalOrdered": 20,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 99,
+    "styleCode": "5400",
+    "description": "Gildan - Gildan - Heavy Cotton 100% Cotton Long Sleeve T-Shirt. 5400",
+    "totalOrdered": 20,
+    "sampleColor": "Gold"
+  },
+  {
+    "rank": 100,
+    "styleCode": "6010",
+    "description": "Next Level - Triblend T-Shirt",
+    "totalOrdered": 20,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 101,
+    "styleCode": "NL6733",
+    "description": "Women\u2019s Triblend Racerback Tank",
+    "totalOrdered": 20,
+    "sampleColor": ""
+  },
+  {
+    "rank": 102,
+    "styleCode": "G8800",
+    "description": "Gildan DryBlend Adult Jersey Sport Shirt",
+    "totalOrdered": 20,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 103,
+    "styleCode": "3001CVC",
+    "description": "BELLA + CANVAS - CVC Jersey Tee - 3001CVC",
+    "totalOrdered": 19,
+    "sampleColor": "Athletic Heather"
+  },
+  {
+    "rank": 104,
+    "styleCode": "T475",
+    "description": "Sport-Tek - Sport-Tek Dry Zone Raglan Polo. T475",
+    "totalOrdered": 19,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 105,
+    "styleCode": "PC54",
+    "description": "Port & Company - Port & Company - Core Cotton Tee. PC54",
+    "totalOrdered": 19,
+    "sampleColor": "Aquatic Blue"
+  },
+  {
+    "rank": 106,
+    "styleCode": "SM104",
+    "description": "Paragon - Women's Saratoga Performance Mini Mesh Polo",
+    "totalOrdered": 19,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 107,
+    "styleCode": "G2410",
+    "description": "Gildan - Ultra Cotton\u00ae Long Sleeve Pocket T-Shirt - 2410",
+    "totalOrdered": 19,
+    "sampleColor": "Safety Orange"
+  },
+  {
+    "rank": 108,
+    "styleCode": "LB8502",
+    "description": "Liberty Bags Branson Bargain Canvas Tote",
+    "totalOrdered": 19,
+    "sampleColor": "Natural"
+  },
+  {
+    "rank": 109,
+    "styleCode": "NL1510",
+    "description": "Next Level Women's Ideal Tee\r\n",
+    "totalOrdered": 19,
+    "sampleColor": "Antique gold"
+  },
+  {
+    "rank": 110,
+    "styleCode": "NL3633",
+    "description": "Next Level - Ringspun Cotton Tank",
+    "totalOrdered": 19,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 111,
+    "styleCode": "5000B",
+    "description": "Gildan Youth Heavy Cotton\u2122 T-Shirt - 5000B",
+    "totalOrdered": 18,
+    "sampleColor": "Maoroon"
+  },
+  {
+    "rank": 112,
+    "styleCode": "7200",
+    "description": "Next Level - Heavyweight T-Shirt - 7200",
+    "totalOrdered": 18,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 113,
+    "styleCode": "B8803",
+    "description": "BELLA + CANVAS - Women's Flowy Scoop Muscle Tank",
+    "totalOrdered": 18,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 114,
+    "styleCode": "B6008",
+    "description": "BELLA+CANVAS Women's Jersey Racerback Tank",
+    "totalOrdered": 18,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 115,
+    "styleCode": "A136",
+    "description": "Anvil by Gildan Solid Brushed Twill Cap",
+    "totalOrdered": 18,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 116,
+    "styleCode": "31-069",
+    "description": "OTTO CAP 5 Panel Mid Profile Baseball Cap",
+    "totalOrdered": 17,
+    "sampleColor": "Black / Natural"
+  },
+  {
+    "rank": 117,
+    "styleCode": "18500",
+    "description": "Gildan - Heavy Blend\u2122 Hooded Sweatshirt - 18500",
+    "totalOrdered": 17,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 118,
+    "styleCode": "CC6030",
+    "description": "Comfort Colors Pocket Tee",
+    "totalOrdered": 17,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 119,
+    "styleCode": "B6004",
+    "description": "BELLA+CANVAS Women's Slim Fit Tee",
+    "totalOrdered": 17,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 120,
+    "styleCode": "6606",
+    "description": "YP Classics - Retro Trucker Cap - 6606",
+    "totalOrdered": 16,
+    "sampleColor": "Multicam Green/Khaki"
+  },
+  {
+    "rank": 121,
+    "styleCode": "2400",
+    "description": "Gildan - Ultra Cotton\u00ae Long Sleeve T-Shirt - 2400",
+    "totalOrdered": 16,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 122,
+    "styleCode": "JHA030",
+    "description": "Just Hoods By AWDis - Adult Midweight College Crewneck Sweatshirt",
+    "totalOrdered": 16,
+    "sampleColor": "Jet Black"
+  },
+  {
+    "rank": 123,
+    "styleCode": "PC54Y",
+    "description": "Client Supplied Port & Company Youth Core Cotton Tee",
+    "totalOrdered": 16,
+    "sampleColor": "Jet Black"
+  },
+  {
+    "rank": 124,
+    "styleCode": "A980",
+    "description": "Anvil Lightweight Tee",
+    "totalOrdered": 16,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 125,
+    "styleCode": "G2200",
+    "description": "Gildan Ultra Cotton Tank top",
+    "totalOrdered": 16,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 126,
+    "styleCode": "NL6071",
+    "description": "Next Level Men's Tri-Blend Long Sleeve Tee",
+    "totalOrdered": 16,
+    "sampleColor": "Heather White"
+  },
+  {
+    "rank": 127,
+    "styleCode": "ST650",
+    "description": "Sport-Tek - Sport-Tek Micropique Sport-Wick Polo. ST650",
+    "totalOrdered": 15,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 128,
+    "styleCode": "5080",
+    "description": "HEAVY TEE",
+    "totalOrdered": 15,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 129,
+    "styleCode": "N3142",
+    "description": "A4 Men's Cooling Performance T-Shirt",
+    "totalOrdered": 15,
+    "sampleColor": "Light Blue"
+  },
+  {
+    "rank": 130,
+    "styleCode": "SS3000",
+    "description": "Independent Trading Co. - Midweight Crewneck Sweatshirt - SS3000",
+    "totalOrdered": 15,
+    "sampleColor": "Gunmetal Heather"
+  },
+  {
+    "rank": 131,
+    "styleCode": "G6400",
+    "description": "Gildan Softstyle Shirt with Left chest + full back Screen print\r\nWhite ink",
+    "totalOrdered": 15,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 132,
+    "styleCode": "AS5001",
+    "description": "AS Staple TEe",
+    "totalOrdered": 15,
+    "sampleColor": "Forest Green"
+  },
+  {
+    "rank": 133,
+    "styleCode": "A4N3253",
+    "description": "A4 Adult Birdseye Mesh Long Sleeve Tee",
+    "totalOrdered": 15,
+    "sampleColor": "Silver\t"
+  },
+  {
+    "rank": 134,
+    "styleCode": "TM16398",
+    "description": "MEN DADE Short Sleeve Polo",
+    "totalOrdered": 15,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 135,
+    "styleCode": "B3200",
+    "description": "BELLA+CANVAS Unisex 3/4 Sleeve Baseball Tee - Front - Jefferson St",
+    "totalOrdered": 15,
+    "sampleColor": "White/Black"
+  },
+  {
+    "rank": 136,
+    "styleCode": "CC4410",
+    "description": "Comfort Colors Adult Heavyweight Ring Spun Long Sleeve Pocket Tee",
+    "totalOrdered": 15,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 137,
+    "styleCode": "A4N3142",
+    "description": "A4 - A4 Cooling Performance Short Sleeve Tee A4N3142",
+    "totalOrdered": 14,
+    "sampleColor": "Light Blue"
+  },
+  {
+    "rank": 138,
+    "styleCode": "6004",
+    "description": "Client Supplied Tees",
+    "totalOrdered": 14,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 139,
+    "styleCode": "18000",
+    "description": "Gildan 1800 crewneck white",
+    "totalOrdered": 14,
+    "sampleColor": "white"
+  },
+  {
+    "rank": 140,
+    "styleCode": "NL9303",
+    "description": "Next Level Apparel\u00ae Unisex Santa Cruz Pullover Hoodie",
+    "totalOrdered": 14,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 141,
+    "styleCode": "202",
+    "description": "Tultex\r\nUnisex Fine Jersey T-Shirt - 202",
+    "totalOrdered": 13,
+    "sampleColor": "Purple"
+  },
+  {
+    "rank": 142,
+    "styleCode": "SHASS",
+    "description": "Shaka Wear - Adult Active Short-Sleeve Crewneck T-Shirt",
+    "totalOrdered": 13,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 143,
+    "styleCode": "LST350",
+    "description": "Sport-Tek - Sport-Tek Women's PosiCharge Competitor Tee. LST350",
+    "totalOrdered": 13,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 144,
+    "styleCode": "G5V00L",
+    "description": "Gildan ladies ultra cotton v neck",
+    "totalOrdered": 13,
+    "sampleColor": "Charcoal"
+  },
+  {
+    "rank": 145,
+    "styleCode": "NL6051",
+    "description": "Next Level Unisex Tri-Blend 3/4 Raglan Tee with front Classic Styles logo and name on back  SHAVECHAPPELLE",
+    "totalOrdered": 13,
+    "sampleColor": "Vintage Blk/Premium Heather"
+  },
+  {
+    "rank": 146,
+    "styleCode": "NL340L",
+    "description": "\r\nNext Level Women's Perfect Sporty V-Neck Tee",
+    "totalOrdered": 13,
+    "sampleColor": "H Grey"
+  },
+  {
+    "rank": 147,
+    "styleCode": "G800B",
+    "description": "Gildan - DryBlend Youth 5.6 oz. - 50/50 T-Shirt",
+    "totalOrdered": 13,
+    "sampleColor": "Carolina Blue "
+  },
+  {
+    "rank": 148,
+    "styleCode": "3729",
+    "description": "BELLA + CANVAS - Unisex Sponge Fleece Drop Shoulder Hoodie Sweatshirt - 3729",
+    "totalOrdered": 12,
+    "sampleColor": "Athletic Heather"
+  },
+  {
+    "rank": 149,
+    "styleCode": "RF498",
+    "description": "American Apparel - Unisex ReFlex Fleece Hoodie Sweatshirt - RF498",
+    "totalOrdered": 12,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 150,
+    "styleCode": "88181",
+    "description": "CORE365\r\nMen's Origin Performance Piqu\u00e9 Polo - 88181",
+    "totalOrdered": 12,
+    "sampleColor": "Carbon"
+  },
+  {
+    "rank": 151,
+    "styleCode": "YST350",
+    "description": "Sport-Tek - Sport-Tek Youth PosiCharge Competitor Tee. YST350",
+    "totalOrdered": 12,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 152,
+    "styleCode": "Black",
+    "description": "CRZ Yoga- Butterluxe High-waisted Leggings 25\" in Black",
+    "totalOrdered": 12,
+    "sampleColor": ""
+  },
+  {
+    "rank": 153,
+    "styleCode": "5089M",
+    "description": "YP Classics - Premium Five-Panel Snapback Cap - 5089M",
+    "totalOrdered": 12,
+    "sampleColor": "Royal"
+  },
+  {
+    "rank": 154,
+    "styleCode": "5001T",
+    "description": "Staple Tear Out Tee",
+    "totalOrdered": 12,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 155,
+    "styleCode": "5101",
+    "description": "Supply Hood",
+    "totalOrdered": 12,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 156,
+    "styleCode": "6014",
+    "description": "Comfort Colors - Garment-Dyed Heavyweight Long Sleeve T-Shirt - 6014",
+    "totalOrdered": 12,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 157,
+    "styleCode": "1807GD",
+    "description": "L/S Grmnt Dye Crew Neck 6.5oz\r\n",
+    "totalOrdered": 12,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 158,
+    "styleCode": "5469",
+    "description": "Sierra Pacific - Women's Moisture Free Mesh Polo ",
+    "totalOrdered": 12,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 159,
+    "styleCode": "HF09GD",
+    "description": "LA Apparel L/S Heavy Fleece Hood PO 14 Oz\r\n",
+    "totalOrdered": 12,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 160,
+    "styleCode": "SM0220",
+    "description": "Paragon Bahama Adult Long Sleeve Hooded Performance Tee",
+    "totalOrdered": 12,
+    "sampleColor": "Aluminum"
+  },
+  {
+    "rank": 161,
+    "styleCode": "NL6240",
+    "description": "Next Level CVC V-Neck Tee 2C White + Red\r\nFull Front  - Pizza & Wings",
+    "totalOrdered": 12,
+    "sampleColor": "Heather Gray"
+  },
+  {
+    "rank": 162,
+    "styleCode": "B8880",
+    "description": "BELLA+CANVAS Women's Flowy Boxy Tank",
+    "totalOrdered": 12,
+    "sampleColor": "Dark Grey Heather"
+  },
+  {
+    "rank": 163,
+    "styleCode": "kc8100",
+    "description": "\t\r\nDeluxe Cotton Washed Brushed Gap Cap",
+    "totalOrdered": 12,
+    "sampleColor": "navy"
+  },
+  {
+    "rank": 164,
+    "styleCode": "nl3600",
+    "description": "Next Level premium tee",
+    "totalOrdered": 12,
+    "sampleColor": "Dk Choc"
+  },
+  {
+    "rank": 165,
+    "styleCode": "3501",
+    "description": "BELLA + CANVAS\r\nUnisex Jersey Long Sleeve Tee - 3501",
+    "totalOrdered": 11,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 166,
+    "styleCode": "6006",
+    "description": "YP Classics - Five-Panel Classic Trucker Cap - 6006",
+    "totalOrdered": 11,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 167,
+    "styleCode": "IND280SL",
+    "description": "Independent Trading Co. - Avenue Hooded Sweatshirt - IND280SL",
+    "totalOrdered": 11,
+    "sampleColor": "Ivory"
+  },
+  {
+    "rank": 168,
+    "styleCode": "ST340LS",
+    "description": "Sport-Tek\u00ae PosiCharge\u00ae RacerMesh\u00ae Long Sleeve Tee",
+    "totalOrdered": 11,
+    "sampleColor": "Neon Yellow"
+  },
+  {
+    "rank": 169,
+    "styleCode": "5402",
+    "description": "AS Colour Chad Polo",
+    "totalOrdered": 11,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 170,
+    "styleCode": "1304",
+    "description": "LS Grmnt Dye Crew Neck 6.5oz",
+    "totalOrdered": 11,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 171,
+    "styleCode": "0469",
+    "description": "Sierra Pacific - Moisture Free Mesh Polo ",
+    "totalOrdered": 11,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 172,
+    "styleCode": "BA7100",
+    "description": "Bayside T-Shirt with a Pocket",
+    "totalOrdered": 11,
+    "sampleColor": "Orange"
+  },
+  {
+    "rank": 173,
+    "styleCode": "PC54YLS",
+    "description": "Port & Company\u00ae Youth Long Sleeve Core Cotton Tee - LC - PBIS",
+    "totalOrdered": 11,
+    "sampleColor": "Gold"
+  },
+  {
+    "rank": 174,
+    "styleCode": "NL6200",
+    "description": "Next Level Unisex Poly/Cotton Tee\r\n",
+    "totalOrdered": 11,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 175,
+    "styleCode": "T9121",
+    "description": "\r\nColortone Maverick Mask",
+    "totalOrdered": 11,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 176,
+    "styleCode": "CC6014",
+    "description": "Comfort Colors Adult Heavyweight Ring Spun Long Sleeve Tee",
+    "totalOrdered": 11,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 177,
+    "styleCode": "NL3533",
+    "description": "Next Level Women's Jersey Tank",
+    "totalOrdered": 11,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 178,
+    "styleCode": "B6681",
+    "description": "Bella Women's Poly/Cotton Crop Tee",
+    "totalOrdered": 11,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 179,
+    "styleCode": "TST350",
+    "description": "Sport-Tek - Sport-Tek Tall PosiCharge Competitor Tee. TST350",
+    "totalOrdered": 10,
+    "sampleColor": "Silver"
+  },
+  {
+    "rank": 180,
+    "styleCode": "H000",
+    "description": "Gildan - Gildan Hammer T-Shirt. H000",
+    "totalOrdered": 10,
+    "sampleColor": "Dark Navy"
+  },
+  {
+    "rank": 181,
+    "styleCode": "5100",
+    "description": "Client Supplied\r\nC2 Sport - Performance T-Shirt - 5100",
+    "totalOrdered": 10,
+    "sampleColor": "Columbia Blue"
+  },
+  {
+    "rank": 182,
+    "styleCode": "6482",
+    "description": "BELLA + CANVAS - Women's Jersey Crop Tee - 6482",
+    "totalOrdered": 10,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 183,
+    "styleCode": "1566",
+    "description": "Comfort Colors - Garment-Dyed Sweatshirt - 1566",
+    "totalOrdered": 10,
+    "sampleColor": "Blue Jean"
+  },
+  {
+    "rank": 184,
+    "styleCode": "VC300A",
+    "description": "Valucap - Adult Bio-Washed Classic Dad Hat - VC300A",
+    "totalOrdered": 10,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 185,
+    "styleCode": "1501KC",
+    "description": "YP Classics - Cuffed Beanie - 1501KC",
+    "totalOrdered": 10,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 186,
+    "styleCode": "HF-09",
+    "description": "Los Angeles Apparel Heavy Fleece Hoodie\r\n\r\nLeft Chest Supatransfer\r\n5x5\r\n\r\nFull back Supatransfer\r\n15x15",
+    "totalOrdered": 10,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 187,
+    "styleCode": "104",
+    "description": "Paragon - Women's Saratoga Performance Mini Mesh Polo ",
+    "totalOrdered": 10,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 188,
+    "styleCode": "3901",
+    "description": "Client Supplied - Unisex Sponge Fleece Raglan Crewneck Sweatshirt ",
+    "totalOrdered": 10,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 189,
+    "styleCode": "883681",
+    "description": "Nike Dri-FIT Legacy Polo",
+    "totalOrdered": 10,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 190,
+    "styleCode": "B6003",
+    "description": "BELLA+CANVAS Women's Jersey Muscle Tank",
+    "totalOrdered": 10,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 191,
+    "styleCode": "BA8100",
+    "description": "Bayside T-Shirt with a Pocket",
+    "totalOrdered": 10,
+    "sampleColor": "Dark Ash"
+  },
+  {
+    "rank": 192,
+    "styleCode": "Sm0100",
+    "description": "Mens Paragon Saratoga Adult Mini Mesh Performance Polo",
+    "totalOrdered": 10,
+    "sampleColor": "Heather Grey"
+  },
+  {
+    "rank": 193,
+    "styleCode": "AL1901",
+    "description": "Alstyle Heavyweight Adult Tee",
+    "totalOrdered": 10,
+    "sampleColor": ""
+  },
+  {
+    "rank": 194,
+    "styleCode": "SM0500",
+    "description": "Paragon Sebring Adult Performance Polo",
+    "totalOrdered": 10,
+    "sampleColor": "Deep Navy"
+  },
+  {
+    "rank": 195,
+    "styleCode": "L575",
+    "description": "Ladies' Raglan Polos - Left Chest Embroidery",
+    "totalOrdered": 10,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 196,
+    "styleCode": "FF1501KC",
+    "description": "YP Classics Cuffed Knit Beanie\r\n",
+    "totalOrdered": 10,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 197,
+    "styleCode": "PP1996",
+    "description": "PRIM + PREUX Adult Dynamic Polo",
+    "totalOrdered": 10,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 198,
+    "styleCode": "K467",
+    "description": "Sport-Tek Dri-Mesh Polo with Tipped Collar and Piping",
+    "totalOrdered": 10,
+    "sampleColor": "Steel/Black"
+  },
+  {
+    "rank": 199,
+    "styleCode": "G64v00",
+    "description": "",
+    "totalOrdered": 10,
+    "sampleColor": "White "
+  },
+  {
+    "rank": 200,
+    "styleCode": "3001T",
+    "description": "BELLA + CANVAS - Toddler Jersey Tee - 3001T\r\n\r\n3T-2",
+    "totalOrdered": 9,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 201,
+    "styleCode": "EXP54LWZ",
+    "description": "Independent Trading Co. - Lightweight Windbreaker Full-Zip Jacket - EXP54LWZ",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 202,
+    "styleCode": "2017",
+    "description": "LA S/S crew neck 6.0 oz heavy",
+    "totalOrdered": 9,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 203,
+    "styleCode": "5056S",
+    "description": "Imperial - The Barnes Cap - 5056",
+    "totalOrdered": 9,
+    "sampleColor": "Graphite/ Black"
+  },
+  {
+    "rank": 204,
+    "styleCode": "5180",
+    "description": "Hanes - Unisex Beefy-T\u00ae T-Shirt",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 205,
+    "styleCode": "267020",
+    "description": "Nike - Nike Dri-FIT Classic Polo. 267020",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 206,
+    "styleCode": "F170",
+    "description": "Hanes - Adult Ultimate Cotton\u00ae Pullover Hooded Sweatshirt",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 207,
+    "styleCode": "PRM3500",
+    "description": "Independent Trading Co. - Midweight Pigment-Dyed Crewneck Sweatshirt - PRM3500",
+    "totalOrdered": 9,
+    "sampleColor": "Pigment Cement"
+  },
+  {
+    "rank": 208,
+    "styleCode": "SM210",
+    "description": "Paragon Dri Fit Longsleeve ",
+    "totalOrdered": 9,
+    "sampleColor": "Safety Green"
+  },
+  {
+    "rank": 209,
+    "styleCode": "5040",
+    "description": "AS Colour MENS STAPLE STONE WASH TEE ",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 210,
+    "styleCode": "6681",
+    "description": "BELLA + CANVAS - Women\u2019s Crop Tee ",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 211,
+    "styleCode": "NL6740",
+    "description": "Next Level Women's Tri-Blend Deep V-Neck Tee",
+    "totalOrdered": 9,
+    "sampleColor": "Vintage Turquoise"
+  },
+  {
+    "rank": 212,
+    "styleCode": "B3480",
+    "description": "BELLA + CANVAS - Unisex Jersey Tank",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 213,
+    "styleCode": "ST380",
+    "description": "Sportek Elevate Tee with Left Chest + Full Back Print and cut Vinyl",
+    "totalOrdered": 9,
+    "sampleColor": "Iron Grey"
+  },
+  {
+    "rank": 214,
+    "styleCode": "G18600",
+    "description": "Gildan Heavy Blend Adult Full Zip Hooded Sweatshirt",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 215,
+    "styleCode": "1",
+    "description": "Full Back\r\nLAZY GANG",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 216,
+    "styleCode": "B8413",
+    "description": "BELLA+CANVAS Women's Triblend Short Sleeve Tee",
+    "totalOrdered": 9,
+    "sampleColor": "Charcoal Black Triblend"
+  },
+  {
+    "rank": 217,
+    "styleCode": "A4N3252",
+    "description": "A4 Adult Birdseye Mesh Performance Tee",
+    "totalOrdered": 9,
+    "sampleColor": "Graphite"
+  },
+  {
+    "rank": 218,
+    "styleCode": "NL6040",
+    "description": "Next Level Men's Tri-Blend V-Neck Tee",
+    "totalOrdered": 9,
+    "sampleColor": "see notes"
+  },
+  {
+    "rank": 219,
+    "styleCode": "g18500",
+    "description": "Gildan hoodie ",
+    "totalOrdered": 9,
+    "sampleColor": "Lt pink"
+  },
+  {
+    "rank": 220,
+    "styleCode": "KC6210",
+    "description": "KC Caps",
+    "totalOrdered": 9,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 221,
+    "styleCode": "1801MW",
+    "description": "1801MW S/S Mineral Wash Crew 6.5oz",
+    "totalOrdered": 8,
+    "sampleColor": "Carbon Black"
+  },
+  {
+    "rank": 222,
+    "styleCode": "ST640",
+    "description": "Sport-Tek - Sport-Tek PosiCharge RacerMesh Polo. ST640",
+    "totalOrdered": 8,
+    "sampleColor": "True Royal"
+  },
+  {
+    "rank": 223,
+    "styleCode": "5916",
+    "description": "STADIUM SHORTS",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 224,
+    "styleCode": "NKDC1963",
+    "description": "Client Supplied garments",
+    "totalOrdered": 8,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 225,
+    "styleCode": "4700",
+    "description": "47 Brand - Clean Up Cap ",
+    "totalOrdered": 8,
+    "sampleColor": "Khaki"
+  },
+  {
+    "rank": 226,
+    "styleCode": "C914",
+    "description": "port and company c914",
+    "totalOrdered": 8,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 227,
+    "styleCode": "C112",
+    "description": "Port Authority - Port Authority Snapback Trucker Cap. C112",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 228,
+    "styleCode": "8502",
+    "description": "Liberty Bags - Branson Bargain Canvas Tote",
+    "totalOrdered": 8,
+    "sampleColor": "Natural"
+  },
+  {
+    "rank": 229,
+    "styleCode": "SKGD",
+    "description": "Shakkawear Garment Dye Tee",
+    "totalOrdered": 8,
+    "sampleColor": "Cream"
+  },
+  {
+    "rank": 230,
+    "styleCode": "1580NL",
+    "description": "Next Level Women's 1580NL Ideal Crop T-Shirt",
+    "totalOrdered": 8,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 231,
+    "styleCode": "102",
+    "description": "Pro Club Comfort Tee",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 232,
+    "styleCode": "GH0000",
+    "description": "Gildan Hammer Tee",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 233,
+    "styleCode": "6886",
+    "description": "Mega Cap",
+    "totalOrdered": 8,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 234,
+    "styleCode": "G8400",
+    "description": "Gildan Dryblend longsleeve",
+    "totalOrdered": 8,
+    "sampleColor": "Heather Grey"
+  },
+  {
+    "rank": 235,
+    "styleCode": "SS4500Z",
+    "description": "Independent Trading Co. - Midweight Full-Zip Hooded Sweatshirt",
+    "totalOrdered": 8,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 236,
+    "styleCode": "7505",
+    "description": "Client Supplied - Women's Raglan Pullover Fleece ",
+    "totalOrdered": 8,
+    "sampleColor": "Heather Mustard"
+  },
+  {
+    "rank": 237,
+    "styleCode": "FF6089M",
+    "description": "YP Classics Premium Snapback Cap",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 238,
+    "styleCode": "363807",
+    "description": "Nike Dri-FIT Micro Pique Polo\r\n",
+    "totalOrdered": 8,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 239,
+    "styleCode": "K575",
+    "description": "Mens Raglan Polos - Left Chest Embroidery",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 240,
+    "styleCode": "LB5502",
+    "description": "Cotton Twill Apron\r\n7in Front\r\nClay Bae",
+    "totalOrdered": 8,
+    "sampleColor": "White\t"
+  },
+  {
+    "rank": 241,
+    "styleCode": "PC78H",
+    "description": "Port & Company\u00ae Core Fleece Pullover Hooded Sweatshirt",
+    "totalOrdered": 8,
+    "sampleColor": "Candy Pink"
+  },
+  {
+    "rank": 242,
+    "styleCode": "G64V00",
+    "description": "Gildan Softstyle V neck tee",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 243,
+    "styleCode": "64V00L",
+    "description": "Gildan Softstyle Ladies' V-Neck Tee",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 244,
+    "styleCode": "B3939",
+    "description": "BELLA+CANVAS Unisex Triblend Full-Zip Lightweight Hoodie",
+    "totalOrdered": 8,
+    "sampleColor": "Charcoal"
+  },
+  {
+    "rank": 245,
+    "styleCode": "KC6819",
+    "description": "Flat Bill Snapback Hat",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 246,
+    "styleCode": "AA2001W",
+    "description": "American Apparel Unisex Fine Jersey Tee - FF Only - Tribe TC",
+    "totalOrdered": 8,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 247,
+    "styleCode": "AATR401",
+    "description": "American Apparel Unisex USA Tri-Blend Track Tee",
+    "totalOrdered": 8,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 248,
+    "styleCode": "SP12",
+    "description": "Sportsman - 12\" Solid Cuffed Beanie - SP12",
+    "totalOrdered": 7,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 249,
+    "styleCode": "2300",
+    "description": "Gildan - Gildan - Ultra Cotton 100% US Cotton T-Shirt with Pocket. 2300",
+    "totalOrdered": 7,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 250,
+    "styleCode": "6502",
+    "description": "YP Classics - Lightly-Structured Five-Panel Snapback Cap - 6502",
+    "totalOrdered": 7,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 251,
+    "styleCode": "IND420XD",
+    "description": "Independent Trading Co. - Unisex Mainstreet Hooded Sweatshirt - IND420XD",
+    "totalOrdered": 7,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 252,
+    "styleCode": "3001Y",
+    "description": "BELLA + CANVAS - Youth Jersey Tee - 3001Y",
+    "totalOrdered": 7,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 253,
+    "styleCode": "Q600",
+    "description": "Q-Tees - 25L Jumbo Tote - Q600",
+    "totalOrdered": 7,
+    "sampleColor": "Natural"
+  },
+  {
+    "rank": 254,
+    "styleCode": "5161",
+    "description": "RELAX HOOD AS COLOR",
+    "totalOrdered": 7,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 255,
+    "styleCode": "FF6606",
+    "description": "YP Classics Retro Trucker Cap\r\n\r\n",
+    "totalOrdered": 7,
+    "sampleColor": "Black\t"
+  },
+  {
+    "rank": 256,
+    "styleCode": "SHMHLS",
+    "description": "Shaka Wear - Max Heavyweight Long Sleeve T-Shirt ",
+    "totalOrdered": 7,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 257,
+    "styleCode": "5200",
+    "description": "C2 Sport - Youth Performance T-Shirt - 5200 Red M 2 3.72 7.44\r\nSub Total: 55.80",
+    "totalOrdered": 7,
+    "sampleColor": ""
+  },
+  {
+    "rank": 258,
+    "styleCode": "G500",
+    "description": "Gildan - Adult Heavy Cotton\u2122 T-Shirt",
+    "totalOrdered": 7,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 259,
+    "styleCode": "NKDC1991",
+    "description": "Client Supplied garments",
+    "totalOrdered": 7,
+    "sampleColor": "Blue Tint"
+  },
+  {
+    "rank": 260,
+    "styleCode": "G1800",
+    "description": "Gildan\u00ae - Heavy Blend\u2122 Crewneck Sweatshirt\r\n\r\n",
+    "totalOrdered": 7,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 261,
+    "styleCode": "5400B",
+    "description": "Gildan - Heavy Cotton\u2122 Youth Long Sleeve T-Shirt ",
+    "totalOrdered": 7,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 262,
+    "styleCode": "Q800",
+    "description": "Q-Tees - Promotional Tote - Q800",
+    "totalOrdered": 7,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 263,
+    "styleCode": "220P",
+    "description": "Paragon - Bahama Performance Hooded Long Sleeve T-Shirt - 220",
+    "totalOrdered": 7,
+    "sampleColor": "Sand"
+  },
+  {
+    "rank": 264,
+    "styleCode": "8400",
+    "description": "Gildan - Gildan - DryBlend 50 Cotton/50 Poly Long Sleeve T-Shirt. 8400",
+    "totalOrdered": 7,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 265,
+    "styleCode": "cc1717",
+    "description": "Comfort Colors - Garment-Dyed Heavyweight T-Shirt - 1717",
+    "totalOrdered": 7,
+    "sampleColor": "Ivory"
+  },
+  {
+    "rank": 266,
+    "styleCode": "IND40Z",
+    "description": "Independent Trading Co. - Hooded Zip-up ",
+    "totalOrdered": 7,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 267,
+    "styleCode": "CC1745",
+    "description": "Adult Heavyweight Color Blast Tee",
+    "totalOrdered": 7,
+    "sampleColor": ""
+  },
+  {
+    "rank": 268,
+    "styleCode": "B3415",
+    "description": "B+C Unisex Triblend Short Sleeve V-Neck Tee",
+    "totalOrdered": 7,
+    "sampleColor": "Aqua Triblend"
+  },
+  {
+    "rank": 269,
+    "styleCode": "LB8860",
+    "description": "Liberty Bags Nicole Cotton Canvas Tote",
+    "totalOrdered": 7,
+    "sampleColor": "Natural"
+  },
+  {
+    "rank": 270,
+    "styleCode": "B3021",
+    "description": "BELLA+CANVAS Mens Jersey Short Sleeve Pocket Tee",
+    "totalOrdered": 7,
+    "sampleColor": "Black/Deep Heather"
+  },
+  {
+    "rank": 271,
+    "styleCode": "B3739",
+    "description": "BELLA+CANVAS Unisex Sponge Fleece Full-Zip Hoodie\r\nLeft Chest\r\nFull Back\r\nOceanic Pest Control",
+    "totalOrdered": 7,
+    "sampleColor": "A. Heather"
+  },
+  {
+    "rank": 272,
+    "styleCode": "B3483",
+    "description": "BELLA+CANVAS Unisex Jersey Muscle Tank",
+    "totalOrdered": 7,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 273,
+    "styleCode": "2",
+    "description": "2C Black + Purple\r\nFront Only\r\nBelieve That",
+    "totalOrdered": 7,
+    "sampleColor": ""
+  },
+  {
+    "rank": 274,
+    "styleCode": "G44800",
+    "description": "Gildan Performance Adult Jersey Sport Shirt",
+    "totalOrdered": 7,
+    "sampleColor": "Marbled Charcoal"
+  },
+  {
+    "rank": 275,
+    "styleCode": "Nike 363807",
+    "description": "Nike Golf - Dri-FIT Micro Pique Polo. 363807.\r\n\r\nNO BACK",
+    "totalOrdered": 7,
+    "sampleColor": "Blue Saphire"
+  },
+  {
+    "rank": 276,
+    "styleCode": "G200L",
+    "description": "Gildan Ladies tee with full color COD money logo",
+    "totalOrdered": 7,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 277,
+    "styleCode": "G200B",
+    "description": "front and Back ",
+    "totalOrdered": 7,
+    "sampleColor": "White "
+  },
+  {
+    "rank": 278,
+    "styleCode": "3321",
+    "description": "Rabbit Skins\r\nToddler Fine Jersey Tee - 3321",
+    "totalOrdered": 6,
+    "sampleColor": "Maroon"
+  },
+  {
+    "rank": 279,
+    "styleCode": "4328",
+    "description": "4328 Sporty Baby Rib Crop Tank",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 280,
+    "styleCode": "6405",
+    "description": "BELLA + CANVAS - Women\u2019s Relaxed Jersey V-Neck Tee - 6405",
+    "totalOrdered": 6,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 281,
+    "styleCode": "6610",
+    "description": "Next Level - Women\u2019s CVC T-Shirt - 6610",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 282,
+    "styleCode": "799802",
+    "description": "Nike - Nike Dri-FIT Players Modern Fit Polo. 799802",
+    "totalOrdered": 6,
+    "sampleColor": "Pine Green"
+  },
+  {
+    "rank": 283,
+    "styleCode": "OC771",
+    "description": "OC771 Ultimate Trucker Cap",
+    "totalOrdered": 6,
+    "sampleColor": "NAVY/WHITE"
+  },
+  {
+    "rank": 284,
+    "styleCode": "2000B",
+    "description": "Gildan - Gildan - Youth Ultra Cotton 100% US Cotton T-Shirt. 2000B",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 285,
+    "styleCode": "8800",
+    "description": "Gildan - DryBlend\u00ae Jersey Polo ",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 286,
+    "styleCode": "SS1000C",
+    "description": "Independent Trading Co. - Icon Lightweight Loopback Terry Crewneck Sweatshirt - SS1000C",
+    "totalOrdered": 6,
+    "sampleColor": "Harvest Gold"
+  },
+  {
+    "rank": 287,
+    "styleCode": "110200-PC",
+    "description": "4900 Series 100% cotton\r\n22\" x 22\" Bandana",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 288,
+    "styleCode": "TST350LS",
+    "description": "Sport-Tek - Sport-Tek Tall Long Sleeve PosiCharge Competitor Tee. TST350LS",
+    "totalOrdered": 6,
+    "sampleColor": "Atomic Blue"
+  },
+  {
+    "rank": 289,
+    "styleCode": "7502",
+    "description": "BELLA + CANVAS - Women's Crop Fleece Hoodie - 7502",
+    "totalOrdered": 6,
+    "sampleColor": "Deep Heather"
+  },
+  {
+    "rank": 290,
+    "styleCode": "6008",
+    "description": "BELLA + CANVAS - Women's Jersey Racerback Tank ",
+    "totalOrdered": 6,
+    "sampleColor": "Charity Pink"
+  },
+  {
+    "rank": 291,
+    "styleCode": "CS410",
+    "description": "CornerStone\u00ae - Select Snag-Proof Tactical Polo",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 292,
+    "styleCode": "G64000L",
+    "description": "Gildan - Softstyle\u00ae Women\u2019s T-Shirt - 64000L",
+    "totalOrdered": 6,
+    "sampleColor": "Dark Heather"
+  },
+  {
+    "rank": 293,
+    "styleCode": "PC55",
+    "description": "Port & Company\u00ae Core Blend Tee",
+    "totalOrdered": 6,
+    "sampleColor": "Safety Green"
+  },
+  {
+    "rank": 294,
+    "styleCode": "White",
+    "description": "Client Supplied Garments",
+    "totalOrdered": 6,
+    "sampleColor": ""
+  },
+  {
+    "rank": 295,
+    "styleCode": "5903",
+    "description": "AS Colours MENS BEACH SHORTS ",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 296,
+    "styleCode": "B3001Y",
+    "description": "BELLA+CANVAS Youth Jersey Short Sleeve Tee",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 297,
+    "styleCode": "G5000L",
+    "description": "Gildan Ultra Cotton Ladies Tee",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 298,
+    "styleCode": "Ind4000",
+    "description": "Client Supplied Hoodies \r\n",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 299,
+    "styleCode": "G2000T",
+    "description": "Pocket Tee Tall",
+    "totalOrdered": 6,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 300,
+    "styleCode": "NL6210 CVC",
+    "description": "Next Level Unisex CVC Tee DTG Sample",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 301,
+    "styleCode": "G2800",
+    "description": "Gildan Jersey Polo\r\n*Not White thread*",
+    "totalOrdered": 6,
+    "sampleColor": ""
+  },
+  {
+    "rank": 302,
+    "styleCode": "PC54LS",
+    "description": "Port & Company\u00ae Long Sleeve Core Cotton Tee - LC - PBIS",
+    "totalOrdered": 6,
+    "sampleColor": "Gold"
+  },
+  {
+    "rank": 303,
+    "styleCode": "FF6006",
+    "description": "YP Classics 5 Panel Classic Trucker Cap\r\n",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 304,
+    "styleCode": "A130",
+    "description": "Adidas Climalite A130 Men's Polo",
+    "totalOrdered": 6,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 305,
+    "styleCode": "NL6610",
+    "description": "Next Level Women's CVC Tee\r\n",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 306,
+    "styleCode": "51356",
+    "description": "Ouray Performance Epic 2.0 Cap\r\n",
+    "totalOrdered": 6,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 307,
+    "styleCode": "LA4424",
+    "description": "Rabbit Skins Infant Fine Jersey Bodysuit",
+    "totalOrdered": 6,
+    "sampleColor": "Heather"
+  },
+  {
+    "rank": 308,
+    "styleCode": "NL6410",
+    "description": "Next level sueded longsleeve with left chest, full back and sleeve print.",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 309,
+    "styleCode": "B6400",
+    "description": "BELLA+CANVAS\r\nWomen's Relaxed Jersey\r\nFull Front\r\nHBCU Lifestyle (black)",
+    "totalOrdered": 6,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 310,
+    "styleCode": "B3727",
+    "description": "BELLA+CANVAS Unisex Jogger Sweatpants",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 311,
+    "styleCode": "LST380",
+    "description": "Sport-Tek\u00ae Ladies PosiCharge\u00ae Elevate Scoop Neck Tee",
+    "totalOrdered": 6,
+    "sampleColor": "Lime Shock"
+  },
+  {
+    "rank": 312,
+    "styleCode": "TM96398",
+    "description": "WOMEN DADE Short Sleeve Polo",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 313,
+    "styleCode": "B8800",
+    "description": "Bella + Canvas - Women's Flowy Racerback Tank",
+    "totalOrdered": 6,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 314,
+    "styleCode": "G45800",
+    "description": "Gildan Performance Adult Double Pique Sport Shirt",
+    "totalOrdered": 6,
+    "sampleColor": "Charcoal"
+  },
+  {
+    "rank": 315,
+    "styleCode": "NL6233",
+    "description": "Next Level Men's CVC Tank",
+    "totalOrdered": 6,
+    "sampleColor": "black"
+  },
+  {
+    "rank": 316,
+    "styleCode": "NL6440",
+    "description": "PREMIUM SUEDED V-NECK",
+    "totalOrdered": 6,
+    "sampleColor": "Heavy Metal"
+  },
+  {
+    "rank": 317,
+    "styleCode": "AFX90UNZ",
+    "description": "Surfboard Zip Up  (Unisex)\r\nSS Activewear \u2014 Independent Trading Co. \u2014 Unisex Lightweight Full Zip Hooded Sweatshirt  \u2014 AFX90UNZ (Misty Blue)",
+    "totalOrdered": 5,
+    "sampleColor": "Misty Blue\t"
+  },
+  {
+    "rank": 318,
+    "styleCode": "64000L",
+    "description": "Gildan - Gildan Softstyle Women's T-Shirt. 64000L",
+    "totalOrdered": 5,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 319,
+    "styleCode": "LST353LS",
+    "description": "Sport-Tek - Sport-Tek Women's Long Sleeve PosiCharge Competitor V-Neck Tee. LST353LS",
+    "totalOrdered": 5,
+    "sampleColor": "True Royal"
+  },
+  {
+    "rank": 320,
+    "styleCode": "5100B",
+    "description": "C2 Sport - Unisex Performance T-Shirt - 5100",
+    "totalOrdered": 5,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 321,
+    "styleCode": "52MBBJ",
+    "description": "Alleson Athletic - Unisex Diamond Jersey - 52MBBJ",
+    "totalOrdered": 5,
+    "sampleColor": "White/ Black"
+  },
+  {
+    "rank": 322,
+    "styleCode": "TM1WW002",
+    "description": "Womens TM Polos Item # TM1WW002",
+    "totalOrdered": 5,
+    "sampleColor": "Allure Heather"
+  },
+  {
+    "rank": 323,
+    "styleCode": "ST550",
+    "description": "Sport-Tek - Sport-Tek PosiCharge Competitor Polo. ST550",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 324,
+    "styleCode": "4058",
+    "description": "CROP LS TEE",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 325,
+    "styleCode": "6400",
+    "description": "BELLA + CANVAS - Women\u2019s Relaxed Jersey Tee - 6400 ",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 326,
+    "styleCode": "1745",
+    "description": "Comfort Colors - Colorblast Heavyweight T-Shirt ",
+    "totalOrdered": 5,
+    "sampleColor": "Amethyst"
+  },
+  {
+    "rank": 327,
+    "styleCode": "BG218",
+    "description": "Port Authority Backpack with FC logo and personalized Name",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 328,
+    "styleCode": "ST340",
+    "description": "Sport-Tek - Sport-Tek PosiCharge RacerMesh Tee. ST340",
+    "totalOrdered": 5,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 329,
+    "styleCode": "SM100",
+    "description": "Paragon Saratoga Adult Mini Mesh Performance Polo",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 330,
+    "styleCode": "4001",
+    "description": "Paragon - Guardian Snag Proof Polo - 4001",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 331,
+    "styleCode": "ST467",
+    "description": "Sport-Tek - Sport-Tek Endeavor Polo. ST467",
+    "totalOrdered": 5,
+    "sampleColor": "Dark Royal Heather"
+  },
+  {
+    "rank": 332,
+    "styleCode": "K500P",
+    "description": "Port Authority - Port Authority Silk Touch Polo with Pocket. K500P",
+    "totalOrdered": 5,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 333,
+    "styleCode": "J317",
+    "description": "Port Authority - Port Authority Core Soft Shell Jacket. J317",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 334,
+    "styleCode": "6245PT",
+    "description": "YP Classics - Peached Cotton Twill Dad Hat - 6245PT",
+    "totalOrdered": 5,
+    "sampleColor": "Yellow"
+  },
+  {
+    "rank": 335,
+    "styleCode": "LA1801GD",
+    "description": "Los Angeles Apparel Garment Dye Tee",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 336,
+    "styleCode": "ind400",
+    "description": "Independent Trading Co. - Heavyweight Hooded Sweatshirt - IND4000\r\n",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 337,
+    "styleCode": "QTB",
+    "description": "Q-Tees - Economical Tote - \t15\"L x 16\"H",
+    "totalOrdered": 5,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 338,
+    "styleCode": "PRM4500",
+    "description": "Independent Trading Co. - Midweight Pigment-Dyed Hooded Sweatshirt ",
+    "totalOrdered": 5,
+    "sampleColor": "Pigment Cement"
+  },
+  {
+    "rank": 339,
+    "styleCode": "3727",
+    "description": "BELLA + CANVAS - Unisex Joggers ",
+    "totalOrdered": 5,
+    "sampleColor": "Maroon"
+  },
+  {
+    "rank": 340,
+    "styleCode": "G5400B",
+    "description": "Port & Company\u00ae Core Cotton \r\nYouth  Longsleeve Tee\r\nLeft Chest 3.5\"\r\nPBIS Logo",
+    "totalOrdered": 5,
+    "sampleColor": "Gold"
+  },
+  {
+    "rank": 341,
+    "styleCode": "150",
+    "description": "Paragon - Memphis Sueded Polo",
+    "totalOrdered": 5,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 342,
+    "styleCode": "AL2004",
+    "description": "Allmade\u00ae Unisex Tri-Blend Tee",
+    "totalOrdered": 5,
+    "sampleColor": "Bright White"
+  },
+  {
+    "rank": 343,
+    "styleCode": "B6005",
+    "description": "BELLA + CANVAS - Women\u2019s Jersey V-Neck Tee \r\nFull Front Full Color\r\nDTG Printing Light\r\n12\" in. Tall",
+    "totalOrdered": 5,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 344,
+    "styleCode": "18500B",
+    "description": "GILDAN 18500B\r\nSCRIBBLE HOODIE (YOUTH)",
+    "totalOrdered": 5,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 345,
+    "styleCode": "B8430",
+    "description": "B+C Women's Triblend Racerback Tank",
+    "totalOrdered": 5,
+    "sampleColor": "Aqua triblend"
+  },
+  {
+    "rank": 346,
+    "styleCode": "AI827",
+    "description": "Men's Endurance Singlet S",
+    "totalOrdered": 5,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 347,
+    "styleCode": "AI227",
+    "description": "Women's Endurance Racerback",
+    "totalOrdered": 5,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 348,
+    "styleCode": "AJ220",
+    "description": "Women's City Polo",
+    "totalOrdered": 5,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 349,
+    "styleCode": "Q0T600",
+    "description": "Towels",
+    "totalOrdered": 5,
+    "sampleColor": ""
+  },
+  {
+    "rank": 350,
+    "styleCode": "PC54TT",
+    "description": "Port & Company\u00ae Core Cotton Tank Top",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 351,
+    "styleCode": "FF180",
+    "description": "Flexfit Delta Cap\r\n",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 352,
+    "styleCode": "A939",
+    "description": "Alstyle tee with front chest print 5c Hookup",
+    "totalOrdered": 5,
+    "sampleColor": "Camo Green"
+  },
+  {
+    "rank": 353,
+    "styleCode": "EXP95NB",
+    "description": "Independent Men's Heavyweight Windbreaker Jacket\r\n",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 354,
+    "styleCode": "NL6310",
+    "description": "Next Level Youth Tri-Blend Tee",
+    "totalOrdered": 5,
+    "sampleColor": "Vintage Black"
+  },
+  {
+    "rank": 355,
+    "styleCode": "A4N4229",
+    "description": "A4 Adult Two Button Color Block Henley",
+    "totalOrdered": 5,
+    "sampleColor": "Cardinal/White"
+  },
+  {
+    "rank": 356,
+    "styleCode": "Nl 3600",
+    "description": "Next level Cotton tee",
+    "totalOrdered": 5,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 357,
+    "styleCode": "M2079",
+    "description": "ALL SPORT UNISEX PERFORMANCE SHOOTER TEE",
+    "totalOrdered": 5,
+    "sampleColor": "Sport Royal"
+  },
+  {
+    "rank": 358,
+    "styleCode": "NL6533",
+    "description": "Next Level Women's Burnout Racerback Tank",
+    "totalOrdered": 5,
+    "sampleColor": "see notes"
+  },
+  {
+    "rank": 359,
+    "styleCode": "VA101",
+    "description": "Adams Bucket Cap",
+    "totalOrdered": 5,
+    "sampleColor": "Nautical Red"
+  },
+  {
+    "rank": 360,
+    "styleCode": "NL6021",
+    "description": "Next Level Unisex Tri-Blend Long Sleeve Hooded Tee",
+    "totalOrdered": 5,
+    "sampleColor": "P. Heather"
+  },
+  {
+    "rank": 361,
+    "styleCode": "2955",
+    "description": "INTENSIFY BLACK HEATHER 1/4 ZIP PULLOVER",
+    "totalOrdered": 5,
+    "sampleColor": "Purple"
+  },
+  {
+    "rank": 362,
+    "styleCode": "G5700",
+    "description": "Gildan Adult Heavy Cotton 3/4 Raglan Tee (white body, black sleeve)",
+    "totalOrdered": 5,
+    "sampleColor": "White/Black"
+  },
+  {
+    "rank": 363,
+    "styleCode": "LST860",
+    "description": "Left chest print on sportek 1/4 zip",
+    "totalOrdered": 5,
+    "sampleColor": "Pink rasberry"
+  },
+  {
+    "rank": 364,
+    "styleCode": "NL3300L",
+    "description": "Next level perfect tee",
+    "totalOrdered": 5,
+    "sampleColor": "Shocking pink"
+  },
+  {
+    "rank": 365,
+    "styleCode": "A6750L",
+    "description": "TriBlend Womens T ",
+    "totalOrdered": 5,
+    "sampleColor": "White "
+  },
+  {
+    "rank": 366,
+    "styleCode": "RN75813",
+    "description": "Client Supplied Garments ",
+    "totalOrdered": 5,
+    "sampleColor": "Black "
+  },
+  {
+    "rank": 367,
+    "styleCode": "MC180",
+    "description": "5.3 oz Adult Crew Neck T-Shirt-Tee",
+    "totalOrdered": 5,
+    "sampleColor": "Cardinal"
+  },
+  {
+    "rank": 368,
+    "styleCode": "G64v00L",
+    "description": "Screen Print Front Front Left Print/Full Screen Print On Back",
+    "totalOrdered": 5,
+    "sampleColor": "White "
+  },
+  {
+    "rank": 369,
+    "styleCode": "g2400",
+    "description": "DTG printing left chest + Full back on white gildan longsleeve",
+    "totalOrdered": 5,
+    "sampleColor": "white"
+  },
+  {
+    "rank": 370,
+    "styleCode": "1117",
+    "description": "AS Colour Bucket Hat",
+    "totalOrdered": 4,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 371,
+    "styleCode": "4062",
+    "description": "AS Colour Wo's Crop Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 372,
+    "styleCode": "5103",
+    "description": "AS Colour Stencil Crew\r\n",
+    "totalOrdered": 4,
+    "sampleColor": "Ecru"
+  },
+  {
+    "rank": 373,
+    "styleCode": "52MBFJ",
+    "description": "Alleson Athletic\r\nMen's Full Button Lightweight Baseball Jersey - 52MBFJ",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 374,
+    "styleCode": "TT11",
+    "description": "Team 365 - Men's Zone Performance T-Shirt - TT11",
+    "totalOrdered": 4,
+    "sampleColor": "Safety Yellow"
+  },
+  {
+    "rank": 375,
+    "styleCode": "PC61LSP",
+    "description": "Port & Company - Port & Company - Long Sleeve Essential Pocket Tee. PC61LSP",
+    "totalOrdered": 4,
+    "sampleColor": "S. Orange"
+  },
+  {
+    "rank": 376,
+    "styleCode": "LST640",
+    "description": "Sport-Tek - Sport-Tek Women's PosiCharge RacerMesh Polo. LST640",
+    "totalOrdered": 4,
+    "sampleColor": "True Royal"
+  },
+  {
+    "rank": 377,
+    "styleCode": "5200B",
+    "description": "C2 Sport - Youth Performance T-Shirt - 5200",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 378,
+    "styleCode": "TM1MU412",
+    "description": "Client Supplied garments",
+    "totalOrdered": 4,
+    "sampleColor": "Allure Heather"
+  },
+  {
+    "rank": 379,
+    "styleCode": "CT106899",
+    "description": "CT103938\r\nCarhartt\u00ae Cotton Canvas Cap",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 380,
+    "styleCode": "5054",
+    "description": "AS Colour Block L/S Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Ecru"
+  },
+  {
+    "rank": 381,
+    "styleCode": "3945",
+    "description": "Bella + Canvas - Unisex Sponge Fleece Drop Shoulder Sweatshirt",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 382,
+    "styleCode": "4630",
+    "description": "Wo's Active Leggings\r\n\r\n",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 383,
+    "styleCode": "SHMHSST",
+    "description": "Shaka Wear - Men's Tall Max Heavyweight Short-Sleeve T-Shirt\r\n\r\n",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 384,
+    "styleCode": "1301GD",
+    "description": "American Apparel - Unisex Garment Dyed T-Shirt",
+    "totalOrdered": 4,
+    "sampleColor": "Faded Brown"
+  },
+  {
+    "rank": 385,
+    "styleCode": "LS16001",
+    "description": "\t\r\nLane Seven - Unisex Urban Pullover Hooded Sweatshirt",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 386,
+    "styleCode": "3100",
+    "description": "Augusta Sportswear - Unisex Nylon Coach's Jacket",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 387,
+    "styleCode": "S608",
+    "description": "Port Authority - Port Authority Long Sleeve Easy Care Shirt S608",
+    "totalOrdered": 4,
+    "sampleColor": "Steel Grey/ Light Stone"
+  },
+  {
+    "rank": 388,
+    "styleCode": "1801",
+    "description": "LA Aparrel 1801",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 389,
+    "styleCode": "1809GD",
+    "description": "Garment Dye / S/S Pocket Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Cement"
+  },
+  {
+    "rank": 390,
+    "styleCode": "3650",
+    "description": "BELLA + CANVAS - Texture Tee - 3650",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 391,
+    "styleCode": "G800",
+    "description": "Gildan - Adult T-Shirt",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 392,
+    "styleCode": "BC3001",
+    "description": "Bella + Canvas - BELLA+CANVAS Unisex Jersey Short Sleeve Tee. BC3001",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 393,
+    "styleCode": "4800",
+    "description": "M&O - Gold Soft Touch T-Shirt ",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 394,
+    "styleCode": "KP1500",
+    "description": "Port & Company\u00ae Combed Ring Spun Pique Polo",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 395,
+    "styleCode": "SM200",
+    "description": "Paragon - Islander Performance T-Shirt ",
+    "totalOrdered": 4,
+    "sampleColor": "Neon Lime"
+  },
+  {
+    "rank": 396,
+    "styleCode": "6506",
+    "description": "YP Classics - Five-Panel Retro Trucker Cap ",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 397,
+    "styleCode": "3200",
+    "description": "Next Level - Unisex Cotton V-Neck T-Shirt ",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 398,
+    "styleCode": "C800",
+    "description": "Port Authority\u00ae Fine Twill Cap\r\n\r\nFront Panel Embriodery\r\n2.25\"w x 2.25\"t\r\nNavy Thread\r\n\"boca Babe\"",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 399,
+    "styleCode": "400",
+    "description": "Tultex - Unisex 50/50 Sport Polo ",
+    "totalOrdered": 4,
+    "sampleColor": "Heather Charcoal"
+  },
+  {
+    "rank": 400,
+    "styleCode": "700",
+    "description": "Paragon - Hatteras Performance Short Sleeve Fishing Shirt",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 401,
+    "styleCode": "3980",
+    "description": "Code Five - Realtree\u00ae Camo T-Shirt ",
+    "totalOrdered": 4,
+    "sampleColor": "APG"
+  },
+  {
+    "rank": 402,
+    "styleCode": "OAD117",
+    "description": "OAD - Large Canvas Tote ",
+    "totalOrdered": 4,
+    "sampleColor": "Natural"
+  },
+  {
+    "rank": 403,
+    "styleCode": "T200",
+    "description": "Q-Tees - Hemmed Hand Towel ",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 404,
+    "styleCode": "214",
+    "description": "Paragon - Women's Long Islander Performance Long Sleeve T-Shirt ",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 405,
+    "styleCode": "6071",
+    "description": "Next Level - Unisex Triblend Long Sleeve T-Shirt ",
+    "totalOrdered": 4,
+    "sampleColor": "Tahiti Blue"
+  },
+  {
+    "rank": 406,
+    "styleCode": "PRM50PTPD",
+    "description": "Independent Trading Co. - Pigment-Dyed Fleece Pants ",
+    "totalOrdered": 4,
+    "sampleColor": "Pigment Sandstone"
+  },
+  {
+    "rank": 407,
+    "styleCode": "1114",
+    "description": "AS Colour SURF CAP ",
+    "totalOrdered": 4,
+    "sampleColor": "Coal "
+  },
+  {
+    "rank": 408,
+    "styleCode": "TBD",
+    "description": "Client Supplied Dad Hats",
+    "totalOrdered": 4,
+    "sampleColor": "TBD"
+  },
+  {
+    "rank": 409,
+    "styleCode": "PC380",
+    "description": "Port & Company\u00ae Performance Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Jet Black"
+  },
+  {
+    "rank": 410,
+    "styleCode": "FF6606MC",
+    "description": "YP Classics Multicam Retro Trucker Cap",
+    "totalOrdered": 4,
+    "sampleColor": "MultiCam Khaki"
+  },
+  {
+    "rank": 411,
+    "styleCode": "BL_A5",
+    "description": "SupaColor transfer sub blocker 8\" wide front chest",
+    "totalOrdered": 4,
+    "sampleColor": ""
+  },
+  {
+    "rank": 412,
+    "styleCode": "BA7100+",
+    "description": "Bayside T-Shirt with a Pocket Plus Size",
+    "totalOrdered": 4,
+    "sampleColor": "Orange"
+  },
+  {
+    "rank": 413,
+    "styleCode": "BA8100+",
+    "description": "Bayside Long Sleeve T-Shirt with a Pocket Plus Size",
+    "totalOrdered": 4,
+    "sampleColor": "Orange"
+  },
+  {
+    "rank": 414,
+    "styleCode": "GN-1004SB",
+    "description": "Washed Cotton Flat Bill Cap",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 415,
+    "styleCode": "B6405",
+    "description": "Bella+Canvas Women's Jersey Short Sleeve V-Neck Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 416,
+    "styleCode": "B3091",
+    "description": "BELLA+CANVAS Men's Crew Tee",
+    "totalOrdered": 4,
+    "sampleColor": "RED"
+  },
+  {
+    "rank": 417,
+    "styleCode": "T1300",
+    "description": "Client Supplied Black/Grey Shirts",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 418,
+    "styleCode": "AJ243",
+    "description": "Women's Crossroad Top",
+    "totalOrdered": 4,
+    "sampleColor": "White/Steel\t"
+  },
+  {
+    "rank": 419,
+    "styleCode": "AL1307",
+    "description": "Alstyle Classic Adult Tank Top\r\nwith Front chest DTG print 9\" Wide",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 420,
+    "styleCode": "LB8881",
+    "description": "Liberty Bags Boston Drawstring Backpack",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 421,
+    "styleCode": "LBMS7007",
+    "description": "Maui and Sons Large Boat Tote",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 422,
+    "styleCode": "50004",
+    "description": "Ouray Sideline Contrast Stitch Mesh Cap\r\n",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 423,
+    "styleCode": "NL6333",
+    "description": "Next Level Men's Muscle Tank\r\n",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 424,
+    "styleCode": "838957",
+    "description": "Nike Ladies Dri-FIT Legacy Polo",
+    "totalOrdered": 4,
+    "sampleColor": "Rush Pink "
+  },
+  {
+    "rank": 425,
+    "styleCode": "LA3080",
+    "description": "Rabbit Skins Toddler Premium Jersey Tee\r\n6in Toddler Front\r\nFor the Dreamers",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 426,
+    "styleCode": "BG0301",
+    "description": "Badger Wide Solid Headband",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 427,
+    "styleCode": "B8882",
+    "description": "BELLA + CANVAS - Women\u2019s Flowy Cropped Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 428,
+    "styleCode": "8880",
+    "description": "BELLA + CANVAS - Women\u2019s Flowy Boxy Tank",
+    "totalOrdered": 4,
+    "sampleColor": "Athletic Heather"
+  },
+  {
+    "rank": 429,
+    "styleCode": "LA6918",
+    "description": "LAT Men's Long Sleeve Fine Jersey Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 430,
+    "styleCode": "CP77",
+    "description": "\r\n\r\nPort & Company\u00ae - Brushed Twill Low Profile Cap",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 431,
+    "styleCode": "NL3604",
+    "description": "Next Level Men's Premium Fitted Cotton Ringer Tee\r\n10in Wide Front\r\nWho Will You Be Today?",
+    "totalOrdered": 4,
+    "sampleColor": "White/Black"
+  },
+  {
+    "rank": 432,
+    "styleCode": "NL3710",
+    "description": "\r\nNext Level Girl's Princess Ringspun Cotton Short Sleeve Tee",
+    "totalOrdered": 4,
+    "sampleColor": "L Pink"
+  },
+  {
+    "rank": 433,
+    "styleCode": "AI841",
+    "description": "Men's Camp Polo\r\n",
+    "totalOrdered": 4,
+    "sampleColor": "White/Steel"
+  },
+  {
+    "rank": 434,
+    "styleCode": "13V114",
+    "description": "Van Heusen Ladies' Long Sleeve Silky Poplin",
+    "totalOrdered": 4,
+    "sampleColor": "Pink"
+  },
+  {
+    "rank": 435,
+    "styleCode": "NL3605",
+    "description": "Next Level Adult Cotton Pocket Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Natural"
+  },
+  {
+    "rank": 436,
+    "styleCode": "B3650",
+    "description": "BELLA+CANVAS Unisex Poly-Cotton Short Sleeve Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Black Mineral Wash"
+  },
+  {
+    "rank": 437,
+    "styleCode": "29M",
+    "description": "DRI-POWER\u00ae T-SHIRT",
+    "totalOrdered": 4,
+    "sampleColor": "J Navy"
+  },
+  {
+    "rank": 438,
+    "styleCode": "S700",
+    "description": "Champion - Double Dry Eco\u00ae Hooded Sweatshirt",
+    "totalOrdered": 4,
+    "sampleColor": "Gold"
+  },
+  {
+    "rank": 439,
+    "styleCode": "3",
+    "description": "3C White, Black + Purple\r\nFront Only\r\nBelieve That",
+    "totalOrdered": 4,
+    "sampleColor": ""
+  },
+  {
+    "rank": 440,
+    "styleCode": "A4N3264",
+    "description": "A4 Adult Spun Polyester Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Graphite"
+  },
+  {
+    "rank": 441,
+    "styleCode": "414000",
+    "description": "Badger hook tee",
+    "totalOrdered": 4,
+    "sampleColor": "Col Blue/Col Blue Digital\t"
+  },
+  {
+    "rank": 442,
+    "styleCode": "B3729",
+    "description": "Bella Canvas Sponge fleece Pullover hoodie",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 443,
+    "styleCode": "G94800",
+    "description": "Gildan DryBlend Adult Pique Sport Shirt",
+    "totalOrdered": 4,
+    "sampleColor": "Charcoal"
+  },
+  {
+    "rank": 444,
+    "styleCode": "A392",
+    "description": "ANVIL Women's Featherweight V-Neck Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Heather Dark Grey"
+  },
+  {
+    "rank": 445,
+    "styleCode": "AS5052",
+    "description": "\t\r\nMENS STATE TEE - 5052",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 446,
+    "styleCode": "AS4007",
+    "description": "WO'S DASH TANK - 4007",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 447,
+    "styleCode": "AS3006",
+    "description": "YOUTH TEE - 3006",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 448,
+    "styleCode": "A4N3261",
+    "description": "A4 Solid Interlock Polo",
+    "totalOrdered": 4,
+    "sampleColor": "Graphite"
+  },
+  {
+    "rank": 449,
+    "styleCode": "443MR",
+    "description": "JZ 443MR/MXR 6.5OZ PQ SPT SHRT",
+    "totalOrdered": 4,
+    "sampleColor": "Green"
+  },
+  {
+    "rank": 450,
+    "styleCode": "BG7219",
+    "description": "Badger Adult Mesh Pocketed 9\" Short",
+    "totalOrdered": 4,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 451,
+    "styleCode": "b3001",
+    "description": "Bella Canvas ringpun plus size cotton tee ",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 452,
+    "styleCode": "G2000b",
+    "description": "Mini Mickey with green glasses size : 3 with the name\r\nKyle Jr",
+    "totalOrdered": 4,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 453,
+    "styleCode": "T473LS",
+    "description": "Sport-Tek\u00ae Dry Zone\u00ae Long Sleeve Raglan T-Shirt",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 454,
+    "styleCode": "ST351",
+    "description": "Sport-Tek\u00ae Colorblock PosiCharge\u00ae Competitor\u2122 Tee",
+    "totalOrdered": 4,
+    "sampleColor": "Black/Lime Shock"
+  },
+  {
+    "rank": 455,
+    "styleCode": "4140",
+    "description": "Badger 4140 - Digital Hook Tee\r\n",
+    "totalOrdered": 4,
+    "sampleColor": "Forest"
+  },
+  {
+    "rank": 456,
+    "styleCode": "sm100",
+    "description": "Paragon dri fit polo in gray",
+    "totalOrdered": 4,
+    "sampleColor": "Carbon"
+  },
+  {
+    "rank": 457,
+    "styleCode": "838964",
+    "description": "Nike Golf Dri-FIT Embossed Tri-Blade Polo. 838964",
+    "totalOrdered": 4,
+    "sampleColor": "Black "
+  },
+  {
+    "rank": 458,
+    "styleCode": "4820 B Tech Tee",
+    "description": "Poly Shirts ",
+    "totalOrdered": 4,
+    "sampleColor": "white"
+  },
+  {
+    "rank": 459,
+    "styleCode": "G5v00l",
+    "description": "gildan ultra cottonv neck",
+    "totalOrdered": 4,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 460,
+    "styleCode": "lp101",
+    "description": "Adams cap with pill embriodery ",
+    "totalOrdered": 4,
+    "sampleColor": "royal"
+  },
+  {
+    "rank": 461,
+    "styleCode": "g1800",
+    "description": "Gildan Hoodie with Front chest DTG print + neck tag",
+    "totalOrdered": 4,
+    "sampleColor": "white "
+  },
+  {
+    "rank": 462,
+    "styleCode": "355",
+    "description": "Augusta Drop Ship - Adult Accelerate Short",
+    "totalOrdered": 4,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 463,
+    "styleCode": "6933",
+    "description": "cleint supplied garment",
+    "totalOrdered": 4,
+    "sampleColor": "Red"
+  },
+  {
+    "rank": 464,
+    "styleCode": "G50v",
+    "description": "COD screen print front and back white ink",
+    "totalOrdered": 4,
+    "sampleColor": "royal"
+  },
+  {
+    "rank": 465,
+    "styleCode": "4064G",
+    "description": "Staple Tank Top (Women\u2019s)\r\nAS Colour \u2014 Wo\u2019s Organic Rib Crop Tank \u2014 4064G (Powder)",
+    "totalOrdered": 3,
+    "sampleColor": "Powder"
+  },
+  {
+    "rank": 466,
+    "styleCode": "6010M",
+    "description": "Next Level - Unisex Triblend T-Shirt - 6010",
+    "totalOrdered": 3,
+    "sampleColor": " Black"
+  },
+  {
+    "rank": 467,
+    "styleCode": "3911",
+    "description": "BELLA + CANVAS - Unisex Sponge Fleece Classic Crewneck Sweatshirt - 3911",
+    "totalOrdered": 3,
+    "sampleColor": "Dark Grey Heather"
+  },
+  {
+    "rank": 468,
+    "styleCode": "1500KC",
+    "description": "YP Classics - 8 1/2\" Beanie - 1500KC",
+    "totalOrdered": 3,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 469,
+    "styleCode": "3719Y",
+    "description": "BELLA + CANVAS - Youth Sponge Fleece Hoodie Sweatshirt - 3719Y",
+    "totalOrdered": 3,
+    "sampleColor": "Navy"
+  },
+  {
+    "rank": 470,
+    "styleCode": "C110",
+    "description": "Port Authority - Port Authority Flexfit 110 Mesh Cap C110",
+    "totalOrdered": 3,
+    "sampleColor": "Black/ Black"
+  },
+  {
+    "rank": 471,
+    "styleCode": "AL6008",
+    "description": "AllMade - Allmade Women's Tri-Blend Long Sleeve Tee AL6008",
+    "totalOrdered": 3,
+    "sampleColor": "Aluminum Grey"
+  },
+  {
+    "rank": 472,
+    "styleCode": "1300",
+    "description": "Colortone - Unisex Mineral Wash T-Shirt - 1300",
+    "totalOrdered": 3,
+    "sampleColor": "Mineral Black"
+  },
+  {
+    "rank": 473,
+    "styleCode": "PC61P",
+    "description": "Port & Company - Port & Company - Essential Pocket Tee. PC61P",
+    "totalOrdered": 3,
+    "sampleColor": "S.Orange"
+  },
+  {
+    "rank": 474,
+    "styleCode": "BC8413",
+    "description": "BELLA+CANVAS Women's Triblend Short Sleeve Tee. BC8413",
+    "totalOrdered": 3,
+    "sampleColor": "Grey Triblend"
+  },
+  {
+    "rank": 475,
+    "styleCode": "K8000",
+    "description": "Port Authority - Port Authority EZCotton Polo. K8000",
+    "totalOrdered": 3,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 476,
+    "styleCode": "788",
+    "description": "Augusta Sportswear - Unisex Nexgen Performance Long Sleeve T-Shirt - 788",
+    "totalOrdered": 3,
+    "sampleColor": "kelly"
+  },
+  {
+    "rank": 477,
+    "styleCode": "5904",
+    "description": "Swim Shorts",
+    "totalOrdered": 3,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 478,
+    "styleCode": "5924",
+    "description": "Training Shorts",
+    "totalOrdered": 3,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 479,
+    "styleCode": "1801gd",
+    "description": "LA apparel 1801gd\r\nS/S Grmnt Dye Crew Neck 6.5oz",
+    "totalOrdered": 3,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 480,
+    "styleCode": "5082",
+    "description": "ASColour Heavy Faded Tee\r\n5082",
+    "totalOrdered": 3,
+    "sampleColor": "Faded Black"
+  },
+  {
+    "rank": 481,
+    "styleCode": "67000",
+    "description": "Gildan - Gildan Softstyle CVC Tee 67000",
+    "totalOrdered": 3,
+    "sampleColor": "Pitch Black"
+  },
+  {
+    "rank": 482,
+    "styleCode": "1807gd",
+    "description": "L/S Grmnt Dye Crew Neck 6.5oz\r\n",
+    "totalOrdered": 3,
+    "sampleColor": "vintage black"
+  },
+  {
+    "rank": 483,
+    "styleCode": "5001A",
+    "description": "Staple Active Tee",
+    "totalOrdered": 3,
+    "sampleColor": "WHITE"
+  },
+  {
+    "rank": 484,
+    "styleCode": "500",
+    "description": "Paragon - Sebring Performance Polo - 500",
+    "totalOrdered": 3,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 485,
+    "styleCode": "A430",
+    "description": "Adidas Basic Polo",
+    "totalOrdered": 3,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 486,
+    "styleCode": "3900",
+    "description": "Next Level - Women\u2019s Cotton T-Shirt - 3900",
+    "totalOrdered": 3,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 487,
+    "styleCode": "LS16005",
+    "description": "Lane Seven - Unisex Urban Heavyweight T-Shirt",
+    "totalOrdered": 3,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 488,
+    "styleCode": "3512",
+    "description": "BELLA + CANVAS - Jersey Hooded Long Sleeve Tee - 3512",
+    "totalOrdered": 3,
+    "sampleColor": "Charcoal Black Triblend"
+  },
+  {
+    "rank": 489,
+    "styleCode": "L217",
+    "description": "Port Authority\u00ae Women's Value Fleece Jacket",
+    "totalOrdered": 3,
+    "sampleColor": "Maroon"
+  },
+  {
+    "rank": 490,
+    "styleCode": "F217",
+    "description": "Port Authority - Port Authority Value Fleece Jacket. F217",
+    "totalOrdered": 3,
+    "sampleColor": "True Navy"
+  },
+  {
+    "rank": 491,
+    "styleCode": "BC3501",
+    "description": "Client Supplied Garments",
+    "totalOrdered": 3,
+    "sampleColor": ""
+  },
+  {
+    "rank": 492,
+    "styleCode": "5017",
+    "description": "Augusta Sportswear - Adult Vital Polo ",
+    "totalOrdered": 3,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 493,
+    "styleCode": "AL2008",
+    "description": "AllMade - Allmade Women's Tri-Blend Tee AL2008",
+    "totalOrdered": 3,
+    "sampleColor": "Deep Black"
+  },
+  {
+    "rank": 494,
+    "styleCode": "1801NEON",
+    "description": "1801NEON\r\nS/S Neon Crew Neck 6.5oz",
+    "totalOrdered": 3,
+    "sampleColor": "Neon Yellow"
+  },
+  {
+    "rank": 495,
+    "styleCode": "sm210",
+    "description": "Paragon - Long Islander Performance Long Sleeve T-Shirt",
+    "totalOrdered": 3,
+    "sampleColor": "Blue mist"
+  },
+  {
+    "rank": 496,
+    "styleCode": "1545",
+    "description": "Comfort Colors - Colorblast Crewneck Sweatshirt - 1545\r\n",
+    "totalOrdered": 3,
+    "sampleColor": "Clay"
+  },
+  {
+    "rank": 497,
+    "styleCode": "3633",
+    "description": "Next Level Apparel - Men's Cotton Tank",
+    "totalOrdered": 3,
+    "sampleColor": "Black"
+  },
+  {
+    "rank": 498,
+    "styleCode": "8430",
+    "description": "Bella + Canvas - Ladies' Triblend Racerback Tank",
+    "totalOrdered": 3,
+    "sampleColor": "White"
+  },
+  {
+    "rank": 499,
+    "styleCode": "5250",
+    "description": "Hanes - Hanes Authentic 100% Cotton T-Shirt. 5250",
+    "totalOrdered": 3,
+    "sampleColor": "Fatigue Green"
+  },
+  {
+    "rank": 500,
+    "styleCode": "2050",
+    "description": "Sportsman - Bucket Hat - 2050",
+    "totalOrdered": 3,
+    "sampleColor": "White"
+  }
+]
