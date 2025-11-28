@@ -1,22 +1,28 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 27, 2025 (Consolidated)
+**Last Updated:** November 28, 2025
 
 ---
 
 ## 🚀 Homelab Deployment
 
-**Status:** ✅ FULLY OPERATIONAL - All Data Imported + Inventory API Running
+**Status:** ✅ PRODUCTION READY - Frontend + API + All Data Deployed
 
 ### Running Services
 
-| Service | URL | Status | Data |
-|---------|-----|--------|------|
-| **Strapi CMS** | http://docker-host:1337 | ✅ Running (v5.31.2) | 12,854 orders, 49,216 line items |
-| **PostgreSQL** | docker-host:5432 | ✅ Healthy | Primary database |
-| **Redis** | docker-host:6379 | ✅ Healthy | Cache ready |
-| **Inventory API** | http://docker-host:3002 | ✅ Running | 3 suppliers configured |
-| **MinIO** | http://docker-host:9001 | ✅ Running | Artwork storage |
+| Service | Port | URL | Status |
+|---------|------|-----|--------|
+| **React Frontend** | 3000 | http://docker-host:3000 | ✅ Running |
+| **Strapi CMS** | 1337 | http://docker-host:1337 | ✅ Running (v5.31.2) |
+| **PostgreSQL** | 5432 | Internal | ✅ Healthy |
+| **Redis** | 6379 | Internal | ✅ Healthy |
+| **Inventory API** | 3002 | http://docker-host:3002 | ✅ Running |
+| **MinIO** | 9000-9001 | http://docker-host:9001 | ✅ Running |
+| **Traefik** | 80/443 | http://docker-host:8080 | ✅ Running |
+
+### HTTPS URLs (Traefik + Cloudflare)
+- **Frontend:** https://app.printshop.ronny.works
+- **API/Admin:** https://printshop.ronny.works
 
 ### Data Counts (Verified Nov 27, 2025)
 - **Orders:** 12,854
@@ -24,20 +30,16 @@
 - **Line Items:** 49,216
 - **Products:** 710
 
-### Artwork Scrape (In Progress)
-- **Progress:** 510/12,867 orders (~4%)
-- **Size:** ~12GB downloaded
-- **Location:** `data/artwork/by_customer/` and `data/artwork/by_order/`
-- **ETA:** ~60 hours at current rate
-
 ---
 
-## Session Summary (Nov 26-27, 2025)
+## Session Summary (Nov 26-28, 2025)
 
 ### Completed ✅
 - Full Printavo data export and import
 - AS Colour dual authentication (JWT + Subscription-Key)
 - Inventory API deployed on port 3002
+- **Frontend built and deployed** (React + Vite)
+- Traefik SSL configured for HTTPS
 - Docker-compose updated for homelab
 - Documentation consolidated (HLBPA style)
 
@@ -45,6 +47,7 @@
 1. **AS Colour Auth:** Required both Subscription-Key header AND JWT Bearer token
 2. **Port Conflict:** Inventory API moved to 3002 (uptime-kuma uses 3001)
 3. **Docker Compose:** Removed deprecated `version` field, cleaned up unused services
+4. **Artwork in Git:** Added to .gitignore (16GB - stored in MinIO, not Git)
 
 ---
 

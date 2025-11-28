@@ -1,7 +1,7 @@
 # PrintShop OS - Architecture Overview
 
-> **Last Updated:** November 27, 2025  
-> **Status:** Production Migration Complete  
+> **Last Updated:** November 28, 2025  
+> **Status:** Production - Frontend Deployed  
 > **Maintainer:** @ronnyworks
 
 ---
@@ -20,6 +20,7 @@ flowchart TB
     end
     
     subgraph PrintShopOS["PrintShop OS (docker-host)"]
+        FE[React Frontend<br/>:3000]
         ST[Strapi CMS<br/>:1337]
         API[Inventory API<br/>:3002]
         PG[(PostgreSQL<br/>:5432)]
@@ -28,7 +29,7 @@ flowchart TB
     end
     
     subgraph Clients["Clients"]
-        FE[React Frontend]
+        WEB[Web Browser]
         AD[Admin Panel]
     end
     
@@ -42,6 +43,7 @@ flowchart TB
     API <--> RD
     API --> ST
     
+    WEB --> FE
     FE --> ST
     AD --> ST
     
@@ -52,16 +54,28 @@ flowchart TB
 
 ## Container Architecture
 
-All services run on `docker-host` (100.92.156.118) via Docker Compose.
+All services run on `docker-host` (100.92.156.118) via Docker.
 
-| Service | Container | Port | Status | Purpose |
-|---------|-----------|------|--------|---------|
-| **Strapi CMS** | `printshop-strapi` | 1337 | ✅ Running | Central API, content management |
-| **PostgreSQL** | `printshop-postgres` | 5432 | ✅ Running | Primary database |
-| **Redis** | `printshop-redis` | 6379 | ✅ Running | Cache, sessions |
-| **Inventory API** | `printshop-api` | 3002 | ✅ Running | Supplier integrations |
-| **MinIO** | `minio` | 9000/9001 | ✅ Running | Artwork storage |
-| **Traefik** | `traefik` | 80/443 | ✅ Running | Reverse proxy |
+| Service | Container | Port | URL | Status |
+|---------|-----------|------|-----|--------|
+| **React Frontend** | `printshop-frontend` | 3000 | `app.printshop.ronny.works` | ✅ Running |
+| **Strapi CMS** | `printshop-strapi` | 1337 | `printshop.ronny.works` | ✅ Running |
+| **PostgreSQL** | `printshop-postgres` | 5432 | Internal | ✅ Running |
+| **Redis** | `printshop-redis` | 6379 | Internal | ✅ Running |
+| **Inventory API** | `printshop-api` | 3002 | Internal | ✅ Running |
+| **MinIO** | `minio` | 9000/9001 | Internal | ✅ Running |
+| **Traefik** | `traefik` | 80/443/8080 | Reverse Proxy | ✅ Running |
+
+### Access URLs
+
+| Service | Direct Access (Tailscale) | HTTPS (Traefik) |
+|---------|---------------------------|-----------------|
+| Frontend | http://100.92.156.118:3000 | https://app.printshop.ronny.works |
+| Strapi API | http://100.92.156.118:1337 | https://printshop.ronny.works |
+| Strapi Admin | http://100.92.156.118:1337/admin | https://printshop.ronny.works/admin |
+| Inventory API | http://100.92.156.118:3002 | Internal only |
+| MinIO Console | http://100.92.156.118:9001 | Internal only |
+| Traefik Dashboard | http://100.92.156.118:8080 | Internal only |
 
 ### Network Topology
 
@@ -70,13 +84,13 @@ All services run on `docker-host` (100.92.156.118) via Docker Compose.
 │ docker-host (100.92.156.118)                                    │
 │                                                                 │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐         │
-│  │  Traefik    │────│   Strapi    │────│  PostgreSQL │         │
-│  │  :80/:443   │    │   :1337     │    │    :5432    │         │
-│  └─────────────┘    └──────┬──────┘    └─────────────┘         │
-│         │                  │                                    │
-│  ┌──────┴──────┐    ┌──────┴──────┐    ┌─────────────┐         │
-│  │ Inventory   │    │    Redis    │    │    MinIO    │         │
-│  │ API :3002   │────│    :6379    │    │ :9000/:9001 │         │
+│  │  Traefik    │────│  Frontend   │────│   Strapi    │         │
+│  │  :80/:443   │    │   :3000     │    │   :1337     │         │
+│  └─────────────┘    └─────────────┘    └──────┬──────┘         │
+│         │                                      │                │
+│  ┌──────┴──────┐    ┌─────────────┐    ┌──────┴──────┐         │
+│  │ Inventory   │    │  PostgreSQL │    │    Redis    │         │
+│  │ API :3002   │    │    :5432    │    │    :6379    │         │
 │  └─────────────┘    └─────────────┘    └─────────────┘         │
 │                                                                 │
 │  Network: homelab-network (external)                            │
