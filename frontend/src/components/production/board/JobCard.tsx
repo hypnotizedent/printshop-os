@@ -11,7 +11,8 @@ import {
   Package, 
   Warning, 
   CaretRight,
-  Lightning
+  Lightning,
+  NotePencil
 } from '@phosphor-icons/react';
 import type { ProductionJob } from './types';
 import { cn } from '@/lib/utils';
@@ -96,9 +97,10 @@ export function JobCard({ job, onClick, isDragging }: JobCardProps) {
 
         {/* Production notes */}
         {job.productionNotes && (
-          <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded truncate">
-            📝 {job.productionNotes}
-          </p>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+            <NotePencil size={14} className="flex-shrink-0" />
+            <span className="truncate">{job.productionNotes}</span>
+          </div>
         )}
 
         {/* Footer with due date and quantity */}

@@ -32,6 +32,10 @@ import { cn } from '@/lib/utils';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 const REFRESH_INTERVAL = 30000; // 30 seconds
 
+// Progress constants for job status
+const PROGRESS_COMPLETE = 100;
+const PROGRESS_DEFAULT = 50;
+
 interface StrapiLineItem {
   id?: number;
   description?: string;
@@ -142,7 +146,7 @@ export function ProductionBoard() {
       createdAt: order.createdAt || new Date().toISOString(),
       updatedAt: order.updatedAt || new Date().toISOString(),
       quantity: totalQuantity,
-      progress: order.status === 'COMPLETE' ? 100 : 50,
+      progress: order.status === 'COMPLETE' ? PROGRESS_COMPLETE : PROGRESS_DEFAULT,
     };
   };
 
@@ -179,14 +183,26 @@ export function ProductionBoard() {
 
       setJobs(transformedJobs);
 
-      // Calculate stats
+      // Calculate stats in a single pass for efficiency
+      const statsAccumulator = transformedJobs.reduce((acc, job) => {
+        acc.total++;
+        if (job.isRush) acc.rush++;
+        switch (job.status) {
+          case 'queue': acc.queue++; break;
+          case 'in_progress': acc.inProgress++; break;
+          case 'quality_check': acc.qualityCheck++; break;
+          case 'complete': acc.complete++; break;
+        }
+        return acc;
+      }, { total: 0, queue: 0, inProgress: 0, qualityCheck: 0, complete: 0, rush: 0 });
+
       const newStats: ProductionStatsType = {
-        totalJobsDueToday: transformedJobs.length,
-        jobsInQueue: transformedJobs.filter(j => j.status === 'queue').length,
-        jobsInProgress: transformedJobs.filter(j => j.status === 'in_progress').length,
-        jobsInQualityCheck: transformedJobs.filter(j => j.status === 'quality_check').length,
-        jobsCompleted: transformedJobs.filter(j => j.status === 'complete').length,
-        rushOrderCount: transformedJobs.filter(j => j.isRush).length,
+        totalJobsDueToday: statsAccumulator.total,
+        jobsInQueue: statsAccumulator.queue,
+        jobsInProgress: statsAccumulator.inProgress,
+        jobsInQualityCheck: statsAccumulator.qualityCheck,
+        jobsCompleted: statsAccumulator.complete,
+        rushOrderCount: statsAccumulator.rush,
         lastRefreshed: new Date(),
       };
       setStats(newStats);
