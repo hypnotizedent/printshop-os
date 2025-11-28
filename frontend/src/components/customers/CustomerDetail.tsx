@@ -377,7 +377,7 @@ export function CustomerDetail({ customerId, onBack, onNewOrder }: CustomerDetai
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    onClick={() => copyToClipboard(customer.phone!, 'Phone')}
+                    onClick={() => customer.phone && copyToClipboard(customer.phone, 'Phone')}
                   >
                     <Copy size={16} />
                   </Button>

@@ -76,6 +76,10 @@ export function CustomerList({ onSelectCustomer, onNewOrder }: CustomerListProps
     onSelectCustomer(cardData);
   };
 
+  // Transform API customer to card data format
+  // Note: totalOrders and totalRevenue are set to 0 here because the list API
+  // doesn't include order data. These are calculated on the detail page when
+  // orders are fetched separately. This is intentional to keep the list API fast.
   const transformToCardData = (customer: CustomerAPIResponse): CustomerCardData => ({
     id: customer.id.toString(),
     documentId: customer.documentId,
@@ -83,8 +87,8 @@ export function CustomerList({ onSelectCustomer, onNewOrder }: CustomerListProps
     email: customer.email,
     phone: customer.phone,
     company: customer.company,
-    totalOrders: 0, // Will be calculated from orders when populated
-    totalRevenue: 0, // Will be calculated from orders when populated
+    totalOrders: 0,
+    totalRevenue: 0,
     lastOrderDate: customer.updatedAt,
     status: 'active' as const,
   });
@@ -146,14 +150,14 @@ export function CustomerList({ onSelectCustomer, onNewOrder }: CustomerListProps
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Min. Order Count</label>
               <Select 
-                value={filters.orderCountMin?.toString() || ''} 
-                onValueChange={(v) => setFilters(prev => ({ ...prev, orderCountMin: v ? parseInt(v) : undefined }))}
+                value={filters.orderCountMin?.toString() || 'any'} 
+                onValueChange={(v) => setFilters(prev => ({ ...prev, orderCountMin: v === 'any' ? undefined : parseInt(v) }))}
               >
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="any">Any</SelectItem>
                   <SelectItem value="1">1+</SelectItem>
                   <SelectItem value="5">5+</SelectItem>
                   <SelectItem value="10">10+</SelectItem>
@@ -165,14 +169,14 @@ export function CustomerList({ onSelectCustomer, onNewOrder }: CustomerListProps
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Last Order Within</label>
               <Select 
-                value={filters.lastOrderDays?.toString() || ''} 
-                onValueChange={(v) => setFilters(prev => ({ ...prev, lastOrderDays: v ? parseInt(v) : undefined }))}
+                value={filters.lastOrderDays?.toString() || 'any'} 
+                onValueChange={(v) => setFilters(prev => ({ ...prev, lastOrderDays: v === 'any' ? undefined : parseInt(v) }))}
               >
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Any time" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any time</SelectItem>
+                  <SelectItem value="any">Any time</SelectItem>
                   <SelectItem value="30">30 days</SelectItem>
                   <SelectItem value="90">90 days</SelectItem>
                   <SelectItem value="180">6 months</SelectItem>

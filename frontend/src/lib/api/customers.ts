@@ -116,7 +116,8 @@ export async function getRecentCustomers(
   limit: number = 5
 ): Promise<StrapiResponse<CustomerAPIResponse>> {
   const params = new URLSearchParams({
-    'pagination[limit]': limit.toString(),
+    'pagination[pageSize]': limit.toString(),
+    'pagination[page]': '1',
     'sort': 'updatedAt:desc',
   });
 
