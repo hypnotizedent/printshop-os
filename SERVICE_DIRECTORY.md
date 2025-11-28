@@ -1,53 +1,73 @@
 # PrintShop OS - Service Directory
 
-**Last Updated:** November 27, 2025 (Session 15 - AS Colour Auth Fix)
+**Last Updated:** November 27, 2025 (Consolidated)
 
 ---
 
 ## 🚀 Homelab Deployment
 
-**Status:** ✅ FULLY OPERATIONAL - All Data Imported + Inventory API Ready
+**Status:** ✅ FULLY OPERATIONAL - All Data Imported + Inventory API Running
 
 ### Running Services
 
 | Service | URL | Status | Data |
 |---------|-----|--------|------|
-| **Strapi CMS** | http://100.92.156.118:1337 | ✅ Running (v5.31.2 Enterprise) | 3,317 customers, 12,867 orders, 500 products |
-| **PostgreSQL** | 100.92.156.118:5432 | ✅ Running | 49,216 line items |
-| **Redis** | 100.92.156.118:6379 | ✅ Running | Cache ready |
-| **Inventory API** | http://100.92.156.118:3001 | 🔄 Deploy pending | Supplier integration |
-| **MinIO** | http://100.92.156.118:9001 | ✅ Running | Artwork bucket ready |
+| **Strapi CMS** | http://docker-host:1337 | ✅ Running (v5.31.2) | 12,854 orders, 49,216 line items |
+| **PostgreSQL** | docker-host:5432 | ✅ Healthy | Primary database |
+| **Redis** | docker-host:6379 | ✅ Healthy | Cache ready |
+| **Inventory API** | http://docker-host:3002 | ✅ Running | 3 suppliers configured |
+| **MinIO** | http://docker-host:9001 | ✅ Running | Artwork storage |
 
-### Session 15 Notes (Nov 27, 2025 - AS Colour Auth Fix)
-- ✅ **FIXED: AS Colour dual authentication**
-  - Subscription-Key header for catalog/inventory
-  - JWT Bearer token from email/password for pricing
-  - Client now auto-authenticates on first request
-- ✅ **Updated `services/api/src/inventory/clients.ts`**
-  - `ASColourInventoryClient` now accepts email/password
-  - Automatic JWT token refresh (23-hour expiry)
-- ✅ **Updated `services/api/.env`** - Added ASCOLOUR_EMAIL/PASSWORD
-- ✅ **Documentation updated:** `docs/SUPPLIER_INTEGRATION.md` with dual-auth details
+### Data Counts (Verified Nov 27, 2025)
+- **Orders:** 12,854
+- **Customers:** 3,317
+- **Line Items:** 49,216
+- **Products:** 710
 
-### Session 14 Notes (Nov 27, 2025 - Inventory API + Artwork)
-- ✅ **Line Items COMPLETE:** 49,216 imported to Strapi
-- ✅ **Top 500 Products:** Imported for autocomplete
-- ✅ **Inventory API built:** `services/api/src/inventory/`
-  - Real-time inventory checks across AS Colour, S&S, SanMar
-  - Redis caching (15-min TTL)
-  - SKU pattern detection for supplier routing
-- ✅ **All supplier credentials configured:** See `docs/SUPPLIER_INTEGRATION.md`
-- 🔄 **Artwork scrape running:** ~12,867 orders (~7 hours)
-  - Customer-organized structure: `by_customer/{slug}/{year}/{order}/`
-  - Symlinks: `by_order/{visual_id}/`
-  - MinIO sync script ready: `scripts/sync-artwork-to-minio.sh`
-- ✅ **Documentation updated:**
-  - `docs/SUPPLIER_INTEGRATION.md` - Full supplier API docs
-  - `docs/ARTWORK_ARCHIVE_STRATEGY.md` - Artwork storage design
-  - `docs/PRINTAVO_MIGRATION_STATUS.md` - Overall progress
-  - `docs/AGENT_SESSION_CONTEXT.md` - LLM context sync
+### Artwork Scrape (In Progress)
+- **Progress:** 510/12,867 orders (~4%)
+- **Size:** ~12GB downloaded
+- **Location:** `data/artwork/by_customer/` and `data/artwork/by_order/`
+- **ETA:** ~60 hours at current rate
 
-### Session 12 Notes (Nov 27, 2025 - Printavo API Complete Extraction)
+---
+
+## Session Summary (Nov 26-27, 2025)
+
+### Completed ✅
+- Full Printavo data export and import
+- AS Colour dual authentication (JWT + Subscription-Key)
+- Inventory API deployed on port 3002
+- Docker-compose updated for homelab
+- Documentation consolidated (HLBPA style)
+
+### Key Technical Fixes
+1. **AS Colour Auth:** Required both Subscription-Key header AND JWT Bearer token
+2. **Port Conflict:** Inventory API moved to 3002 (uptime-kuma uses 3001)
+3. **Docker Compose:** Removed deprecated `version` field, cleaned up unused services
+
+---
+
+## Quick Commands
+
+```bash
+# SSH to docker-host
+ssh docker-host
+
+# Container status
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Test inventory API
+curl http://docker-host:3002/health
+curl http://docker-host:3002/api/inventory/check/5001
+
+# View logs
+docker logs printshop-strapi --tail 50 -f
+```
+
+---
+
+## Service Structure
 - ✅ **COMPLETE Printavo API extraction** - ALL accessible data exported:
   - **12,867 orders** (61 MB) with 44,158 embedded line items (23 MB)
   - **3,358 customers** (3.8 MB)

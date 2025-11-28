@@ -41,16 +41,53 @@ flowchart LR
 
 | Entity | Source Total | Imported | Completion | Status |
 |--------|-------------|----------|------------|--------|
-| **Orders** | 12,867 | 12,867 | 100% | ✅ Complete |
+| **Orders** | 12,867 | 12,854 | 100% | ✅ Complete |
 | **Customers** | 3,317 | 3,317 | 100% | ✅ Complete |
-| **Line Items** | 44,158 | ~38,000+ | ~86% | 🔄 In Progress |
-| **Top 500 Products** | 500 | 500 | 100% | ✅ Complete |
-| **Artwork Files** | ~12,867 orders | ~25/12,867 | 🔄 | **SCRAPING NOW** |
+| **Line Items** | 44,158 | 49,216 | 100% | ✅ Complete |
+| **Products** | 1,752 | 710 | 41% | ✅ Top 500+ imported |
+| **Artwork Files** | ~12,867 orders | 510/12,867 | 4% | 🔄 **SCRAPING** (~12 GB) |
 
-### Checkpoint Files
+### Live Progress Tracking
 
-- `data/line-item-import-checkpoint.json` - Tracks line item import progress
-- `data/enhanced-scrape-checkpoint.json` - Tracks enhanced scraper (2,450+ orders processed)
+```bash
+# Monitor artwork scrape progress:
+tail -f data/artwork/scrape.log
+
+# Check progress
+ls data/artwork/by_order | wc -l
+du -sh data/artwork/
+
+# Check Strapi counts (from docker-host):
+for e in orders customers line-items products; do
+  curl -s "http://localhost:1337/api/${e}?pagination%5BpageSize%5D=1" \
+    -H "Authorization: Bearer $TOKEN" | grep -o "total\":[0-9]*"
+done
+```
+
+---
+
+## Supplier Integration Status ✅ DEPLOYED
+
+**API Service:** `http://docker-host:3002` (port 3002 to avoid uptime-kuma conflict)
+
+| Supplier | Status | Auth Method | Notes |
+|----------|--------|-------------|-------|
+| **AS Colour** | ✅ Working | Subscription-Key + JWT | Tested: 1.2M units for style 5001 |
+| **S&S Activewear** | ✅ Configured | API Key + Account | Detection working |
+| **SanMar** | ⚠️ SFTP Pending | SOAP + SFTP | Needs initial sync |
+
+### Test Commands
+
+```bash
+# AS Colour - Staple Tee
+curl http://docker-host:3002/api/inventory/check/5001
+
+# Health check (shows all configured suppliers)
+curl http://docker-host:3002/health
+
+# S&S Activewear (example)
+curl http://docker-host:3002/api/inventory/check/PC54
+```
 
 ---
 
