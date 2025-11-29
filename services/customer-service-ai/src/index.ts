@@ -3,7 +3,7 @@
  * Express server with AI-powered customer service endpoints
  */
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, Router } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createAIRoutes } from './routes/ai.routes';
@@ -168,17 +168,17 @@ app.get('/docs', (_req: Request, res: Response) => {
         },
         get: {
           method: 'GET',
-          path: '/chat/sessions/:sessionId',
+          path: '/chat/sessions/:session_id',
           description: 'Get chat session details and history',
         },
         message: {
           method: 'POST',
-          path: '/chat/sessions/:sessionId/messages',
+          path: '/chat/sessions/:session_id/messages',
           description: 'Send a message in a chat session',
         },
         resolve: {
           method: 'POST',
-          path: '/chat/sessions/:sessionId/resolve',
+          path: '/chat/sessions/:session_id/resolve',
           description: 'Mark a chat session as resolved',
         },
       },
@@ -192,6 +192,7 @@ app.get('/docs', (_req: Request, res: Response) => {
 });
 
 // Mount AI routes with lazy service initialization
+// Initialize middleware for lazy service initialization
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (!servicesInitialized && req.path !== '/health' && req.path !== '/docs') {
     await initializeServices();
@@ -199,16 +200,36 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Mount routes when services are ready
-app.use((req: Request, res: Response, next: NextFunction) => {
-  if (ragService && sentimentService && designAnalysisService && chatService) {
-    const aiRouter = createAIRoutes(ragService, sentimentService, designAnalysisService, chatService);
-    aiRouter(req, res, next);
-  } else if (req.path !== '/health' && req.path !== '/docs' && req.path !== '/ready') {
-    res.status(503).json({ error: 'Services not available', message: 'AI services are still initializing' });
-  } else {
-    next();
+// Mount AI routes when services are ready
+let aiRouter: Router | null = null;
+
+app.use('/api', (req: Request, res: Response, next: NextFunction) => {
+  if (!ragService || !sentimentService || !designAnalysisService || !chatService) {
+    return res.status(503).json({ error: 'Services not available', message: 'AI services are still initializing' });
   }
+
+  // Create router once when all services are available
+  if (!aiRouter) {
+    aiRouter = createAIRoutes(ragService, sentimentService, designAnalysisService, chatService);
+  }
+
+  return aiRouter(req, res, next);
+});
+
+// Root-level routes (without /api prefix) for backward compatibility
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (!ragService || !sentimentService || !designAnalysisService || !chatService) {
+    if (req.path !== '/health' && req.path !== '/docs' && req.path !== '/ready') {
+      return res.status(503).json({ error: 'Services not available', message: 'AI services are still initializing' });
+    }
+    return next();
+  }
+
+  if (!aiRouter) {
+    aiRouter = createAIRoutes(ragService, sentimentService, designAnalysisService, chatService);
+  }
+
+  return aiRouter(req, res, next);
 });
 
 // Error handling middleware

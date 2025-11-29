@@ -59,16 +59,15 @@ describe('SentimentService', () => {
     });
 
     it('should fallback to keyword analysis when LLM returns non-JSON response', async () => {
-      // When LLM returns non-JSON, it falls back to analyzing the LLM's response
-      // Since "Invalid response without JSON" has no sentiment keywords, result is neutral
+      // When LLM returns non-JSON, it falls back to analyzing the original text
       mockLLMClient.chat.mockResolvedValue('Invalid response without JSON');
 
       const result = await sentimentService.analyzeSentiment({
-        text: "I'm frustrated with my order",
+        text: 'I am happy and pleased and I appreciate the service!',
       });
 
-      // Fallback analyzes the LLM response, not the original text
-      expect(result.sentiment).toBe('neutral');
+      // Now fallback analyzes the original text, which has positive keywords
+      expect(result.sentiment).toBe('positive');
       expect(result.confidence).toBe(0.6);
     });
 

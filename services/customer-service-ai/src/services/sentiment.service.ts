@@ -16,20 +16,25 @@ export class SentimentService {
   async analyzeSentiment(request: SentimentRequest): Promise<SentimentResponse> {
     const prompt = this.buildPrompt(request.text);
 
-    const response = await this.llmClient.chat([
-      {
-        role: 'system',
-        content: `You are a sentiment analysis expert. Analyze the given text and respond with JSON:
+    try {
+      const response = await this.llmClient.chat([
+        {
+          role: 'system',
+          content: `You are a sentiment analysis expert. Analyze the given text and respond with JSON:
 {
   "sentiment": "positive|neutral|negative|very_negative",
   "confidence": 0.0-1.0,
   "analysis": "Brief explanation of the sentiment"
 }`,
-      },
-      { role: 'user', content: prompt },
-    ]);
+        },
+        { role: 'user', content: prompt },
+      ]);
 
-    return this.parseResponse(response);
+      return this.parseResponse(response, request.text);
+    } catch {
+      // If LLM fails completely, use fallback on original text
+      return this.fallbackAnalysis(request.text);
+    }
   }
 
   private buildPrompt(text: string): string {
@@ -44,7 +49,7 @@ Consider:
 - Implied satisfaction or dissatisfaction`;
   }
 
-  private parseResponse(response: string): SentimentResponse {
+  private parseResponse(response: string, originalText: string): SentimentResponse {
     try {
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -56,11 +61,11 @@ Consider:
         };
       }
     } catch {
-      // Fall through to default
+      // Fall through to fallback
     }
 
-    // Basic keyword-based fallback
-    return this.fallbackAnalysis(response);
+    // Basic keyword-based fallback on the original text
+    return this.fallbackAnalysis(originalText);
   }
 
   private fallbackAnalysis(text: string): SentimentResponse {

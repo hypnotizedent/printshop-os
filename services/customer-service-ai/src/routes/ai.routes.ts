@@ -163,11 +163,11 @@ export function createAIRoutes(
 
   /**
    * Send a message in a chat session
-   * POST /chat/sessions/:sessionId/messages
+   * POST /chat/sessions/:session_id/messages
    */
-  router.post('/chat/sessions/:sessionId/messages', async (req: Request, res: Response) => {
+  router.post('/chat/sessions/:session_id/messages', async (req: Request, res: Response) => {
     try {
-      const { sessionId } = req.params;
+      const { session_id } = req.params;
       const { message } = req.body;
 
       if (!message) {
@@ -176,7 +176,7 @@ export function createAIRoutes(
         });
       }
 
-      const response = await chatService.chat(sessionId, message);
+      const response = await chatService.chat(session_id, message);
 
       res.json({
         response_text: response.responseText,
@@ -194,13 +194,13 @@ export function createAIRoutes(
 
   /**
    * Get chat session history
-   * GET /chat/sessions/:sessionId
+   * GET /chat/sessions/:session_id
    */
-  router.get('/chat/sessions/:sessionId', async (req: Request, res: Response) => {
+  router.get('/chat/sessions/:session_id', async (req: Request, res: Response) => {
     try {
-      const { sessionId } = req.params;
+      const { session_id } = req.params;
 
-      const session = await chatService.getSession(sessionId);
+      const session = await chatService.getSession(session_id);
 
       if (!session) {
         return res.status(404).json({ error: 'Session not found' });
@@ -222,13 +222,13 @@ export function createAIRoutes(
 
   /**
    * Resolve a chat session
-   * POST /chat/sessions/:sessionId/resolve
+   * POST /chat/sessions/:session_id/resolve
    */
-  router.post('/chat/sessions/:sessionId/resolve', async (req: Request, res: Response) => {
+  router.post('/chat/sessions/:session_id/resolve', async (req: Request, res: Response) => {
     try {
-      const { sessionId } = req.params;
+      const { session_id } = req.params;
 
-      await chatService.resolveSession(sessionId);
+      await chatService.resolveSession(session_id);
 
       res.json({ success: true, message: 'Session resolved' });
     } catch (error) {

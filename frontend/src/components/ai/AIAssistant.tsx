@@ -181,22 +181,36 @@ export function AIAssistant({ className, embedded = false }: AIAssistantProps) {
   }
 
   const formatMessageContent = (content: string) => {
-    // Simple markdown-like formatting
+    // Simple markdown-like formatting with safe React components
     return content.split("\n").map((line, i) => {
-      // Bold text
-      line = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      // Parse bold text and return React elements
+      const parts = line.split(/\*\*(.+?)\*\*/)
+      const formattedParts = parts.map((part, j) => {
+        // Odd indices are the bold content
+        if (j % 2 === 1) {
+          return <strong key={j}>{part}</strong>
+        }
+        return part
+      })
+
       // Bullet points
       if (line.startsWith("• ")) {
         return (
           <div key={i} className="flex gap-2 ml-2">
             <span>•</span>
-            <span dangerouslySetInnerHTML={{ __html: line.substring(2) }} />
+            <span>{formattedParts.slice(0).map((p, idx) => 
+              typeof p === 'string' ? p.replace(/^• /, '') : p
+            )}</span>
           </div>
         )
       }
-      return (
-        <div key={i} dangerouslySetInnerHTML={{ __html: line || "&nbsp;" }} />
-      )
+      
+      // Empty lines
+      if (!line.trim()) {
+        return <div key={i}>&nbsp;</div>
+      }
+      
+      return <div key={i}>{formattedParts}</div>
     })
   }
 
