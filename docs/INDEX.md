@@ -1,6 +1,6 @@
 # PrintShop OS Documentation
 
-> **Last Updated:** November 27, 2025  
+> **Last Updated:** November 29, 2025  
 > **Status:** Production Migration Complete
 
 ---
@@ -13,6 +13,7 @@
 | Check migration status | [PRINTAVO_MIGRATION_STATUS.md](PRINTAVO_MIGRATION_STATUS.md) |
 | Set up supplier APIs | [SUPPLIER_INTEGRATION.md](SUPPLIER_INTEGRATION.md) |
 | Contribute code | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Track audit action items | [AUDIT_ACTION_ITEMS.md](AUDIT_ACTION_ITEMS.md) |
 
 ---
 
@@ -21,6 +22,7 @@
 ```
 docs/
 ├── ARCHITECTURE_OVERVIEW.md    # System architecture (HLBPA style)
+├── AUDIT_ACTION_ITEMS.md       # Living audit dashboard (action items)
 ├── PRINTAVO_MIGRATION_STATUS.md # Data import progress
 ├── SUPPLIER_INTEGRATION.md      # Supplier API documentation
 ├── CONTRIBUTING.md              # Contribution guidelines
@@ -41,6 +43,15 @@ High-level system architecture following HLBPA principles:
 - Key workflows (inventory check, order creation)
 - Deployment view and quick commands
 - Gap analysis
+
+### [AUDIT_ACTION_ITEMS.md](AUDIT_ACTION_ITEMS.md)
+Living Audit Dashboard with actionable sub-issues:
+- Branch review (8 unmerged branches)
+- Test coverage inventory
+- Service documentation status
+- Documentation consolidation
+- Archive cleanup
+- Audit automation
 
 ### [PRINTAVO_MIGRATION_STATUS.md](PRINTAVO_MIGRATION_STATUS.md)
 Current status of Printavo data migration:
