@@ -16,6 +16,7 @@ import { QuoteBuilder } from "./components/quotes/QuoteBuilder"
 import { ProductCatalog } from "./components/products/ProductCatalog"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
 import { ShipmentTracking } from "./components/shipping/ShipmentTracking"
+import { InvoicesPage } from "./components/invoices/InvoicesPage"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 import { toast } from "sonner"
 
@@ -260,6 +261,8 @@ function App() {
         return <ShippingLabelForm />
       case "tracking":
         return <ShipmentTracking />
+      case "invoices":
+        return <InvoicesPage onViewOrder={handleViewOrder} />
       default:
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} onViewOrder={handleViewOrder} />
     }

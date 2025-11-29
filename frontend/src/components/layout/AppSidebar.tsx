@@ -1,4 +1,4 @@
-import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, MapTrifold } from "@phosphor-icons/react"
+import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, MapTrifold, Receipt } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/ui/ThemeToggle"
 
@@ -20,6 +20,7 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
     { icon: ClockAfternoon, label: "Production", href: "production" },
     { icon: Package, label: "Jobs", href: "jobs", badge: 12 },
     { icon: FileText, label: "Quotes", href: "quotes" },
+    { icon: Receipt, label: "Invoices", href: "invoices" },
     { icon: ShoppingCart, label: "Products", href: "products" },
     { icon: Truck, label: "Shipping", href: "shipping" },
     { icon: MapTrifold, label: "Tracking", href: "tracking" },
