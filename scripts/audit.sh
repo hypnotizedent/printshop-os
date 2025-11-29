@@ -20,9 +20,25 @@
 #   ./scripts/audit.sh --no-color         # Disable colors
 #   ./scripts/audit.sh --help             # Show help
 #
+# Requirements:
+#   - Bash 4.0+ (macOS default is 3.2, install via: brew install bash)
+#   - Git
+#   - bc (standard on macOS/Linux)
+#   - jq (optional, improves package.json parsing)
+#
 # =============================================================================
 
 set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Bash Version Check
+# -----------------------------------------------------------------------------
+if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
+    echo "Error: Bash 4.0+ required. Found: $BASH_VERSION" >&2
+    echo "Install with: brew install bash (macOS)" >&2
+    echo "Then run with: /usr/local/bin/bash scripts/audit.sh" >&2
+    exit 1
+fi
 
 # Script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

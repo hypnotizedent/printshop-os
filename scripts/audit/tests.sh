@@ -182,6 +182,9 @@ output_tests_markdown() {
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
         
+        # Strip leading ./ from path for consistent matching
+        file="${file#./}"
+        
         local service
         service=$(get_service_from_path "$file")
         local test_count
@@ -281,6 +284,9 @@ output_tests_json() {
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
         
+        # Strip leading ./ from path for consistent matching
+        file="${file#./}"
+        
         local service
         service=$(get_service_from_path "$file")
         local test_count
@@ -365,6 +371,9 @@ output_tests_csv() {
     
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
+        
+        # Strip leading ./ from path for consistent matching
+        file="${file#./}"
         
         local service
         service=$(get_service_from_path "$file")

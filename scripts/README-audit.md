@@ -29,6 +29,30 @@ chmod +x scripts/audit.sh
 chmod +x scripts/audit/*.sh
 ```
 
+### Prerequisites
+
+| Requirement | Notes |
+|-------------|-------|
+| **Bash 4.0+** | macOS ships with Bash 3.2 - install via `brew install bash` |
+| **Git** | Required for branch analysis |
+| **bc** | Standard on macOS/Linux, used for size calculations |
+| **jq** | Optional, improves package.json parsing accuracy |
+
+#### macOS Users
+
+macOS ships with Bash 3.2, which doesn't support associative arrays used by this script. Install a newer version:
+
+```bash
+# Install Bash 4+
+brew install bash
+
+# Run the audit with the new Bash
+/usr/local/bin/bash scripts/audit.sh
+
+# Or add to your PATH and use directly
+# Add to ~/.zshrc or ~/.bashrc: export PATH="/usr/local/bin:$PATH"
+```
+
 ## Command Line Options
 
 | Option | Description | Example |
