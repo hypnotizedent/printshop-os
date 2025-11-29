@@ -3,12 +3,12 @@
  * Run this to verify the auth system works end-to-end
  */
 
-import { test, expect } from 'vitest';
+import { test, expect, vi, describe, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AuthProvider } from '../contexts/AuthContext';
-import { LoginForm } from '../components/auth/LoginForm';
-import { SignupForm } from '../components/auth/SignupForm';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { SignupForm } from '@/components/auth/SignupForm';
 
 // Mock the API
 global.fetch = vi.fn();

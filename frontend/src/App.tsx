@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { Toaster } from "@/components/ui/sonner"
 import { AppSidebar } from "./components/layout/AppSidebar"
 import { DashboardPage } from "./components/dashboard/DashboardPage"
@@ -13,11 +14,15 @@ import LabelsDemo from "./pages/LabelsDemo"
 import { QuoteForm } from "./components/quotes/QuoteForm"
 import { ProductCatalog } from "./components/products/ProductCatalog"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
-import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
+import { Portal } from "./components/portal/Portal"
+import { AuthPage } from "./components/auth/AuthPage"
+import { useAuth } from "./contexts/AuthContext"
+import type { Job, Customer, Machine, FileItem, DashboardStats, StrapiCustomer, StrapiOrder } from "./lib/types"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
-function App() {
+// Main admin/employee dashboard content
+function MainDashboard() {
   const [currentPage, setCurrentPage] = useState("dashboard")
   const [customers, setCustomers] = useState<Customer[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
@@ -34,7 +39,7 @@ function App() {
         const customersRes = await fetch(`${API_BASE}/api/customers?pagination[limit]=500`);
         if (customersRes.ok) {
           const customersData = await customersRes.json();
-          const transformedCustomers: Customer[] = (customersData.data || []).map((c: any) => ({
+          const transformedCustomers: Customer[] = (customersData.data || []).map((c: StrapiCustomer) => ({
             id: c.documentId || c.id.toString(),
             name: c.name || 'Unknown',
             email: c.email || '',
@@ -52,7 +57,7 @@ function App() {
         const ordersRes = await fetch(`${API_BASE}/api/orders?populate=customer&pagination[limit]=100`);
         if (ordersRes.ok) {
           const ordersData = await ordersRes.json();
-          const transformedJobs: Job[] = (ordersData.data || []).map((o: any) => {
+          const transformedJobs: Job[] = (ordersData.data || []).map((o: StrapiOrder) => {
             // Map Strapi order status to Job status
             const statusMap: Record<string, Job['status']> = {
               'QUOTE': 'quote',
@@ -78,7 +83,7 @@ function App() {
               dueDate: o.dueDate || new Date().toISOString(),
               createdAt: o.createdAt,
               description: o.notes || '',
-              quantity: o.items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0,
+              quantity: o.items?.reduce((sum: number, item: { quantity?: number }) => sum + (item.quantity || 0), 0) || 0,
               fileCount: 0,
               estimatedCost: o.totalAmount || 0,
               progress: o.status === 'COMPLETED' || o.status === 'INVOICE PAID' ? 100 : 50,
@@ -88,7 +93,7 @@ function App() {
 
           // Update customer order counts
           const customerOrderCounts: Record<string, { count: number; revenue: number }> = {};
-          (ordersData.data || []).forEach((o: any) => {
+          (ordersData.data || []).forEach((o: StrapiOrder) => {
             const custId = o.customer?.documentId;
             if (custId) {
               if (!customerOrderCounts[custId]) {
@@ -171,11 +176,55 @@ function App() {
       <AppSidebar currentPage={currentPage} onNavigate={setCurrentPage} />
       <main className="flex-1 p-8 overflow-auto">
         <div className="max-w-[1600px] mx-auto">
-          {renderPage()}
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            renderPage()
+          )}
         </div>
       </main>
-      <Toaster />
     </div>
+  )
+}
+
+// Customer Portal Layout - wrapped in the portal-specific router
+function CustomerPortalLayout() {
+  return <Portal />
+}
+
+// Login/Auth Page
+function LoginPage() {
+  const { isAuthenticated, userType } = useAuth()
+  
+  // If already authenticated, redirect to appropriate page
+  if (isAuthenticated) {
+    if (userType === 'customer') {
+      return <Navigate to="/portal" replace />
+    }
+    return <Navigate to="/" replace />
+  }
+  
+  return <AuthPage />
+}
+
+// Main App with routing
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Login route */}
+        <Route path="/login" element={<LoginPage />} />
+        
+        {/* Customer Portal routes - has its own internal routing */}
+        <Route path="/portal/*" element={<CustomerPortalLayout />} />
+        
+        {/* Main admin/employee dashboard - root and all unmatched */}
+        <Route path="/*" element={<MainDashboard />} />
+      </Routes>
+      <Toaster />
+    </Router>
   )
 }
 
