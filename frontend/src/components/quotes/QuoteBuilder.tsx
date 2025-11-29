@@ -29,7 +29,7 @@ import {
   ArrowRight,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { ordersApi, jobsApi } from '@/lib/api-client';
+import { ordersApi, jobsApi, DEFAULT_JOB_DUE_DAYS } from '@/lib/api-client';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -619,7 +619,7 @@ export function QuoteBuilder() {
         customerId: formData.customer.id,
         status: 'design',
         priority: formData.rushOrder ? 'high' : 'normal',
-        dueDate: formData.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        dueDate: formData.dueDate || new Date(Date.now() + DEFAULT_JOB_DUE_DAYS * 24 * 60 * 60 * 1000).toISOString(),
         quantity: totalQty || 1,
         estimatedCost: totals.total,
         order: { connect: [orderIdToConvert] },

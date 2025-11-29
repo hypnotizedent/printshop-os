@@ -8,6 +8,13 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/** Default number of days from now for job due dates when not specified */
+export const DEFAULT_JOB_DUE_DAYS = 14;
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -376,13 +383,14 @@ export const ordersApi = {
     const order = orderResult.data;
     
     // Create associated job record
+    const defaultDueDate = new Date(Date.now() + DEFAULT_JOB_DUE_DAYS * 24 * 60 * 60 * 1000).toISOString();
     const jobResult = await jobsApi.create({
-      title: order.orderNumber || `Job for Order ${order.id}`,
+      title: order.orderNumber || `Job for Order ${order.documentId}`,
       customer: order.customer?.name || 'Unknown Customer',
       customerId: order.customer?.documentId,
       status: 'design',
       priority: 'normal',
-      dueDate: order.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: order.dueDate || defaultDueDate,
       quantity: order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 1,
       estimatedCost: order.totalAmount,
       order: { connect: [orderDocumentId] },

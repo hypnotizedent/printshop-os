@@ -66,17 +66,33 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
     return null
   }
 
+  // Valid status values that match JobStatus type
+  const validStatuses: Job['status'][] = ['quote', 'design', 'prepress', 'printing', 'finishing', 'delivery', 'completed', 'cancelled']
+  
+  // Type guard to check if a string is a valid JobStatus
+  const isValidJobStatus = (status: string): status is Job['status'] => {
+    return validStatuses.includes(status as Job['status'])
+  }
+
   // Update job status in Strapi
-  const handleStatusUpdate = async (jobId: string, newStatus: string, jobDocumentId?: string) => {
+  const handleStatusUpdate = async (jobId: string, newStatus: string) => {
+    // Validate that newStatus is a valid JobStatus
+    if (!isValidJobStatus(newStatus)) {
+      toast.error('Invalid status', {
+        description: `"${newStatus}" is not a valid job status`,
+      })
+      return
+    }
+
     setUpdatingJobId(jobId)
     try {
-      // Use documentId if available, otherwise fall back to id
-      const documentId = jobDocumentId || jobId
-      const result = await jobsApi.updateStatus(documentId, newStatus)
+      // The job id is used as the documentId for API calls
+      // In a real app, you'd want to ensure jobs have proper documentId fields
+      const result = await jobsApi.updateStatus(jobId, newStatus)
       
       if (result.success) {
-        // Update local state via parent callback
-        onUpdateJob(jobId, { status: newStatus as Job['status'] })
+        // Update local state via parent callback with validated status
+        onUpdateJob(jobId, { status: newStatus })
         toast.success('Job status updated', {
           description: `Moved to ${columns.find(c => c.id === newStatus)?.label || newStatus}`,
         })
@@ -94,9 +110,9 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
   }
 
   // Handle direct status selection from dropdown
-  const handleDirectStatusChange = async (jobId: string, newStatus: string, jobDocumentId?: string) => {
+  const handleDirectStatusChange = async (jobId: string, newStatus: string) => {
     if (newStatus === jobs.find(j => j.id === jobId)?.status) return
-    await handleStatusUpdate(jobId, newStatus, jobDocumentId)
+    await handleStatusUpdate(jobId, newStatus)
   }
 
   return (
