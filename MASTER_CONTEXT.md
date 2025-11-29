@@ -43,6 +43,27 @@
 | Frontend | `http://docker-host:3000` | None |
 | Job Estimator | `http://docker-host:3001` | None |
 
+## 🐳 Docker Host Requirements
+
+### Docker Compose V2 (Required)
+The production docker-host requires Docker Compose V2 (plugin version). The old Python-based `docker-compose` (v1) has bugs with newer Docker versions.
+
+**Install:**
+```bash
+sudo apt-get update && sudo apt-get install -y docker-compose-plugin
+docker compose version  # Verify: should show v2.x
+```
+
+**Usage:**
+```bash
+# Use space, not hyphen
+docker compose up -d        # ✅ Correct (V2)
+docker-compose up -d        # ❌ Old/deprecated (V1)
+```
+
+### Health Check IPv4
+All container health checks use `127.0.0.1` instead of `localhost` to avoid IPv6 resolution issues inside containers.
+
 ## 🚨 Known Issues
 
 ### MinIO File Types
