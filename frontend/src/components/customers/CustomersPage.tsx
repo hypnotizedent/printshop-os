@@ -8,9 +8,11 @@ import type { Customer } from "@/lib/types"
 
 interface CustomersPageProps {
   customers: Customer[]
+  onViewCustomer?: (customerId: string) => void
+  onNewOrder?: (customerId: string) => void
 }
 
-export function CustomersPage({ customers }: CustomersPageProps) {
+export function CustomersPage({ customers, onViewCustomer, onNewOrder }: CustomersPageProps) {
   const [searchQuery, setSearchQuery] = useState("")
 
   const filteredCustomers = customers.filter(customer =>
@@ -132,10 +134,25 @@ export function CustomersPage({ customers }: CustomersPageProps) {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewCustomer?.(customer.id);
+                  }}
+                >
                   View Details
                 </Button>
-                <Button size="sm" className="flex-1">
+                <Button 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNewOrder?.(customer.id);
+                  }}
+                >
                   New Order
                 </Button>
               </div>

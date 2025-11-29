@@ -78,8 +78,21 @@ interface QuoteFormData {
   lineItems: LineItem[];
 }
 
+// UUID generator that works over HTTP (crypto.randomUUID requires HTTPS)
+const generateId = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for non-secure contexts
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 const createEmptyLineItem = (): LineItem => ({
-  id: crypto.randomUUID(),
+  id: generateId(),
   garmentType: '',
   styleNumber: '',
   color: '',
@@ -90,12 +103,21 @@ const createEmptyLineItem = (): LineItem => ({
   unitPrice: 0,
 });
 
-export function QuoteForm() {
+interface QuoteFormProps {
+  initialCustomer?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+  };
+}
+
+export function QuoteForm({ initialCustomer }: QuoteFormProps = {}) {
   const [formData, setFormData] = useState<QuoteFormData>({
-    customerName: '',
-    customerEmail: '',
-    customerPhone: '',
-    company: '',
+    customerName: initialCustomer?.name || '',
+    customerEmail: initialCustomer?.email || '',
+    customerPhone: initialCustomer?.phone || '',
+    company: initialCustomer?.company || '',
     dueDate: '',
     notes: '',
     lineItems: [createEmptyLineItem()],

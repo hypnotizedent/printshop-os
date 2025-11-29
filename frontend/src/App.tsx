@@ -5,6 +5,7 @@ import { DashboardPage } from "./components/dashboard/DashboardPage"
 import { JobsPage } from "./components/jobs/JobsPage"
 import { ProductionScheduleView } from "./components/machines/ProductionScheduleView"
 import { CustomersPage } from "./components/customers/CustomersPage"
+import { CustomerDetailPage } from "./components/customers/CustomerDetailPage"
 import { FilesPage } from "./components/files/FilesPage"
 import { ReportsPage } from "./components/reports/ReportsPage"
 import { SettingsPage } from "./components/settings/SettingsPage"
@@ -14,11 +15,13 @@ import { QuoteForm } from "./components/quotes/QuoteForm"
 import { ProductCatalog } from "./components/products/ProductCatalog"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
+import { toast } from "sonner"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
 function App() {
   const [currentPage, setCurrentPage] = useState("dashboard")
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
   const [machines] = useState<Machine[]>([])
@@ -135,6 +138,31 @@ function App() {
     console.log("Update job:", jobId, updates)
   }
 
+  // Handler for viewing customer details
+  const handleViewCustomer = (customerId: string) => {
+    setSelectedCustomerId(customerId);
+    setCurrentPage("customer-detail");
+  }
+
+  // Handler for creating new order for a customer
+  const handleNewOrder = (customerId: string) => {
+    // Navigate to quotes page with customer pre-selected
+    setSelectedCustomerId(customerId);
+    setCurrentPage("quotes");
+    toast.success("Creating new quote", {
+      description: "Customer info has been pre-filled"
+    });
+  }
+
+  // Get the selected customer for quotes
+  const selectedCustomer = customersList.find(c => c.id === selectedCustomerId);
+
+  // Handler for going back from customer detail
+  const handleBackFromCustomer = () => {
+    setSelectedCustomerId(null);
+    setCurrentPage("customers");
+  }
+
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
@@ -146,7 +174,27 @@ function App() {
       case "machines":
         return <ProductionScheduleView />
       case "customers":
-        return <CustomersPage customers={customersList} />
+        return (
+          <CustomersPage 
+            customers={customersList} 
+            onViewCustomer={handleViewCustomer}
+            onNewOrder={handleNewOrder}
+          />
+        )
+      case "customer-detail":
+        return selectedCustomerId ? (
+          <CustomerDetailPage
+            customerId={selectedCustomerId}
+            onBack={handleBackFromCustomer}
+            onNewOrder={handleNewOrder}
+          />
+        ) : (
+          <CustomersPage 
+            customers={customersList}
+            onViewCustomer={handleViewCustomer}
+            onNewOrder={handleNewOrder}
+          />
+        )
       case "files":
         return <FilesPage files={filesList} />
       case "reports":
@@ -156,7 +204,12 @@ function App() {
       case "labels-demo":
         return <LabelsDemo />
       case "quotes":
-        return <QuoteForm />
+        return <QuoteForm initialCustomer={selectedCustomer ? {
+          name: selectedCustomer.name,
+          email: selectedCustomer.email,
+          phone: selectedCustomer.phone,
+          company: selectedCustomer.company,
+        } : undefined} />
       case "products":
         return <ProductCatalog />
       case "shipping":

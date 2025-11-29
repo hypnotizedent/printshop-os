@@ -6,7 +6,7 @@
 
 ---
 
-## 📊 Current State (Last Updated: November 29, 2025 1:00 PM EST)
+## 📊 Current State (Last Updated: November 29, 2025 2:10 PM EST)
 
 ### Data Status
 | Data Type | Source Count | In Strapi | Status |
@@ -24,8 +24,13 @@
 | Redis | printshop-redis | ✅ Healthy | 6379 |
 | Strapi CMS | printshop-strapi | ⚠️ Unhealthy (but running) | 1337 |
 | API Service | printshop-api | ✅ Healthy | 3002 |
-| Frontend | printshop-frontend | ✅ Healthy | 3000 |
+| Frontend | printshop-frontend | ✅ Healthy (fixed 2:05 PM) | 3000 |
 | MinIO | printshop-minio | ✅ Healthy | 9000/9001 |
+
+### ⚠️ Known Infrastructure Issues
+1. **Stale NFS mount:** `/mnt/printshop/` on docker-host is stale - use `sudo umount -f` to fix
+2. **docker-compose v1.29.2 bug:** `KeyError: 'ContainerConfig'` - workaround: `docker rm -f` before recreating
+3. **Strapi healthcheck:** Marked unhealthy but actually works fine
 
 ### Credentials (Reference)
 ```
@@ -170,19 +175,327 @@ git push origin main
 # Commit: ba8e905
 ```
 
-#### 📍 1:00 PM - Session Summary
+#### 📍 1:05 PM - Deployed Auth Fixes to docker-host
+**Issue Encountered:** docker-compose v1.29.2 `KeyError: 'ContainerConfig'` bug
+```bash
+# First attempt - failed
+ssh docker-host 'cd ~/stacks/printshop-os && docker-compose up -d --build strapi'
+# ERROR: 'ContainerConfig' - known docker-compose v1 bug with newer Docker
+
+# Fix: Force remove stale containers
+ssh docker-host 'docker ps -a --filter "name=strapi" --format "{{.ID}}" | xargs -r docker rm -f'
+# Removed: d7b744753516
+
+# Retry - SUCCESS
+ssh docker-host 'cd ~/stacks/printshop-os && docker-compose up -d strapi'
+# Creating printshop-strapi ... done
+```
+
+**Synced files via rsync (not git - docker-host not a git repo):**
+```bash
+rsync -avz printshop-strapi/src/api/quote/routes/quote.ts docker-host:~/stacks/printshop-os/printshop-strapi/src/api/quote/routes/
+rsync -avz printshop-strapi/src/api/shipping/routes/shipping.ts docker-host:~/stacks/printshop-os/printshop-strapi/src/api/shipping/routes/
+```
+
+#### 📍 1:10 PM - Verified Auth Fixes Working
+```bash
+# Before: 403 Forbidden
+# After:
+curl -s -o /dev/null -w "%{http_code}" http://100.92.156.118:1337/api/quotes
+# Result: 200 ✅
+
+curl -s -o /dev/null -w "%{http_code}" -X POST http://100.92.156.118:1337/api/shipping/rates -H "Content-Type: application/json" -d '{"test":true}'
+# Result: 400 ✅ (auth passed, needs proper payload)
+```
+
+| Endpoint | Before | After |
+|----------|--------|-------|
+| `GET /api/quotes` | 403 Forbidden | **200 OK** ✅ |
+| `POST /api/shipping/rates` | 403 Forbidden | **400 Bad Request** ✅ |
+
+---
+
+#### 📍 1:15 PM - Frontend Quotes Page Still Crashing
+**Issue:** http://100.92.156.118:3000/ → Quotes page crashes
+**Investigation:** Frontend container was running old build
+
+#### 📍 1:20 PM - Rebuilt & Redeployed Frontend
+```bash
+# 1. Sync all frontend source
+rsync -avz --exclude node_modules frontend/ docker-host:~/stacks/printshop-os/frontend/
+
+# 2. Force remove old container (avoid docker-compose bug)
+ssh docker-host 'docker ps -a --filter "name=frontend" --format "{{.ID}}" | xargs -r docker rm -f'
+
+# 3. Rebuild container (no cache)
+ssh docker-host 'cd ~/stacks/printshop-os && docker-compose build --no-cache frontend'
+# Built successfully: printshop-os_frontend:latest
+
+# 4. docker-compose up failed - Strapi "unhealthy" blocks frontend
+# ERROR: Container "strapi" is unhealthy
+# (Strapi is running fine, just fails healthcheck)
+
+# 5. Workaround: Start frontend directly without dependency
+ssh docker-host 'docker run -d --name printshop-frontend --network homelab-network -p 3000:3000 -e NODE_ENV=production --restart unless-stopped printshop-os_frontend:latest'
+```
+
+**Container Status After Fix:**
+```
+NAMES                STATUS
+printshop-frontend   Up (healthy) ✅
+printshop-strapi     Up (unhealthy) - but works
+printshop-api        Up (healthy)
+printshop-minio      Up (healthy)
+printshop-postgres   Up (healthy)
+printshop-redis      Up (healthy)
+```
+
+**Frontend Rebuild Notes:**
+- Dockerfile uses node:18-alpine (warns about packages needing Node 20+)
+- Build successful with 6297 modules transformed
+- CSS: 469KB, JS: 662KB (gzip: 186KB)
+
+---
+
+### Session: November 29, 2025 (Continued) - Frontend Bug Fixes
+
+**Started:** 1:30 PM EST  
+**Goal:** Fix Quotes page crash, Customer View Details blank page, wire up New Order button
+
+---
+
+#### 📍 1:30 PM - Diagnosed Frontend Issues (3 Bugs)
+
+**Bug 1: Quotes Page Crash**
+- **Symptom:** `crypto.randomUUID is not a function` error
+- **Root Cause:** `crypto.randomUUID()` only works in **secure contexts** (HTTPS or localhost), NOT over plain HTTP
+- **Location:** `frontend/src/components/quotes/QuoteForm.tsx` line 82
+- **Code:**
+  ```tsx
+  const createEmptyLineItem = (): LineItem => ({
+    id: crypto.randomUUID(),  // <-- CRASHES on HTTP!
+    ...
+  });
+  ```
+
+**Bug 2: Customer View Details Blank**
+- **Symptom:** Customer detail page shows no orders
+- **Root Cause:** Orders have `printavoCustomerId` field but customer relation object NOT populated in Strapi
+- **Discovery:** API returns orders with `printavoCustomerId: "9645649"` but no `customer` object
+- **Location:** `frontend/src/components/customers/CustomerDetailPage.tsx`
+- **Code:**
+  ```tsx
+  // Was filtering by customer.documentId (doesn't exist)
+  `${API_BASE}/api/orders?filters[customer][documentId][$eq]=${customerId}`
+  ```
+
+**Bug 3: New Order Button Non-Functional**
+- **Symptom:** Clicking "New Order" just shows toast "coming soon"
+- **Location:** `frontend/src/App.tsx` lines 148-155
+
+---
+
+#### 📍 1:35 PM - Fixed crypto.randomUUID (Bug 1)
+
+**Fix:** Added UUID polyfill that works over HTTP
+
+**Files Modified:**
+1. `frontend/src/components/quotes/QuoteForm.tsx`
+2. `frontend/src/components/production/mobile/MobileTimeClock.tsx`
+
+**Solution:**
+```tsx
+// UUID generator that works over HTTP (crypto.randomUUID requires HTTPS)
+const generateId = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for non-secure contexts
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+```
+
+---
+
+#### 📍 1:40 PM - Fixed Customer Orders Query (Bug 2)
+
+**Fix:** Changed order filter to use `printavoCustomerId` instead of broken customer relation
+
+**File Modified:** `frontend/src/components/customers/CustomerDetailPage.tsx`
+
+**Before:**
+```tsx
+const res = await fetch(
+  `${API_BASE}/api/orders?filters[customer][documentId][$eq]=${customerId}`
+);
+```
+
+**After:**
+```tsx
+// First get customer's printavoId
+const customerRes = await fetch(`${API_BASE}/api/customers/${customerId}`);
+const customerData = await customerRes.json();
+const printavoCustomerId = customerData.data?.printavoId;
+
+// Then fetch orders by printavoCustomerId
+const res = await fetch(
+  `${API_BASE}/api/orders?filters[printavoCustomerId][$eq]=${printavoCustomerId}`
+);
+```
+
+---
+
+#### 📍 1:45 PM - Wired Up New Order Button (Bug 3)
+
+**Fix:** Navigate to Quotes page with customer info pre-filled
+
+**Files Modified:**
+1. `frontend/src/components/quotes/QuoteForm.tsx` - Added `initialCustomer` prop
+2. `frontend/src/App.tsx` - Updated handler + passed customer to QuoteForm
+
+**QuoteForm.tsx Changes:**
+```tsx
+interface QuoteFormProps {
+  initialCustomer?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+  };
+}
+
+export function QuoteForm({ initialCustomer }: QuoteFormProps = {}) {
+  const [formData, setFormData] = useState<QuoteFormData>({
+    customerName: initialCustomer?.name || '',
+    customerEmail: initialCustomer?.email || '',
+    // ... pre-fills from customer
+  });
+```
+
+**App.tsx Changes:**
+```tsx
+const handleNewOrder = (customerId: string) => {
+  setSelectedCustomerId(customerId);
+  setCurrentPage("quotes");
+  toast.success("Creating new quote", {
+    description: "Customer info has been pre-filled"
+  });
+}
+
+// In renderPage():
+case "quotes":
+  return <QuoteForm initialCustomer={selectedCustomer ? {
+    name: selectedCustomer.name,
+    email: selectedCustomer.email,
+    phone: selectedCustomer.phone,
+    company: selectedCustomer.company,
+  } : undefined} />
+```
+
+---
+
+#### 📍 1:50 PM - Built Frontend Locally
+```bash
+cd frontend && npm run build
+# ✓ 6297 modules transformed
+# ✓ built in 2.04s
+# Output: dist/assets/main-Cnbj8G8n.js (648KB)
+```
+
+---
+
+#### 📍 1:55 PM - Discovered Stale Mount Issue on docker-host
+
+**Problem:** rsync to `/mnt/printshop/` was hanging indefinitely
+
+**Diagnosis:**
+```bash
+ssh docker-host "timeout 2 ls /mnt/printshop/ 2>&1 || echo 'MOUNT_STALE'"
+# Result: MOUNT_STALE
+```
+
+**Root Cause:** `/mnt/printshop/` is a stale NFS mount (disconnected network mount)
+
+**Workaround:** Copy files via `/tmp/` then `docker cp` into container
+
+---
+
+#### 📍 2:00 PM - Deployed Frontend via docker cp
+
+**Strategy:** Since stale mount blocks rsync, copy to `/tmp/` then docker cp
+
+```bash
+# 1. Create temp directory
+ssh docker-host "rm -rf /tmp/frontend-dist && mkdir -p /tmp/frontend-dist"
+
+# 2. SCP files to temp
+scp -r /Users/ronnyworks/Projects/printshop-os/frontend/dist/* docker-host:/tmp/frontend-dist/
+# main-DUYiLeir.css    432KB  967KB/s
+# main-Cnbj8G8n.js     648KB  1.7MB/s
+# + index.html, manifest.json, offline.html, sw.js
+
+# 3. Docker cp into container
+ssh docker-host "docker cp /tmp/frontend-dist/. printshop-frontend:/app/dist/"
+# Files copied successfully
+
+# 4. Restart container
+ssh docker-host "docker restart printshop-frontend"
+```
+
+---
+
+#### 📍 2:05 PM - Verified All Fixes Working
+
+**Test Results:**
+| Page | Before | After |
+|------|--------|-------|
+| Quotes | ❌ `crypto.randomUUID is not a function` crash | ✅ Loads, form works |
+| Customer View Details | ❌ Blank (no orders) | ✅ Shows customer orders |
+| New Order button | ❌ Toast "coming soon" | ✅ Navigates to Quotes with customer pre-filled |
+
+**Live URL:** http://100.92.156.118:3000/
+
+---
+
+### 🔴 Known Issues to Fix Later
+
+1. **Stale mount:** `/mnt/printshop/` on docker-host needs `sudo umount -f /mnt/printshop`
+2. **Order-Customer relation:** Orders have `printavoCustomerId` but customer object not linked in Strapi
+   - Workaround: Frontend fetches customer printavoId first, then filters orders
+   - Proper fix: Run script to populate customer relations on orders
+3. **Strapi healthcheck:** Container marked "unhealthy" but works fine
+
+---
+
+### 📋 Session Summary - November 29, 2025
+
 **Completed:**
-- ✅ PR #169 audited, bugs found, fixes verified, merged
-- ✅ Quote routes: 403 → auth disabled for dashboard
-- ✅ Shipping routes: 403 → auth disabled for dashboard
-- ✅ All changes pushed to main
+- ✅ PR #169: Audited, bugs found, fixed, merged
+- ✅ Strapi auth: Added `auth: false` to quote + shipping routes
+- ✅ Frontend Bug 1: `crypto.randomUUID` replaced with HTTP-safe polyfill
+- ✅ Frontend Bug 2: Customer orders now filter by `printavoCustomerId`
+- ✅ Frontend Bug 3: New Order button navigates to Quotes with pre-filled customer
+- ✅ Deployment: Worked around stale mount with docker cp method
 
-**Next Steps:**
-- Deploy updated Strapi to docker-host to apply auth fixes
-- Test endpoints from frontend
+**Files Changed:**
+| File | Change |
+|------|--------|
+| `frontend/src/components/quotes/QuoteForm.tsx` | Added generateId polyfill, initialCustomer prop |
+| `frontend/src/components/customers/CustomerDetailPage.tsx` | Fixed order query to use printavoCustomerId |
+| `frontend/src/components/production/mobile/MobileTimeClock.tsx` | Added generateId polyfill |
+| `frontend/src/App.tsx` | Wired New Order to navigate to Quotes |
+| `printshop-strapi/src/api/quote/routes/quote.ts` | Added auth: false |
+| `printshop-strapi/src/api/shipping/routes/shipping.ts` | Added auth: false |
 
-**Session Ended:** 1:00 PM EST
-**Fix:** Add `auth: false` to routes for internal dashboard access
+**Commits:**
+- `ba8e905` - fix(strapi): add auth: false to quote and shipping routes
+- `9b43e3e` - feat(scripts): add automated audit script (PR #169)
+
+**Session Ended:** 2:10 PM EST
 
 ---
 
