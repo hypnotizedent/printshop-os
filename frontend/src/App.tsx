@@ -11,7 +11,7 @@ import { ReportsPage } from "./components/reports/ReportsPage"
 import { SettingsPage } from "./components/settings/SettingsPage"
 import { ProductionPage } from "./components/production/ProductionPage"
 import LabelsDemo from "./pages/LabelsDemo"
-import { QuoteForm } from "./components/quotes/QuoteForm"
+import { QuoteBuilder } from "./components/quotes/QuoteBuilder"
 import { ProductCatalog } from "./components/products/ProductCatalog"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
@@ -204,12 +204,7 @@ function App() {
       case "labels-demo":
         return <LabelsDemo />
       case "quotes":
-        return <QuoteForm initialCustomer={selectedCustomer ? {
-          name: selectedCustomer.name,
-          email: selectedCustomer.email,
-          phone: selectedCustomer.phone,
-          company: selectedCustomer.company,
-        } : undefined} />
+        return <QuoteBuilder />
       case "products":
         return <ProductCatalog />
       case "shipping":
