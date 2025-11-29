@@ -32,8 +32,8 @@
 | PR | Title | Reason |
 |----|-------|--------|
 | #156 | Task status analysis | No code changes, status doc only |
-| #166 | Living Audit Dashboard | Duplicate of #167 |
-| #167 | Living Audit Dashboard v2 | Keep one, close other |
+| #166 | Living Audit Dashboard | Duplicate of #167 (close this one) |
+| #167 | Living Audit Dashboard v2 | Keep this version as it's the updated iteration |
 | #170 | Copilot Workspace URL docs | Trivial change to 97KB log file |
 
 ## Branch Cleanup

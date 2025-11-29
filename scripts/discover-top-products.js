@@ -26,8 +26,7 @@ async function discoverTopProducts() {
     const exportDirs = fs
       .readdirSync(rawExportPath)
       .filter((d) => d.startsWith('printavo_'))
-      .sort()
-      .reverse();
+      .sort((a, b) => b.localeCompare(a)); // Descending order - most recent first
 
     if (exportDirs.length > 0) {
       const latestExport = path.join(rawExportPath, exportDirs[0], 'orders.json');
@@ -63,7 +62,7 @@ async function discoverTopProducts() {
 
       const styleNumber = (item.style_number || '').toUpperCase().trim();
       const styleName = item.style_description || 'Unknown Product';
-      const quantity = item.total_quantities || 1;
+      const quantity = Math.max(1, parseInt(item.total_quantities) || 1); // Ensure valid positive integer
       const category = item.category || 'Unknown';
       const color = item.color || '';
 
@@ -81,8 +80,12 @@ async function discoverTopProducts() {
         existing.categories.add(category);
         if (color) existing.sampleColors.add(color);
         // Update lastUsed if this order is more recent
-        if (order.created_at && (!existing.lastUsed || order.created_at > existing.lastUsed)) {
-          existing.lastUsed = order.created_at;
+        if (order.created_at) {
+          const orderDate = new Date(order.created_at);
+          const existingDate = existing.lastUsed ? new Date(existing.lastUsed) : null;
+          if (!existingDate || orderDate > existingDate) {
+            existing.lastUsed = order.created_at;
+          }
         }
       } else {
         productMap.set(key, {
