@@ -3,9 +3,62 @@
  * Communicates with Strapi payments endpoints
  */
 
-import type { OrderPayment, PaymentFormData, PaymentsDashboardSummary, OutstandingOrderSummary } from '../types';
+import type { OrderPayment, PaymentFormData, PaymentsDashboardSummary, OutstandingOrderSummary, PaymentMethodEnum } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+
+// Security constants
+const MAX_REFERENCE_LENGTH = 100;
+const MAX_NOTES_LENGTH = 500;
+const MAX_RECORDED_BY_LENGTH = 100;
+const MAX_AMOUNT = 999999999.99;
+const VALID_PAYMENT_METHODS: PaymentMethodEnum[] = ['cash', 'check', 'credit_card', 'ach', 'stripe', 'bank_transfer', 'other'];
+
+/**
+ * Sanitize text input by removing HTML tags and trimming
+ */
+function sanitizeText(value: string | undefined, maxLength: number): string | undefined {
+  if (!value) return undefined;
+  return value
+    .replace(/<[^>]*>/g, '')
+    .slice(0, maxLength)
+    .trim() || undefined;
+}
+
+/**
+ * Validate payment form data
+ */
+function validatePaymentData(payment: PaymentFormData, maxAmount: number): { valid: boolean; error?: string } {
+  // Validate amount
+  if (typeof payment.amount !== 'number' || !isFinite(payment.amount)) {
+    return { valid: false, error: 'Invalid payment amount' };
+  }
+  if (payment.amount <= 0) {
+    return { valid: false, error: 'Payment amount must be greater than 0' };
+  }
+  if (payment.amount > maxAmount) {
+    return { valid: false, error: 'Payment amount exceeds outstanding balance' };
+  }
+  if (payment.amount > MAX_AMOUNT) {
+    return { valid: false, error: 'Payment amount exceeds maximum allowed' };
+  }
+
+  // Validate payment method
+  if (!VALID_PAYMENT_METHODS.includes(payment.paymentMethod)) {
+    return { valid: false, error: 'Invalid payment method' };
+  }
+
+  // Validate payment date
+  if (!payment.paymentDate || !/^\d{4}-\d{2}-\d{2}$/.test(payment.paymentDate)) {
+    return { valid: false, error: 'Invalid payment date format' };
+  }
+  const paymentDate = new Date(payment.paymentDate);
+  if (isNaN(paymentDate.getTime())) {
+    return { valid: false, error: 'Invalid payment date' };
+  }
+
+  return { valid: true };
+}
 
 interface StrapiPaymentResponse {
   data: {
@@ -74,18 +127,42 @@ export async function recordPayment(
   recordedBy: string = 'Staff'
 ): Promise<{ success: boolean; payment?: OrderPayment; newAmountPaid?: number; newAmountOutstanding?: number; error?: string }> {
   try {
+    // Validate orderDocumentId format (basic check)
+    if (!orderDocumentId || typeof orderDocumentId !== 'string' || orderDocumentId.length > 100) {
+      return { success: false, error: 'Invalid order ID' };
+    }
+
+    // Sanitize recordedBy
+    const sanitizedRecordedBy = sanitizeText(recordedBy, MAX_RECORDED_BY_LENGTH) || 'Staff';
+
     // First, fetch the current order to get latest amounts
-    const orderRes = await fetch(`${API_BASE}/api/orders/${orderDocumentId}`);
+    const orderRes = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(orderDocumentId)}`);
     if (!orderRes.ok) {
       return { success: false, error: 'Failed to fetch order' };
     }
     const orderData: StrapiOrderResponse = await orderRes.json();
     const order = orderData.data;
     
+    if (!order) {
+      return { success: false, error: 'Order not found' };
+    }
+
     const currentAmountPaid = order.amountPaid || 0;
     const totalAmount = order.totalAmount || 0;
+    const currentOutstanding = order.amountOutstanding || (totalAmount - currentAmountPaid);
+
+    // Validate payment data against current order state
+    const validation = validatePaymentData(payment, currentOutstanding);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+
     const newAmountPaid = currentAmountPaid + payment.amount;
     const newAmountOutstanding = Math.max(0, totalAmount - newAmountPaid);
+
+    // Sanitize text fields
+    const sanitizedReferenceNumber = sanitizeText(payment.referenceNumber, MAX_REFERENCE_LENGTH);
+    const sanitizedNotes = sanitizeText(payment.notes, MAX_NOTES_LENGTH);
 
     // Create the payment record
     const paymentRes = await fetch(`${API_BASE}/api/payments`, {
@@ -100,20 +177,20 @@ export async function recordPayment(
           status: 'paid',
           paymentType: 'balance',
           paymentMethod: payment.paymentMethod,
-          referenceNumber: payment.referenceNumber || null,
+          referenceNumber: sanitizedReferenceNumber || null,
           paymentDate: payment.paymentDate,
-          recordedBy: recordedBy,
-          notes: payment.notes || null,
+          recordedBy: sanitizedRecordedBy,
+          notes: sanitizedNotes || null,
           paidAt: new Date().toISOString(),
         },
       }),
     });
 
     if (!paymentRes.ok) {
-      const error = await paymentRes.json();
+      // Don't expose detailed server errors to client
       return { 
         success: false, 
-        error: error.error?.message || 'Failed to record payment' 
+        error: 'Failed to record payment. Please try again.' 
       };
     }
 
@@ -158,10 +235,11 @@ export async function recordPayment(
       newAmountOutstanding,
     };
   } catch (error) {
+    // Log error for debugging but don't expose details to user
     console.error('Record payment error:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Network error recording payment',
+      error: 'An error occurred while recording the payment. Please try again.',
     };
   }
 }
@@ -171,8 +249,14 @@ export async function recordPayment(
  */
 export async function getPayments(orderDocumentId: string): Promise<OrderPayment[]> {
   try {
+    // Validate and encode the orderDocumentId to prevent injection
+    if (!orderDocumentId || typeof orderDocumentId !== 'string' || orderDocumentId.length > 100) {
+      console.error('Invalid order document ID');
+      return [];
+    }
+
     const res = await fetch(
-      `${API_BASE}/api/payments?filters[order][documentId][$eq]=${orderDocumentId}&sort=createdAt:desc`
+      `${API_BASE}/api/payments?filters[order][documentId][$eq]=${encodeURIComponent(orderDocumentId)}&sort=createdAt:desc`
     );
 
     if (!res.ok) {
