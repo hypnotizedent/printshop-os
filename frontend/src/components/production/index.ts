@@ -14,4 +14,10 @@ export { ChecklistTemplate } from './ChecklistTemplate';
 export { PhotoCapture } from './PhotoCapture';
 export { ChecklistSignature } from './ChecklistSignature';
 
+// Calendar and Scheduling Components
+export { ProductionCalendar } from './ProductionCalendar';
+export { CalendarDayView } from './CalendarDayView';
+export { JobQuickView } from './JobQuickView';
+export { CapacityWidget } from './CapacityWidget';
+
 export type { ChecklistData, ChecklistStepData } from './Checklist';
