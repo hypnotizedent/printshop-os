@@ -49,7 +49,7 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
   const [sortBy, setSortBy] = useState("timeline.createdAt:desc")
 
   // API base URL (in production, this would come from environment variables)
-  const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:3002'
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337'
 
   // Fetch orders
   const fetchOrders = async () => {
