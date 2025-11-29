@@ -40,3 +40,50 @@ export interface SupplierInventoryResult {
   inventory?: InventoryItem[];
   error?: string;
 }
+
+export interface ColorAvailabilityResponse {
+  sku: string;
+  name: string;
+  supplier: SupplierType;
+  colorCount: number;
+  colors: Array<{
+    color: string;
+    inStock: boolean;
+    totalQty: number;
+    sizes: string[];
+  }>;
+  lastChecked: string;
+  cached: boolean;
+}
+
+export interface SizeAvailabilityResponse {
+  sku: string;
+  name: string;
+  supplier: SupplierType;
+  colorFilter: string | null;
+  sizeCount: number;
+  sizes: Array<{
+    size: string;
+    inStock: boolean;
+    totalQty: number;
+    colors: string[];
+  }>;
+  lastChecked: string;
+  cached: boolean;
+}
+
+export interface PricingResponse {
+  sku: string;
+  supplier: SupplierType;
+  basePrice: number;
+  currency: string;
+  priceBreaks: Array<{
+    minQty: number;
+    maxQty?: number;
+    price: number;
+    casePrice?: number;
+  }>;
+  quantity: number | null;
+  priceForQuantity: number | null;
+  lastChecked: string;
+}

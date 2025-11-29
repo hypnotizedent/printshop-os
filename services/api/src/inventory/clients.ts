@@ -234,6 +234,43 @@ export class SSActivewearInventoryClient {
       return { found: false, error: error.message || 'API error' };
     }
   }
+
+  /**
+   * Get pricing with volume breaks for a specific style
+   */
+  async getPricing(sku: string): Promise<{ 
+    found: boolean; 
+    basePrice?: number; 
+    priceBreaks?: Array<{ quantity: number; price: number; casePrice?: number }>; 
+    error?: string 
+  }> {
+    try {
+      const styleId = sku.replace(/^SS-/i, '');
+      const priceRes = await this.client.get(`/v2/products/${styleId}/pricing`);
+      const pricing = priceRes.data || [];
+      
+      if (pricing.length === 0) {
+        return { found: false, error: 'No pricing found' };
+      }
+
+      const sorted = pricing.sort((a: any, b: any) => a.quantity - b.quantity);
+      
+      return {
+        found: true,
+        basePrice: sorted[0]?.price || 0,
+        priceBreaks: sorted.map((p: any) => ({
+          quantity: p.quantity,
+          price: p.price,
+          casePrice: p.casePrice
+        }))
+      };
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return { found: false, error: 'Product not found' };
+      }
+      return { found: false, error: error.message || 'API error' };
+    }
+  }
 }
 
 // SanMar Client (uses cached CSV data)
