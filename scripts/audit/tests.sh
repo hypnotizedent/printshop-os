@@ -129,15 +129,18 @@ count_test_cases() {
     if [[ -f "$file" ]]; then
         # TypeScript/JavaScript: it(), test()
         local ts_count
-        ts_count=$(grep -cE "^\s*(it|test)\s*\(" "$file" 2>/dev/null || echo "0")
+        ts_count=$(grep -cE "^\s*(it|test)\s*\(" "$file" 2>/dev/null | tr -d '[:space:]') || ts_count=0
+        [[ -z "$ts_count" ]] && ts_count=0
         
         # Python: def test_
         local py_count
-        py_count=$(grep -cE "^\s*def\s+test_" "$file" 2>/dev/null || echo "0")
+        py_count=$(grep -cE "^\s*def\s+test_" "$file" 2>/dev/null | tr -d '[:space:]') || py_count=0
+        [[ -z "$py_count" ]] && py_count=0
         
         # Go: func Test
         local go_count
-        go_count=$(grep -cE "^func\s+Test" "$file" 2>/dev/null || echo "0")
+        go_count=$(grep -cE "^func\s+Test" "$file" 2>/dev/null | tr -d '[:space:]') || go_count=0
+        [[ -z "$go_count" ]] && go_count=0
         
         count=$((ts_count + py_count + go_count))
     fi
