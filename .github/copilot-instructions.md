@@ -1,5 +1,12 @@
 # GitHub Copilot Instructions for PrintShop OS
 
+## 🚨 CRITICAL: First Steps
+
+Before making ANY changes:
+1. Read `MASTER_CONTEXT.md` for project context
+2. Check `docs/PR_TRIAGE.md` for current PR status
+3. Never modify files in `data/raw/` - these are immutable exports
+
 ## Session Context (READ FIRST!)
 
 **Before doing anything, check `.vscode/session-state.json`** - it contains:

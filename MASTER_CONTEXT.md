@@ -1,0 +1,70 @@
+# PrintShop OS - Master Context
+
+> ⚠️ **AI MODELS: READ THIS FIRST** - This file contains critical context for the entire project.
+
+## 🏗️ Architecture Overview
+
+### Core Services (4 Buckets)
+| Service | Location | Port | Status |
+|---------|----------|------|--------|
+| Frontend | `/frontend` | 3000 | ✅ Active |
+| Strapi CMS | `/printshop-strapi` | 1337 | ✅ Active |
+| Job Estimator | `/services/job-estimator` | 3001 | ✅ Active |
+| Supplier Sync | `/services/supplier-sync` | 3002 | ✅ Active |
+
+### Data Locations
+| Data Type | Location | Notes |
+|-----------|----------|-------|
+| Printavo Exports | `data/raw/printavo-exports/` | Raw exports, never modify |
+| Line Items | `data/line-item-import-checkpoint.json` | 44K items, source for Top 500 |
+| Customers | `data/customer-import-checkpoint.json` | 336 customers |
+| Orders | `data/order-import-checkpoint.json` | 831 orders |
+| Artwork | `data/artwork/` | Customer artwork uploads |
+
+### Docker Host Paths
+| Service | Container Path | Host Path |
+|---------|---------------|-----------|
+| Strapi Uploads | `/opt/app/public/uploads` | `/data/strapi-uploads` |
+| MinIO Data | `/data` | `/data/minio` |
+| PostgreSQL | `/var/lib/postgresql/data` | `/data/postgres` |
+
+### File Types & Storage
+| File Type | Current Location | Future Location |
+|-----------|-----------------|-----------------|
+| PNG/JPG (artwork) | MinIO `artwork` bucket | ✅ Working |
+| DST (embroidery) | ⚠️ NOT YET IMPLEMENTED | MinIO `production-files` bucket |
+| EPS/AI/PDF | ⚠️ NOT YET IMPLEMENTED | MinIO `production-files` bucket |
+
+### API Endpoints
+| Service | URL | Auth |
+|---------|-----|------|
+| Strapi API | `http://docker-host:1337/api` | Bearer token |
+| Strapi Admin | `http://docker-host:1337/admin` | Session |
+| Frontend | `http://docker-host:3000` | None |
+| Job Estimator | `http://docker-host:3001` | None |
+
+## 🚨 Known Issues
+
+### MinIO File Types
+- **Problem**: Printavo scraper only pulled PNGs
+- **Need**: DST, EPS, PDF, AI files for production
+- **Status**: ON HOLD until source files obtained
+
+### Supplier Products (500K SKUs)
+- **Problem**: Can't import 500K products into Strapi
+- **Solution**: PR #160 implements curated Top 500 products system
+- **Status**: Pending merge
+
+## 📊 Current Data Counts
+| Content Type | Count | Source |
+|-------------|-------|--------|
+| Customers | 336 | Printavo 2025 |
+| Orders | 831 | Printavo 2025 |
+| Line Items | 44,158 | Printavo 2025 |
+| Products | 18 | Manual entry |
+
+## 🔗 Related Repositories
+| Repo | Purpose |
+|------|---------|
+| `hypnotizedent/ptavo` | Printavo API analysis & scraper code |
+| `hypnotizedent/homelab-infrastructure` | Docker host infrastructure |
