@@ -241,6 +241,9 @@ This is an **enterprise platform**. That means:
 
 ### Deploy Commands
 ```bash
+# IMPORTANT: Use 'docker compose' (space), not 'docker-compose' (hyphen)
+# Docker Compose V2 is required - see MASTER_CONTEXT.md for install instructions
+
 # Deploy to docker-host (via Tailscale)
 rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/
 ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'
@@ -250,6 +253,10 @@ ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose logs -f prints
 
 # Quick status check
 ssh docker-host 'docker ps --format "table {{.Names}}\t{{.Status}}"'
+
+# Additional commands
+docker compose down               # Stop all services
+docker compose logs -f strapi     # Follow logs for specific service
 
 # Access via Tailscale (direct to docker-host)
 # Strapi: http://docker-host:1337 or https://printshop.ronny.works
