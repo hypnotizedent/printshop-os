@@ -4,6 +4,8 @@
 **Auditor:** GitHub Copilot (Claude Opus 4.5)  
 **Scope:** Full repository audit for documentation, organization, and single source of truth
 
+> 📋 **Action Items:** See [docs/AUDIT_ACTION_ITEMS.md](docs/AUDIT_ACTION_ITEMS.md) for the Living Audit Dashboard with trackable sub-issues.
+
 ---
 
 ## Executive Summary
