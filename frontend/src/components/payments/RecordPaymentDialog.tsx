@@ -63,18 +63,55 @@ export function RecordPaymentDialog({
   const [notes, setNotes] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Sanitize text input to prevent XSS and limit length
+  const sanitizeTextInput = (value: string, maxLength: number): string => {
+    // Remove any HTML tags and limit length
+    return value
+      .replace(/<[^>]*>/g, '')
+      .slice(0, maxLength)
+      .trim()
+  }
+
+  // Maximum lengths for text fields
+  const MAX_REFERENCE_LENGTH = 100
+  const MAX_NOTES_LENGTH = 500
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
 
     const amountNum = parseFloat(amount)
-    if (isNaN(amountNum) || amountNum <= 0) {
+    if (isNaN(amountNum) || !isFinite(amountNum) || amountNum <= 0) {
       newErrors.amount = "Please enter a valid amount greater than 0"
     } else if (amountNum > amountOutstanding) {
       newErrors.amount = `Amount cannot exceed outstanding balance of $${amountOutstanding.toFixed(2)}`
+    } else if (amountNum > 999999999.99) {
+      newErrors.amount = "Amount exceeds maximum allowed value"
     }
 
     if (!paymentDate) {
       newErrors.paymentDate = "Please select a payment date"
+    } else {
+      // Validate date format and reasonable range
+      const date = new Date(paymentDate)
+      const now = new Date()
+      const oneYearAgo = new Date()
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+      
+      if (isNaN(date.getTime())) {
+        newErrors.paymentDate = "Please enter a valid date"
+      } else if (date > now) {
+        newErrors.paymentDate = "Payment date cannot be in the future"
+      } else if (date < oneYearAgo) {
+        newErrors.paymentDate = "Payment date cannot be more than 1 year ago"
+      }
+    }
+
+    if (referenceNumber.length > MAX_REFERENCE_LENGTH) {
+      newErrors.referenceNumber = `Reference number cannot exceed ${MAX_REFERENCE_LENGTH} characters`
+    }
+
+    if (notes.length > MAX_NOTES_LENGTH) {
+      newErrors.notes = `Notes cannot exceed ${MAX_NOTES_LENGTH} characters`
     }
 
     setErrors(newErrors)
@@ -89,9 +126,9 @@ export function RecordPaymentDialog({
     const paymentData: PaymentFormData = {
       amount: parseFloat(amount),
       paymentMethod,
-      referenceNumber: referenceNumber || undefined,
+      referenceNumber: referenceNumber ? sanitizeTextInput(referenceNumber, MAX_REFERENCE_LENGTH) : undefined,
       paymentDate,
-      notes: notes || undefined,
+      notes: notes ? sanitizeTextInput(notes, MAX_NOTES_LENGTH) : undefined,
     }
 
     const result = await recordPayment(orderDocumentId, paymentData)
@@ -200,6 +237,7 @@ export function RecordPaymentDialog({
               id="referenceNumber"
               value={referenceNumber}
               onChange={(e) => setReferenceNumber(e.target.value)}
+              maxLength={MAX_REFERENCE_LENGTH}
               placeholder={
                 paymentMethod === "check"
                   ? "Check #"
@@ -207,13 +245,21 @@ export function RecordPaymentDialog({
                     ? "Transaction ID"
                     : "Reference #"
               }
+              className={errors.referenceNumber ? "border-destructive" : ""}
             />
-            <p className="text-xs text-muted-foreground">
-              {paymentMethod === "check" && "Enter the check number"}
-              {paymentMethod === "credit_card" && "Enter the transaction ID"}
-              {paymentMethod === "ach" && "Enter the ACH reference number"}
-              {paymentMethod === "stripe" && "Enter the Stripe payment ID"}
-            </p>
+            {errors.referenceNumber ? (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <Warning size={14} />
+                {errors.referenceNumber}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                {paymentMethod === "check" && "Enter the check number"}
+                {paymentMethod === "credit_card" && "Enter the transaction ID"}
+                {paymentMethod === "ach" && "Enter the ACH reference number"}
+                {paymentMethod === "stripe" && "Enter the Stripe payment ID"}
+              </p>
+            )}
           </div>
 
           {/* Payment Date */}
@@ -243,7 +289,15 @@ export function RecordPaymentDialog({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Optional payment notes..."
               rows={2}
+              maxLength={MAX_NOTES_LENGTH}
+              className={errors.notes ? "border-destructive" : ""}
             />
+            {errors.notes && (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <Warning size={14} />
+                {errors.notes}
+              </p>
+            )}
           </div>
         </div>
 
