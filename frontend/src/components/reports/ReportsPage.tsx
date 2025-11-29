@@ -1,8 +1,48 @@
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ChartBar, TrendUp, CurrencyDollar, Package } from "@phosphor-icons/react"
+import { useState } from "react"
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Users, CurrencyDollar, Gear, CalendarBlank } from "@phosphor-icons/react"
+import { SalesReport } from "./SalesReport"
+import { ProductionReport } from "./ProductionReport"
+import { CustomerReport } from "./CustomerReport"
+import { getDateRange } from "@/lib/reports-api"
+
+type DatePeriod = 'week' | 'month' | 'quarter' | 'year'
 
 export function ReportsPage() {
+  const [period, setPeriod] = useState<DatePeriod>('month')
+  const [activeTab, setActiveTab] = useState('sales')
+
+  const dateRange = getDateRange(period)
+
+  const reportCards = [
+    {
+      id: 'sales',
+      title: 'Sales Report',
+      description: 'Revenue, orders, and top customers',
+      icon: CurrencyDollar,
+      color: 'text-green-600',
+      bgColor: 'bg-green-600/10',
+    },
+    {
+      id: 'production',
+      title: 'Production Report',
+      description: 'Jobs, turnaround, and delivery metrics',
+      icon: Gear,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-600/10',
+    },
+    {
+      id: 'customers',
+      title: 'Customer Report',
+      description: 'Acquisition, retention, and lifetime value',
+      icon: Users,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-600/10',
+    },
+  ]
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -10,46 +50,81 @@ export function ReportsPage() {
           <h1 className="text-3xl font-bold text-foreground tracking-tight">Reports</h1>
           <p className="text-muted-foreground mt-1">Analytics and insights for your print shop</p>
         </div>
-        <Button>Export Report</Button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <CalendarBlank size={20} className="text-muted-foreground" />
+            <Select value={period} onValueChange={(value: DatePeriod) => setPeriod(value)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="quarter">This Quarter</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { icon: CurrencyDollar, label: "Revenue", value: "$45,231", change: "+12%" },
-          { icon: Package, label: "Jobs Completed", value: "156", change: "+8%" },
-          { icon: TrendUp, label: "Avg Job Value", value: "$290", change: "+5%" },
-          { icon: ChartBar, label: "Utilization", value: "78%", change: "+3%" },
-        ].map((stat, i) => (
-          <Card key={i} className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{stat.label}</p>
-                <p className="text-3xl font-bold text-foreground mt-2">{stat.value}</p>
-                <p className="text-sm text-green-600 font-semibold mt-1">{stat.change}</p>
+      {/* Date Range Display */}
+      <div className="text-sm text-muted-foreground">
+        Showing data from <span className="font-medium text-foreground">{dateRange.dateFrom}</span> to <span className="font-medium text-foreground">{dateRange.dateTo}</span>
+      </div>
+
+      {/* Report Navigation Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {reportCards.map((report) => (
+          <Card 
+            key={report.id}
+            className={`cursor-pointer transition-all hover:shadow-md ${activeTab === report.id ? 'ring-2 ring-primary' : ''}`}
+            onClick={() => setActiveTab(report.id)}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${report.bgColor}`}>
+                  <report.icon size={24} weight="fill" className={report.color} />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">{report.title}</CardTitle>
+                  <CardDescription>{report.description}</CardDescription>
+                </div>
               </div>
-              <div className="p-3 rounded-lg bg-primary/10">
-                <stat.icon size={24} weight="fill" className="text-primary" />
-              </div>
-            </div>
+            </CardHeader>
           </Card>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Revenue Trends</h2>
-          <div className="h-64 flex items-center justify-center border-2 border-dashed border-border rounded-lg">
-            <p className="text-muted-foreground">Chart visualization would appear here</p>
-          </div>
-        </Card>
+      {/* Report Content */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="sales" className="gap-2">
+            <CurrencyDollar size={16} />
+            Sales
+          </TabsTrigger>
+          <TabsTrigger value="production" className="gap-2">
+            <Gear size={16} />
+            Production
+          </TabsTrigger>
+          <TabsTrigger value="customers" className="gap-2">
+            <Users size={16} />
+            Customers
+          </TabsTrigger>
+        </TabsList>
 
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Job Distribution</h2>
-          <div className="h-64 flex items-center justify-center border-2 border-dashed border-border rounded-lg">
-            <p className="text-muted-foreground">Chart visualization would appear here</p>
-          </div>
-        </Card>
-      </div>
+        <TabsContent value="sales">
+          <SalesReport dateFrom={dateRange.dateFrom} dateTo={dateRange.dateTo} />
+        </TabsContent>
+
+        <TabsContent value="production">
+          <ProductionReport dateFrom={dateRange.dateFrom} dateTo={dateRange.dateTo} />
+        </TabsContent>
+
+        <TabsContent value="customers">
+          <CustomerReport dateFrom={dateRange.dateFrom} dateTo={dateRange.dateTo} />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
