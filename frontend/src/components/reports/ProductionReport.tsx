@@ -162,7 +162,7 @@ export function ProductionReport({ dateFrom, dateTo }: ProductionReportProps) {
                 {data.averageTurnaroundDays} days
               </p>
               <div className="flex items-center gap-1 mt-2">
-                {/* For turnaround, lower is better, so invert the arrow logic */}
+                {/* For turnaround, lower is better (faster), so down arrow is green */}
                 {data.turnaroundChange <= 0 ? (
                   <ArrowDown size={16} weight="bold" className="text-green-600" />
                 ) : (
@@ -174,7 +174,9 @@ export function ProductionReport({ dateFrom, dateTo }: ProductionReportProps) {
                 )}>
                   {Math.abs(data.turnaroundChange)}%
                 </span>
-                <span className="text-xs text-muted-foreground">vs previous period</span>
+                <span className="text-xs text-muted-foreground">
+                  {data.turnaroundChange <= 0 ? 'faster' : 'slower'}
+                </span>
               </div>
             </div>
           </div>

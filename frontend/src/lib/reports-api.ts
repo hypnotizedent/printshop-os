@@ -64,7 +64,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
  */
 export function getDateRange(period: 'week' | 'month' | 'quarter' | 'year' | 'custom', customFrom?: string, customTo?: string) {
   const now = new Date();
-  let dateFrom: Date;
+  let dateFrom: Date = new Date(now.getFullYear(), now.getMonth(), 1); // Default to start of month
   let dateTo: Date = now;
 
   switch (period) {
@@ -464,8 +464,9 @@ export async function getCustomerReport(dateFrom: string, dateTo: string): Promi
       ? Math.round((retainedCustomers / prevCustomerIds.size) * 100) 
       : 100;
     
-    // For previous retention (compare to period before that)
-    const previousPeriodRetentionRate = 75; // Placeholder since we'd need a third period
+    // For previous retention rate, use the current rate as baseline
+    // (would need a third period for accurate comparison, so we show N/A via 0% change)
+    const previousPeriodRetentionRate = customerRetentionRate;
     
     // Average lifetime value
     const allCustomerRevenues = Object.values(customerStats).map(c => c.revenue);
@@ -574,15 +575,17 @@ export async function getDashboardStats(): Promise<DashboardStatsData> {
     // Revenue by day for chart
     const revenueByDayMap: Record<string, number> = {};
     
-    // Initialize all days of the month
-    for (let d = new Date(startOfMonth); d <= now; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
+    // Initialize all days of the month (using a separate counter variable)
+    const currentDate = new Date(startOfMonth);
+    while (currentDate <= now) {
+      const dateStr = currentDate.toISOString().split('T')[0];
       revenueByDayMap[dateStr] = 0;
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
     orders.forEach((o: any) => {
       const date = new Date(o.createdAt).toISOString().split('T')[0];
-      if (revenueByDayMap.hasOwnProperty(date)) {
+      if (Object.prototype.hasOwnProperty.call(revenueByDayMap, date)) {
         revenueByDayMap[date] += o.totalAmount || 0;
       }
     });
