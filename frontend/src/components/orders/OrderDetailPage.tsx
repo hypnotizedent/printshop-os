@@ -94,11 +94,9 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [paymentRefreshTrigger, setPaymentRefreshTrigger] = useState(0);
 
-  const handlePaymentRecorded = (payment: OrderPayment) => {
-    // Update local order state with new payment amounts
+  const handlePaymentRecorded = (_payment: OrderPayment, newAmountPaid: number, newAmountOutstanding: number) => {
+    // Update local order state with new payment amounts from the API
     if (order) {
-      const newAmountPaid = order.amountPaid + payment.amount;
-      const newAmountOutstanding = Math.max(0, order.totalAmount - newAmountPaid);
       setOrder({
         ...order,
         amountPaid: newAmountPaid,

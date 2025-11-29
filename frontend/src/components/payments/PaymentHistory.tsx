@@ -120,23 +120,29 @@ export function PaymentHistory({
     })
   }
 
-  // Calculate running balance (payments are sorted descending, so we reverse for balance calc)
-  const paymentsWithBalance = [...payments].reverse().reduce<
-    (OrderPayment & { runningBalance: number })[]
-  >((acc, payment, index) => {
-    const previousBalance =
-      index === 0 ? totalAmount : acc[index - 1].runningBalance
-    const runningBalance =
-      payment.status === "paid"
-        ? previousBalance - payment.amount
-        : previousBalance
-
-    acc.push({ ...payment, runningBalance: Math.max(0, runningBalance) })
-    return acc
-  }, [])
-
-  // Reverse back to show newest first
-  const sortedPayments = [...paymentsWithBalance].reverse()
+  // Calculate running balance for each payment
+  // Payments are sorted newest first from API, so we process oldest first for balance calc
+  const calculatePaymentsWithBalance = () => {
+    // Sort payments by date (oldest first) for balance calculation
+    const chronologicalPayments = [...payments].sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )
+    
+    let runningBalance = totalAmount
+    const withBalances = chronologicalPayments.map(payment => {
+      if (payment.status === "paid") {
+        runningBalance = Math.max(0, runningBalance - payment.amount)
+      }
+      return { ...payment, runningBalance }
+    })
+    
+    // Sort back to newest first for display
+    return withBalances.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  }
+  
+  const sortedPayments = calculatePaymentsWithBalance()
 
   if (isLoading) {
     return (

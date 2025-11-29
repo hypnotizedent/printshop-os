@@ -65,13 +65,28 @@ interface StrapiOrderResponse {
 
 /**
  * Record a new payment for an order
+ * Note: Updates order amounts after creating payment. In production,
+ * this should be handled atomically on the backend.
  */
 export async function recordPayment(
   orderDocumentId: string,
   payment: PaymentFormData,
   recordedBy: string = 'Staff'
-): Promise<{ success: boolean; payment?: OrderPayment; error?: string }> {
+): Promise<{ success: boolean; payment?: OrderPayment; newAmountPaid?: number; newAmountOutstanding?: number; error?: string }> {
   try {
+    // First, fetch the current order to get latest amounts
+    const orderRes = await fetch(`${API_BASE}/api/orders/${orderDocumentId}`);
+    if (!orderRes.ok) {
+      return { success: false, error: 'Failed to fetch order' };
+    }
+    const orderData: StrapiOrderResponse = await orderRes.json();
+    const order = orderData.data;
+    
+    const currentAmountPaid = order.amountPaid || 0;
+    const totalAmount = order.totalAmount || 0;
+    const newAmountPaid = currentAmountPaid + payment.amount;
+    const newAmountOutstanding = Math.max(0, totalAmount - newAmountPaid);
+
     // Create the payment record
     const paymentRes = await fetch(`${API_BASE}/api/payments`, {
       method: 'POST',
@@ -104,28 +119,22 @@ export async function recordPayment(
 
     const paymentData: StrapiPaymentResponse = await paymentRes.json();
 
-    // Fetch the current order to update amountPaid and amountOutstanding
-    const orderRes = await fetch(`${API_BASE}/api/orders/${orderDocumentId}`);
-    if (orderRes.ok) {
-      const orderData: StrapiOrderResponse = await orderRes.json();
-      const order = orderData.data;
-      
-      const newAmountPaid = (order.amountPaid || 0) + payment.amount;
-      const newAmountOutstanding = Math.max(0, (order.totalAmount || 0) - newAmountPaid);
-
-      // Update the order with new payment amounts
-      await fetch(`${API_BASE}/api/orders/${orderDocumentId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+    // Update the order with new payment amounts
+    const updateRes = await fetch(`${API_BASE}/api/orders/${orderDocumentId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        data: {
+          amountPaid: newAmountPaid,
+          amountOutstanding: newAmountOutstanding,
         },
-        body: JSON.stringify({
-          data: {
-            amountPaid: newAmountPaid,
-            amountOutstanding: newAmountOutstanding,
-          },
-        }),
-      });
+      }),
+    });
+
+    if (!updateRes.ok) {
+      console.warn('Failed to update order payment amounts');
     }
 
     const p = paymentData.data;
@@ -145,6 +154,8 @@ export async function recordPayment(
         paidAt: p.paidAt,
         createdAt: p.createdAt,
       },
+      newAmountPaid,
+      newAmountOutstanding,
     };
   } catch (error) {
     console.error('Record payment error:', error);

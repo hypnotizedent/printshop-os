@@ -33,7 +33,7 @@ interface RecordPaymentDialogProps {
   orderDocumentId: string
   orderNumber: string
   amountOutstanding: number
-  onPaymentRecorded: (payment: OrderPayment) => void
+  onPaymentRecorded: (payment: OrderPayment, newAmountPaid: number, newAmountOutstanding: number) => void
 }
 
 const PAYMENT_METHODS: { value: PaymentMethodEnum; label: string }[] = [
@@ -96,14 +96,14 @@ export function RecordPaymentDialog({
 
     const result = await recordPayment(orderDocumentId, paymentData)
 
-    if (result.success && result.payment) {
+    if (result.success && result.payment && result.newAmountPaid !== undefined && result.newAmountOutstanding !== undefined) {
       toast.success("Payment recorded", {
         description: `$${parseFloat(amount).toFixed(2)} recorded for order #${orderNumber}`,
       })
-      onPaymentRecorded(result.payment)
+      onPaymentRecorded(result.payment, result.newAmountPaid, result.newAmountOutstanding)
       onOpenChange(false)
-      // Reset form
-      setAmount(amountOutstanding.toFixed(2))
+      // Reset form - use the new outstanding amount from the API response
+      setAmount(result.newAmountOutstanding.toFixed(2))
       setPaymentMethod("cash")
       setReferenceNumber("")
       setNotes("")

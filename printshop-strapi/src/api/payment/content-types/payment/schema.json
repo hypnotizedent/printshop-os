@@ -15,7 +15,8 @@
     "order": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "api::order.order"
+      "target": "api::order.order",
+      "inversedBy": "payments"
     },
     "amount": {
       "type": "decimal",
