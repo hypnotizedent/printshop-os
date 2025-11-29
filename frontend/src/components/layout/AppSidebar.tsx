@@ -1,4 +1,4 @@
-import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, UserCircle } from "@phosphor-icons/react"
+import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, UserCircle, SignIn } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/ui/ThemeToggle"
 import { Link } from "react-router-dom"
@@ -93,7 +93,7 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
             to="/login"
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-foreground hover:bg-muted"
           >
-            <Bell size={20} />
+            <SignIn size={20} />
             <span className="font-medium text-sm">Login Page</span>
           </Link>
         </div>

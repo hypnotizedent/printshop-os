@@ -1,22 +1,23 @@
-import { Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Navigation } from "./Navigation"
 import { Dashboard } from "./Dashboard"
 import { useAuth } from "@/contexts/AuthContext"
 import type { 
+  CustomerUser,
   CustomerDashboardStats, 
   CustomerOrder, 
   CustomerNotification,
   QuoteRequest 
 } from "@/lib/types"
 
-// Mock data for demonstration - will be replaced with API calls
-const getMockUser = (customer: { id: number; documentId: string; name: string; email: string; company?: string | null } | null) => ({
+// Transform auth customer to CustomerUser type for portal components
+const getCustomerUser = (customer: { id: number; documentId: string; name: string; email: string; company?: string | null } | null): CustomerUser => ({
   id: customer?.documentId || "1",
   name: customer?.name || "Customer",
   email: customer?.email || "customer@example.com",
   company: customer?.company || undefined,
-  role: "customer" as const
+  role: "customer"
 })
 
 const mockStats: CustomerDashboardStats = {
@@ -231,7 +232,7 @@ function SupportTickets() {
 
 export function Portal() {
   const { logout, customer } = useAuth()
-  const user = getMockUser(customer)
+  const user = getCustomerUser(customer)
   
   const handleSearch = () => {
     // TODO: Implement search functionality
