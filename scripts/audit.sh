@@ -199,13 +199,10 @@ run_check() {
         return 1
     fi
 
-    if [[ ! -x "$script" ]]; then
-        # Try to source and run if not executable
-        source "$script"
-        "run_${check}_audit" "$format"
-    else
-        "$script" "$format"
-    fi
+    # Source the script and call its run function
+    # This provides consistent behavior regardless of executable status
+    source "$script"
+    "run_${check}_audit" "$format"
 }
 
 # -----------------------------------------------------------------------------
