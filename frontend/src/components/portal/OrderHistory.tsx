@@ -24,6 +24,7 @@ import {
 } from "@phosphor-icons/react"
 import type { Order, OrderStatus, OrderListResponse } from "@/lib/types"
 import { format } from "date-fns"
+import { fetchCustomerOrders, fetchOrderDetails, type PortalOrder } from "@/lib/portal-api"
 
 interface OrderHistoryProps {
   customerId?: string
@@ -48,6 +49,50 @@ const formatStatus = (status: OrderStatus): string => {
   ).join(' ')
 }
 
+// Map PortalOrder from Strapi to the Order format expected by the component
+function mapPortalOrderToOrder(portalOrder: PortalOrder): Order {
+  const status = (portalOrder.status?.toLowerCase().replace(/\s+/g, '_') || 'pending') as OrderStatus;
+  
+  return {
+    id: parseInt(portalOrder.id) || 0,
+    attributes: {
+      printavoId: portalOrder.visualId || portalOrder.orderNumber,
+      customer: {
+        name: '', // Will be populated by customer context
+        email: '',
+      },
+      status,
+      totals: {
+        subtotal: portalOrder.totalAmount || 0,
+        tax: 0,
+        shipping: 0,
+        discount: 0,
+        fees: 0,
+        total: portalOrder.totalAmount || 0,
+        amountPaid: portalOrder.amountPaid || 0,
+        amountOutstanding: portalOrder.amountOutstanding || 0,
+      },
+      lineItems: (portalOrder.lineItems || []).map(item => ({
+        id: item.id,
+        description: item.description,
+        category: item.style,
+        quantity: item.quantity,
+        unitCost: item.unitPrice,
+        taxable: true,
+        total: item.quantity * item.unitPrice,
+      })),
+      timeline: {
+        createdAt: portalOrder.createdAt,
+        updatedAt: portalOrder.updatedAt,
+        dueDate: portalOrder.dueDate,
+        customerDueDate: portalOrder.customerDueDate,
+      },
+      notes: portalOrder.notes,
+      orderNickname: portalOrder.orderNickname || portalOrder.orderNumber,
+    }
+  };
+}
+
 export function OrderHistory({ customerId }: OrderHistoryProps) {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -64,49 +109,41 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
   // Filters
   const [searchQuery, setSearchQuery] = useState("")
   const [filters, setFilters] = useState<OrderFilterState>({})
-  const [sortBy, setSortBy] = useState("timeline.createdAt:desc")
+  const [sortBy, setSortBy] = useState("createdAt:desc")
 
-  // API base URL (in production, this would come from environment variables)
-  const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:3002'
-
-  // Fetch orders
+  // Fetch orders using portal-api
   const fetchOrders = async () => {
+    if (!customerId) {
+      setLoading(false)
+      setError('Customer ID required')
+      return
+    }
+
     setLoading(true)
     setError(null)
     
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        sort: sortBy,
+      const result = await fetchCustomerOrders(customerId, {
+        page,
+        limit,
+        status: filters.status,
+        sortBy,
       })
-
-      if (searchQuery) {
-        params.append('search', searchQuery)
-      }
-
-      if (filters.status) {
-        params.append('status', filters.status)
-      }
-
-      if (filters.dateFrom) {
-        params.append('dateFrom', filters.dateFrom.toISOString().split('T')[0])
-      }
-
-      if (filters.dateTo) {
-        params.append('dateTo', filters.dateTo.toISOString().split('T')[0])
-      }
-
-      const response = await fetch(`${API_BASE_URL}/api/customer/orders?${params}`)
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders')
-      }
-
-      const data: OrderListResponse = await response.json()
-      setOrders(data.data)
-      setTotal(data.pagination.total)
-      setPages(data.pagination.pages)
+      // Map PortalOrder[] to Order[] for component compatibility
+      const mappedOrders = result.orders.map(mapPortalOrderToOrder)
+      
+      // Apply client-side search filter if needed
+      const filteredOrders = searchQuery 
+        ? mappedOrders.filter(o => 
+            o.attributes.printavoId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            o.attributes.orderNickname?.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : mappedOrders
+      
+      setOrders(filteredOrders)
+      setTotal(result.total)
+      setPages(result.pages)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       console.error('Error fetching orders:', err)
@@ -117,19 +154,19 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
 
   useEffect(() => {
     fetchOrders()
-  }, [page, limit, searchQuery, filters, sortBy])
+  }, [page, limit, searchQuery, filters, sortBy, customerId])
 
   const handleViewDetails = async (orderId: number) => {
+    if (!customerId) return
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/api/customer/orders/${orderId}`)
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch order details')
+      const orderDetails = await fetchOrderDetails(orderId.toString(), customerId)
+      if (orderDetails) {
+        setSelectedOrder(mapPortalOrderToOrder(orderDetails))
+        setDetailsOpen(true)
+      } else {
+        alert('Order not found')
       }
-
-      const data = await response.json()
-      setSelectedOrder(data.data)
-      setDetailsOpen(true)
     } catch (err) {
       console.error('Error fetching order details:', err)
       alert('Failed to load order details')
@@ -137,11 +174,13 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
   }
 
   const handleDownloadInvoice = (orderId: number) => {
-    window.open(`${API_BASE_URL}/api/customer/orders/${orderId}/invoice`, '_blank')
+    // TODO: Implement invoice download via Strapi
+    alert('Invoice download coming soon')
   }
 
   const handleDownloadFiles = (orderId: number) => {
-    window.open(`${API_BASE_URL}/api/customer/orders/${orderId}/files`, '_blank')
+    // TODO: Implement files download via Strapi
+    alert('File download coming soon')
   }
 
   const handleSearch = (query: string) => {
@@ -189,12 +228,12 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="timeline.createdAt:desc">Newest First</SelectItem>
-              <SelectItem value="timeline.createdAt:asc">Oldest First</SelectItem>
-              <SelectItem value="totals.total:desc">Highest Amount</SelectItem>
-              <SelectItem value="totals.total:asc">Lowest Amount</SelectItem>
-              <SelectItem value="printavoId:desc">Order # (High-Low)</SelectItem>
-              <SelectItem value="printavoId:asc">Order # (Low-High)</SelectItem>
+              <SelectItem value="createdAt:desc">Newest First</SelectItem>
+              <SelectItem value="createdAt:asc">Oldest First</SelectItem>
+              <SelectItem value="totalAmount:desc">Highest Amount</SelectItem>
+              <SelectItem value="totalAmount:asc">Lowest Amount</SelectItem>
+              <SelectItem value="orderNumber:desc">Order # (High-Low)</SelectItem>
+              <SelectItem value="orderNumber:asc">Order # (Low-High)</SelectItem>
             </SelectContent>
           </Select>
         </div>

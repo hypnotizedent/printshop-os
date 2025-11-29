@@ -22,8 +22,12 @@ interface Order {
   id: string;
   documentId: string;
   orderNumber: string;
+  orderNickname?: string;
+  visualId?: string;
   status: string;
   totalAmount: number;
+  amountPaid: number;
+  amountOutstanding: number;
   dueDate: string;
   createdAt: string;
   notes?: string;
@@ -37,9 +41,10 @@ interface CustomerDetailPageProps {
   customerId: string;
   onBack: () => void;
   onNewOrder: (customerId: string) => void;
+  onViewOrder?: (orderId: string) => void;
 }
 
-export function CustomerDetailPage({ customerId, onBack, onNewOrder }: CustomerDetailPageProps) {
+export function CustomerDetailPage({ customerId, onBack, onNewOrder, onViewOrder }: CustomerDetailPageProps) {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,9 +114,13 @@ export function CustomerDetailPage({ customerId, onBack, onNewOrder }: CustomerD
         const fetchedOrders: Order[] = (data.data || []).map((o: any) => ({
           id: o.id.toString(),
           documentId: o.documentId,
-          orderNumber: o.orderNumber || `#${o.id}`,
+          orderNumber: o.visualId || o.orderNumber || `#${o.id}`,
+          orderNickname: o.orderNickname || null,
+          visualId: o.visualId || o.orderNumber,
           status: o.status || 'PENDING',
           totalAmount: o.totalAmount || 0,
+          amountPaid: o.amountPaid || 0,
+          amountOutstanding: o.amountOutstanding || 0,
           dueDate: o.dueDate || '',
           createdAt: o.createdAt,
           notes: o.notes,
@@ -318,37 +327,54 @@ export function CustomerDetailPage({ customerId, onBack, onNewOrder }: CustomerD
                 <div
                   key={order.documentId || order.id}
                   className="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => onViewOrder?.(order.documentId || order.id)}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-semibold text-foreground">
-                        {order.orderNumber}
+                        #{order.orderNumber}
                       </span>
+                      {order.orderNickname && (
+                        <span className="text-muted-foreground font-medium">
+                          {order.orderNickname}
+                        </span>
+                      )}
                       <Badge className={getStatusColor(order.status)}>
                         {formatStatus(order.status)}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock size={14} />
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </span>
                       {order.dueDate && (
-                        <span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={14} />
                           Due: {new Date(order.dueDate).toLocaleDateString()}
                         </span>
                       )}
-                      {order.items && order.items.length > 0 && (
-                        <span>
-                          {order.items.reduce((sum, item) => sum + (item.quantity || 0), 0)} items
+                      {order.notes && (
+                        <span className="truncate max-w-[200px]" title={order.notes}>
+                          {order.notes}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-semibold text-foreground">
-                      ${order.totalAmount.toLocaleString()}
-                    </p>
+                    {order.totalAmount > 0 ? (
+                      <>
+                        <p className="text-lg font-semibold text-foreground">
+                          ${order.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        {order.amountOutstanding > 0 && order.amountPaid > 0 && (
+                          <p className="text-xs text-orange-600">
+                            ${order.amountOutstanding.toLocaleString('en-US', { minimumFractionDigits: 2 })} due
+                          </p>
+                        )}
+                        {order.amountPaid > 0 && order.amountOutstanding === 0 && (
+                          <p className="text-xs text-green-600">Paid in full</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-lg font-semibold text-muted-foreground">Quote</p>
+                    )}
                   </div>
                 </div>
               ))}

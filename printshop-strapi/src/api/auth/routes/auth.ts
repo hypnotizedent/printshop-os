@@ -54,5 +54,35 @@ export default {
         middlewares: [],
       },
     },
+    {
+      method: 'GET',
+      path: '/customer/orders',
+      handler: 'auth.getCustomerOrders',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/customer/orders/:orderNumber',
+      handler: 'auth.getCustomerOrder',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/customer/quotes',
+      handler: 'auth.getCustomerQuotes',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
   ],
 };

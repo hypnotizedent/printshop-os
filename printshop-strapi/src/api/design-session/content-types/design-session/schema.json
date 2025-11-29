@@ -1,0 +1,67 @@
+{
+  "kind": "collectionType",
+  "collectionName": "design_sessions",
+  "info": {
+    "singularName": "design-session",
+    "pluralName": "design-sessions",
+    "displayName": "Design Session",
+    "description": "Customer design sessions for the online designer tool"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "customerEmail": {
+      "type": "email"
+    },
+    "customerId": {
+      "type": "string"
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer"
+    },
+    "garmentType": {
+      "type": "enumeration",
+      "enum": [
+        "t-shirt",
+        "hoodie",
+        "tank-top",
+        "long-sleeve",
+        "polo",
+        "sweatshirt"
+      ],
+      "default": "t-shirt",
+      "required": true
+    },
+    "designs": {
+      "type": "json",
+      "required": true
+    },
+    "pricing": {
+      "type": "json",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "active",
+        "completed",
+        "abandoned"
+      ],
+      "default": "active",
+      "required": true
+    },
+    "productId": {
+      "type": "string"
+    },
+    "canvasData": {
+      "type": "json"
+    },
+    "thumbnailUrl": {
+      "type": "string"
+    }
+  }
+}

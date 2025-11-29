@@ -1,0 +1,88 @@
+{
+  "kind": "collectionType",
+  "collectionName": "custom_orders",
+  "info": {
+    "singularName": "custom-order",
+    "pluralName": "custom-orders",
+    "displayName": "Custom Order",
+    "description": "Custom design orders from the online designer"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "sessionId": {
+      "type": "string",
+      "required": true
+    },
+    "designSession": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::design-session.design-session"
+    },
+    "customerEmail": {
+      "type": "email"
+    },
+    "customerId": {
+      "type": "string"
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer"
+    },
+    "garmentType": {
+      "type": "enumeration",
+      "enum": [
+        "t-shirt",
+        "hoodie",
+        "tank-top",
+        "long-sleeve",
+        "polo",
+        "sweatshirt"
+      ],
+      "required": true
+    },
+    "designs": {
+      "type": "json",
+      "required": true
+    },
+    "pricing": {
+      "type": "json",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending",
+      "required": true
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 1
+    },
+    "size": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::order.order"
+    },
+    "productionFiles": {
+      "type": "json"
+    }
+  }
+}

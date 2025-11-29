@@ -12,9 +12,10 @@ import { cn } from "@/lib/utils"
 interface JobsPageProps {
   jobs: Job[]
   onUpdateJob: (jobId: string, updates: Partial<Job>) => void
+  onViewOrder?: (orderId: string) => void
 }
 
-export function JobsPage({ jobs, onUpdateJob: _onUpdateJob }: JobsPageProps) {
+export function JobsPage({ jobs, onUpdateJob: _onUpdateJob, onViewOrder }: JobsPageProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeView, setActiveView] = useState("kanban")
 
@@ -101,7 +102,11 @@ export function JobsPage({ jobs, onUpdateJob: _onUpdateJob }: JobsPageProps) {
 
               <div className="space-y-3">
                 {columnJobs.map((job) => (
-                  <Card key={job.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer group">
+                  <Card 
+                    key={job.id} 
+                    className="p-4 hover:shadow-md transition-shadow cursor-pointer group"
+                    onClick={() => onViewOrder?.(job.id)}
+                  >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">

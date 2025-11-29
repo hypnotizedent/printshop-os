@@ -71,6 +71,102 @@ const CATEGORY_DISPLAY: Record<string, string> = {
   'other': 'Other'
 };
 
+// Demo products for when no products are in the database
+function getDemoProducts(): Product[] {
+  return [
+    {
+      id: 1,
+      documentId: 'demo-1',
+      name: 'Classic Tee',
+      sku: 'AS-5001',
+      brand: 'AS Colour',
+      category: 't-shirts',
+      description: 'A classic fit tee with a round neck. Made from 100% combed cotton for a soft, comfortable feel.',
+      basePrice: 8.50,
+      imageUrl: 'https://placehold.co/300x400/1a1a1a/ffffff?text=Classic+Tee',
+      colors: ['Black', 'White', 'Navy', 'Grey Marle'],
+      sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+      variants: [],
+      supplier: 'ascolour',
+    },
+    {
+      id: 2,
+      documentId: 'demo-2',
+      name: 'Heavy Cotton Tee',
+      sku: 'G500',
+      brand: 'Gildan',
+      category: 't-shirts',
+      description: '5.3 oz., 100% preshrunk cotton. Classic fit with seamless collar.',
+      basePrice: 4.25,
+      imageUrl: 'https://placehold.co/300x400/1a1a1a/ffffff?text=Gildan+500',
+      colors: ['Black', 'White', 'Sport Grey', 'Navy', 'Red'],
+      sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
+      variants: [],
+      supplier: 'sanmar',
+    },
+    {
+      id: 3,
+      documentId: 'demo-3',
+      name: 'Pullover Hoodie',
+      sku: 'AS-5101',
+      brand: 'AS Colour',
+      category: 'hoodies',
+      description: 'Mid-weight fleece hoodie with front pouch pocket. Made from premium cotton-poly blend.',
+      basePrice: 28.00,
+      imageUrl: 'https://placehold.co/300x400/1a1a1a/ffffff?text=Hoodie',
+      colors: ['Black', 'Coal', 'Navy', 'Grey Marle'],
+      sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+      variants: [],
+      supplier: 'ascolour',
+    },
+    {
+      id: 4,
+      documentId: 'demo-4',
+      name: 'Bella+Canvas 3001',
+      sku: 'BC-3001',
+      brand: 'Bella+Canvas',
+      category: 't-shirts',
+      description: 'The retail fit favorite. 4.2 oz., airlume combed and ringspun cotton.',
+      basePrice: 5.50,
+      imageUrl: 'https://placehold.co/300x400/1a1a1a/ffffff?text=BC+3001',
+      colors: ['Black', 'White', 'Heather Grey', 'Navy', 'Athletic Heather'],
+      sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+      variants: [],
+      supplier: 'ssactivewear',
+    },
+    {
+      id: 5,
+      documentId: 'demo-5',
+      name: 'Champion Powerblend Hoodie',
+      sku: 'S700',
+      brand: 'Champion',
+      category: 'hoodies',
+      description: 'Powerblend fleece retains shape and resists pilling. Features the classic C logo.',
+      basePrice: 32.00,
+      imageUrl: 'https://placehold.co/300x400/1a1a1a/ffffff?text=Champion',
+      colors: ['Black', 'Navy', 'Oxford Grey', 'Scarlet'],
+      sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
+      variants: [],
+      supplier: 'ssactivewear',
+    },
+    {
+      id: 6,
+      documentId: 'demo-6',
+      name: 'Port & Company Polo',
+      sku: 'KP55',
+      brand: 'Port & Company',
+      category: 'polos',
+      description: '5.5 oz., 65/35 poly/cotton. Features three-button placket and flat knit collar.',
+      basePrice: 12.00,
+      imageUrl: 'https://placehold.co/300x400/1a1a1a/ffffff?text=Polo',
+      colors: ['Black', 'White', 'Navy', 'Royal', 'Red'],
+      sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'],
+      variants: [],
+      supplier: 'sanmar',
+    },
+  ];
+}
+
 export function ProductCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,6 +190,13 @@ export function ProductCatalog() {
       if (!response.ok) throw new Error('Failed to fetch products');
       
       const data = await response.json();
+      
+      // If no products in database, use demo data
+      if (!data.data || data.data.length === 0) {
+        setProducts(getDemoProducts());
+        setIsLoading(false);
+        return;
+      }
       
       // Transform Strapi response
       const transformed: Product[] = (data.data || []).map((item: any) => {
@@ -137,56 +240,8 @@ export function ProductCatalog() {
       setProducts(transformed);
     } catch (error) {
       console.error('Failed to fetch products:', error);
-      toast.error('Failed to load products');
-      
-      // Demo data for testing
-      setProducts([
-        {
-          id: 1,
-          documentId: 'demo-1',
-          name: 'Classic Tee',
-          sku: 'AS-5001',
-          brand: 'AS Colour',
-          category: 'T-Shirts',
-          description: 'A classic fit tee with a round neck',
-          basePrice: 8.50,
-          imageUrl: 'https://placehold.co/300x400?text=AS+Colour+Tee',
-          colors: ['Black', 'White', 'Navy', 'Grey Marle'],
-          sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
-          variants: [],
-          supplier: 'AS Colour',
-        },
-        {
-          id: 2,
-          documentId: 'demo-2',
-          name: 'Heavy Cotton Tee',
-          sku: 'G500',
-          brand: 'Gildan',
-          category: 'T-Shirts',
-          description: '5.3 oz., 100% preshrunk cotton',
-          basePrice: 4.25,
-          imageUrl: 'https://placehold.co/300x400?text=Gildan+500',
-          colors: ['Black', 'White', 'Sport Grey', 'Navy', 'Red'],
-          sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
-          variants: [],
-          supplier: 'SanMar',
-        },
-        {
-          id: 3,
-          documentId: 'demo-3',
-          name: 'Pullover Hoodie',
-          sku: 'AS-5101',
-          brand: 'AS Colour',
-          category: 'Hoodies',
-          description: 'Mid-weight fleece hoodie with front pouch pocket',
-          basePrice: 28.00,
-          imageUrl: 'https://placehold.co/300x400?text=AS+Colour+Hoodie',
-          colors: ['Black', 'Coal', 'Navy', 'Grey Marle'],
-          sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
-          variants: [],
-          supplier: 'AS Colour',
-        },
-      ]);
+      toast.error('Failed to load products. Showing demo catalog.');
+      setProducts(getDemoProducts());
     } finally {
       setIsLoading(false);
     }

@@ -1,7 +1,13 @@
+import { useState, useEffect } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Navigation } from "./Navigation"
 import { Dashboard } from "./Dashboard"
+import { OrderHistory as OrderHistoryComponent } from "./OrderHistory"
+import { QuotesPage } from "./QuotesPage"
+import { ProfileSettings } from "./ProfileSettings"
+import { CustomerAuthProvider, useCustomerAuthContext } from "@/hooks/useCustomerAuth"
+import { fetchCustomerStats, type PortalCustomer } from "@/lib/portal-api"
 import type { 
   CustomerUser, 
   CustomerDashboardStats, 
@@ -10,134 +16,38 @@ import type {
   QuoteRequest 
 } from "@/lib/types"
 
-// Mock data for demonstration
-const mockUser: CustomerUser = {
-  id: "1",
-  name: "John Smith",
-  email: "john.smith@example.com",
-  company: "Acme Corporation",
-  role: "customer"
+// Convert PortalCustomer to CustomerUser for Navigation component
+function mapCustomerToUser(customer: PortalCustomer | null): CustomerUser {
+  if (!customer) {
+    return {
+      id: "0",
+      name: "Guest",
+      email: "",
+      role: "customer"
+    }
+  }
+  return {
+    id: customer.id,
+    name: customer.name || customer.email,
+    email: customer.email,
+    company: customer.company,
+    role: "customer"
+  }
 }
 
-const mockStats: CustomerDashboardStats = {
-  ordersThisMonth: 12,
-  pendingQuotes: 3,
-  activeJobs: 2,
-  totalSpentYTD: 45234
+// Default stats when loading or no customer
+const defaultStats: CustomerDashboardStats = {
+  ordersThisMonth: 0,
+  pendingQuotes: 0,
+  activeJobs: 0,
+  totalSpentYTD: 0
 }
 
-const mockOrders: CustomerOrder[] = [
-  {
-    id: "1",
-    orderNumber: "12345",
-    status: "completed",
-    total: 1245,
-    date: "2024-11-15",
-    items: 3
-  },
-  {
-    id: "2",
-    orderNumber: "12344",
-    status: "in-production",
-    total: 890,
-    date: "2024-11-14",
-    items: 2
-  },
-  {
-    id: "3",
-    orderNumber: "12343",
-    status: "shipped",
-    total: 2100,
-    date: "2024-11-12",
-    items: 5,
-    trackingNumber: "1Z999AA10123456784"
-  },
-  {
-    id: "4",
-    orderNumber: "12342",
-    status: "completed",
-    total: 650,
-    date: "2024-11-10",
-    items: 1
-  },
-  {
-    id: "5",
-    orderNumber: "12341",
-    status: "completed",
-    total: 1500,
-    date: "2024-11-08",
-    items: 4
-  }
-]
+// Mock notifications (TODO: implement notification system)
+const mockNotifications: CustomerNotification[] = []
 
-const mockNotifications: CustomerNotification[] = [
-  {
-    id: "1",
-    type: "success",
-    title: "Order Shipped",
-    message: "Your order #12343 has been shipped and is on its way!",
-    date: "2024-11-23T10:30:00Z",
-    read: false,
-    actionUrl: "/portal/orders/12343"
-  },
-  {
-    id: "2",
-    type: "warning",
-    title: "Quote Expiring Soon",
-    message: "Quote #5678 will expire in 2 days. Review and approve to proceed.",
-    date: "2024-11-22T14:15:00Z",
-    read: false,
-    actionUrl: "/portal/quotes/pending"
-  },
-  {
-    id: "3",
-    type: "info",
-    title: "New Product Available",
-    message: "Check out our new premium card stock options!",
-    date: "2024-11-20T09:00:00Z",
-    read: true
-  }
-]
-
-const mockPendingQuotes: QuoteRequest[] = [
-  {
-    id: "1",
-    quoteNumber: "Q-2024-001",
-    status: "pending",
-    description: "Business Cards - 1000 units",
-    requestedDate: "2024-11-20",
-    estimatedTotal: 450,
-    expiresAt: "2024-11-27"
-  },
-  {
-    id: "2",
-    quoteNumber: "Q-2024-002",
-    status: "pending",
-    description: "Brochures - 500 units, tri-fold",
-    requestedDate: "2024-11-19",
-    estimatedTotal: 1200,
-    expiresAt: "2024-11-26"
-  },
-  {
-    id: "3",
-    quoteNumber: "Q-2024-003",
-    status: "pending",
-    description: "Flyers - 2000 units, full color",
-    requestedDate: "2024-11-18",
-    estimatedTotal: 890,
-    expiresAt: "2024-11-25"
-  }
-]
-
-// Placeholder components for other routes
-function OrderHistory() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Order History</h1>
-      <p className="text-muted-foreground mt-2">View all your past orders</p>
-    </div>
-  )
-}
+// Mock pending quotes (TODO: wire to Strapi quotes)
+const mockPendingQuotes: QuoteRequest[] = []
 
 function TrackOrders() {
   return (
@@ -153,24 +63,6 @@ function RequestQuote() {
     <div className="p-6">
       <h1 className="text-2xl font-bold">Request Quote</h1>
       <p className="text-muted-foreground mt-2">Submit a new quote request</p>
-    </div>
-  )
-}
-
-function PendingQuotes() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Pending Quotes</h1>
-      <p className="text-muted-foreground mt-2">Review and approve quotes</p>
-    </div>
-  )
-}
-
-function QuoteHistory() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Quote History</h1>
-      <p className="text-muted-foreground mt-2">View all your quotes</p>
     </div>
   )
 }
@@ -230,21 +122,71 @@ function SupportTickets() {
 }
 
 export function Portal() {
+  return (
+    <CustomerAuthProvider>
+      <PortalContent />
+    </CustomerAuthProvider>
+  )
+}
+
+function PortalContent() {
+  const { customer, logout, isLoggedIn, isLoading } = useCustomerAuthContext()
+  const [stats, setStats] = useState<CustomerDashboardStats>(defaultStats)
+  const [recentOrders, setRecentOrders] = useState<CustomerOrder[]>([])
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  // Fetch dashboard stats when customer logs in
+  useEffect(() => {
+    async function loadDashboardData() {
+      if (!customer?.documentId) {
+        setStatsLoading(false)
+        return
+      }
+
+      setStatsLoading(true)
+      try {
+        const dashboardStats = await fetchCustomerStats(customer.documentId)
+        setStats(dashboardStats)
+      } catch (err) {
+        console.error('Failed to load dashboard stats:', err)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+
+    loadDashboardData()
+  }, [customer?.documentId])
+
+  const user = mapCustomerToUser(customer)
+
   const handleSearch = () => {
     // TODO: Implement search functionality
     // This will be connected to the backend search API
   }
 
   const handleLogout = () => {
-    // TODO: Implement logout functionality
-    // This will clear session and redirect to login page
+    logout()
+    // Redirect to login page
+    window.location.href = '/login'
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <Router>
       <div className="flex min-h-screen bg-background">
         <Navigation 
-          user={mockUser}
+          user={user}
           notificationCount={mockNotifications.filter(n => !n.read).length}
           onSearch={handleSearch}
           onLogout={handleLogout}
@@ -257,24 +199,45 @@ export function Portal() {
               element={
                 <ProtectedRoute allowedUserTypes={["customer"]}>
                   <Dashboard
-                    stats={mockStats}
-                    recentOrders={mockOrders}
+                    stats={stats}
+                    recentOrders={recentOrders}
                     notifications={mockNotifications}
                     pendingQuotes={mockPendingQuotes}
-                    userName={mockUser.name.split(' ')[0]}
+                    userName={user.name.split(' ')[0]}
                   />
                 </ProtectedRoute>
               } 
             />
-            <Route path="/portal/orders/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><OrderHistory /></ProtectedRoute>} />
+            <Route 
+              path="/portal/orders/history" 
+              element={
+                <ProtectedRoute allowedUserTypes={["customer"]}>
+                  <OrderHistoryComponent customerId={customer?.documentId} />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/portal/orders/track" element={<ProtectedRoute allowedUserTypes={["customer"]}><TrackOrders /></ProtectedRoute>} />
             <Route path="/portal/quotes/request" element={<ProtectedRoute allowedUserTypes={["customer"]}><RequestQuote /></ProtectedRoute>} />
-            <Route path="/portal/quotes/pending" element={<ProtectedRoute allowedUserTypes={["customer"]}><PendingQuotes /></ProtectedRoute>} />
-            <Route path="/portal/quotes/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><QuoteHistory /></ProtectedRoute>} />
-            <Route path="/portal/account/profile" element={<ProtectedRoute allowedUserTypes={["customer"]}><Profile /></ProtectedRoute>} />
-            <Route path="/portal/account/addresses" element={<ProtectedRoute allowedUserTypes={["customer"]}><Addresses /></ProtectedRoute>} />
+            <Route 
+              path="/portal/quotes/pending" 
+              element={
+                <ProtectedRoute allowedUserTypes={["customer"]}>
+                  <QuotesPage customerId={customer?.documentId} showOnlyPending={true} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/portal/quotes/history" 
+              element={
+                <ProtectedRoute allowedUserTypes={["customer"]}>
+                  <QuotesPage customerId={customer?.documentId} showOnlyPending={false} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/portal/account/profile" element={<ProtectedRoute allowedUserTypes={["customer"]}><ProfileSettings /></ProtectedRoute>} />
+            <Route path="/portal/account/addresses" element={<ProtectedRoute allowedUserTypes={["customer"]}><ProfileSettings /></ProtectedRoute>} />
             <Route path="/portal/account/payment" element={<ProtectedRoute allowedUserTypes={["customer"]}><PaymentMethods /></ProtectedRoute>} />
-            <Route path="/portal/account/notifications" element={<ProtectedRoute allowedUserTypes={["customer"]}><NotificationSettings /></ProtectedRoute>} />
+            <Route path="/portal/account/notifications" element={<ProtectedRoute allowedUserTypes={["customer"]}><ProfileSettings /></ProtectedRoute>} />
             <Route path="/portal/support/contact" element={<ProtectedRoute allowedUserTypes={["customer"]}><ContactSupport /></ProtectedRoute>} />
             <Route path="/portal/support/tickets" element={<ProtectedRoute allowedUserTypes={["customer"]}><SupportTickets /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/portal" replace />} />

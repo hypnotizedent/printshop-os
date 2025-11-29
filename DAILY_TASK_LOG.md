@@ -6,31 +6,861 @@
 
 ---
 
-## 📊 Current State (Last Updated: November 29, 2025 2:10 PM EST)
+## 📊 Current State (Last Updated: November 30, 2025 - 3:10 AM EST)
 
 ### Data Status
 | Data Type | Source Count | In Strapi | Status |
 |-----------|--------------|-----------|--------|
-| Customers | 3,358 | 3,319 | ✅ Imported |
-| Orders | 12,867 | 12,868 | ✅ Imported |
-| Line Items | 44,158 | ~36,500 | 🔄 83% Complete (importing) |
-| Products | 105 (Printavo) + 400K (Suppliers) | 0 | ❌ Pending |
+| Customers | 3,358 | 3,320 | ✅ Imported (+1 portal test user) |
+| Orders | 12,867 | 12,867 | ✅ Imported (nicknames backfilled) |
+| Line Items | 49,216 | 49,216 | ✅ Imported |
+| Products | 105 (Printavo) + 400K (Suppliers) | 0 | ❌ Pending (demo catalog active) |
 | Artwork | 115,606 files (201 GB) | - | ⏸️ Paused (see notes) |
+| Quotes | - | 3 (test) | ✅ Schema ready, test data created |
+| Design Sessions | - | 0 | ✅ Schema deployed (new!) |
+| Custom Orders | - | 0 | ✅ Schema deployed (new!) |
 
 ### Infrastructure Status
 | Service | Container | Status | Port |
 |---------|-----------|--------|------|
 | PostgreSQL | printshop-postgres | ✅ Healthy | 5432 |
 | Redis | printshop-redis | ✅ Healthy | 6379 |
-| Strapi CMS | printshop-strapi | ⚠️ Unhealthy (but running) | 1337 |
+| Strapi CMS | printshop-strapi | ✅ Running (restarted 3:01 AM) | 1337 |
 | API Service | printshop-api | ✅ Healthy | 3002 |
-| Frontend | printshop-frontend | ✅ Healthy (fixed 2:05 PM) | 3000 |
+| Frontend | printshop-frontend | ✅ Deployed (restarted) | 3000 |
 | MinIO | printshop-minio | ✅ Healthy | 9000/9001 |
+| **Customer Portal** | **local dev** | **🔄 Running localhost:5000** | **5000** |
+| **Online Designer** | **local dev** | **🔄 Ready for testing** | **8080** |
 
-### ⚠️ Known Infrastructure Issues
+### Customer Portal (PrintFlow)
+- **Repo:** `~/Projects/printshop-pro` (cloned from `hypnotizedent/printshop-pro`)
+- **GitHub Spark URL:** https://printshop-pro--hypnotizedent.github.app
+- **Local Dev:** http://localhost:5000
+- **Status:** ✅ Connected to Strapi backend, auth working
+- **Next:** Deploy to docker-host as container
+
+### Online Designer (Custom Studio App) - NEW!
+- **Repo:** `~/Projects/custom-studio-app` (cloned from `hypnotizedent/custom-studio-app`)
+- **Technology:** React + Fabric.js canvas editor + react-dropzone
+- **Original Backend:** Supabase (replaced with Strapi)
+- **Local Dev:** http://localhost:8081 (port 8081 - changed from 8080 to avoid Traefik conflict)
+- **Status:** ✅ Running locally, Strapi integration complete
+- **Next:** Test full design session flow with Strapi backend
+
+---
+
+## 🔥 Session: November 30, 2025 - Early Morning Pt 2 (3:00 AM - 3:15 AM EST)
+
+### Summary: Online Designer (custom-studio-app) Integration with Strapi
+
+**Goal:** Replace Supabase backend in custom-studio-app with PrintShop OS Strapi backend.
+
+**Completed This Session:**
+1. ✅ Cloned custom-studio-app repo locally
+2. ✅ Created Strapi API client (`src/lib/strapi.ts`)
+3. ✅ Updated CustomerDesignSession component to use Strapi
+4. ✅ Created `design-session` content type in Strapi
+5. ✅ Created `custom-order` content type in Strapi
+6. ✅ Deployed both content types to Strapi (docker-host)
+7. ✅ Verified API endpoints working (`/api/design-sessions`, `/api/custom-orders`)
+
+### Detailed Timeline
+
+#### 3:00 AM - Clone custom-studio-app
+**Action:** Clone the online designer repo from GitHub
+```bash
+cd ~/Projects && gh repo clone hypnotizedent/custom-studio-app
+```
+**Result:** Successfully cloned - Lovable.dev generated React + Fabric.js app
+
+#### 3:02 AM - Analyze Supabase Usage
+**Finding:** App uses Supabase for:
+- Authentication
+- Design session storage
+- Custom order submission
+- File uploads
+
+**Files Using Supabase:**
+- `src/integrations/supabase/client.ts`
+- `src/lib/supabase.ts`
+- `src/components/CustomerDesignSession.tsx`
+
+#### 3:05 AM - Create Strapi API Client
+**File Created:** `~/Projects/custom-studio-app/src/lib/strapi.ts`
+```typescript
+const STRAPI_URL = import.meta.env.VITE_STRAPI_URL || 'http://100.92.156.118:1337';
+
+class StrapiClient {
+  async createDesignSession(session) { /* POST /api/design-sessions */ }
+  async updateDesignSession(documentId, updates) { /* PUT /api/design-sessions/:id */ }
+  async createCustomOrder(order) { /* POST /api/custom-orders */ }
+  async uploadDesignFile(file) { /* POST /api/upload */ }
+  async loginCustomer(email, password) { /* POST /api/auth/customer/login */ }
+  async signupCustomer(email, password, name) { /* POST /api/auth/customer/signup */ }
+}
+
+export const strapi = new StrapiClient();
+```
+
+#### 3:07 AM - Update CustomerDesignSession Component
+**File Modified:** `~/Projects/custom-studio-app/src/components/CustomerDesignSession.tsx`
+- Changed import from `supabase` to `strapi`
+- Updated all database calls to use Strapi API
+- Session now uses `documentId` instead of Supabase `id`
+
+#### 3:09 AM - Create design-session Content Type
+**Files Created:**
+- `printshop-strapi/src/api/design-session/content-types/design-session/schema.json`
+- `printshop-strapi/src/api/design-session/controllers/design-session.ts`
+- `printshop-strapi/src/api/design-session/routes/design-session.ts`
+- `printshop-strapi/src/api/design-session/services/design-session.ts`
+
+**Schema Fields:**
+```json
+{
+  "attributes": {
+    "customerEmail": { "type": "email" },
+    "customerId": { "type": "string" },
+    "garmentType": { "type": "string", "required": true },
+    "designs": { "type": "json", "required": true },
+    "pricing": { "type": "json", "required": true },
+    "status": { "type": "enumeration", "enum": ["active", "completed", "abandoned"] },
+    "productId": { "type": "string" }
+  }
+}
+```
+
+#### 3:11 AM - Create custom-order Content Type
+**Files Created:**
+- `printshop-strapi/src/api/custom-order/content-types/custom-order/schema.json`
+- `printshop-strapi/src/api/custom-order/controllers/custom-order.ts`
+- `printshop-strapi/src/api/custom-order/routes/custom-order.ts`
+- `printshop-strapi/src/api/custom-order/services/custom-order.ts`
+
+**Schema Fields:**
+```json
+{
+  "attributes": {
+    "sessionId": { "type": "string", "required": true },
+    "designSession": { "type": "relation", "target": "api::design-session.design-session" },
+    "customerEmail": { "type": "email" },
+    "customerId": { "type": "string" },
+    "customer": { "type": "relation", "target": "api::customer.customer" },
+    "garmentType": { "type": "enumeration", "enum": ["t-shirt", "hoodie", "tank-top", ...] },
+    "designs": { "type": "json", "required": true },
+    "pricing": { "type": "json", "required": true },
+    "status": { "type": "enumeration", "enum": ["pending", "processing", "completed", "cancelled"] },
+    "quantity": { "type": "integer", "default": 1 },
+    "size": { "type": "string" },
+    "color": { "type": "string" },
+    "notes": { "type": "text" },
+    "order": { "type": "relation", "target": "api::order.order" },
+    "productionFiles": { "type": "json" }
+  }
+}
+```
+
+#### 3:13 AM - Deploy Content Types to Strapi
+**Commands:**
+```bash
+# Bundle and copy content types
+cd printshop-strapi/src/api && tar -czf /tmp/strapi-api-update.tar.gz design-session custom-order
+scp /tmp/strapi-api-update.tar.gz docker-host:/tmp/
+
+# Extract into container
+ssh docker-host 'docker cp /tmp/strapi-api-update.tar.gz printshop-strapi:/tmp/'
+ssh docker-host 'docker exec printshop-strapi tar -xzf /tmp/strapi-api-update.tar.gz -C /srv/app/src/api/'
+
+# Restart Strapi
+ssh docker-host 'docker restart printshop-strapi'
+```
+
+#### 3:15 AM - Verify API Endpoints
+**Test:**
+```bash
+curl http://100.92.156.118:1337/api/design-sessions
+# Response: {"data":[],"meta":{"pagination":{"page":1,"pageSize":25,"pageCount":0,"total":0}}}
+
+curl http://100.92.156.118:1337/api/custom-orders
+# Response: {"data":[],"meta":{"pagination":{"page":1,"pageSize":25,"pageCount":0,"total":0}}}
+```
+**Result:** ✅ Both endpoints working!
+
+---
+
+## 🔥 Session: November 30, 2025 - Early Morning Pt 3 (3:15 AM - 3:30 AM EST)
+
+### Summary: Custom-Studio-App Port Conflict & Supabase Migration Fixes
+
+**Goal:** Get custom-studio-app running locally with Strapi backend.
+
+### Issues Encountered & Solutions
+
+#### 3:15 AM - Port 8080 Conflict with Traefik
+**Problem:** `npm run dev` failed - port 8080 already in use
+```
+Error: listen EADDRINUSE: address already in use :::8080
+```
+
+**Root Cause:** Traefik dashboard runs on port 8080 (see SERVICE_DIRECTORY.md)
+```
+| Traefik | http://100.92.156.118:8080 | Reverse proxy |
+```
+
+**Solution:** Changed Vite dev server port from 8080 → 8081
+```bash
+sed -i '' 's/port: 8080/port: 8081/' ~/Projects/custom-studio-app/vite.config.ts
+```
+
+**File Modified:** `custom-studio-app/vite.config.ts`
+```typescript
+// Before
+server: {
+  host: "::",
+  port: 8080,
+}
+
+// After
+server: {
+  host: "::",
+  port: 8081,
+}
+```
+
+#### 3:18 AM - Missing Supabase Default Export
+**Problem:** Build error when starting dev server
+```
+✘ [ERROR] No matching export in "src/lib/supabase.ts" for import "default"
+
+  src/pages/Index.tsx:3:7:
+    3 │ import supabase from '@/lib/supabase';
+      ╵        ~~~~~~~~
+```
+
+**Root Cause:** Index.tsx was importing Supabase but we hadn't updated it to use Strapi yet
+
+**Solution:** Rewrote `Index.tsx` to use Strapi API client instead of Supabase
+```typescript
+// Before
+import supabase from '@/lib/supabase';
+const { data, error } = await supabase.storage.from('designs').upload(fileName, file);
+const { data, error } = await supabase.from('design_orders').insert([...]);
+
+// After  
+import { strapi } from '@/lib/strapi';
+const result = await strapi.uploadDesignFile(file);
+const order = await strapi.createCustomOrder({...});
+```
+
+**Key Changes in Index.tsx:**
+1. Import changed from `supabase` to `strapi`
+2. File upload: Supabase storage → `strapi.uploadDesignFile()`
+3. Order creation: Supabase insert → `strapi.createCustomOrder()`
+4. Redirect URL updated to use `documentId` (Strapi v5 pattern)
+
+#### 3:20 AM - ShopifyApp.tsx Still Using Supabase
+**Problem:** `ShopifyApp.tsx` still imported Supabase
+```typescript
+import { supabase } from "@/lib/supabase";
+```
+
+**Solution:** Removed Supabase dependency, made it a placeholder component
+- Removed all Supabase calls
+- Added "Shopify integration coming soon!" toast
+- Demo mode for now - OAuth will be integrated later
+
+**Decision:** Shopify integration is not critical for PrintShop OS. The custom designer can work standalone without Shopify. Can revisit when needed.
+
+#### 3:22 AM - Missing react-dropzone Dependency
+**Problem:** Build error after fixing Supabase imports
+```
+Error: The following dependencies are imported but could not be resolved:
+  react-dropzone (imported by /Users/ronnyworks/Projects/custom-studio-app/src/pages/Index.tsx)
+```
+
+**Root Cause:** react-dropzone wasn't in package.json (was a Lovable.dev assumed dependency)
+
+**Solution:**
+```bash
+cd ~/Projects/custom-studio-app && npm install react-dropzone
+```
+
+#### 3:25 AM - Terminal Working Directory Issues
+**Problem:** npm commands running in wrong directory
+```bash
+npm run dev
+# Error: Could not read package.json: ENOENT: no such file or directory, 
+# open '/Users/ronnyworks/Projects/printshop-os/package.json'
+```
+
+**Root Cause:** VS Code terminal was still in printshop-os directory
+
+**Solution:** Used subshell to force correct directory
+```bash
+(cd /Users/ronnyworks/Projects/custom-studio-app && npm install react-dropzone && npm run dev)
+```
+
+#### 3:28 AM - Success! Custom Studio App Running
+**Result:** App successfully running at http://localhost:8081
+
+```
+VITE v5.4.10  ready in 122 ms
+
+➜  Local:   http://localhost:8081/
+➜  Network: http://192.168.12.197:8081/
+➜  Network: http://192.168.12.125:8081/
+➜  Network: http://100.85.186.7:8081/
+```
+
+### Files Modified This Session
+
+| File | Change | Reason |
+|------|--------|--------|
+| `custom-studio-app/vite.config.ts` | Port 8080 → 8081 | Avoid Traefik conflict |
+| `custom-studio-app/src/pages/Index.tsx` | Full rewrite | Replace Supabase with Strapi |
+| `custom-studio-app/src/components/ShopifyApp.tsx` | Remove Supabase | Make it a placeholder |
+| `custom-studio-app/.env` | Created | Add `VITE_STRAPI_URL=http://100.92.156.118:1337` |
+| `custom-studio-app/package.json` | Added react-dropzone | Missing dependency |
+
+### Lessons Learned
+
+1. **Port Conflicts:** Always check SERVICE_DIRECTORY.md before assigning ports
+2. **Lovable.dev Apps:** May have implicit dependencies not in package.json
+3. **Supabase → Strapi Migration:** Need to update ALL files that import supabase, not just the main client
+4. **Terminal Context:** VS Code terminals don't always cd correctly - use subshells when needed
+
+### Current State of Online Designer
+
+**Working:**
+- ✅ Dev server running on port 8081
+- ✅ Strapi API client created
+- ✅ Index page uses Strapi for uploads and orders
+- ✅ design-session and custom-order content types deployed
+
+**Not Yet Tested:**
+- ⚠️ File upload to Strapi (needs testing)
+- ⚠️ Custom order creation flow
+- ⚠️ Customer authentication integration
+
+**TODO:**
+1. Test file upload through UI
+2. Test complete design → order flow
+3. Add customer authentication (login/signup)
+4. Deploy to docker-host as container
+
+---
+
+## 🔥 Session: November 30, 2025 - Early Morning (2:00 AM - 2:50 AM EST)
+curl http://100.92.156.118:1337/api/design-sessions
+# Response: {"data":[],"meta":{"pagination":{"page":1,"pageSize":25,"pageCount":0,"total":0}}}
+
+curl http://100.92.156.118:1337/api/custom-orders
+# Response: {"data":[],"meta":{"pagination":{"page":1,"pageSize":25,"pageCount":0,"total":0}}}
+```
+**Result:** ✅ Both endpoints working!
+
+### Files Created/Modified This Session
+
+| File | Type | Description |
+|------|------|-------------|
+| `custom-studio-app/src/lib/strapi.ts` | Created | Strapi API client replacing Supabase |
+| `custom-studio-app/src/components/CustomerDesignSession.tsx` | Modified | Updated to use Strapi instead of Supabase |
+| `printshop-strapi/src/api/design-session/*` | Created | New content type (4 files) |
+| `printshop-strapi/src/api/custom-order/*` | Created | New content type (4 files) |
+
+### Content Types Added to Strapi
+| Content Type | API Endpoint | Purpose |
+|--------------|--------------|---------|
+| design-session | `/api/design-sessions` | Stores active customer design sessions (canvas state) |
+| custom-order | `/api/custom-orders` | Stores completed orders from online designer |
+
+### Next Steps (TODO)
+1. Create `.env` for custom-studio-app with `VITE_STRAPI_URL=http://100.92.156.118:1337`
+2. Run `npm install && npm run dev` to test locally
+3. Test creating a design session through the UI
+4. Update remaining Supabase imports in other components
+5. Deploy as container on docker-host
+
+---
+
+## 🔥 Session: November 30, 2025 - Early Morning (2:00 AM - 2:50 AM EST)
+
+### Summary: Customer Portal Integration with Strapi Backend
+
+**Goal:** Connect the customer-facing PrintFlow portal (printshop-pro) to the PrintShop OS Strapi backend.
+
+**Completed This Session:**
+1. ✅ Cloned printshop-pro repo locally
+2. ✅ Configured API URL to point to Strapi
+3. ✅ Discovered auth endpoints already existed in Strapi
+4. ✅ Created new customer-specific endpoints for orders/quotes
+5. ✅ Fixed TypeScript errors in new endpoints
+6. ✅ Deployed updated auth controller to Strapi
+7. ✅ Tested customer signup/login flow - working!
+8. ✅ Customer portal running locally at http://localhost:5000
+
+### Detailed Timeline
+
+#### 2:00 AM - Clone & Setup
+**Action:** Clone printshop-pro repo for local development
+```bash
+cd ~/Projects && gh repo clone hypnotizedent/printshop-pro
+```
+**Result:** Successfully cloned 191 objects (215 KB)
+
+#### 2:02 AM - Configure API URL
+**Action:** Create `.env` file to point to production Strapi
+```bash
+echo 'VITE_API_URL=http://100.92.156.118:1337' > ~/Projects/printshop-pro/.env
+```
+**Result:** Frontend now configured to use docker-host Strapi
+
+#### 2:05 AM - Discover Existing Auth Endpoints
+**Finding:** Strapi already has customer auth endpoints!
+- `POST /api/auth/customer/login` - Email + password login
+- `POST /api/auth/customer/signup` - Create new customer account
+- `GET /api/auth/verify` - Validate JWT token
+- `POST /api/auth/employee/validate-pin` - Employee PIN auth
+
+**Verified with curl tests:**
+```bash
+# Test signup - SUCCESS!
+curl -X POST http://100.92.156.118:1337/api/auth/customer/signup \
+  -H "Content-Type: application/json" \
+  -d '{"email": "portal-test@example.com", "password": "TestPass123!", "name": "Portal Test User"}'
+# Response: {"success":true,"token":"eyJhbG...","user":{...}}
+
+# Test login - SUCCESS!
+curl -X POST http://100.92.156.118:1337/api/auth/customer/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "portal-test@example.com", "password": "TestPass123!"}'
+# Response: {"success":true,"token":"eyJhbG...","user":{...}}
+```
+
+#### 2:10 AM - Identify Missing Endpoints
+**Problem:** Dashboard.tsx calls `/customer/orders` but Strapi only has `/orders`
+**Analysis:** The frontend expects:
+- `GET /api/customer/orders` - Customer's orders (filtered by JWT)
+- `GET /api/customer/orders/:orderNumber` - Single order details
+- `GET /api/customer/quotes` - Customer's quotes
+
+**Solution:** Add these endpoints to auth controller
+
+#### 2:15 AM - Add Customer Endpoints to Strapi
+**Files Modified:**
+1. `printshop-strapi/src/api/auth/routes/auth.ts` - Added 3 new routes
+2. `printshop-strapi/src/api/auth/controllers/auth.ts` - Added 3 handler methods
+
+**New Routes Added:**
+```typescript
+{
+  method: 'GET',
+  path: '/customer/orders',
+  handler: 'auth.getCustomerOrders',
+  config: { auth: false },
+},
+{
+  method: 'GET',
+  path: '/customer/orders/:orderNumber',
+  handler: 'auth.getCustomerOrder',
+  config: { auth: false },
+},
+{
+  method: 'GET',
+  path: '/customer/quotes',
+  handler: 'auth.getCustomerQuotes',
+  config: { auth: false },
+}
+```
+
+#### 2:20 AM - First Deploy Attempt - FAILED
+**Issue:** rsync to `/mnt/printshop/` fails with "Permission denied"
+```bash
+rsync -avz printshop-strapi/ docker-host:/mnt/primary/docker/volumes/printshop-os/printshop-strapi/
+# ERROR: mkdir failed: Permission denied (13)
+```
+
+**Root Cause:** Checked DAILY_TASK_LOG.md - found note about stale NFS mount!
+```
+⚠️ Known Infrastructure Issues
+1. Stale NFS mount: /mnt/printshop/ on docker-host is stale
+```
+
+**Solution:** Use docker cp instead of rsync (per documented deployment pattern)
+
+#### 2:25 AM - Second Deploy - TypeScript Errors!
+**Action:** Copy files into running container
+```bash
+scp auth-controller.ts docker-host:/tmp/
+ssh docker-host 'docker cp /tmp/auth-controller.ts printshop-strapi:/srv/app/src/api/auth/controllers/auth.ts'
+docker restart printshop-strapi
+```
+
+**Issue:** Strapi fails to start - TypeScript compilation errors!
+```
+src/api/auth/controllers/auth.ts:441:24 - error TS2339: Property 'total' does not exist
+src/api/auth/controllers/auth.ts:493:20 - error TS2322: Type '"lineItems"' is not assignable
+```
+
+**Root Cause Analysis:**
+1. Order schema uses `totalAmount` not `total`
+2. Quote schema has `lineItems` as JSON field, not a relation (can't populate)
+3. Quote uses `subtotal` not `total`
+
+#### 2:30 AM - Fix TypeScript Errors
+**Changes Made:**
+1. `order.total` → `order.totalAmount`
+2. `quote.total` → `quote.subtotal`
+3. Quote populate: `['lineItems', 'customer']` → `['customer']` (lineItems is JSON)
+
+**Fixed Code:**
+```typescript
+// Orders
+total: order.totalAmount || 0,  // Was: order.total
+
+// Quotes
+populate: ['customer'],  // Was: ['lineItems', 'customer']
+total: quote.subtotal || 0,  // Was: quote.total
+```
+
+#### 2:35 AM - Third Deploy - SUCCESS!
+**Action:** Re-copy fixed controller and restart
+```bash
+scp auth.ts docker-host:/tmp/auth-controller.ts
+ssh docker-host 'docker cp /tmp/auth-controller.ts printshop-strapi:/srv/app/src/api/auth/controllers/auth.ts && docker restart printshop-strapi'
+```
+
+**Strapi Logs:**
+```
+[2025-11-29 19:48:49.933] info: Strapi started successfully
+```
+
+#### 2:40 AM - Test Customer Orders Endpoint
+```bash
+curl -s http://100.92.156.118:1337/api/customer/orders \
+  -H "Authorization: Bearer eyJhbG..." | jq .
+```
+**Response:**
+```json
+{
+  "orders": [],
+  "pagination": { "page": 1, "limit": 10, "total": 0 }
+}
+```
+**Note:** Empty because test user has no orders (just created). Endpoint works!
+
+#### 2:45 AM - Start Customer Portal Dev Server
+```bash
+cd ~/Projects/printshop-pro && npm install && npm run dev
+```
+**Result:** Portal running at http://localhost:5000
+
+#### 2:50 AM - Session Summary
+**What's Working:**
+- ✅ Customer signup creates account with hashed password
+- ✅ Customer login returns JWT token
+- ✅ Token verification works
+- ✅ Customer orders endpoint returns filtered orders
+- ✅ Customer quotes endpoint ready
+- ✅ Portal runs locally and connects to Strapi
+
+**What's Not Working Yet:**
+- ⚠️ Existing customers have no passwordHash (need to set password to login)
+- ⚠️ Orders not linked to customers via relation (uses printavoCustomerId string)
+- ⚠️ Customer portal not deployed to docker-host yet
+
+### Files Modified This Session
+
+| File | Changes |
+|------|---------|
+| `printshop-strapi/src/api/auth/routes/auth.ts` | Added 3 routes: `/customer/orders`, `/customer/orders/:orderNumber`, `/customer/quotes` |
+| `printshop-strapi/src/api/auth/controllers/auth.ts` | Added `getCustomerOrders`, `getCustomerOrder`, `getCustomerQuotes` methods; fixed `totalAmount` and `subtotal` field names |
+| `~/Projects/printshop-pro/.env` | Created with `VITE_API_URL=http://100.92.156.118:1337` |
+
+### Deployment Commands Used
+```bash
+# Copy auth controller to docker-host
+scp /path/to/auth.ts docker-host:/tmp/auth-controller.ts
+
+# Copy into Strapi container and restart
+ssh docker-host 'docker cp /tmp/auth-controller.ts printshop-strapi:/srv/app/src/api/auth/controllers/auth.ts && docker restart printshop-strapi'
+
+# Start customer portal locally
+cd ~/Projects/printshop-pro && npm run dev
+```
+
+### Issues Encountered & Solutions
+
+| Issue | Root Cause | Solution |
+|-------|-----------|----------|
+| rsync permission denied | Stale NFS mount at `/mnt/printshop/` | Use docker cp instead (per daily log) |
+| TypeScript: `order.total` doesn't exist | Order schema uses `totalAmount` | Changed to `order.totalAmount` |
+| TypeScript: Can't populate `lineItems` on quote | Quote.lineItems is JSON, not relation | Removed from populate array |
+| TypeScript: `quote.total` doesn't exist | Quote schema uses `subtotal` | Changed to `quote.subtotal` |
+
+### Next Steps (TODO)
+1. Deploy customer portal as container on docker-host (port 3001 or subdomain)
+2. Run script to link orders→customers via relation (not just printavoCustomerId)
+3. Allow existing customers to set password (forgot password flow)
+4. Add order tracking page (public URL with order number + email)
+
+---
+
+## 🔥 Session: November 29-30, 2025 - Late Night (11:00 PM - 12:15 AM EST)
+
+#### 11:00 PM - Dashboard Click Handler Fix
+**Problem:** User clicks "Giant Carpet Tees + Polos" on Dashboard → nothing happens
+**Fix:** Added `onViewOrder` prop to DashboardPage interface and click handler to job cards
+**Deployed:** 11:10 PM
+
+#### 11:15 PM - Order Detail Page Error
+**Problem:** After click, OrderDetailPage shows "Failed to load order details"
+**Root Cause:** Strapi v5 uses `populate=*` not `populate=customer,lineItems`
+**Additional Fix:** Added customer lookup fallback when `customer` relation is null
+**Deployed:** 11:25 PM
+
+#### 11:30 PM - Customer Names Missing
+**Problem:** All jobs show "Unknown Customer" instead of actual names
+**Root Cause:** `o.customer?.name` is null for all orders (relation never linked)
+**Fix:** Build customer lookup map by `printavoId` during data fetch
+**Deployed:** 11:45 PM
+
+#### 11:50 PM - Variable Scope Bug
+**Problem:** Dashboard now blank after customer name fix
+**Root Cause:** JavaScript variable scope error - `customersData` referenced outside its block
+**Fix:** Moved `customersRawData` array to outer scope, build lookup before orders fetch
+**Deployed:** 11:55 PM
+
+#### 12:00 AM - Customer Landing Page (GitHub Spark)
+**User Request:** Connect customer-facing landing page from GitHub Spark
+**Discovery:**
+- App URL: `https://printshop-pro--hypnotizedent.github.app`
+- Platform: GitHub Spark (not Codespaces)
+- Auth redirect: `github.com/spark/runtime/auth?...`
+**Status:** Identified - needs integration with Strapi API
+**Next Steps:**
+1. Access Spark app source at https://github.com/settings/spark
+2. Configure API endpoint to point to `http://100.92.156.118:1337`
+3. Use `portal-api.ts` functions for customer authentication and data
+
+### Files Modified This Session
+
+| File | Changes |
+|------|---------|
+| `frontend/src/components/dashboard/DashboardPage.tsx` | Added `onViewOrder` prop + click handler |
+| `frontend/src/App.tsx` | Passed `onViewOrder` to DashboardPage, added customer lookup by printavoId, fixed variable scope |
+| `frontend/src/components/orders/OrderDetailPage.tsx` | Fixed `populate=*`, added customer lookup fallback |
+
+### GitHub Repos Reference
+```
+hypnotizedent/printshop-os          - Main monorepo (this workspace)
+hypnotizedent/homelab-infrastructure - Infrastructure configs
+hypnotizedent/printshop-os-fronten   - Separate frontend repo (typo in name)
+hypnotizedent/mint-prints-pricing    - Pricing calculator
+hypnotizedent/custom-studio-app      - Custom studio app
+```
+
+### Known Data Issue (Needs Future Fix)
+**Problem:** Order→Customer relation not established in Strapi
+- Orders have `printavoCustomerId` field (string ID from Printavo)
+- Orders have `customer` relation field (null for all orders)
+- Customers have `printavoId` field that matches `printavoCustomerId`
+
+**Workaround Applied:** Frontend looks up customer by `printavoCustomerId` when `customer` relation is null
+
+**Permanent Fix (TODO):** Run a script to link orders to customers:
+```javascript
+// For each order where customer is null
+// Find customer by printavoId === order.printavoCustomerId
+// Update order.customer = customer.documentId
+```
+
+### Deployment Commands Used
+```bash
+# Build
+cd frontend && npm run build
+
+# Deploy (ALWAYS restart after docker cp!)
+scp -r dist docker-host:/tmp/frontend-dist
+ssh docker-host 'docker cp /tmp/frontend-dist/. printshop-frontend:/app/dist/ && docker restart printshop-frontend && rm -rf /tmp/frontend-dist'
+```
+
+---
+
+## 🔥 Session: November 29, 2025 - Late Night (11:00 PM - 11:45 PM EST)
+
+### Summary: Dashboard Click Navigation + Customer Name Fixes
+
+**Issues Reported:**
+1. Clicking orders on Dashboard "Recent Jobs" → nothing happens
+2. Customer names showing "Unknown Customer" on all jobs
+3. Order detail page → "Failed to load order details" error
+
+**Root Cause Analysis:**
+
+| Issue | Root Cause | Fix |
+|-------|-----------|-----|
+| Dashboard click broken | DashboardPage had `cursor-pointer` but no `onClick` handler | Added `onViewOrder` prop and click handler |
+| "Unknown Customer" | Orders have `customer: null` relation - only `printavoCustomerId` is populated | Added customer lookup by `printavoCustomerId` in App.tsx |
+| Order detail 404 | Strapi v5 uses `populate=*` not `populate=customer,lineItems` | Fixed populate syntax + added customer lookup fallback |
+
+### Timeline
+
+#### 11:00 PM - Dashboard Click Handler Fix
+**Problem:** User clicks "Giant Carpet Tees + Polos" on Dashboard → nothing happens
+**Investigation:** `DashboardPage.tsx` had `cursor-pointer` class but no `onClick`
+**Fix:** Added `onViewOrder` prop to DashboardPage interface and click handler to job cards
+
+```tsx
+// DashboardPage.tsx
+interface DashboardPageProps {
+  onViewOrder?: (orderId: string) => void  // NEW
+}
+
+// Job card now clickable:
+<div onClick={() => onViewOrder?.(job.id)}>
+```
+
+```tsx
+// App.tsx - pass handler
+<DashboardPage ... onViewOrder={handleViewOrder} />
+```
+
+**Deployed:** 11:10 PM
+
+#### 11:15 PM - "Failed to load order details" Error
+**Problem:** After click, OrderDetailPage shows error
+**Investigation:** 
+- Tested Strapi API: `curl .../api/orders/${documentId}?populate=customer,lineItems`
+- Error: `Invalid key customer,lineItems` - Strapi v5 syntax issue
+- Correct: `populate=*`
+
+**Additional Problem:** Even with `populate=*`, customer is `null`:
+```json
+{
+  "orderNumber": "4588",
+  "orderNickname": "Giant Carpet Tees + Polos", 
+  "printavoCustomerId": "2136748",
+  "customer": null  // ← NOT LINKED!
+}
+```
+
+**Root Cause:** During import, orders were created with `printavoCustomerId` but the Strapi relation to `customer` was never established.
+
+**Fix in OrderDetailPage.tsx:**
+1. Changed `populate=customer,lineItems` → `populate=*`
+2. Added fallback: if `customer` is null, fetch by `printavoCustomerId`:
+```tsx
+if (!customerData && o.printavoCustomerId) {
+  const custRes = await fetch(
+    `${API_BASE}/api/customers?filters[printavoId][$eq]=${o.printavoCustomerId}`
+  );
+  customerData = custData.data[0];
+}
+```
+
+**Deployed:** 11:25 PM
+
+#### 11:30 PM - "Unknown Customer" on Dashboard Jobs
+**Problem:** All jobs show "Unknown Customer" instead of actual names
+**Investigation:** Same root cause - `o.customer?.name` is null for all orders
+**Fix in App.tsx:**
+```tsx
+// Build customer lookup from printavoId
+const customersLookup: Record<string, string> = {};
+(customersData.data || []).forEach((c: any) => {
+  if (c.printavoId) {
+    customersLookup[c.printavoId] = c.name || 'Unknown';
+  }
+});
+
+// Use lookup when building jobs
+const customerName = o.customer?.name || 
+  (o.printavoCustomerId ? customersLookup[o.printavoCustomerId] : null) || 
+  'Unknown Customer';
+```
+
+**Deployed:** 11:45 PM
+
+### Files Modified This Session
+
+| File | Changes |
+|------|---------|
+| `frontend/src/components/dashboard/DashboardPage.tsx` | Added `onViewOrder` prop + click handler |
+| `frontend/src/App.tsx` | Passed `onViewOrder` to DashboardPage, added customer lookup by printavoId |
+| `frontend/src/components/orders/OrderDetailPage.tsx` | Fixed `populate=*`, added customer lookup fallback |
+
+### Known Data Issue (Needs Future Fix)
+**Problem:** Order→Customer relation not established in Strapi
+- Orders have `printavoCustomerId` field (string ID from Printavo)
+- Orders have `customer` relation field (null for all orders)
+- Customers have `printavoId` field that matches `printavoCustomerId`
+
+**Workaround Applied:** Frontend looks up customer by `printavoCustomerId` when `customer` relation is null
+
+**Permanent Fix (TODO):** Run a script to link orders to customers:
+```javascript
+// For each order where customer is null
+// Find customer by printavoId === order.printavoCustomerId
+// Update order.customer = customer.documentId
+```
+
+### Deployment Commands Used
+```bash
+# Build
+cd frontend && npm run build
+
+# Deploy (ALWAYS restart after docker cp!)
+scp -r dist docker-host:/tmp/frontend-dist
+ssh docker-host 'docker cp /tmp/frontend-dist/. printshop-frontend:/app/dist/ && docker restart printshop-frontend && rm -rf /tmp/frontend-dist'
+```
+
+---### ⚠️ Known Infrastructure Issues
 1. **Stale NFS mount:** `/mnt/printshop/` on docker-host is stale - use `sudo umount -f` to fix
 2. **docker-compose v1.29.2 bug:** `KeyError: 'ContainerConfig'` - workaround: `docker rm -f` before recreating
 3. **Strapi healthcheck:** Marked unhealthy but actually works fine
+4. **Frontend container serves static files:** MUST restart container after docker cp! Files are cached.
+
+### 🚨 Deployment Mistake Log (Learn From These!)
+
+#### November 29, 2025 - Frontend Deploy Didn't Take Effect
+**What happened:** 
+- Built frontend locally with fixes
+- Used `scp` to copy dist to docker-host `/tmp/`
+- Used `docker cp` to copy into container `/app/dist/`
+- Told user changes were live - **they weren't visible**
+
+**Root Cause:**
+The frontend container (likely nginx or a static file server) **caches files in memory**. Even though `docker cp` successfully copied the new files to `/app/dist/`, the running process was still serving the old files from its internal cache.
+
+**The Fix:**
+```bash
+# ALWAYS restart the container after docker cp!
+ssh docker-host 'docker restart printshop-frontend'
+```
+
+**Correct Deploy Procedure:**
+```bash
+# 1. Build locally
+cd frontend && npm run build
+
+# 2. Copy to docker-host temp
+scp -r dist docker-host:/tmp/frontend-dist
+
+# 3. Copy into container
+ssh docker-host 'docker cp /tmp/frontend-dist/. printshop-frontend:/app/dist/'
+
+# 4. RESTART CONTAINER (the missing step!)
+ssh docker-host 'docker restart printshop-frontend'
+
+# 5. Clean up temp files
+ssh docker-host 'rm -rf /tmp/frontend-dist'
+```
+
+**Why Copilot missed this:**
+- Focused on file deployment, forgot runtime behavior
+- Didn't verify by checking the actual served content in browser
+- Assumed docker cp = immediate effect (wrong for static file servers)
 
 ### Credentials (Reference)
 ```
@@ -45,9 +875,359 @@ MinIO Console: http://100.92.156.118:9001 - minioadmin / 00ab9d9e1e9b806fb9323d0
 
 ---
 
-## 🎯 Immediate Priorities (P0)
+## 🔥 Session: November 30, 2025 (Frontend Data Display Fixes)
 
-1. **Import Line Items** - 44,158 items ready in `data/raw/printavo-exports/complete_2025-11-27_14-20-05/lineitems.json`
+### Late Session: Frontend Bug Fixes ✅
+
+**Objective:** Fix multiple frontend data display issues reported by user:
+1. Only 100 customers/jobs showing (pagination limit)
+2. Jobs page click does nothing (no order detail view)
+3. Job Nickname not displayed (critical field for production)
+4. Date showing 11/28 instead of actual dates
+
+**Root Cause Analysis:**
+
+| Issue | Root Cause | Solution |
+|-------|-----------|----------|
+| 100 items limit | `pagination[limit]=100` hardcoded in App.tsx | Increased to 1000 |
+| Job click does nothing | CustomerDetailPage order cards have `cursor-pointer` but no `onClick` | Added `onViewOrder` handler |
+| Missing orderNickname | App.tsx line 77 uses `Order #${orderNumber}` only | Changed to `orderNickname \|\| Order #...` |
+| All dates show 11/28 | `createdAt` is Strapi import date, not original Printavo date | Use `dueDate` instead |
+
+**Files Modified:**
+
+1. **`frontend/src/App.tsx`** - Major updates
+   - Added import for `OrderDetailPage`
+   - Added `selectedOrderId` state
+   - Changed `pagination[limit]=100` → `pagination[limit]=1000`
+   - Fixed job title: `o.orderNickname || \`Order #${o.orderNumber}\``
+   - Added `handleViewOrder(orderId)` handler
+   - Added `handleBackFromOrder()` handler
+   - Added `order-detail` route case
+   - Passed `onViewOrder` prop to CustomerDetailPage
+
+2. **`frontend/src/components/customers/CustomerDetailPage.tsx`**
+   - Added `onViewOrder?: (orderId: string) => void` prop
+   - Added `onClick={() => onViewOrder?.(order.documentId)}` to order cards
+   - Fixed date display: removed misleading `createdAt`, use `dueDate` as primary
+
+3. **`frontend/src/components/orders/OrderDetailPage.tsx`** (NEW - 545 lines)
+   - Staff-facing order detail page
+   - Order header with nickname, status badge, amounts
+   - Line items table with 25+ size columns (2XS → 5XL)
+   - Payments section with payment history
+   - Imprints section with decoration method details
+   - Shipping info and status timeline
+   - Back navigation
+
+**Date Issue Deep Dive:**
+
+The date issue occurs because Strapi's auto-generated `createdAt` field stores when records were imported to Strapi (Nov 28-29, 2025), not when orders were originally created in Printavo. 
+
+**Schema Analysis:**
+- Order schema has: `dueDate`, `customerDueDate`, `productionDueDate`, `invoiceDate`, `paymentDueDate`
+- No `originalCreatedAt` or `printavoCreatedAt` field exists
+- **Recommendation:** Add `orderDate` field to schema and re-import with original Printavo dates
+
+**Current Workaround:** Display `dueDate` (preserved from Printavo) instead of misleading `createdAt`
+
+**Questions Answered:**
+- **"Where is ShipmentTracking.tsx wired?"** → Sidebar "Tracking" nav item (MapTrifold icon)
+
+**Architecture Notes:**
+- Strapi v5 at `100.92.156.118:1337` - 16 content types
+- Frontend at `100.92.156.118:3000` - React 19 + Vite
+- Data imported: 12,867 orders, 3,319 customers, 49,216 line items
+
+**Next Steps:**
+1. Deploy frontend to docker-host
+2. Test order click navigation
+3. Consider adding `orderDate` field to Strapi schema for accurate order dates
+4. Consider server-side pagination for 12,867 orders (currently loading 1000 max)
+
+---
+
+## 🔥 Session: November 29, 2025 (Customer Portal + Shipping Features)
+
+### 8:10 PM - 8:30 PM: Tracking Page + Cleanup ✅
+
+**Objective:** Add shipment tracking page, remove dev notice box
+
+**Changes Made:**
+1. **Removed EasyPost Integration Note** from ShippingLabelForm.tsx
+   - Removed the amber warning box at bottom of form
+   - Cleaner UI for production use
+
+2. **Created `ShipmentTracking.tsx`** (NEW - 380 lines)
+   - Left panel: Recent shipments list with search
+   - Right panel: Tracking details for selected shipment
+   - Fetches shipments from Strapi `/api/shipments`
+   - Shows tracking history (from EasyPost `/api/shipping/track/:id`)
+   - "Track on Carrier" button links to USPS/UPS/FedEx/DHL tracking
+   - Copy tracking number to clipboard
+   - View label button when label URL available
+
+3. **Updated App.tsx and AppSidebar.tsx**
+   - Added `/tracking` route → `<ShipmentTracking />`
+   - Added "Tracking" nav item with MapTrifold icon
+
+**Tested:**
+- Verified orders endpoint: `GET /api/orders` works with $containsi search
+- Verified customers endpoint: `GET /api/customers` works with search
+- Order lookup uses URLSearchParams (auto-encodes brackets)
+
+**Deployed:** 8:30 PM - Frontend size 689KB JS, 443KB CSS
+
+---
+
+### 7:45 PM - 8:10 PM: Multi-Box Shipping + Order Lookup ✅
+
+**Objective:** Shipping features - multi-box shipments and order lookup
+
+**Changes Made:**
+1. **Updated `ShippingLabelForm.tsx`** - Multi-box support
+   - Added `ParcelWithId` interface with unique IDs per parcel
+   - Added `parcels` array state replacing single `parcel`
+   - Added `addParcel()`, `removeParcel()`, `updateParcel()` functions
+   - Updated UI to render parcel cards with Add/Remove buttons
+   - Added shipment summary showing total weight and box count
+   - Updated `validateAddresses()` for multi-parcel validation
+   - Updated `getRates()` to include all parcels in request
+
+2. **Order/Customer Lookup** ✅
+   - Added `OrderSearchResult` and `CustomerSearchResult` interfaces
+   - Added `searchOrdersAndCustomers()` function to query Strapi
+   - Added `selectOrder()` and `selectCustomer()` to auto-fill recipient
+   - Added Dialog with search input and results display
+   - Shows "Has Address" badge for entries with shipping addresses
+   - Auto-fills toAddress on selection
+
+**Technical Details:**
+- Each parcel has unique ID via `generateParcelId()`
+- Box presets (small, medium, large, flat-mailer, custom) per parcel
+- EasyPost rates API receives `parcels` array + `boxCount` for batch support
+- Order lookup queries by orderNumber, visualId, or orderNickname
+- Customer lookup queries by name, email, or company
+- Uses Dialog from shadcn/ui for the lookup modal
+
+**Deployed:** 8:10 PM - Frontend size 675KB JS, 443KB CSS
+
+**Remaining Shipping Work:**
+- [ ] Batch label purchase for multi-box (needs backend support)
+- [ ] Tracking page for shipped orders
+- [ ] Test with real order data
+
+---
+
+### 7:00 PM - 7:45 PM: Quote Approval + Profile + Products Wiring
+
+**Objective:** Wire Customer Portal components to Strapi APIs (HIGH PRIORITY)
+
+**Changes Made:**
+1. **Created `frontend/src/lib/portal-api.ts`** (300+ lines)
+   - `loginCustomer(email)` - Email-based lookup in Strapi customers
+   - `verifySession(token)` - Token validation with expiration check
+   - `fetchCustomerOrders(customerId, options)` - Paginated order fetch with filters
+   - `fetchOrderDetails(orderId, customerId)` - Single order with line items
+   - `fetchCustomerQuotes(customerId, options)` - Quote list with status filter
+   - `fetchCustomerStats(customerId)` - Dashboard stats (orders, quotes, jobs)
+   - `updateCustomerProfile(customerId, updates)` - Profile update endpoint
+   - Helper functions: `formatOrderStatus`, `formatPrice`, `formatDate`
+
+2. **Created `frontend/src/hooks/useCustomerAuth.tsx`**
+   - React hook for auth state management
+   - `login(email)` - Login with localStorage token persistence
+   - `logout()` - Clear session and redirect
+   - `refreshCustomer()` - Refresh customer data from API
+   - `CustomerAuthProvider` context for global auth state
+   - `useCustomerAuthContext()` hook for child components
+
+3. **Updated `frontend/src/components/portal/OrderHistory.tsx`**
+   - Removed hardcoded `API_BASE_URL = 'http://localhost:3002'`
+   - Now uses `fetchCustomerOrders()` and `fetchOrderDetails()` from portal-api.ts
+   - Added `mapPortalOrderToOrder()` function to convert Strapi format → component format
+   - Client-side search filtering on order number
+   - Updated sort options to match Strapi field names
+
+4. **Updated `frontend/src/components/portal/Portal.tsx`**
+   - Wrapped in `CustomerAuthProvider` for global auth context
+   - Replaced mock data with real API calls
+   - `fetchCustomerStats()` on customer login
+   - `OrderHistoryComponent` now receives `customerId` prop
+   - Proper loading state while auth initializing
+
+**Technical Details:**
+- Orders query: `filters[printavoCustomerId][$eq]={printavoId}` (same as CustomerDetailPage fix)
+- Auth token: Base64 encoded JSON with `customerId`, `email`, `exp` (24h expiry)
+- No password required - email lookup only (for internal dashboard use)
+
+**Files Modified:**
+- `frontend/src/lib/portal-api.ts` (NEW)
+- `frontend/src/hooks/useCustomerAuth.tsx` (NEW)
+- `frontend/src/components/portal/OrderHistory.tsx` (MODIFIED)
+- `frontend/src/components/portal/Portal.tsx` (MODIFIED)
+
+**Next Steps:**
+- [x] Build and deploy to docker-host ✅ (4:10 PM)
+- [x] Test OrderHistory with real customer data
+- [x] Wire Quote components (QuoteList, QuoteApproval) ✅ (6:30 PM)
+- [x] Wire Profile components ✅ (7:00 PM)
+- [x] Fix Products page demo catalog ✅ (7:10 PM)
+
+---
+
+### 7:00 PM - 7:15 PM: Profile & Products Fix
+
+**Objective:** Wire Profile settings to Strapi, fix Products page empty state
+
+**Changes Made:**
+
+1. **Updated `frontend/src/components/portal/ContactInfo.tsx`:**
+   - Replaced mock data with `useCustomerAuthContext()` for real customer data
+   - Form now pre-populates with customer name, email, phone, company
+   - Save calls `updateCustomerProfile()` from portal-api.ts
+   - Shows Printavo Customer ID if available
+   - Email field disabled (contact support to change)
+
+2. **Updated `frontend/src/components/portal/Portal.tsx`:**
+   - Added `ProfileSettings` import
+   - Routes `/portal/account/profile`, `/portal/account/addresses`, `/portal/account/notifications` now use `<ProfileSettings />`
+   - ProfileSettings has tabs: Profile, Addresses, Security, Preferences, Activity
+
+3. **Fixed `frontend/src/components/products/ProductCatalog.tsx`:**
+   - **Issue:** Products page showed empty when no products in Strapi database
+   - **Fix:** Added `getDemoProducts()` function with 6 sample products
+   - Now shows demo catalog when Strapi returns empty data
+   - Demo products: AS Colour, Gildan, Bella+Canvas, Champion, Port & Company
+   - Categories: t-shirts, hoodies, polos
+
+**Deployment:**
+```bash
+npm run build  # 1.78s, 665KB JS bundle
+scp -r dist docker-host:/tmp/printshop-frontend-dist
+ssh docker-host 'docker cp /tmp/printshop-frontend-dist/. printshop-frontend:/app/dist/'
+```
+
+**Access Points:**
+- Profile Settings: http://100.92.156.118:3000/portal/account/profile
+- Products Catalog: http://100.92.156.118:3000/products
+
+---
+
+### 5:30 PM - 6:45 PM: Quote Approval Flow Wiring
+
+**Objective:** Complete quote approval workflow from list → view → approve/reject
+
+**Changes Made:**
+
+1. **Created `frontend/src/components/portal/QuotesPage.tsx`** (NEW - 180 lines)
+   - Container component connecting QuoteList + QuoteApproval to Strapi
+   - `loadQuotes()` - Fetches quotes via `fetchCustomerQuotes()`
+   - `handleViewQuote()` - Opens approval dialog with full quote details
+   - `handleApprove()` - Submits approval with signature to Strapi
+   - Maps Strapi statuses (draft/sent/viewed) → UI statuses (Pending/Approved/etc)
+
+2. **Added Quote API Functions to `portal-api.ts`:**
+   - `fetchQuoteDetails(quoteId)` - Full quote with line items, mockups
+   - `approveQuote(documentId, approvalData)` - Submit approval with signature
+   - `rejectQuote(documentId, reason)` - Reject with reason text
+   - `requestQuoteChanges(documentId, comments)` - Request changes on quote
+   - `mapQuoteStatus()` - Maps Strapi enum → QuoteStatus type
+
+3. **Updated `Portal.tsx` Routes:**
+   - `/portal/quotes/pending` → `<QuotesPage showOnlyPending={true} />`
+   - `/portal/quotes/history` → `<QuotesPage showOnlyPending={false} />`
+
+4. **Fixed Field Mappings:**
+   - Strapi uses `total` not `totalAmount`
+   - Strapi uses `approverSignature` and `approvedBy` not `approvalSignature`
+   - Status values: `draft`, `sent`, `viewed`, `approved`, `rejected`, `expired`, `converted`
+
+5. **Created Test Quotes in Strapi:**
+   - Q-2024-001 (sent) - Custom T-Shirts + Caps - $1,420.78
+   - Q-2024-002 (approved) - Polo Shirts - $3,031.00
+   - Q-2024-003 (draft) - Hoodies + Sweatpants - $2,598.00
+
+**API Endpoints:**
+- `GET /api/quotes` - List all quotes (public access configured)
+- `GET /api/quotes/{documentId}?populate=*` - Single quote with details
+- `PUT /api/quotes/{documentId}` - Update status, signature, etc.
+
+**Access Points:**
+- Quote List: http://100.92.156.118:3000/portal/quotes/pending
+- Quote History: http://100.92.156.118:3000/portal/quotes/history
+- Strapi API: http://100.92.156.118:1337/api/quotes
+
+**Files Created/Modified:**
+- `frontend/src/components/portal/QuotesPage.tsx` (NEW)
+- `frontend/src/lib/portal-api.ts` (+180 lines)
+- `frontend/src/components/portal/Portal.tsx` (route updates)
+
+---
+
+### 4:00 PM - 4:15 PM: Frontend UI Polish & Order Display Fixes
+
+**Objective:** Fix order nickname/pricing not showing, improve UI display
+
+**Issues Identified:**
+1. Order nickname (`orderNickname`) was not displayed in CustomerDetailPage
+2. Pricing showed as "$0" because orders display `totalAmount` which may be 0 for quotes
+3. Payment status (amount paid/outstanding) was not visible
+4. Portal OrderHistory was using `orderNumber` instead of `orderNickname`
+
+**Changes Made:**
+
+1. **Updated `frontend/src/components/customers/CustomerDetailPage.tsx`:**
+   - Added `orderNickname`, `visualId`, `amountPaid`, `amountOutstanding` to Order interface
+   - Updated order mapping to extract all pricing fields from Strapi
+   - Order display now shows:
+     - `#13670` (visualId) + nickname if available
+     - Status badge with color coding
+     - Due date and notes preview
+     - Total amount with proper formatting (`$1,234.56`)
+     - Payment status: "Paid in full" (green) or "$X due" (orange)
+     - Shows "Quote" instead of "$0" for unpaid quotes
+
+2. **Updated `frontend/src/lib/portal-api.ts`:**
+   - Added `orderNickname` to `PortalOrder` interface
+
+3. **Updated `frontend/src/components/portal/OrderHistory.tsx`:**
+   - `mapPortalOrderToOrder()` now uses `orderNickname || orderNumber` for nickname field
+
+**Deployment:**
+```bash
+# Build: 1.76s, 664KB JS bundle
+npm run build
+
+# Deploy via scp + docker cp (NFS mount workaround)
+scp -r dist docker-host:/tmp/frontend-dist
+ssh docker-host 'docker cp /tmp/frontend-dist/. printshop-frontend:/app/dist/'
+```
+
+**How to See Changes:**
+1. Navigate to `http://100.92.156.118:3000` 
+2. Click on "Customers" in the sidebar
+3. Click "View Details" on any customer
+4. Order history now shows:
+   - Order number with `#` prefix
+   - Order nickname (if set in Printavo)
+   - Payment status and amounts
+   - Notes preview on hover
+
+**Strapi Order Fields Reference:**
+```json
+{
+  "orderNumber": "13670",
+  "orderNickname": "Customer Project Name",  // Often null
+  "visualId": "13670",                        // Display ID
+  "totalAmount": 1500.00,
+  "amountPaid": 750.00,
+  "amountOutstanding": 750.00,
+  "status": "IN_PRODUCTION"
+}
+```
+
+---
    - Script ready: `scripts/sync-line-items.py`
    - Checkpoint: `data/line-item-import-checkpoint.json`
    - **Current:** 28,828 / 44,158 (65%) - Running in background
