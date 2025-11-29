@@ -409,36 +409,55 @@ services/api/analytics/
 ```
 services/customer-service-ai/
 ├── src/
-│   ├── index.ts              # Main entry
+│   ├── index.ts              # Express server + API endpoints
+│   ├── routes/
+│   │   └── ai.routes.ts      # RESTful AI endpoints
 │   ├── services/
-│   │   └── QuoteOptimizer.ts # AI quote optimizer
+│   │   ├── rag.service.ts    # RAG with ChromaDB
+│   │   ├── chat.service.ts   # Session management
+│   │   ├── sentiment.service.ts    # Sentiment analysis
+│   │   └── design-analysis.service.ts # Image analysis
 │   ├── types/
-│   │   └── ai.types.ts
+│   │   └── index.ts          # TypeScript types
 │   └── utils/
-│       ├── openai-client.ts  # OpenAI integration
-│       └── cost-calculator.ts
-├── tests/
-│   └── quote-optimizer.test.ts # 19 tests
-├── scripts/
-│   │   └── init_knowledge_base.py # Knowledge base ingestion
-│   └── README.md
+│       └── llm-client.ts     # OpenAI/Ollama client
+├── Dockerfile                # Container build
+├── .env.example              # Configuration template
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
 **Responsibilities:**
-- AI-powered design analysis (OpenAI Vision)
-- Quote optimization suggestions
-- Print recommendation engine
-- Issue detection (resolution, bleed, colors)
-- Cost optimization
+- Customer inquiry analysis with RAG (Retrieval-Augmented Generation)
+- FAQ semantic search across knowledge base
+- Sentiment analysis for prioritization
+- Design image analysis (color count, gradients, resolution)
+- Chat session management with Redis
+- Print method recommendations
 
-**API:**
-- `createQuoteOptimizer()` - Initialize
-- `optimizeQuote(designUrl, orderDetails)` - Analyze & optimize
+**API Endpoints:**
+- `POST /analyze-inquiry` - Analyze customer question
+- `POST /faq-search` - Semantic FAQ search
+- `POST /sentiment` - Text sentiment analysis
+- `POST /analyze-design` - Design feasibility check
+- `POST /chat/sessions` - Create chat session
+- `POST /chat/sessions/:id/messages` - Send message
+- `GET /chat/sessions/:id` - Get session history
+- `GET /health` - Service health check
+
+**Technology:**
+- LLM: OpenAI GPT-4 or Ollama (local)
+- Vector DB: ChromaDB
+- Embeddings: text-embedding-3-small
+- Sessions: Redis (optional)
 
 **Performance:**
-- Analysis time: <5 seconds
-- Cost per analysis: ~$0.01
+- Response time: <2 seconds
+- Cost per query: ~$0.01 (OpenAI)
 - Cache TTL: 1 hour
+
+**Port:** 5000
 
 ---
 

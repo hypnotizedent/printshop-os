@@ -13,6 +13,7 @@ import LabelsDemo from "./pages/LabelsDemo"
 import { QuoteForm } from "./components/quotes/QuoteForm"
 import { ProductCatalog } from "./components/products/ProductCatalog"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
+import { AIAssistantPage } from "./pages/AIAssistantPage"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
@@ -161,6 +162,8 @@ function App() {
         return <ProductCatalog />
       case "shipping":
         return <ShippingLabelForm />
+      case "ai-assistant":
+        return <AIAssistantPage />
       default:
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} />
     }
