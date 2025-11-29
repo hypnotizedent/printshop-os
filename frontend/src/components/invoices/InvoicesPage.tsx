@@ -335,6 +335,7 @@ export function InvoicesPage({ onViewOrder }: InvoicesPageProps) {
                         onClick={() => handleViewInvoice(invoice.orderId)}
                         className="h-8 w-8 p-0"
                         title="View Invoice"
+                        aria-label={`View invoice ${invoice.invoiceNumber}`}
                       >
                         <Eye size={18} />
                       </Button>
@@ -346,6 +347,7 @@ export function InvoicesPage({ onViewOrder }: InvoicesPageProps) {
                         }}
                         className="h-8 w-8 p-0"
                         title="Download PDF"
+                        aria-label={`Download invoice ${invoice.invoiceNumber} as PDF`}
                       >
                         <Download size={18} />
                       </Button>
@@ -356,6 +358,7 @@ export function InvoicesPage({ onViewOrder }: InvoicesPageProps) {
                           onClick={() => handleMarkPaid(invoice)}
                           className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
                           title="Mark as Paid"
+                          aria-label={`Mark invoice ${invoice.invoiceNumber} as paid`}
                         >
                           <CheckCircle size={18} />
                         </Button>
