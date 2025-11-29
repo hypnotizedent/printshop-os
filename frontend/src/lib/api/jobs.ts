@@ -7,6 +7,9 @@ import type { Job, CapacityData } from '../types'
 
 const STRAPI_API_URL = import.meta.env.VITE_STRAPI_API_URL || 'http://localhost:1337/api'
 
+// Default daily capacity - can be overridden via environment variable
+const DEFAULT_DAILY_CAPACITY = Number(import.meta.env.VITE_DAILY_JOB_CAPACITY) || 10
+
 /**
  * Get jobs within a date range for calendar views
  */
