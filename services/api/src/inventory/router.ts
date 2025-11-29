@@ -478,4 +478,294 @@ router.post('/batch', async (req: Request, res: Response) => {
   });
 });
 
+/**
+ * GET /api/inventory/colors/:sku
+ * Get available colors for a product with stock info
+ */
+router.get('/colors/:sku', async (req: Request, res: Response) => {
+  const { sku } = req.params;
+  
+  if (!sku || sku.length < 2) {
+    return res.status(400).json({ error: 'Invalid SKU format', code: 'INVALID_SKU' });
+  }
+
+  const supplier = detectSupplier(sku);
+  const cacheKey = getCacheKey(sku, supplier);
+
+  // Try to get from cache first
+  let inventoryData: InventoryCheckResponse | null = null;
+  
+  try {
+    const redis = await getRedisClient();
+    if (redis) {
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        inventoryData = JSON.parse(cached);
+      }
+    }
+  } catch (error) {
+    console.error('Cache read error:', error);
+  }
+
+  // If not cached, fetch from supplier
+  if (!inventoryData) {
+    const result = await querySupplier(sku, supplier);
+    
+    if (!result.found) {
+      return res.status(404).json({
+        error: result.error || 'Product not found',
+        sku,
+        supplier,
+        code: 'NOT_FOUND',
+      });
+    }
+
+    inventoryData = {
+      sku: sku.toUpperCase(),
+      name: result.name || sku,
+      supplier,
+      price: result.price || null,
+      currency: result.currency || 'USD',
+      inventory: result.inventory || [],
+      totalQty: 0,
+      lastChecked: new Date().toISOString(),
+      cached: false,
+    };
+
+    // Cache for later
+    try {
+      const redis = await getRedisClient();
+      if (redis) {
+        await redis.setEx(cacheKey, CACHE_TTL, JSON.stringify(inventoryData));
+      }
+    } catch {
+      // Continue
+    }
+  }
+
+  // Aggregate colors from inventory
+  const colorMap = new Map<string, { color: string; inStock: boolean; totalQty: number; sizes: string[] }>();
+  
+  for (const item of inventoryData.inventory) {
+    const existing = colorMap.get(item.color);
+    if (existing) {
+      if (!existing.sizes.includes(item.size)) {
+        existing.sizes.push(item.size);
+      }
+      existing.totalQty += item.qty;
+      if (item.qty > 0) {
+        existing.inStock = true;
+      }
+    } else {
+      colorMap.set(item.color, {
+        color: item.color,
+        inStock: item.qty > 0,
+        totalQty: item.qty,
+        sizes: [item.size]
+      });
+    }
+  }
+
+  const colors = Array.from(colorMap.values()).sort((a, b) => a.color.localeCompare(b.color));
+
+  return res.json({
+    sku: sku.toUpperCase(),
+    name: inventoryData.name,
+    supplier,
+    colorCount: colors.length,
+    colors,
+    lastChecked: inventoryData.lastChecked,
+    cached: true,
+  });
+});
+
+/**
+ * GET /api/inventory/sizes/:sku
+ * Get available sizes for a product with stock info
+ */
+router.get('/sizes/:sku', async (req: Request, res: Response) => {
+  const { sku } = req.params;
+  const { color } = req.query;
+  
+  if (!sku || sku.length < 2) {
+    return res.status(400).json({ error: 'Invalid SKU format', code: 'INVALID_SKU' });
+  }
+
+  const supplier = detectSupplier(sku);
+  const cacheKey = getCacheKey(sku, supplier);
+
+  // Try cache
+  let inventoryData: InventoryCheckResponse | null = null;
+  
+  try {
+    const redis = await getRedisClient();
+    if (redis) {
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        inventoryData = JSON.parse(cached);
+      }
+    }
+  } catch {
+    // Continue
+  }
+
+  if (!inventoryData) {
+    const result = await querySupplier(sku, supplier);
+    
+    if (!result.found) {
+      return res.status(404).json({
+        error: result.error || 'Product not found',
+        sku,
+        supplier,
+        code: 'NOT_FOUND',
+      });
+    }
+
+    inventoryData = {
+      sku: sku.toUpperCase(),
+      name: result.name || sku,
+      supplier,
+      price: result.price || null,
+      currency: result.currency || 'USD',
+      inventory: result.inventory || [],
+      totalQty: 0,
+      lastChecked: new Date().toISOString(),
+      cached: false,
+    };
+  }
+
+  // Filter by color if specified
+  let inventory = inventoryData.inventory;
+  if (color) {
+    const colorStr = (color as string).toLowerCase();
+    inventory = inventory.filter(item => item.color.toLowerCase().includes(colorStr));
+  }
+
+  // Aggregate sizes
+  const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
+  const sizeMap = new Map<string, { size: string; inStock: boolean; totalQty: number; colors: string[] }>();
+  
+  for (const item of inventory) {
+    const existing = sizeMap.get(item.size);
+    if (existing) {
+      if (!existing.colors.includes(item.color)) {
+        existing.colors.push(item.color);
+      }
+      existing.totalQty += item.qty;
+      if (item.qty > 0) {
+        existing.inStock = true;
+      }
+    } else {
+      sizeMap.set(item.size, {
+        size: item.size,
+        inStock: item.qty > 0,
+        totalQty: item.qty,
+        colors: [item.color]
+      });
+    }
+  }
+
+  // Sort by standard size order
+  const sizes = Array.from(sizeMap.values()).sort((a, b) => {
+    const aIdx = sizeOrder.indexOf(a.size.toUpperCase());
+    const bIdx = sizeOrder.indexOf(b.size.toUpperCase());
+    if (aIdx === -1 && bIdx === -1) return a.size.localeCompare(b.size);
+    if (aIdx === -1) return 1;
+    if (bIdx === -1) return -1;
+    return aIdx - bIdx;
+  });
+
+  return res.json({
+    sku: sku.toUpperCase(),
+    name: inventoryData.name,
+    supplier,
+    colorFilter: color || null,
+    sizeCount: sizes.length,
+    sizes,
+    lastChecked: inventoryData.lastChecked,
+    cached: true,
+  });
+});
+
+/**
+ * GET /api/inventory/pricing/:sku
+ * Get pricing with volume breaks for a product
+ */
+router.get('/pricing/:sku', async (req: Request, res: Response) => {
+  const { sku } = req.params;
+  const { quantity } = req.query;
+  
+  if (!sku || sku.length < 2) {
+    return res.status(400).json({ error: 'Invalid SKU format', code: 'INVALID_SKU' });
+  }
+
+  const supplier = detectSupplier(sku);
+  const client = getSupplierClient(supplier);
+
+  if (!client) {
+    return res.status(503).json({
+      error: `${supplier} client not configured`,
+      sku,
+      supplier,
+      code: 'SUPPLIER_ERROR',
+    });
+  }
+
+  try {
+    let basePrice = 0;
+    let currency = 'USD';
+    let priceBreaks: Array<{ minQty: number; maxQty?: number; price: number; casePrice?: number }> = [];
+
+    // Get pricing from supplier
+    if (supplier === 's&s-activewear' && ssActivewearClient) {
+      const styleId = sku.replace(/^SS-/i, '');
+      const pricing = await (ssActivewearClient as any).client.get(`/v2/products/${styleId}/pricing`);
+      const prices = pricing.data || [];
+      
+      if (prices.length > 0) {
+        const sorted = prices.sort((a: any, b: any) => a.quantity - b.quantity);
+        basePrice = sorted[0].price || 0;
+        
+        priceBreaks = sorted.map((p: any, i: number) => ({
+          minQty: p.quantity,
+          maxQty: sorted[i + 1]?.quantity ? sorted[i + 1].quantity - 1 : undefined,
+          price: p.price,
+          casePrice: p.casePrice
+        }));
+      }
+    }
+
+    // Calculate price for specific quantity
+    let priceForQuantity: number | null = null;
+    if (quantity) {
+      const qty = parseInt(quantity as string);
+      if (!isNaN(qty) && qty > 0) {
+        const applicableBreak = [...priceBreaks]
+          .reverse()
+          .find(b => qty >= b.minQty);
+        priceForQuantity = applicableBreak?.price || basePrice;
+      }
+    }
+
+    return res.json({
+      sku: sku.toUpperCase(),
+      supplier,
+      basePrice,
+      currency,
+      priceBreaks,
+      quantity: quantity ? parseInt(quantity as string) : null,
+      priceForQuantity,
+      lastChecked: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Pricing lookup error:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch pricing',
+      sku,
+      supplier,
+      code: 'SUPPLIER_ERROR',
+    });
+  }
+});
+
 export default router;
