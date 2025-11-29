@@ -52,10 +52,21 @@
         "stripe",
         "cash",
         "check",
+        "credit_card",
+        "ach",
         "bank_transfer",
         "other"
       ],
-      "default": "stripe"
+      "default": "cash"
+    },
+    "referenceNumber": {
+      "type": "string"
+    },
+    "paymentDate": {
+      "type": "date"
+    },
+    "recordedBy": {
+      "type": "string"
     },
     "stripePaymentIntentId": {
       "type": "string"

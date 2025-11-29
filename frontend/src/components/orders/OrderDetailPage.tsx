@@ -20,9 +20,12 @@ import {
   FileText,
   CheckCircle,
   Warning,
-  Copy
+  Copy,
+  Plus
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
+import { RecordPaymentDialog, PaymentHistory } from "@/components/payments"
+import type { OrderPayment } from "@/lib/types"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -88,6 +91,23 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [paymentRefreshTrigger, setPaymentRefreshTrigger] = useState(0);
+
+  const handlePaymentRecorded = (payment: OrderPayment) => {
+    // Update local order state with new payment amounts
+    if (order) {
+      const newAmountPaid = order.amountPaid + payment.amount;
+      const newAmountOutstanding = Math.max(0, order.totalAmount - newAmountPaid);
+      setOrder({
+        ...order,
+        amountPaid: newAmountPaid,
+        amountOutstanding: newAmountOutstanding,
+      });
+    }
+    // Trigger payment history refresh
+    setPaymentRefreshTrigger(prev => prev + 1);
+  };
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -314,6 +334,15 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
           </div>
         </div>
         <div className="flex gap-2">
+          {order.amountOutstanding > 0 && (
+            <Button 
+              className="gap-2"
+              onClick={() => setIsPaymentDialogOpen(true)}
+            >
+              <Plus size={18} weight="bold" />
+              Record Payment
+            </Button>
+          )}
           <Button variant="outline" className="gap-2">
             <Printer size={18} />
             Print
@@ -480,6 +509,13 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
               </CardContent>
             </Card>
           )}
+
+          {/* Payment History */}
+          <PaymentHistory
+            orderDocumentId={order.documentId}
+            totalAmount={order.totalAmount}
+            refreshTrigger={paymentRefreshTrigger}
+          />
         </div>
 
         {/* Sidebar */}
@@ -597,6 +633,16 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
           </Card>
         </div>
       </div>
+
+      {/* Record Payment Dialog */}
+      <RecordPaymentDialog
+        open={isPaymentDialogOpen}
+        onOpenChange={setIsPaymentDialogOpen}
+        orderDocumentId={order.documentId}
+        orderNumber={order.orderNumber}
+        amountOutstanding={order.amountOutstanding}
+        onPaymentRecorded={handlePaymentRecorded}
+      />
     </div>
   );
 }

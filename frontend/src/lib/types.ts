@@ -377,3 +377,50 @@ export interface Quote {
 
   notes?: string
 }
+
+// Payment Tracking Types
+export type PaymentMethodEnum = 'cash' | 'check' | 'credit_card' | 'ach' | 'stripe' | 'bank_transfer' | 'other'
+export type PaymentStatusEnum = 'pending' | 'processing' | 'paid' | 'failed' | 'refunded' | 'expired' | 'cancelled'
+export type PaymentTypeEnum = 'deposit' | 'balance' | 'full' | 'refund'
+
+export interface OrderPayment {
+  id: string
+  documentId: string
+  amount: number
+  status: PaymentStatusEnum
+  paymentType?: PaymentTypeEnum
+  paymentMethod: PaymentMethodEnum
+  referenceNumber?: string
+  paymentDate?: string
+  recordedBy?: string
+  notes?: string
+  paidAt?: string
+  createdAt: string
+}
+
+export interface PaymentFormData {
+  amount: number
+  paymentMethod: PaymentMethodEnum
+  referenceNumber?: string
+  paymentDate: string
+  notes?: string
+}
+
+export interface OutstandingOrderSummary {
+  id: string
+  documentId: string
+  orderNumber: string
+  customerName: string
+  totalAmount: number
+  amountPaid: number
+  amountOutstanding: number
+  dueDate?: string
+}
+
+export interface PaymentsDashboardSummary {
+  totalOutstanding: number
+  paymentsThisWeek: number
+  paymentsThisMonth: number
+  overdueCount: number
+  outstandingOrders: OutstandingOrderSummary[]
+}
