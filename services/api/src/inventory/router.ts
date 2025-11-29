@@ -718,17 +718,14 @@ router.get('/pricing/:sku', async (req: Request, res: Response) => {
 
     // Get pricing from supplier
     if (supplier === 's&s-activewear' && ssActivewearClient) {
-      const styleId = sku.replace(/^SS-/i, '');
-      const pricing = await (ssActivewearClient as any).client.get(`/v2/products/${styleId}/pricing`);
-      const prices = pricing.data || [];
+      const pricingResult = await ssActivewearClient.getPricing(sku);
       
-      if (prices.length > 0) {
-        const sorted = prices.sort((a: any, b: any) => a.quantity - b.quantity);
-        basePrice = sorted[0].price || 0;
+      if (pricingResult.found && pricingResult.priceBreaks) {
+        basePrice = pricingResult.basePrice || 0;
         
-        priceBreaks = sorted.map((p: any, i: number) => ({
+        priceBreaks = pricingResult.priceBreaks.map((p, i, arr) => ({
           minQty: p.quantity,
-          maxQty: sorted[i + 1]?.quantity ? sorted[i + 1].quantity - 1 : undefined,
+          maxQty: arr[i + 1]?.quantity ? arr[i + 1].quantity - 1 : undefined,
           price: p.price,
           casePrice: p.casePrice
         }));

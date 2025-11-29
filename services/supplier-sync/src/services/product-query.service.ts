@@ -81,6 +81,9 @@ export interface PriceBreakResult {
   priceForQuantity?: number;
 }
 
+// Configuration constants
+const MAX_VARIANTS_PER_QUERY = 100; // Limit variants to avoid excessive API calls
+
 export class ProductQueryService {
   private strapiClient: AxiosInstance | null = null;
   private cacheService: CacheService | null = null;
@@ -318,7 +321,8 @@ export class ProductQueryService {
           if (!this.sanmarClient) return null;
           const smProduct = await this.sanmarClient.getProduct(styleCode);
           if (!smProduct) return null;
-          // SanMar transformer would be needed here
+          // SanMar uses cached CSV data - product data should come from Strapi
+          logger.warn('SanMar product not found in Strapi cache, live API query not supported', { sku });
           return null;
 
         default:
@@ -380,7 +384,7 @@ export class ProductQueryService {
         case SupplierName.AS_COLOUR:
           if (this.asColourClient) {
             const variants = await this.asColourClient.listVariants(styleCode);
-            for (const v of variants.slice(0, 100)) { // Limit to avoid too many API calls
+            for (const v of variants.slice(0, MAX_VARIANTS_PER_QUERY)) {
               try {
                 const inv = await this.asColourClient.getVariantInventory(styleCode, v.sku);
                 if (inv) {
@@ -394,8 +398,12 @@ export class ProductQueryService {
                     });
                   });
                 }
-              } catch {
-                // Continue on individual variant errors
+              } catch (variantError: any) {
+                logger.debug('Failed to fetch variant inventory', { 
+                  styleCode, 
+                  variantSku: v.sku, 
+                  error: variantError.message 
+                });
               }
             }
           }

@@ -67,6 +67,9 @@ const POPULAR_STYLES = {
   ]
 };
 
+// Configuration constants
+const RATE_LIMIT_DELAY_MS = 200; // Delay between API calls to respect rate limits
+
 class CurateProductsCLI {
   private strapiClient: AxiosInstance;
   private asColourClient: ASColourClient | null = null;
@@ -88,11 +91,14 @@ class CurateProductsCLI {
 
     this.asColourTransformer = new ASColourTransformer();
 
-    // Initialize supplier clients
-    if (process.env.ASCOLOUR_API_KEY || process.env.ASCOLOUR_SUBSCRIPTION_KEY) {
+    // Initialize supplier clients with proper validation
+    const asColourApiKey = process.env.ASCOLOUR_API_KEY || process.env.ASCOLOUR_SUBSCRIPTION_KEY;
+    if (asColourApiKey) {
       this.asColourClient = new ASColourClient({
-        apiKey: process.env.ASCOLOUR_API_KEY || process.env.ASCOLOUR_SUBSCRIPTION_KEY || ''
+        apiKey: asColourApiKey
       });
+    } else {
+      console.warn('Warning: AS Colour API key not configured (ASCOLOUR_API_KEY or ASCOLOUR_SUBSCRIPTION_KEY)');
     }
 
     if (process.env.SS_ACTIVEWEAR_API_KEY && process.env.SS_ACTIVEWEAR_ACCOUNT_NUMBER) {
@@ -100,6 +106,8 @@ class CurateProductsCLI {
         apiKey: process.env.SS_ACTIVEWEAR_API_KEY,
         accountNumber: process.env.SS_ACTIVEWEAR_ACCOUNT_NUMBER
       });
+    } else if (process.env.SS_ACTIVEWEAR_API_KEY || process.env.SS_ACTIVEWEAR_ACCOUNT_NUMBER) {
+      console.warn('Warning: S&S Activewear requires both API key and account number');
     }
   }
 
@@ -364,8 +372,8 @@ class CurateProductsCLI {
           console.log(`  ✗ ${styleCode}: ${error.message}`);
         }
 
-        // Rate limit
-        await new Promise(r => setTimeout(r, 200));
+        // Rate limit to respect supplier API limits
+        await new Promise(r => setTimeout(r, RATE_LIMIT_DELAY_MS));
       }
     }
 
