@@ -5,6 +5,8 @@
  * Created: November 29, 2025
  */
 
+import { generatePrintableInvoice } from './invoice-utils';
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
 // ============================================================================
@@ -142,7 +144,9 @@ export async function generateInvoice(
 
 /**
  * Download invoice as PDF
- * Generates and returns PDF blob for download
+ * Generates and returns HTML content blob for printing
+ * Note: This returns HTML content that can be printed as PDF from the browser.
+ * For server-side PDF generation, use the backend pdfkit service.
  */
 export async function downloadInvoicePDF(orderId: string): Promise<Blob | null> {
   try {
@@ -153,13 +157,11 @@ export async function downloadInvoicePDF(orderId: string): Promise<Blob | null> 
       throw new Error(error || 'Failed to generate invoice');
     }
     
-    // Call backend PDF generation endpoint if available
-    // For now, we'll create a simple HTML-based PDF using the browser
-    const pdfContent = generatePDFContent(invoice);
+    // Generate printable HTML content
+    const htmlContent = generatePrintableInvoice(invoice);
     
-    // Create a blob from the HTML content
-    // In production, this would call a backend endpoint that uses pdfkit
-    const blob = new Blob([pdfContent], { type: 'text/html' });
+    // Create a blob from the HTML content for download/print
+    const blob = new Blob([htmlContent], { type: 'text/html' });
     return blob;
   } catch (error) {
     console.error('Download invoice PDF error:', error);
