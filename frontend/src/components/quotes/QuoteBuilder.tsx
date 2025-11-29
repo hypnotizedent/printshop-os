@@ -1,6 +1,7 @@
 /**
  * QuoteBuilder Component
  * Modern, fast quote/invoice builder with artwork upload, templates, and real-time pricing.
+ * Integrates with ProductSearch for catalog-based product selection.
  */
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -26,8 +27,11 @@ import {
   Check, 
   Upload,
   Eye,
+  Package,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { ProductSearch } from '@/components/products/ProductSearch';
+import type { Product } from '@/components/products/ProductsPage';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -141,6 +145,10 @@ interface LineItem {
   unitPrice: number;
   artwork: ArtworkFile[];
   notes: string;
+  // Product catalog integration
+  selectedProduct?: Product | null;
+  productBasePrice?: number;
+  availableSizes?: string[];
 }
 
 interface CustomerData {
@@ -188,6 +196,9 @@ const createEmptyLineItem = (): LineItem => ({
   unitPrice: 0,
   artwork: [],
   notes: '',
+  selectedProduct: null,
+  productBasePrice: 0,
+  availableSizes: [],
 });
 
 interface CustomerSearchResult {
@@ -238,19 +249,36 @@ export function QuoteBuilder() {
       
       if (!category) continue;
       
-      let basePrice = category.basePrice + (item.colors * category.colorPrice);
-      basePrice *= garment?.baseMultiplier || 1;
+      // Start with product base price if selected from catalog, otherwise use print category base
+      let basePrice = item.productBasePrice || 0;
+      
+      // Add print costs
+      const printCost = category.basePrice + (item.colors * category.colorPrice);
+      basePrice += printCost * (garment?.baseMultiplier || 1);
       
       // Location multiplier
       const locationMultiplier = 1 + (item.printLocations.length - 1) * 0.25;
       
-      // Quantity discount
+      // Quantity discount (also check product pricing tiers if available)
       let qtyDiscount = 1;
-      if (qty >= 144) qtyDiscount = 0.7;
-      else if (qty >= 72) qtyDiscount = 0.8;
-      else if (qty >= 48) qtyDiscount = 0.85;
-      else if (qty >= 24) qtyDiscount = 0.9;
-      else if (qty >= 12) qtyDiscount = 0.95;
+      if (item.selectedProduct?.pricingTiers && item.selectedProduct.pricingTiers.length > 0) {
+        // Find applicable tier from product catalog
+        const sortedTiers = [...item.selectedProduct.pricingTiers].sort((a, b) => b.minQty - a.minQty);
+        const applicableTier = sortedTiers.find(tier => qty >= tier.minQty);
+        if (applicableTier && item.productBasePrice) {
+          // Calculate discount based on tier price vs base price
+          const tierDiscount = applicableTier.price / item.productBasePrice;
+          qtyDiscount = Math.min(qtyDiscount, tierDiscount);
+        }
+      }
+      // Apply standard quantity discounts if no product tiers
+      if (qtyDiscount === 1) {
+        if (qty >= 144) qtyDiscount = 0.7;
+        else if (qty >= 72) qtyDiscount = 0.8;
+        else if (qty >= 48) qtyDiscount = 0.85;
+        else if (qty >= 24) qtyDiscount = 0.9;
+        else if (qty >= 12) qtyDiscount = 0.95;
+      }
       
       subtotal += basePrice * locationMultiplier * qtyDiscount * qty;
     }
@@ -829,8 +857,13 @@ export function QuoteBuilder() {
                       {index + 1}
                     </span>
                     <CardTitle className="text-base">
-                      {GARMENT_TYPES.find(g => g.value === item.garmentType)?.label || 'New Item'}
+                      {item.selectedProduct?.name || GARMENT_TYPES.find(g => g.value === item.garmentType)?.label || 'New Item'}
                     </CardTitle>
+                    {item.selectedProduct && (
+                      <Badge variant="outline" className="text-xs">
+                        {item.selectedProduct.sku}
+                      </Badge>
+                    )}
                     {getTotalQuantity(item) > 0 && (
                       <Badge variant="secondary">{getTotalQuantity(item)} pcs</Badge>
                     )}
@@ -848,6 +881,48 @@ export function QuoteBuilder() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Product Selection from Catalog */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Package size={16} />
+                    Select Product from Catalog
+                  </Label>
+                  <ProductSearch
+                    selectedProduct={item.selectedProduct}
+                    onSelect={(product) => {
+                      // Map product category to garment type
+                      const categoryToGarment: Record<string, string> = {
+                        't-shirts': 't-shirt',
+                        'hoodies': 'hoodie',
+                        'polos': 'polo',
+                        'sweatshirts': 'crewneck',
+                        'jackets': 'jacket',
+                        'hats': 'hat',
+                        'bags': 'bag',
+                      };
+                      updateLineItem(item.id, { 
+                        selectedProduct: product,
+                        styleNumber: product.sku,
+                        garmentType: categoryToGarment[product.category] || 'other',
+                        productBasePrice: product.basePrice,
+                        availableSizes: product.sizes,
+                        unitPrice: product.basePrice,
+                      });
+                      toast.success(`Added ${product.name}`, {
+                        description: `$${product.basePrice.toFixed(2)} per unit`,
+                      });
+                    }}
+                    onClear={() => {
+                      updateLineItem(item.id, { 
+                        selectedProduct: null,
+                        productBasePrice: 0,
+                        availableSizes: [],
+                      });
+                    }}
+                    placeholder="Search by product name or SKU..."
+                  />
+                </div>
+
                 <div className="grid grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>Garment Type *</Label>
