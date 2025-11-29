@@ -40,12 +40,12 @@
 - **Next:** Deploy to docker-host as container
 
 ### Online Designer (Custom Studio App) - NEW!
-- **Repo:** `~/Projects/custom-studio-app` (cloned from `hypnotizedent/custom-studio-app`)
+- **Location:** `frontend/src/apps/online-designer/` (moved into monorepo)
+- **Origin:** Cloned from `hypnotizedent/custom-studio-app` (archived repo)
 - **Technology:** React + Fabric.js canvas editor + react-dropzone
 - **Original Backend:** Supabase (replaced with Strapi)
-- **Local Dev:** http://localhost:8081 (port 8081 - changed from 8080 to avoid Traefik conflict)
-- **Status:** ✅ Running locally, Strapi integration complete
-- **Next:** Test full design session flow with Strapi backend
+- **Status:** ✅ Code migrated to monorepo, Strapi integration complete
+- **Next:** Add route `/designer` in main App.tsx, test full flow
 
 ---
 
