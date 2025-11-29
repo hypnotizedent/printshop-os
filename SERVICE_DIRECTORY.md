@@ -148,6 +148,24 @@ This document provides a precise map of where every component, service, and feat
 
 ## Recent Updates
 
+### November 29, 2025 (Production Dashboard Epic #86)
+
+✅ **Production Dashboard - Real-time Floor Visibility**
+- Created `frontend/src/components/production/JobQueueDashboard.tsx` - Priority ordered job queue
+  - Real-time job visibility with status filtering
+  - Search, sort by priority/date/customer
+  - Due date tracking with overdue warnings
+- Created `frontend/src/components/production/SupervisorDashboard.tsx` - Supervisor oversight
+  - Active alerts with acknowledgment
+  - Bottleneck detection with recommendations
+  - Staff overview with status indicators
+- Enhanced `frontend/src/components/production/ProductionPage.tsx`
+  - Desktop sidebar navigation
+  - Mobile hamburger menu
+  - Quick stats and action cards
+- Updated `frontend/src/components/production/mobile/MobileNavigation.tsx`
+  - Full feature navigation for mobile
+
 ### November 27, 2025 (Session 10 - Supplier Sync & Deployment)
 
 ✅ **Strapi Production Deployment**
@@ -675,11 +693,21 @@ See: `docs/reference/STRAPI_TYPESCRIPT_API_FIX.md`
 frontend/
 ├── src/
 │   ├── components/
-│   │   ├── production/       # Production dashboard UI
-│   │   │   ├── TimeClock.tsx
-│   │   │   ├── JobQueue.tsx
-│   │   │   ├── SOPLibrary.tsx
-│   │   │   └── ResourceMonitor.tsx
+│   │   ├── production/       # Production dashboard UI ✅ ENHANCED
+│   │   │   ├── ProductionPage.tsx      # Main production page with navigation
+│   │   │   ├── JobQueueDashboard.tsx   # Priority ordered job queue ✅ NEW
+│   │   │   ├── SupervisorDashboard.tsx # Supervisor oversight view ✅ NEW
+│   │   │   ├── MetricsDashboard.tsx    # Team productivity metrics
+│   │   │   ├── TimeClock.tsx           # PIN-based time clock
+│   │   │   ├── SOPLibrary.tsx          # SOP library with search
+│   │   │   ├── Checklist.tsx           # Quality checklists
+│   │   │   ├── TeamMetrics.tsx         # Team analytics
+│   │   │   ├── Leaderboard.tsx         # Performance leaderboard
+│   │   │   └── mobile/                 # Mobile-optimized components
+│   │   │       ├── MobileNavigation.tsx
+│   │   │       ├── MobileTimeClock.tsx
+│   │   │       ├── MobileChecklist.tsx
+│   │   │       └── MobileSOPViewer.tsx
 │   │   ├── portal/           # Customer portal UI
 │   │   │   ├── OrderHistory.tsx
 │   │   │   ├── OrderDetails.tsx

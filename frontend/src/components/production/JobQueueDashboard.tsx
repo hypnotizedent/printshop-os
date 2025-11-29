@@ -24,6 +24,18 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
+// Time constants
+const MILLISECONDS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MILLISECONDS_PER_HOUR = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+
+// Default values
+const DEFAULT_ESTIMATED_TIME_MINUTES = 120;
+const DEFAULT_PAGINATION_LIMIT = 50;
+const REFRESH_INTERVAL_MS = 30000;
+
 interface QueueJob {
   id: string;
   orderNumber: string;
@@ -51,7 +63,7 @@ export function JobQueueDashboard({ onJobSelect }: JobQueueDashboardProps) {
   useEffect(() => {
     loadQueue();
     // Set up polling for real-time updates
-    const interval = setInterval(loadQueue, 30000);
+    const interval = setInterval(loadQueue, REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
   }, []);
 
@@ -59,7 +71,7 @@ export function JobQueueDashboard({ onJobSelect }: JobQueueDashboardProps) {
     setLoading(true);
     try {
       // Fetch jobs from Strapi API
-      const response = await fetch(`${API_URL}/api/orders?populate=customer&pagination[limit]=50&sort=dueDate:asc`);
+      const response = await fetch(`${API_URL}/api/orders?populate=customer&pagination[limit]=${DEFAULT_PAGINATION_LIMIT}&sort=dueDate:asc`);
       if (response.ok) {
         const data = await response.json();
         const transformedJobs: QueueJob[] = (data.data || []).map((order: any) => ({
@@ -70,7 +82,7 @@ export function JobQueueDashboard({ onJobSelect }: JobQueueDashboardProps) {
           status: mapStatus(order.status),
           priority: getPriority(order),
           dueDate: order.dueDate || new Date().toISOString(),
-          estimatedTime: 120, // Default 2 hours
+          estimatedTime: DEFAULT_ESTIMATED_TIME_MINUTES,
           assignedTo: order.assignedTo || undefined,
           progress: getProgress(order.status),
         }));
@@ -110,11 +122,16 @@ export function JobQueueDashboard({ onJobSelect }: JobQueueDashboardProps) {
   const getPriority = (order: any): QueueJob['priority'] => {
     const dueDate = new Date(order.dueDate);
     const now = new Date();
-    const hoursUntilDue = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const hoursUntilDue = (dueDate.getTime() - now.getTime()) / MILLISECONDS_PER_HOUR;
     
-    if (hoursUntilDue < 24) return 'urgent';
-    if (hoursUntilDue < 48) return 'high';
-    if (hoursUntilDue < 168) return 'normal';
+    // Priority thresholds in hours
+    const URGENT_THRESHOLD = HOURS_PER_DAY; // 24 hours
+    const HIGH_THRESHOLD = HOURS_PER_DAY * 2; // 48 hours
+    const NORMAL_THRESHOLD = HOURS_PER_DAY * 7; // 168 hours (1 week)
+    
+    if (hoursUntilDue < URGENT_THRESHOLD) return 'urgent';
+    if (hoursUntilDue < HIGH_THRESHOLD) return 'high';
+    if (hoursUntilDue < NORMAL_THRESHOLD) return 'normal';
     return 'low';
   };
 
@@ -216,15 +233,15 @@ export function JobQueueDashboard({ onJobSelect }: JobQueueDashboardProps) {
     
     if (diff < 0) {
       const overdue = Math.abs(diff);
-      const hours = Math.floor(overdue / (1000 * 60 * 60));
+      const hours = Math.floor(overdue / MILLISECONDS_PER_HOUR);
       return { text: `${hours}h overdue`, isOverdue: true };
     }
     
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
+    const hours = Math.floor(diff / MILLISECONDS_PER_HOUR);
+    const days = Math.floor(hours / HOURS_PER_DAY);
     
     if (days > 0) {
-      return { text: `${days}d ${hours % 24}h`, isOverdue: false };
+      return { text: `${days}d ${hours % HOURS_PER_DAY}h`, isOverdue: false };
     }
     return { text: `${hours}h`, isOverdue: false };
   };
