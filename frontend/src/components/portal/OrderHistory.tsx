@@ -51,44 +51,109 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
   // API base URL (in production, this would come from environment variables)
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337'
 
-  // Fetch orders
+  // Fetch orders using Strapi API
   const fetchOrders = async () => {
     setLoading(true)
     setError(null)
     
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        sort: sortBy,
-      })
+      // Build Strapi-compatible query parameters
+      const params = new URLSearchParams()
+      
+      // Pagination
+      params.append('pagination[page]', page.toString())
+      params.append('pagination[pageSize]', limit.toString())
+      
+      // Sorting - convert our format to Strapi format
+      const [sortField, sortOrder] = sortBy.split(':')
+      params.append('sort', `${sortField}:${sortOrder}`)
+      
+      // Populate related data
+      params.append('populate[customer]', 'true')
+      params.append('populate[lineItems]', 'true')
 
+      // Search filter (by order number)
       if (searchQuery) {
-        params.append('search', searchQuery)
+        params.append('filters[orderNumber][$containsi]', searchQuery)
       }
 
+      // Status filter
       if (filters.status) {
-        params.append('status', filters.status)
+        params.append('filters[status][$eq]', filters.status.toUpperCase())
       }
 
+      // Date range filters
       if (filters.dateFrom) {
-        params.append('dateFrom', filters.dateFrom.toISOString().split('T')[0])
+        params.append('filters[createdAt][$gte]', filters.dateFrom.toISOString().split('T')[0])
       }
 
       if (filters.dateTo) {
-        params.append('dateTo', filters.dateTo.toISOString().split('T')[0])
+        params.append('filters[createdAt][$lte]', filters.dateTo.toISOString().split('T')[0])
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/customer/orders?${params}`)
+      // Customer ID filter (if provided)
+      if (customerId) {
+        params.append('filters[customer][documentId][$eq]', customerId)
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/orders?${params}`)
       
       if (!response.ok) {
         throw new Error('Failed to fetch orders')
       }
 
-      const data: OrderListResponse = await response.json()
-      setOrders(data.data)
-      setTotal(data.pagination.total)
-      setPages(data.pagination.pages)
+      const strapiData = await response.json()
+      
+      // Transform Strapi response to our Order format
+      const transformedOrders: Order[] = (strapiData.data || []).map((item: any) => ({
+        id: item.id,
+        attributes: {
+          printavoId: item.orderNumber || item.id.toString(),
+          orderNickname: item.notes || '',
+          status: mapStrapiStatus(item.status),
+          customer: {
+            name: item.customer?.name || 'Unknown Customer',
+            email: item.customer?.email || '',
+            company: item.customer?.company || ''
+          },
+          billingAddress: {
+            street: '',
+            city: '',
+            state: '',
+            zip: ''
+          },
+          shippingAddress: item.shippingAddress || undefined,
+          totals: {
+            subtotal: item.subtotal || 0,
+            tax: item.tax || 0,
+            shipping: item.shippingCost || 0,
+            discount: item.discount || 0,
+            fees: item.fees || 0,
+            total: item.totalAmount || 0,
+            amountPaid: item.amountPaid || 0,
+            amountOutstanding: (item.totalAmount || 0) - (item.amountPaid || 0)
+          },
+          lineItems: (item.lineItems || []).map((li: any, idx: number) => ({
+            id: li.id?.toString() || idx.toString(),
+            description: li.name || li.description || 'Item',
+            category: li.category || '',
+            quantity: li.quantity || 1,
+            unitCost: li.unitPrice || 0,
+            taxable: true,
+            total: (li.quantity || 1) * (li.unitPrice || 0)
+          })),
+          timeline: {
+            createdAt: item.createdAt || new Date().toISOString(),
+            updatedAt: item.updatedAt || new Date().toISOString(),
+            dueDate: item.dueDate || undefined
+          },
+          notes: item.notes || ''
+        }
+      }))
+      
+      setOrders(transformedOrders)
+      setTotal(strapiData.meta?.pagination?.total || transformedOrders.length)
+      setPages(strapiData.meta?.pagination?.pageCount || 1)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       console.error('Error fetching orders:', err)
@@ -97,20 +162,90 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
     }
   }
 
+  // Map Strapi status to our OrderStatus type
+  const mapStrapiStatus = (status: string): Order['attributes']['status'] => {
+    const statusMap: Record<string, Order['attributes']['status']> = {
+      'QUOTE': 'quote',
+      'QUOTE_SENT': 'quote',
+      'Quote Out For Approval - Email': 'quote',
+      'PENDING': 'pending',
+      'APPROVED': 'pending',
+      'IN_PRODUCTION': 'in_production',
+      'READY_TO_SHIP': 'ready_to_ship',
+      'SHIPPED': 'shipped',
+      'DELIVERED': 'delivered',
+      'COMPLETED': 'completed',
+      'INVOICE PAID': 'invoice_paid',
+      'PAYMENT_DUE': 'payment_due',
+      'CANCELLED': 'cancelled',
+    }
+    return statusMap[status] || 'quote'
+  }
+
   useEffect(() => {
     fetchOrders()
   }, [page, limit, searchQuery, filters, sortBy])
 
   const handleViewDetails = async (orderId: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/customer/orders/${orderId}`)
+      // Use Strapi API to fetch order details
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}?populate=*`)
       
       if (!response.ok) {
         throw new Error('Failed to fetch order details')
       }
 
-      const data = await response.json()
-      setSelectedOrder(data.data)
+      const strapiData = await response.json()
+      const item = strapiData.data
+      
+      // Transform to our Order format
+      const order: Order = {
+        id: item.id,
+        attributes: {
+          printavoId: item.orderNumber || item.id.toString(),
+          orderNickname: item.notes || '',
+          status: mapStrapiStatus(item.status),
+          customer: {
+            name: item.customer?.name || 'Unknown Customer',
+            email: item.customer?.email || '',
+            company: item.customer?.company || ''
+          },
+          billingAddress: {
+            street: '',
+            city: '',
+            state: '',
+            zip: ''
+          },
+          shippingAddress: item.shippingAddress || undefined,
+          totals: {
+            subtotal: item.subtotal || 0,
+            tax: item.tax || 0,
+            shipping: item.shippingCost || 0,
+            discount: item.discount || 0,
+            fees: item.fees || 0,
+            total: item.totalAmount || 0,
+            amountPaid: item.amountPaid || 0,
+            amountOutstanding: (item.totalAmount || 0) - (item.amountPaid || 0)
+          },
+          lineItems: (item.lineItems || []).map((li: any, idx: number) => ({
+            id: li.id?.toString() || idx.toString(),
+            description: li.name || li.description || 'Item',
+            category: li.category || '',
+            quantity: li.quantity || 1,
+            unitCost: li.unitPrice || 0,
+            taxable: true,
+            total: (li.quantity || 1) * (li.unitPrice || 0)
+          })),
+          timeline: {
+            createdAt: item.createdAt || new Date().toISOString(),
+            updatedAt: item.updatedAt || new Date().toISOString(),
+            dueDate: item.dueDate || undefined
+          },
+          notes: item.notes || ''
+        }
+      }
+      
+      setSelectedOrder(order)
       setDetailsOpen(true)
     } catch (err) {
       console.error('Error fetching order details:', err)
@@ -119,11 +254,15 @@ export function OrderHistory({ customerId }: OrderHistoryProps) {
   }
 
   const handleDownloadInvoice = (orderId: number) => {
-    window.open(`${API_BASE_URL}/api/customer/orders/${orderId}/invoice`, '_blank')
+    // Note: This would need a custom Strapi endpoint for invoice generation
+    console.log('Invoice download requested for order:', orderId)
+    alert('Invoice download feature coming soon')
   }
 
   const handleDownloadFiles = (orderId: number) => {
-    window.open(`${API_BASE_URL}/api/customer/orders/${orderId}/files`, '_blank')
+    // Note: This would need a custom Strapi endpoint for file downloads
+    console.log('Files download requested for order:', orderId)
+    alert('Files download feature coming soon')
   }
 
   const handleSearch = (query: string) => {
