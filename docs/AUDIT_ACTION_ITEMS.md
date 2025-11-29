@@ -1,7 +1,7 @@
 # PrintShop OS - Living Audit Dashboard
 
 **Last Updated:** November 29, 2025  
-**Parent Issue:** [#TBD - Break down key audit action items into actionable issues]  
+**Parent Issue:** GitHub Issue for tracking audit action items  
 **Status:** 🟢 Active
 
 ---
@@ -178,9 +178,9 @@ Resolve duplicate and overlapping documentation to maintain single source of tru
 
 | # | Files | Issue | Resolution |
 |---|-------|-------|------------|
-| 4.1 | `ARCHITECTURE.md` vs `docs/ARCHITECTURE_OVERVIEW.md` | Different perspectives on architecture | Keep both - different scopes (implementation vs. overview) |
-| 4.2 | `docs/architecture/*.md` files | 5 files that may overlap with root ARCHITECTURE.md | Review for consolidation |
-| 4.3 | Multiple session summary files | 8+ session files in docs/ARCHIVE_2025_11_27 | Archive or delete |
+| D1 | `ARCHITECTURE.md` vs `docs/ARCHITECTURE_OVERVIEW.md` | Different perspectives on architecture | Keep both - different scopes (implementation vs. overview) |
+| D2 | `docs/architecture/*.md` files | 5 files that may overlap with root ARCHITECTURE.md | Review for consolidation |
+| D3 | Multiple session summary files | 8+ session files in docs/ARCHIVE_2025_11_27 | Archive or delete |
 
 ### Documentation Consolidation Sub-Issues
 
@@ -401,4 +401,4 @@ When creating GitHub Issues from this dashboard:
 
 ---
 
-*This document is auto-generated from the Repository Audit and should be kept in sync with GitHub Issues.*
+*This document is based on the Repository Audit and should be kept in sync with GitHub Issues.*
