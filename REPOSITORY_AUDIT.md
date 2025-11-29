@@ -66,13 +66,13 @@ Run the automated audit script to generate an up-to-date report:
 | Issue | Location | Action | Status |
 |-------|----------|--------|--------|
 | Root doc limit | 11 files (limit: 10) | [ ] Move 1 file to docs/ | ⚠️ Over |
-| Architecture duplicate | ARCHITECTURE.md + docs/ARCHITECTURE_OVERVIEW.md | [ ] Consolidate | ⏳ Pending |
+| Architecture duplicate | ARCHITECTURE.md + docs/ARCHITECTURE_OVERVIEW.md | [x] Cross-referenced | ✅ Addressed |
 | Archive cleanup | 75 archived docs | [ ] Review & delete old | ⚠️ Consider |
 | Legacy folder | docs/legacy/ | [ ] Archive or delete | ⏳ Pending |
 
 **Cross-Reference Map:**
-- `ARCHITECTURE.md` → Main architecture doc (interface-focused)
-- `docs/ARCHITECTURE_OVERVIEW.md` → Should be merged into root
+- `ARCHITECTURE.md` → Main architecture doc (technical implementation)
+- `docs/ARCHITECTURE_OVERVIEW.md` → Deployment-focused overview (cross-references root)
 - `SERVICE_DIRECTORY.md` → Service locations (single source of truth)
 - `PROJECT_OVERVIEW.md` → Project status (single source of truth)
 

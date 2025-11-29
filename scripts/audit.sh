@@ -113,7 +113,7 @@ for service_dir in services/*/; do
         
         # Estimate coverage (rough - test files / source files ratio)
         if [ "$source_count" -gt 0 ]; then
-            ratio=$(echo "scale=0; $test_count * 100 / $source_count" | bc 2>/dev/null || echo "0")
+            ratio=$((test_count * 100 / source_count))
             if [ "$ratio" -ge 50 ]; then
                 coverage="✅ Good ($ratio%)"
             elif [ "$ratio" -ge 20 ]; then
@@ -136,7 +136,7 @@ for dir in frontend printshop-strapi; do
         source_count=$(find "$dir" -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" 2>/dev/null | grep -v ".test." | grep -v ".spec." | grep -v "node_modules" | wc -l | tr -d ' ')
         
         if [ "$source_count" -gt 0 ]; then
-            ratio=$(echo "scale=0; $test_count * 100 / $source_count" | bc 2>/dev/null || echo "0")
+            ratio=$((test_count * 100 / source_count))
             if [ "$ratio" -ge 50 ]; then
                 coverage="✅ Good ($ratio%)"
             elif [ "$ratio" -ge 20 ]; then
@@ -162,7 +162,15 @@ echo ""
 # Count docs
 ROOT_DOCS=$(ls -1 *.md 2>/dev/null | wc -l | tr -d ' ')
 DOCS_FOLDER=$(find docs -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
-ARCHIVE_COUNT=$(find docs/ARCHIVE_* docs/archive -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+
+# Count archived docs more safely
+ARCHIVE_COUNT=0
+for archive_dir in docs/ARCHIVE_* docs/archive; do
+    if [ -d "$archive_dir" ]; then
+        count=$(find "$archive_dir" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+        ARCHIVE_COUNT=$((ARCHIVE_COUNT + count))
+    fi
+done
 
 echo "### File Counts"
 echo ""
@@ -232,7 +240,14 @@ for service_dir in services/*/; do
         # Check for key files
         has_pkg=$([ -f "${service_dir}package.json" ] && echo "✅" || echo "❌")
         has_readme=$([ -f "${service_dir}README.md" ] && echo "✅" || echo "❌")
-        has_tests=$([ -d "${service_dir}tests" ] || find "$service_dir" -name "*.test.ts" -o -name "*.test.js" 2>/dev/null | grep -q . && echo "✅" || echo "❌")
+        
+        # Check for tests - either a tests directory or test files
+        has_tests="❌"
+        if [ -d "${service_dir}tests" ]; then
+            has_tests="✅"
+        elif find "$service_dir" -name "*.test.ts" -o -name "*.test.js" 2>/dev/null | grep -q .; then
+            has_tests="✅"
+        fi
         
         # Overall status
         if [ "$has_pkg" = "✅" ] && [ "$has_readme" = "✅" ] && [ "$has_tests" = "✅" ]; then
@@ -279,8 +294,8 @@ echo "|--------|---------|"
 for script in scripts/*.sh scripts/*.py scripts/*.js; do
     if [ -f "$script" ]; then
         name=$(basename "$script")
-        # Try to get purpose from first comment line
-        purpose=$(head -5 "$script" 2>/dev/null | grep -m1 "#" | sed 's/^#\s*//' | head -c 50)
+        # Try to get purpose from comment lines (skip shebang, look for real comments)
+        purpose=$(head -10 "$script" 2>/dev/null | grep -m1 '^#[[:space:]]*[A-Za-z]' | sed 's/^#[[:space:]]*//' | head -c 50)
         if [ -z "$purpose" ]; then
             purpose="(No description)"
         fi
