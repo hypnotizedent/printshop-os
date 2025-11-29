@@ -1,8 +1,12 @@
 # PrintShop OS - Architecture Overview
 
-> **Last Updated:** November 28, 2025  
+> **Last Updated:** November 29, 2025  
 > **Status:** Production - Frontend Deployed  
 > **Maintainer:** @ronnyworks
+>
+> **📚 Related:** This document complements [`ARCHITECTURE.md`](../ARCHITECTURE.md) in the root directory. 
+> - This file: High-level overview with Mermaid diagrams (deployment-focused)
+> - Root ARCHITECTURE.md: Technical implementation details (code-focused)
 
 ---
 
