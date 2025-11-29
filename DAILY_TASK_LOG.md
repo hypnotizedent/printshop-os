@@ -6,7 +6,7 @@
 
 ---
 
-## 📊 Current State (Last Updated: November 28, 2025)
+## 📊 Current State (Last Updated: November 29, 2025)
 
 ### Data Status
 | Data Type | Source Count | In Strapi | Status |
@@ -334,6 +334,42 @@ data/artwork/
 
 ---
 
+### Day 9: November 29, 2025 (Saturday) - GitHub Copilot Workspace URL Clarification
+
+**User Question:**
+How to connect `https://printshop-pro--hypnotizedent.github.app/` to the main repo?
+
+**Findings:**
+- The URL format `<repo-name>--<owner>.github.app` is a **GitHub Copilot Workspace** URL
+- The URL `printshop-pro--hypnotizedent.github.app` points to a repo named `printshop-pro`
+- However, the actual repository is `printshop-os`, NOT `printshop-pro`
+- Only one repo exists under this owner: `hypnotizedent/printshop-os`
+
+**Correct GitHub Copilot Workspace URL:**
+```
+https://printshop-os--hypnotizedent.github.app/
+```
+
+**What is GitHub Copilot Workspace?**
+- Cloud-based development environment that runs in your browser
+- Automatically connected to the repository when you open it
+- URL format: `https://<repo-name>--<owner>.github.app/`
+- No separate "connection" needed - it IS connected to the repo automatically
+
+**How to Access Copilot Workspace:**
+1. Go to your repository: `https://github.com/hypnotizedent/printshop-os`
+2. Click the green "Code" button
+3. Select "Codespaces" tab
+4. Click "Create codespace on main" (or use existing workspace)
+5. Alternatively, navigate directly to: `https://printshop-os--hypnotizedent.github.app/`
+
+**Key Point:** The `printshop-pro` in the original URL suggests either:
+- A typo (should be `printshop-os`)
+- A previous repository name that was renamed
+- A different workspace that needs to be recreated for `printshop-os`
+
+---
+
 ## 📋 Pending Tasks (Backlog)
 
 ### Data Import
@@ -363,6 +399,16 @@ data/artwork/
 
 ## 🔧 Quick Commands
 
+### GitHub Copilot Workspace
+```bash
+# Correct Copilot Workspace URL for this repo
+https://printshop-os--hypnotizedent.github.app/
+
+# Direct link to repository
+https://github.com/hypnotizedent/printshop-os
+```
+
+### Docker & Homelab
 ```bash
 # Check docker-host status
 ssh docker-host 'docker ps --format "table {{.Names}}\t{{.Status}}"'
@@ -437,7 +483,7 @@ When starting a new session, add a section like this:
 
 ---
 
-*Last Updated: November 28, 2025 @ [auto-fill time]*
-*Total Sessions: 12+*
-*Total Commits: 277+*
-*Days Since Project Start: 8*
+*Last Updated: November 29, 2025 @ 02:48 UTC*
+*Total Sessions: 13+*
+*Total Commits: 280+*
+*Days Since Project Start: 9*
