@@ -3,117 +3,11 @@
 import { Request, Response } from 'express';
 import { MetricsService } from './metrics.service';
 import { ReportsService } from './reports.service';
+import { StrapiService } from './strapi.service';
 import {
-  JobEntry,
-  TimeEntry,
   TimePeriod,
   ReportConfig,
 } from './types';
-
-// TODO: Replace mock data with actual database queries or service calls in production
-// Mock data for development and testing
-const mockJobEntries: JobEntry[] = [
-  {
-    id: '1',
-    employeeId: 'emp-1',
-    jobType: 'Screen Printing',
-    estimatedTime: 2.0,
-    actualTime: 1.8,
-    completed: true,
-    requiresRework: false,
-    completedDate: '2025-11-23T10:30:00Z',
-  },
-  {
-    id: '2',
-    employeeId: 'emp-1',
-    jobType: 'Screen Printing',
-    estimatedTime: 1.5,
-    actualTime: 1.6,
-    completed: true,
-    requiresRework: false,
-    completedDate: '2025-11-23T14:00:00Z',
-  },
-  {
-    id: '3',
-    employeeId: 'emp-2',
-    jobType: 'DTG',
-    estimatedTime: 3.0,
-    actualTime: 3.2,
-    completed: true,
-    requiresRework: false,
-    completedDate: '2025-11-23T11:00:00Z',
-  },
-  {
-    id: '4',
-    employeeId: 'emp-2',
-    jobType: 'Folding',
-    estimatedTime: 1.0,
-    actualTime: 0.9,
-    completed: true,
-    requiresRework: false,
-    completedDate: '2025-11-23T15:00:00Z',
-  },
-  {
-    id: '5',
-    employeeId: 'emp-3',
-    jobType: 'Screen Printing',
-    estimatedTime: 2.5,
-    actualTime: 2.7,
-    completed: true,
-    requiresRework: true,
-    completedDate: '2025-11-23T12:00:00Z',
-  },
-  {
-    id: '6',
-    employeeId: 'emp-3',
-    jobType: 'Heat Press',
-    estimatedTime: 1.0,
-    actualTime: 1.1,
-    completed: true,
-    requiresRework: false,
-    completedDate: '2025-11-23T16:00:00Z',
-  },
-  {
-    id: '7',
-    employeeId: 'emp-1',
-    jobType: 'Quality Check',
-    estimatedTime: 0.5,
-    actualTime: 0.5,
-    completed: true,
-    requiresRework: false,
-    completedDate: '2025-11-23T17:00:00Z',
-  },
-];
-
-const mockTimeEntries: TimeEntry[] = [
-  {
-    id: 't1',
-    employeeId: 'emp-1',
-    employeeName: 'Sarah Johnson',
-    date: '2025-11-23',
-    hoursWorked: 8.0,
-    productiveHours: 7.5,
-    breakTime: 0.5,
-  },
-  {
-    id: 't2',
-    employeeId: 'emp-2',
-    employeeName: 'John Smith',
-    date: '2025-11-23',
-    hoursWorked: 8.0,
-    productiveHours: 7.2,
-    breakTime: 0.8,
-  },
-  {
-    id: 't3',
-    employeeId: 'emp-3',
-    employeeName: 'Mike Thompson',
-    date: '2025-11-23',
-    hoursWorked: 7.5,
-    productiveHours: 7.0,
-    breakTime: 0.5,
-  },
-];
 
 export class AnalyticsController {
   /**
@@ -123,12 +17,26 @@ export class AnalyticsController {
   static async getOverview(req: Request, res: Response): Promise<void> {
     try {
       const period = (req.query.period as TimePeriod) || 'today';
+      
+      // Fetch data from Strapi
+      const [jobEntries, timeEntries, revenue, clockedInEmployees] = await Promise.all([
+        StrapiService.fetchJobEntries(),
+        StrapiService.fetchTimeEntries(),
+        StrapiService.fetchRevenue(period),
+        StrapiService.fetchClockedInCount(),
+      ]);
+      
+      // Fallback to employees list if no time entries
+      const effectiveTimeEntries = timeEntries.length > 0 
+        ? timeEntries 
+        : await StrapiService.fetchEmployees();
+      
       const overview = MetricsService.generateDashboardOverview(
         period,
-        mockJobEntries,
-        mockTimeEntries,
-        45230,
-        8
+        jobEntries,
+        effectiveTimeEntries,
+        revenue,
+        clockedInEmployees || effectiveTimeEntries.length
       );
 
       res.json({
@@ -152,7 +60,18 @@ export class AnalyticsController {
       const { id } = req.params;
       const period = (req.query.period as TimePeriod) || 'week';
 
-      const employee = mockTimeEntries.find(t => t.employeeId === id);
+      // Fetch data from Strapi
+      const [jobEntries, timeEntries] = await Promise.all([
+        StrapiService.fetchJobEntries(),
+        StrapiService.fetchTimeEntries(),
+      ]);
+      
+      // Fallback to employees list if no time entries
+      const effectiveTimeEntries = timeEntries.length > 0 
+        ? timeEntries 
+        : await StrapiService.fetchEmployees();
+
+      const employee = effectiveTimeEntries.find(t => t.employeeId === id);
       if (!employee) {
         res.status(404).json({
           success: false,
@@ -165,8 +84,8 @@ export class AnalyticsController {
         id,
         employee.employeeName,
         period,
-        mockJobEntries,
-        mockTimeEntries
+        jobEntries,
+        effectiveTimeEntries
       );
 
       res.json({
@@ -189,11 +108,23 @@ export class AnalyticsController {
     try {
       const period = (req.query.period as TimePeriod) || 'week';
 
+      // Fetch data from Strapi
+      const [jobEntries, timeEntries, revenue] = await Promise.all([
+        StrapiService.fetchJobEntries(),
+        StrapiService.fetchTimeEntries(),
+        StrapiService.fetchRevenue(period),
+      ]);
+      
+      // Fallback to employees list if no time entries
+      const effectiveTimeEntries = timeEntries.length > 0 
+        ? timeEntries 
+        : await StrapiService.fetchEmployees();
+
       const teamMetrics = MetricsService.calculateTeamMetrics(
         period,
-        mockJobEntries,
-        mockTimeEntries,
-        45230
+        jobEntries,
+        effectiveTimeEntries,
+        revenue
       );
 
       res.json({
@@ -236,7 +167,9 @@ export class AnalyticsController {
         return;
       }
 
-      let efficiencyData = MetricsService.generateEfficiencyData(mockJobEntries);
+      // Fetch job entries from Strapi
+      const jobEntries = await StrapiService.fetchJobEntries();
+      let efficiencyData = MetricsService.generateEfficiencyData(jobEntries);
 
       // Apply filters
       if (employeeId) {
@@ -266,11 +199,23 @@ export class AnalyticsController {
     try {
       const period = (req.query.period as TimePeriod) || 'week';
 
+      // Fetch data from Strapi
+      const [jobEntries, timeEntries, revenue] = await Promise.all([
+        StrapiService.fetchJobEntries(),
+        StrapiService.fetchTimeEntries(),
+        StrapiService.fetchRevenue(period),
+      ]);
+      
+      // Fallback to employees list if no time entries
+      const effectiveTimeEntries = timeEntries.length > 0 
+        ? timeEntries 
+        : await StrapiService.fetchEmployees();
+
       const teamMetrics = MetricsService.calculateTeamMetrics(
         period,
-        mockJobEntries,
-        mockTimeEntries,
-        45230
+        jobEntries,
+        effectiveTimeEntries,
+        revenue
       );
 
       res.json({
@@ -298,7 +243,9 @@ export class AnalyticsController {
     try {
       const groupBy = (req.query.groupBy as 'day' | 'week' | 'month') || 'day';
 
-      const efficiencyData = MetricsService.generateEfficiencyData(mockJobEntries);
+      // Fetch job entries from Strapi
+      const jobEntries = await StrapiService.fetchJobEntries();
+      const efficiencyData = MetricsService.generateEfficiencyData(jobEntries);
       const trends = MetricsService.generateTrendData(efficiencyData, groupBy);
 
       res.json({
@@ -319,9 +266,20 @@ export class AnalyticsController {
    */
   static async getLeaderboard(_req: Request, res: Response): Promise<void> {
     try {
+      // Fetch data from Strapi
+      const [jobEntries, timeEntries] = await Promise.all([
+        StrapiService.fetchJobEntries(),
+        StrapiService.fetchTimeEntries(),
+      ]);
+      
+      // Fallback to employees list if no time entries
+      const effectiveTimeEntries = timeEntries.length > 0 
+        ? timeEntries 
+        : await StrapiService.fetchEmployees();
+
       const leaderboard = MetricsService.generateLeaderboard(
-        mockJobEntries,
-        mockTimeEntries
+        jobEntries,
+        effectiveTimeEntries
       );
 
       res.json({
@@ -353,14 +311,26 @@ export class AnalyticsController {
         return;
       }
 
+      // Fetch data from Strapi
+      const [jobEntries, timeEntries, revenue] = await Promise.all([
+        StrapiService.fetchJobEntries(),
+        StrapiService.fetchTimeEntries(),
+        StrapiService.fetchRevenue('week'),
+      ]);
+      
+      // Fallback to employees list if no time entries
+      const effectiveTimeEntries = timeEntries.length > 0 
+        ? timeEntries 
+        : await StrapiService.fetchEmployees();
+
       // Calculate all metrics needed for report
-      const employeeMetrics = mockTimeEntries.map(emp =>
+      const employeeMetrics = effectiveTimeEntries.map(emp =>
         MetricsService.calculateEmployeeMetrics(
           emp.employeeId,
           emp.employeeName,
           'week',
-          mockJobEntries,
-          mockTimeEntries
+          jobEntries,
+          effectiveTimeEntries
         )
       );
 
@@ -372,17 +342,17 @@ export class AnalyticsController {
 
       const teamMetrics = MetricsService.calculateTeamMetrics(
         'week',
-        mockJobEntries,
-        mockTimeEntries,
-        45230
+        jobEntries,
+        effectiveTimeEntries,
+        revenue
       );
 
       const leaderboard = MetricsService.generateLeaderboard(
-        mockJobEntries,
-        mockTimeEntries
+        jobEntries,
+        effectiveTimeEntries
       );
 
-      const efficiencyData = MetricsService.generateEfficiencyData(mockJobEntries);
+      const efficiencyData = MetricsService.generateEfficiencyData(jobEntries);
 
       const report = ReportsService.generateReport(
         config,
@@ -419,13 +389,24 @@ export class AnalyticsController {
    */
   static async getAlerts(_req: Request, res: Response): Promise<void> {
     try {
-      const employeeMetrics = mockTimeEntries.map(emp =>
+      // Fetch data from Strapi
+      const [jobEntries, timeEntries] = await Promise.all([
+        StrapiService.fetchJobEntries(),
+        StrapiService.fetchTimeEntries(),
+      ]);
+      
+      // Fallback to employees list if no time entries
+      const effectiveTimeEntries = timeEntries.length > 0 
+        ? timeEntries 
+        : await StrapiService.fetchEmployees();
+
+      const employeeMetrics = effectiveTimeEntries.map(emp =>
         MetricsService.calculateEmployeeMetrics(
           emp.employeeId,
           emp.employeeName,
           'week',
-          mockJobEntries,
-          mockTimeEntries
+          jobEntries,
+          effectiveTimeEntries
         )
       );
 

@@ -325,13 +325,28 @@ export async function fetchCustomerQuotes(
   const { status, limit = 50 } = options;
   
   try {
+    // First get customer's printavoId for filtering
+    const customerRes = await fetch(`${API_BASE}/api/customers/${customerId}`);
+    let printavoCustomerId: string | null = null;
+    
+    if (customerRes.ok) {
+      const customerData = await customerRes.json();
+      printavoCustomerId = customerData.data?.printavoId;
+    }
+    
     const params = new URLSearchParams({
       'pagination[limit]': limit.toString(),
       'sort': 'createdAt:desc',
+      'populate': 'customer',
     });
     
-    // Filter by customer if we have a relation set up
-    // For now, fetch all quotes (TODO: add customer filter when relation is set up)
+    // Filter by customer using customerId relation or printavoCustomerId
+    if (customerId) {
+      params.append('filters[$or][0][customer][documentId][$eq]', customerId);
+      if (printavoCustomerId) {
+        params.append('filters[$or][1][printavoCustomerId][$eq]', printavoCustomerId);
+      }
+    }
     
     if (status) {
       params.append('filters[status][$eq]', status);

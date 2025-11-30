@@ -17,6 +17,7 @@ import { QuoteBuilder } from "./components/quotes/QuoteBuilder"
 import { ProductsPage } from "./components/products/ProductsPage"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
 import { AIAssistantPage } from "./pages/AIAssistantPage"
+import OnlineDesignerPage from "./apps/online-designer/pages/Index"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 import { toast } from "sonner"
 
@@ -317,6 +318,9 @@ function App() {
         
         {/* Customer Portal routes - has its own internal routing */}
         <Route path="/portal/*" element={<CustomerPortalLayout />} />
+        
+        {/* Online Designer route */}
+        <Route path="/designer" element={<OnlineDesignerPage />} />
         
         {/* Main admin/employee dashboard - root and all unmatched */}
         <Route path="/*" element={<MainDashboard />} />

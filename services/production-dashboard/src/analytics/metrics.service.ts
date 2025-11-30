@@ -186,6 +186,13 @@ export class MetricsService {
 
     const improvementNeeded = employeeSummaries.filter(emp => emp.efficiencyRate < 85);
 
+    // Calculate trends by comparing current and previous period
+    const { throughputTrend, efficiencyTrend } = this.calculateTrends(
+      period,
+      completedJobs,
+      teamEfficiencyRate
+    );
+
     return {
       period,
       jobsCompleted: completedJobs.length,
@@ -197,10 +204,69 @@ export class MetricsService {
       teamEfficiencyRate,
       bestPerformer,
       improvementNeeded,
-      // TODO: Implement trend calculations by comparing with previous period data
-      throughputTrend: 0, // Would be calculated from historical data
-      efficiencyTrend: 0, // Would be calculated from historical data
+      throughputTrend,
+      efficiencyTrend,
     };
+  }
+
+  /**
+   * Calculate trend percentages by comparing current period with previous period
+   */
+  private static calculateTrends(
+    period: TimePeriod,
+    completedJobs: JobEntry[],
+    currentEfficiency: number
+  ): { throughputTrend: number; efficiencyTrend: number } {
+    const now = new Date();
+    let periodDays: number;
+    
+    switch (period) {
+      case 'today':
+        periodDays = 1;
+        break;
+      case 'week':
+        periodDays = 7;
+        break;
+      case 'month':
+        periodDays = 30;
+        break;
+    }
+    
+    // Calculate date boundaries
+    const currentPeriodStart = new Date(now.getTime() - periodDays * 24 * 60 * 60 * 1000);
+    const previousPeriodStart = new Date(now.getTime() - (periodDays * 2) * 24 * 60 * 60 * 1000);
+    const previousPeriodEnd = currentPeriodStart;
+    
+    // Filter jobs by period
+    const currentPeriodJobs = completedJobs.filter(job => {
+      if (!job.completedDate) return false;
+      const jobDate = new Date(job.completedDate);
+      return jobDate >= currentPeriodStart && jobDate <= now;
+    });
+    
+    const previousPeriodJobs = completedJobs.filter(job => {
+      if (!job.completedDate) return false;
+      const jobDate = new Date(job.completedDate);
+      return jobDate >= previousPeriodStart && jobDate < previousPeriodEnd;
+    });
+    
+    // Calculate throughput trend (% change in completed jobs)
+    const currentThroughput = currentPeriodJobs.length;
+    const previousThroughput = previousPeriodJobs.length;
+    const throughputTrend = previousThroughput > 0
+      ? Math.round(((currentThroughput - previousThroughput) / previousThroughput) * 100)
+      : currentThroughput > 0 ? 100 : 0;
+    
+    // Calculate efficiency trend (% change in efficiency)
+    const previousEstimated = previousPeriodJobs.reduce((sum, job) => sum + job.estimatedTime, 0);
+    const previousActual = previousPeriodJobs.reduce((sum, job) => sum + job.actualTime, 0);
+    const previousEfficiency = this.calculateEfficiencyRate(previousEstimated, previousActual);
+    
+    const efficiencyTrend = previousEfficiency > 0
+      ? Math.round(((currentEfficiency - previousEfficiency) / previousEfficiency) * 100)
+      : currentEfficiency > 0 ? 100 : 0;
+    
+    return { throughputTrend, efficiencyTrend };
   }
 
   /**
