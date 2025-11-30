@@ -44,5 +44,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
 
-# Start server
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Start server - bind to 0.0.0.0 for Docker network access (required for Cloudflare Tunnel)
+CMD ["serve", "-s", "dist", "-l", "tcp://0.0.0.0:3000"]
