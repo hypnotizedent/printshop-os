@@ -419,3 +419,61 @@ export interface StrapiOrder {
     name?: string
   }
 }
+
+// Valid payment methods constant - used for validation
+export const VALID_PAYMENT_METHODS = [
+  'cash',
+  'check',
+  'credit_card',
+  'debit_card',
+  'bank_transfer',
+  'paypal',
+  'venmo',
+  'zelle',
+  'other'
+] as const;
+
+export type ValidPaymentMethod = typeof VALID_PAYMENT_METHODS[number];
+
+// Payment types used by the payments API
+export interface OrderPayment {
+  id: string;
+  documentId: string;
+  amount: number;
+  status: 'pending' | 'paid' | 'failed' | 'refunded';
+  paymentType?: 'deposit' | 'balance' | 'refund';
+  paymentMethod: string;
+  referenceNumber?: string;
+  paymentDate?: string;
+  recordedBy?: string;
+  notes?: string;
+  paidAt?: string;
+  createdAt: string;
+}
+
+export interface PaymentFormData {
+  amount: number;
+  paymentMethod: string;
+  paymentDate: string;
+  referenceNumber?: string;
+  notes?: string;
+}
+
+export interface PaymentsDashboardSummary {
+  totalOutstanding: number;
+  paymentsThisWeek: number;
+  paymentsThisMonth: number;
+  overdueCount: number;
+  outstandingOrders: OutstandingOrderSummary[];
+}
+
+export interface OutstandingOrderSummary {
+  id: string;
+  documentId: string;
+  orderNumber: string;
+  customerName: string;
+  totalAmount: number;
+  amountPaid: number;
+  amountOutstanding: number;
+  dueDate?: string;
+}
