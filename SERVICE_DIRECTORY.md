@@ -148,6 +148,18 @@ This document provides a precise map of where every component, service, and feat
 
 ## Recent Updates
 
+### November 27, 2025 (Business Services Stack)
+
+✅ **Self-Hosted Business Services Added**
+- Created `docker-compose.business-services.yml` with 5 services
+- Invoice Ninja (port 9000) - Invoicing, payments, quotes
+- n8n (port 5678) - Workflow automation
+- Paperless-ngx (port 8010) - Document management with OCR
+- Penpot (port 9001) - Design collaboration
+- Vaultwarden (port 8222) - Password management
+- Updated `.env.example` with all service configurations
+- Created `docs/BUSINESS_SERVICES.md` documentation
+
 ### November 27, 2025 (Session 10 - Supplier Sync & Deployment)
 
 ✅ **Strapi Production Deployment**
@@ -291,6 +303,7 @@ This document provides a precise map of where every component, service, and feat
 | Analytics & reporting | `services/api/analytics/` |
 | AI quote optimizer | `services/customer-service-ai/` |
 | Supplier data sync | `services/supplier-sync/` |
+| Vector database / embeddings | `services/vector-store/` |
 | Frontend components | `frontend/src/components/` |
 | Strapi content types | `printshop-strapi/src/api/` |
 | Database schema | `printshop-strapi/schema.sql` |
@@ -603,7 +616,75 @@ services/label-formatter/
 
 ---
 
-### 7. Strapi CMS
+### 7. Vector Store Service (Milvus)
+
+**Location:** `services/vector-store/`
+
+```
+services/vector-store/
+├── src/
+│   ├── index.ts                    # Main entry point
+│   ├── client.ts                   # Milvus client wrapper
+│   ├── collections/
+│   │   ├── designs.ts              # Design embeddings collection
+│   │   ├── customers.ts            # Customer embeddings collection
+│   │   ├── orders.ts               # Order embeddings collection
+│   │   └── knowledge-base.ts       # RAG knowledge base collection
+│   ├── embeddings/
+│   │   ├── openai.ts               # OpenAI embedding generator
+│   │   └── types.ts                # Embedding types
+│   ├── search/
+│   │   ├── similarity.ts           # Similarity search functions
+│   │   └── rag.ts                  # RAG retrieval functions
+│   ├── scripts/
+│   │   └── init-collections.ts     # Collection initialization
+│   └── utils/
+│       └── logger.ts               # Winston logger
+├── tests/
+│   └── vector-store.test.ts
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+**Infrastructure:**
+
+| Component | Port | Purpose |
+|-----------|------|---------|
+| Milvus | 19530 | Vector database (gRPC) |
+| Milvus Metrics | 9091 | Health/metrics endpoint |
+| Attu | 8001 | Web UI for management |
+| etcd | 2379 | Milvus metadata storage |
+| MinIO | 9010/9011 | Milvus object storage |
+
+**Collections:**
+
+| Collection | Purpose |
+|------------|---------|
+| `designs` | Design similarity search, mockup matching |
+| `customers` | Customer intelligence, segmentation |
+| `orders` | Order pattern matching, pricing insights |
+| `knowledge_base` | RAG retrieval for chatbot context |
+
+**Responsibilities:**
+- Store and search vector embeddings
+- Power semantic search across designs, customers, orders
+- Enable RAG for customer service chatbot
+- Find similar historical orders for pricing
+- Generate embeddings via OpenAI API
+
+**Key Functions:**
+- `ensureCollection(name, dimension)` - Create collection if not exists
+- `insertVectors(collection, records)` - Insert vectors with metadata
+- `searchSimilar(collection, vector, topK)` - Vector similarity search
+- `findSimilarDesigns(description)` - Find similar design mockups
+- `retrieveRAGContext(query)` - Get context for LLM prompts
+
+**Documentation:** `docs/VECTOR_DATABASE.md`
+
+---
+
+### 8. Strapi CMS
 
 **Location:** `printshop-strapi/`  
 **Status:** ✅ All APIs Operational (Fixed Nov 26, 2025)
@@ -667,7 +748,7 @@ See: `docs/reference/STRAPI_TYPESCRIPT_API_FIX.md`
 
 ---
 
-### 7. Frontend Application
+### 9. Frontend Application
 
 **Location:** `frontend/`
 
@@ -992,6 +1073,51 @@ Redis
 
 ---
 
+## Business Services Stack
+
+**Location:** `docker-compose.business-services.yml`  
+**Documentation:** `docs/BUSINESS_SERVICES.md`  
+**Status:** Ready for Deployment
+
+Self-hosted business tools for payments, automation, documents, design, and password management.
+
+| Service | Port | Purpose | Docker Image |
+|---------|------|---------|--------------|
+| **Invoice Ninja** | 9000 | Invoicing, Payments, Quotes | `invoiceninja/invoiceninja:5` |
+| **n8n** | 5678 | Workflow Automation | `n8nio/n8n:latest` |
+| **Paperless-ngx** | 8010 | Document Management, OCR | `ghcr.io/paperless-ngx/paperless-ngx:latest` |
+| **Penpot** | 9001 | Design Collaboration | `penpotapp/frontend:latest` |
+| **Vaultwarden** | 8222 | Password Management | `vaultwarden/server:latest` |
+
+### Integration with Core Services
+
+```
+Strapi CMS ←→ n8n ←→ Invoice Ninja
+                ↓
+         Paperless-ngx (documents)
+                ↓
+         Penpot (designs)
+```
+
+### Key Workflows (n8n)
+- Quote approved → Create Invoice Ninja draft
+- Payment received → Update Strapi order status
+- Document uploaded → OCR in Paperless-ngx → Tag and file
+
+### Startup Commands
+
+```bash
+# Create required databases
+docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE n8n;"
+docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE paperless;"
+docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE penpot;"
+
+# Start business services
+docker compose -f docker-compose.business-services.yml up -d
+```
+
+---
+
 ## Port Assignments
 
 | Service | Port | Protocol |
@@ -1003,6 +1129,11 @@ Redis
 | Frontend Dev Server | 5173 | HTTP |
 | PostgreSQL | 5432 | TCP |
 | Redis | 6379 | TCP |
+| Invoice Ninja | 9000 | HTTP |
+| n8n | 5678 | HTTP |
+| Paperless-ngx | 8010 | HTTP |
+| Penpot | 9001 | HTTP |
+| Vaultwarden | 8222 | HTTP |
 
 ---
 
