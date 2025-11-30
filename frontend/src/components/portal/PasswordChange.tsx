@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { changePassword } from '@/lib/portal-customer-api';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
@@ -41,26 +42,14 @@ export function PasswordChange() {
   const onSubmit = async (data: PasswordFormData) => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/customer/profile/password', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify(data),
-      // });
-
-      // if (!response.ok) {
-      //   const error = await response.json();
-      //   throw new Error(error.message);
-      // }
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast.success('Password changed successfully');
-      reset();
+      const response = await changePassword(data.currentPassword, data.newPassword);
+      
+      if (response.success) {
+        toast.success('Password changed successfully');
+        reset();
+      } else {
+        toast.error(response.error || 'Failed to change password');
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
       toast.error(errorMessage);

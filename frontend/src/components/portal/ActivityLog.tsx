@@ -14,6 +14,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { getActivityLog, type ActivityItem as ApiActivityItem } from '@/lib/portal-customer-api';
 
 interface ActivityItem {
   id: string;
@@ -59,61 +60,26 @@ export function ActivityLog() {
 
   const fetchActivities = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/customer-activities/me', {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
-      // const data = await response.json();
-
-      // Mock data
-      const mockActivities: ActivityItem[] = [
-        {
-          id: '1',
-          activityType: 'password_changed',
-          description: 'Password changed',
-          ipAddress: '192.168.1.1',
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          id: '2',
-          activityType: 'email_updated',
-          description: 'Email updated to john.new@example.com',
-          ipAddress: '192.168.1.1',
-          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          id: '3',
-          activityType: 'address_added',
-          description: 'Added new address "Warehouse"',
-          ipAddress: '192.168.1.1',
-          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          id: '4',
-          activityType: 'login',
-          description: 'Login from 192.168.1.1',
-          ipAddress: '192.168.1.1',
-          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          id: '5',
-          activityType: 'login',
-          description: 'Login from 192.168.1.1',
-          ipAddress: '192.168.1.1',
-          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          id: '6',
-          activityType: 'preferences_updated',
-          description: 'Updated notification preferences',
-          ipAddress: '192.168.1.1',
-          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-      ];
-
-      setActivities(mockActivities);
+      const response = await getActivityLog();
+      
+      if (response.success && response.data) {
+        // Map API response to component's ActivityItem interface
+        const mappedActivities: ActivityItem[] = response.data.map((item: ApiActivityItem) => ({
+          id: item.id,
+          activityType: item.activityType,
+          description: item.description,
+          ipAddress: item.ipAddress,
+          createdAt: item.createdAt,
+        }));
+        setActivities(mappedActivities);
+      } else {
+        // If no activities or API unavailable, show empty state
+        setActivities([]);
+      }
     } catch (error) {
+      console.error('Failed to load activity log:', error);
       toast.error('Failed to load activity log');
+      setActivities([]);
     } finally {
       setLoading(false);
     }

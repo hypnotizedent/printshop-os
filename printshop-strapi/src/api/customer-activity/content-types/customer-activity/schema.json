@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "customer_activities",
+  "info": {
+    "singularName": "customer-activity",
+    "pluralName": "customer-activities",
+    "displayName": "Customer Activity",
+    "description": "Customer account activity log"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "customer": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::customer.customer"
+    },
+    "activityType": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "ipAddress": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}

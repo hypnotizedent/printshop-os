@@ -26,6 +26,18 @@ export default {
     },
     {
       method: 'POST',
+      path: '/auth/customer/change-password',
+      handler: 'auth.changePassword',
+      config: {
+        // Auth is handled manually in the controller via JWT Bearer token validation
+        // This allows for custom error messages and matches other auth endpoints pattern
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
       path: '/auth/employee/validate-pin',
       handler: 'auth.validateEmployeePIN',
       config: {

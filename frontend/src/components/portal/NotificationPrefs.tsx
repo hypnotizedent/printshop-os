@@ -5,6 +5,11 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { 
+  getCustomerPreferences, 
+  saveCustomerPreferences,
+  type CustomerPreferences 
+} from '@/lib/portal-customer-api';
 
 interface Preferences {
   orderConfirmation: boolean;
@@ -28,6 +33,7 @@ export function NotificationPrefs() {
   });
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
+  const [prefsDocumentId, setPrefsDocumentId] = useState<string | undefined>();
 
   useEffect(() => {
     fetchPreferences();
@@ -35,16 +41,22 @@ export function NotificationPrefs() {
 
   const fetchPreferences = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/customer-preferences/me', {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
-      // const data = await response.json();
-      // setPreferences(data);
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await getCustomerPreferences();
+      
+      if (response.success && response.data) {
+        setPreferences({
+          orderConfirmation: response.data.orderConfirmation,
+          artApproval: response.data.artApproval,
+          productionUpdates: response.data.productionUpdates,
+          shipmentNotifications: response.data.shipmentNotifications,
+          quoteReminders: response.data.quoteReminders,
+          marketingEmails: response.data.marketingEmails,
+          smsNotifications: response.data.smsNotifications,
+        });
+        setPrefsDocumentId(response.data.documentId);
+      }
     } catch (error) {
+      console.error('Failed to load preferences:', error);
       toast.error('Failed to load preferences');
     } finally {
       setFetchingData(false);
@@ -58,21 +70,23 @@ export function NotificationPrefs() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // await fetch('/api/customer-preferences/me', {
-      //   method: 'PATCH',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify(preferences),
-      // });
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast.success('Preferences updated successfully');
+      const prefsToSave: CustomerPreferences = {
+        ...preferences,
+        documentId: prefsDocumentId,
+      };
+      
+      const response = await saveCustomerPreferences(prefsToSave);
+      
+      if (response.success) {
+        if (response.data?.documentId) {
+          setPrefsDocumentId(response.data.documentId);
+        }
+        toast.success('Preferences updated successfully');
+      } else {
+        toast.error(response.error || 'Failed to update preferences');
+      }
     } catch (error) {
+      console.error('Failed to save preferences:', error);
       toast.error('Failed to update preferences');
     } finally {
       setLoading(false);
