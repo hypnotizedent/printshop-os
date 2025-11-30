@@ -86,6 +86,7 @@ export function InvoicePreview({
               size="sm" 
               onClick={onClose}
               className="h-8 w-8 p-0"
+              aria-label="Close invoice preview"
             >
               <X size={18} />
             </Button>
