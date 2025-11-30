@@ -20,8 +20,9 @@ import {
   type VectorRecord,
   type SearchResult,
 } from '../client';
-import { generateEmbedding } from '../embeddings/openai';
+import { generateEmbedding, generateBatchEmbeddings } from '../embeddings/openai';
 import { logger } from '../utils/logger';
+import { escapeFilterValue } from '../utils/sanitize';
 
 export const KNOWLEDGE_BASE_COLLECTION = 'knowledge_base';
 
@@ -77,6 +78,10 @@ function chunkText(
   chunkSize: number = 1000,
   overlap: number = 200
 ): string[] {
+  if (chunkSize <= overlap) {
+    throw new Error('chunkSize must be greater than overlap to ensure progress');
+  }
+
   const chunks: string[] = [];
   let start = 0;
 
@@ -98,26 +103,24 @@ export async function indexDocument(
   chunkSize: number = 1000
 ): Promise<string[]> {
   const chunks = chunkText(content, chunkSize);
+  const embeddings = await generateBatchEmbeddings(chunks);
   const ids: string[] = [];
 
-  const records: VectorRecord[] = await Promise.all(
-    chunks.map(async (chunk, index) => {
-      const embedding = await generateEmbedding(chunk);
-      const id = generateChunkId();
-      ids.push(id);
+  const records: VectorRecord[] = chunks.map((chunk, index) => {
+    const id = generateChunkId();
+    ids.push(id);
 
-      return {
-        id,
-        vector: embedding,
-        text: chunk,
-        metadata: {
-          ...metadata,
-          chunkIndex: index,
-          totalChunks: chunks.length,
-        } as unknown as Record<string, unknown>,
-      };
-    })
-  );
+    return {
+      id,
+      vector: embeddings[index],
+      text: chunk,
+      metadata: {
+        ...metadata,
+        chunkIndex: index,
+        totalChunks: chunks.length,
+      } as unknown as Record<string, unknown>,
+    };
+  });
 
   await insertVectors(KNOWLEDGE_BASE_COLLECTION, records);
   logger.info(
@@ -136,12 +139,11 @@ export async function batchIndexDocuments(
   }>,
   chunkSize: number = 1000
 ): Promise<string[][]> {
-  const allIds: string[][] = [];
-
-  for (const { content, metadata } of documents) {
-    const ids = await indexDocument(content, metadata, chunkSize);
-    allIds.push(ids);
-  }
+  const allIds = await Promise.all(
+    documents.map(({ content, metadata }) =>
+      indexDocument(content, metadata, chunkSize)
+    )
+  );
 
   return allIds;
 }
@@ -157,7 +159,7 @@ export async function searchKnowledgeBase(
   const queryVector = await generateEmbedding(query);
 
   const filter = category
-    ? `metadata["category"] == "${category}"`
+    ? `metadata["category"] == "${escapeFilterValue(category)}"`
     : undefined;
 
   return searchSimilar(KNOWLEDGE_BASE_COLLECTION, queryVector, limit, filter);

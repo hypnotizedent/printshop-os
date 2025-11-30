@@ -7,6 +7,7 @@
 
 import { MilvusClient, DataType } from '@zilliz/milvus2-sdk-node';
 import { logger } from './utils/logger';
+import { escapeFilterValue } from './utils/sanitize';
 
 // Default to localhost:19530 for local development
 const MILVUS_ADDRESS = process.env.MILVUS_ADDRESS || 'localhost:19530';
@@ -253,7 +254,7 @@ export async function deleteVectors(
   try {
     await getMilvusClient().delete({
       collection_name: collectionName,
-      filter: `id in [${ids.map((id) => `"${id}"`).join(',')}]`,
+      filter: `id in [${ids.map((id) => `"${escapeFilterValue(id)}"`).join(',')}]`,
     });
     logger.info(`Deleted ${ids.length} vectors from ${collectionName}`);
   } catch (error) {

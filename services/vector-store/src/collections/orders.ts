@@ -20,8 +20,9 @@ import {
   type VectorRecord,
   type SearchResult,
 } from '../client';
-import { generateEmbedding } from '../embeddings/openai';
+import { generateEmbedding, generateBatchEmbeddings } from '../embeddings/openai';
 import { logger } from '../utils/logger';
+import { escapeFilterValue } from '../utils/sanitize';
 
 export const ORDERS_COLLECTION = 'orders';
 
@@ -115,21 +116,19 @@ export async function batchIndexOrders(
     additionalNotes?: string;
   }>
 ): Promise<string[]> {
-  const records: VectorRecord[] = await Promise.all(
-    orders.map(async ({ metadata, additionalNotes }) => {
-      const description = buildOrderDescription(metadata);
-      const text = additionalNotes
-        ? `${description}. Notes: ${additionalNotes}`
-        : description;
-      const embedding = await generateEmbedding(text);
-      return {
-        id: generateRecordId(),
-        vector: embedding,
-        text,
-        metadata: metadata as unknown as Record<string, unknown>,
-      };
-    })
-  );
+  const texts = orders.map(({ metadata, additionalNotes }) => {
+    const description = buildOrderDescription(metadata);
+    return additionalNotes ? `${description}. Notes: ${additionalNotes}` : description;
+  });
+
+  const embeddings = await generateBatchEmbeddings(texts);
+
+  const records: VectorRecord[] = orders.map(({ metadata }, index) => ({
+    id: generateRecordId(),
+    vector: embeddings[index],
+    text: texts[index],
+    metadata: metadata as unknown as Record<string, unknown>,
+  }));
 
   await insertVectors(ORDERS_COLLECTION, records);
   logger.info(`Batch indexed ${records.length} orders`);
@@ -147,7 +146,7 @@ export async function findSimilarOrders(
   const queryVector = await generateEmbedding(query);
 
   const filter = productType
-    ? `metadata["productType"] == "${productType}"`
+    ? `metadata["productType"] == "${escapeFilterValue(productType)}"`
     : undefined;
 
   return searchSimilar(ORDERS_COLLECTION, queryVector, limit, filter);
@@ -172,7 +171,7 @@ export async function findCustomerOrders(
   query?: string,
   limit: number = 10
 ): Promise<SearchResult[]> {
-  const filter = `metadata["customerId"] == "${customerId}"`;
+  const filter = `metadata["customerId"] == "${escapeFilterValue(customerId)}"`;
 
   if (query) {
     const queryVector = await generateEmbedding(query);

@@ -20,8 +20,9 @@ import {
   type VectorRecord,
   type SearchResult,
 } from '../client';
-import { generateEmbedding } from '../embeddings/openai';
+import { generateEmbedding, generateBatchEmbeddings } from '../embeddings/openai';
 import { logger } from '../utils/logger';
+import { escapeFilterValue } from '../utils/sanitize';
 
 export const CUSTOMERS_COLLECTION = 'customers';
 
@@ -108,21 +109,19 @@ export async function batchIndexCustomers(
     additionalContext?: string;
   }>
 ): Promise<string[]> {
-  const records: VectorRecord[] = await Promise.all(
-    customers.map(async ({ metadata, additionalContext }) => {
-      const profile = buildCustomerProfile(metadata);
-      const text = additionalContext
-        ? `${profile}. ${additionalContext}`
-        : profile;
-      const embedding = await generateEmbedding(text);
-      return {
-        id: generateRecordId(),
-        vector: embedding,
-        text,
-        metadata: metadata as unknown as Record<string, unknown>,
-      };
-    })
-  );
+  const texts = customers.map(({ metadata, additionalContext }) => {
+    const profile = buildCustomerProfile(metadata);
+    return additionalContext ? `${profile}. ${additionalContext}` : profile;
+  });
+
+  const embeddings = await generateBatchEmbeddings(texts);
+
+  const records: VectorRecord[] = customers.map(({ metadata }, index) => ({
+    id: generateRecordId(),
+    vector: embeddings[index],
+    text: texts[index],
+    metadata: metadata as unknown as Record<string, unknown>,
+  }));
 
   await insertVectors(CUSTOMERS_COLLECTION, records);
   logger.info(`Batch indexed ${records.length} customers`);
@@ -140,7 +139,7 @@ export async function findSimilarCustomers(
   const queryVector = await generateEmbedding(query);
 
   const filter = segment
-    ? `metadata["segment"] == "${segment}"`
+    ? `metadata["segment"] == "${escapeFilterValue(segment)}"`
     : undefined;
 
   return searchSimilar(CUSTOMERS_COLLECTION, queryVector, limit, filter);

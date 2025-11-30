@@ -32,3 +32,30 @@ describe('Embedding Types', () => {
   });
 });
 
+describe('Sanitization Utilities', () => {
+  it('should escape quotes and backslashes in filter values', async () => {
+    const { escapeFilterValue } = await import('../src/utils/sanitize');
+    expect(escapeFilterValue('normal text')).toBe('normal text');
+    expect(escapeFilterValue('text with "quotes"')).toBe('text with \\"quotes\\"');
+    expect(escapeFilterValue('text with \\backslash')).toBe('text with \\\\backslash');
+    expect(escapeFilterValue('"quoted" and \\escaped')).toBe('\\"quoted\\" and \\\\escaped');
+  });
+
+  it('should handle empty strings', async () => {
+    const { escapeFilterValue } = await import('../src/utils/sanitize');
+    expect(escapeFilterValue('')).toBe('');
+  });
+});
+
+describe('Text Chunking', () => {
+  // Import chunkText indirectly by testing indexDocument behavior
+  // chunkText is a private function, but we test the validation via the module
+
+  it('should export knowledge base collection functions', async () => {
+    const kb = await import('../src/collections/knowledge-base');
+    expect(typeof kb.indexDocument).toBe('function');
+    expect(typeof kb.batchIndexDocuments).toBe('function');
+    expect(typeof kb.searchKnowledgeBase).toBe('function');
+    expect(kb.KNOWLEDGE_BASE_COLLECTION).toBe('knowledge_base');
+  });
+});

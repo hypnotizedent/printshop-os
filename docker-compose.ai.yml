@@ -37,8 +37,9 @@ services:
     container_name: printshop-milvus-minio
     restart: unless-stopped
     environment:
-      MINIO_ACCESS_KEY: ${MILVUS_MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_SECRET_KEY: ${MILVUS_MINIO_SECRET_KEY:-minioadmin}
+      # WARNING: Change these credentials in production!
+      MINIO_ACCESS_KEY: ${MILVUS_MINIO_ACCESS_KEY:?MILVUS_MINIO_ACCESS_KEY must be set}
+      MINIO_SECRET_KEY: ${MILVUS_MINIO_SECRET_KEY:?MILVUS_MINIO_SECRET_KEY must be set}
     ports:
       - "9010:9000"
       - "9011:9001"
@@ -55,7 +56,7 @@ services:
 
   # milvus: High-performance vector database
   milvus:
-    image: milvusdb/milvus:latest
+    image: milvusdb/milvus:v2.3.4
     container_name: printshop-milvus
     restart: unless-stopped
     command: ["milvus", "run", "standalone"]
@@ -82,7 +83,7 @@ services:
 
   # attu: Milvus Web UI for visual management
   attu:
-    image: zilliz/attu:latest
+    image: zilliz/attu:v2.3.4
     container_name: printshop-attu
     restart: unless-stopped
     environment:

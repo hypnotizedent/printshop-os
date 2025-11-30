@@ -19,8 +19,9 @@ import {
   type VectorRecord,
   type SearchResult,
 } from '../client';
-import { generateEmbedding } from '../embeddings/openai';
+import { generateEmbedding, generateBatchEmbeddings } from '../embeddings/openai';
 import { logger } from '../utils/logger';
+import { escapeFilterValue } from '../utils/sanitize';
 
 export const DESIGNS_COLLECTION = 'designs';
 
@@ -83,17 +84,15 @@ export async function indexDesign(
 export async function batchIndexDesigns(
   designs: Array<{ description: string; metadata: DesignMetadata }>
 ): Promise<string[]> {
-  const records: VectorRecord[] = await Promise.all(
-    designs.map(async ({ description, metadata }) => {
-      const embedding = await generateEmbedding(description);
-      return {
-        id: generateDesignId(),
-        vector: embedding,
-        text: description,
-        metadata: metadata as unknown as Record<string, unknown>,
-      };
-    })
-  );
+  const descriptions = designs.map((d) => d.description);
+  const embeddings = await generateBatchEmbeddings(descriptions);
+
+  const records: VectorRecord[] = designs.map(({ description, metadata }, index) => ({
+    id: generateDesignId(),
+    vector: embeddings[index],
+    text: description,
+    metadata: metadata as unknown as Record<string, unknown>,
+  }));
 
   await insertVectors(DESIGNS_COLLECTION, records);
   logger.info(`Batch indexed ${records.length} designs`);
@@ -112,7 +111,7 @@ export async function findSimilarDesigns(
 
   // Optional filter by customer
   const filter = customerId
-    ? `metadata["customerId"] == "${customerId}"`
+    ? `metadata["customerId"] == "${escapeFilterValue(customerId)}"`
     : undefined;
 
   return searchSimilar(DESIGNS_COLLECTION, queryVector, limit, filter);

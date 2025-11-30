@@ -98,75 +98,67 @@ export async function retrieveRAGContext(
     customerId,
   } = options;
 
+  // Execute all searches in parallel for better performance
+  const [kbResults, orderResults, customerResults, designResults] = await Promise.all([
+    searchKnowledgeBase(query, maxChunks).catch((error) => {
+      logger.warn(`Error retrieving knowledge base: ${error}`);
+      return [] as SearchResult[];
+    }),
+    includeOrders
+      ? findSimilarOrders(query, maxChunks).catch((error) => {
+          logger.warn(`Error retrieving orders: ${error}`);
+          return [] as SearchResult[];
+        })
+      : Promise.resolve([] as SearchResult[]),
+    includeCustomers
+      ? findSimilarCustomers(query, maxChunks).catch((error) => {
+          logger.warn(`Error retrieving customers: ${error}`);
+          return [] as SearchResult[];
+        })
+      : Promise.resolve([] as SearchResult[]),
+    includeDesigns
+      ? findSimilarDesigns(query, maxChunks, customerId).catch((error) => {
+          logger.warn(`Error retrieving designs: ${error}`);
+          return [] as SearchResult[];
+        })
+      : Promise.resolve([] as SearchResult[]),
+  ]);
+
   let context = '';
   let totalTokens = 0;
   const allSources: RAGContextResult['sources'] = [];
   const remainingTokens = () => maxTokens - totalTokens;
 
-  // Always include knowledge base
-  try {
-    const kbResults = await searchKnowledgeBase(query, maxChunks);
-    const { text, tokens, sources } = formatResults(
-      kbResults,
-      'Knowledge Base',
-      remainingTokens()
-    );
+  // Format knowledge base results
+  if (kbResults.length > 0) {
+    const { text, tokens, sources } = formatResults(kbResults, 'Knowledge Base', remainingTokens());
     context += text;
     totalTokens += tokens;
     allSources.push(...sources);
-  } catch (error) {
-    logger.warn(`Error retrieving knowledge base: ${error}`);
   }
 
-  // Optionally include order history
-  if (includeOrders && remainingTokens() > 0) {
-    try {
-      const orderResults = await findSimilarOrders(query, maxChunks);
-      const { text, tokens, sources } = formatResults(
-        orderResults,
-        'Order History',
-        remainingTokens()
-      );
-      context += text;
-      totalTokens += tokens;
-      allSources.push(...sources);
-    } catch (error) {
-      logger.warn(`Error retrieving orders: ${error}`);
-    }
+  // Format order results
+  if (orderResults.length > 0 && remainingTokens() > 0) {
+    const { text, tokens, sources } = formatResults(orderResults, 'Order History', remainingTokens());
+    context += text;
+    totalTokens += tokens;
+    allSources.push(...sources);
   }
 
-  // Optionally include customer info
-  if (includeCustomers && remainingTokens() > 0) {
-    try {
-      const customerResults = await findSimilarCustomers(query, maxChunks);
-      const { text, tokens, sources } = formatResults(
-        customerResults,
-        'Customer Info',
-        remainingTokens()
-      );
-      context += text;
-      totalTokens += tokens;
-      allSources.push(...sources);
-    } catch (error) {
-      logger.warn(`Error retrieving customers: ${error}`);
-    }
+  // Format customer results
+  if (customerResults.length > 0 && remainingTokens() > 0) {
+    const { text, tokens, sources } = formatResults(customerResults, 'Customer Info', remainingTokens());
+    context += text;
+    totalTokens += tokens;
+    allSources.push(...sources);
   }
 
-  // Optionally include designs
-  if (includeDesigns && remainingTokens() > 0) {
-    try {
-      const designResults = await findSimilarDesigns(query, maxChunks, customerId);
-      const { text, tokens, sources } = formatResults(
-        designResults,
-        'Design',
-        remainingTokens()
-      );
-      context += text;
-      totalTokens += tokens;
-      allSources.push(...sources);
-    } catch (error) {
-      logger.warn(`Error retrieving designs: ${error}`);
-    }
+  // Format design results
+  if (designResults.length > 0 && remainingTokens() > 0) {
+    const { text, tokens, sources } = formatResults(designResults, 'Design', remainingTokens());
+    context += text;
+    totalTokens += tokens;
+    allSources.push(...sources);
   }
 
   return {
