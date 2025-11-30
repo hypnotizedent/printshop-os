@@ -1,0 +1,226 @@
+# Cloudflare Tunnel Setup for PrintShop OS
+
+**Last Updated:** November 30, 2025
+
+This guide covers deploying PrintShop OS with Cloudflare Tunnel for secure external access with SSL termination.
+
+---
+
+## Overview
+
+Cloudflare Tunnel provides:
+- SSL/TLS termination (HTTPS)
+- DDoS protection
+- No exposed ports required
+- Easy domain routing
+
+---
+
+## Infrastructure
+
+| Component | Location | Notes |
+|-----------|----------|-------|
+| Docker Host | 100.92.156.118 (Tailscale) | Dell R730XD via Proxmox |
+| Cloudflared | Running on docker-host | Connects to Cloudflare edge |
+| Tunnel Config | Cloudflare Dashboard | Not a local config file |
+
+---
+
+## ⚠️ SSL Certificate Limitations
+
+**CRITICAL:** Free Cloudflare SSL only covers **one level of subdomains**.
+
+| Domain Pattern | SSL Coverage | Works? |
+|----------------|--------------|--------|
+| `ronny.works` | ✅ Covered | Yes |
+| `*.ronny.works` | ✅ Covered | Yes |
+| `*.printshop.ronny.works` | ❌ NOT Covered | **No** |
+
+### ❌ Incorrect (Won't Work)
+```
+app.printshop.ronny.works     ← Two levels deep, SSL fails
+api.printshop.ronny.works     ← Two levels deep, SSL fails
+```
+
+### ✅ Correct (Works)
+```
+printshop-app.ronny.works     ← Single level, SSL works
+printshop.ronny.works         ← Single level, SSL works
+api.ronny.works               ← Single level, SSL works
+```
+
+---
+
+## Production URLs
+
+| Service | Production URL | Docker Container |
+|---------|----------------|------------------|
+| Frontend | https://printshop-app.ronny.works | printshop-frontend:3000 |
+| Strapi CMS | https://printshop.ronny.works | printshop-strapi:1337 |
+| API | https://api.ronny.works | printshop-api:3001 |
+
+---
+
+## Docker Network Requirements
+
+The cloudflared container must be on the **same Docker network** as the services it proxies.
+
+### Connect cloudflared to the PrintShop network
+
+```bash
+# One-time command to connect cloudflared to printshop_network
+docker network connect printshop_network cloudflared
+
+# Verify connection
+docker network inspect printshop_network | grep cloudflared
+```
+
+### Why This Is Required
+
+Without network connectivity:
+1. cloudflared cannot resolve container names (e.g., `printshop-frontend`)
+2. You'll see `502 Bad Gateway` errors
+3. DNS lookups for container names will fail
+
+---
+
+## Tunnel Configuration (Cloudflare Dashboard)
+
+Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your Tunnel] → Public Hostnames**.
+
+### Frontend Route
+| Field | Value |
+|-------|-------|
+| Subdomain | `printshop-app` |
+| Domain | `ronny.works` |
+| Service Type | HTTP |
+| URL | `printshop-frontend:3000` |
+
+### Strapi CMS Route
+| Field | Value |
+|-------|-------|
+| Subdomain | `printshop` |
+| Domain | `ronny.works` |
+| Service Type | HTTP |
+| URL | `printshop-strapi:1337` |
+
+### API Route
+| Field | Value |
+|-------|-------|
+| Subdomain | `api` |
+| Domain | `ronny.works` |
+| Service Type | HTTP |
+| URL | `printshop-api:3001` |
+
+---
+
+## Troubleshooting 502 Bad Gateway
+
+### 1. Check if cloudflared is on the correct network
+
+```bash
+# List networks for cloudflared
+docker inspect cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+
+# Should include: printshop_network
+```
+
+### 2. Test container name resolution from cloudflared
+
+```bash
+# Exec into cloudflared and test DNS
+docker exec cloudflared ping -c 1 printshop-frontend
+
+# If this fails, the network connection is missing
+```
+
+### 3. Check if the service is listening on 0.0.0.0
+
+```bash
+# Check listening ports inside the container
+docker exec printshop-frontend netstat -tlnp
+
+# Should show: 0.0.0.0:3000, NOT 127.0.0.1:3000
+```
+
+### 4. Verify the service is healthy
+
+```bash
+# Check container status
+docker ps --filter name=printshop
+
+# View logs
+docker logs printshop-frontend --tail 50
+```
+
+### 5. Test direct access within Docker network
+
+```bash
+# From another container on the same network
+docker exec printshop-strapi curl -I http://printshop-frontend:3000
+```
+
+---
+
+## Environment Variables for Production Build
+
+When building the frontend for production, set these VITE_ variables:
+
+```bash
+# In .env or docker-compose build args
+VITE_API_URL=https://api.ronny.works
+VITE_STRAPI_URL=https://printshop.ronny.works
+VITE_PRICING_URL=https://api.ronny.works
+VITE_WS_URL=wss://api.ronny.works
+```
+
+**Important:** VITE_ variables are baked into the static bundle at build time, not runtime.
+
+---
+
+## Deployment Commands
+
+```bash
+# Deploy to docker-host (via Tailscale)
+rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/
+ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'
+
+# Connect cloudflared to the network (if not already connected)
+ssh docker-host 'docker network connect printshop_network cloudflared'
+
+# Verify services
+ssh docker-host 'docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+```
+
+---
+
+## Quick Health Check
+
+```bash
+# Check all PrintShop containers
+docker ps | grep printshop
+
+# Test external access
+curl -I https://printshop-app.ronny.works
+curl -I https://printshop.ronny.works
+curl -I https://api.ronny.works
+```
+
+---
+
+## Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| 502 Bad Gateway | cloudflared not on same network | `docker network connect printshop_network cloudflared` |
+| Connection refused | Service binding to 127.0.0.1 | Update CMD to bind to 0.0.0.0 |
+| SSL certificate error | Using nested subdomain | Use single-level subdomain pattern |
+| Empty page loads | Wrong VITE_ URLs | Rebuild frontend with correct production URLs |
+
+---
+
+## Related Documentation
+
+- `docker-compose.yml` - Container configuration
+- `.env.production.example` - Environment variables
+- `SERVICE_DIRECTORY.md` - Full service inventory

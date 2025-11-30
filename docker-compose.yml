@@ -268,6 +268,13 @@ services:
   # React 19 + TypeScript + Vite application served via 'serve' package
   # Provides customer portal and operations dashboard
   # Connects to Strapi for data, Pricing Engine for quotes
+  #
+  # CLOUDFLARE TUNNEL NOTE:
+  # If using cloudflared container for external access, ensure it's on the
+  # same Docker network (printshop_network) to resolve container names.
+  # Connect cloudflared to this network:
+  #   docker network connect printshop_network cloudflared
+  # ---------------------------------------------------------------------------
   frontend:
     build:
       context: ./frontend

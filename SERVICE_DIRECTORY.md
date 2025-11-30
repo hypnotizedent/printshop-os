@@ -20,9 +20,14 @@
 | **MinIO** | 9000-9001 | http://docker-host:9001 | ✅ Running |
 | **Traefik** | 80/443 | http://docker-host:8080 | ✅ Running |
 
-### HTTPS URLs (Traefik + Cloudflare)
-- **Frontend:** https://app.printshop.ronny.works
-- **API/Admin:** https://printshop.ronny.works
+### Production URLs (Cloudflare Tunnel)
+| Service | Production URL |
+|---------|----------------|
+| **Frontend** | https://printshop-app.ronny.works |
+| **Strapi CMS** | https://printshop.ronny.works |
+| **API** | https://api.ronny.works |
+
+> **Note:** See `docs/CLOUDFLARE_TUNNEL_SETUP.md` for SSL certificate limitations and tunnel configuration.
 
 ### Data Counts (Verified Nov 27, 2025)
 - **Orders:** 12,854
