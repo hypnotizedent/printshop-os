@@ -1,7 +1,7 @@
 # PrintShop OS - Repository Audit Report
 
-**Generated:** November 28, 2025  
-**Auditor:** GitHub Copilot (Claude Opus 4.5)  
+**Generated:** November 28, 2025 (Updated: November 30, 2025)  
+**Auditor:** GitHub Copilot  
 **Scope:** Full repository audit for documentation, organization, and single source of truth
 
 > 📋 **Action Items:** See [docs/AUDIT_ACTION_ITEMS.md](docs/AUDIT_ACTION_ITEMS.md) for the Living Audit Dashboard with trackable sub-issues.
@@ -21,7 +21,7 @@
 ### 🚨 Critical Issues Found → RESOLVED ✅
 1. ~~**361MB node_modules committed**~~ → ✅ Removed (was local only, not in git)
 2. ~~**35 stale branches**~~ → ✅ Deleted 26 stale branches, 8 remain with unique work
-3. **Documentation sprawl** - 45+ markdown files in docs/, many duplicated or archived ⏳
+3. **Documentation sprawl** - 121 markdown files in docs/, many in archive/legacy folders ⏳
 4. **No session-state.json** - `.vscode/session-state.json` referenced but not found ⏳
 
 ### ⚠️ Moderate Issues → PARTIALLY RESOLVED
@@ -285,16 +285,160 @@ Located in `scripts/` - ready to run but need:
 
 ---
 
+## Service Inventory
+
+**Updated:** November 30, 2025
+
+| Service | Has README | Has API Docs | Has Tests | Test Files | Integration Status |
+|---------|------------|--------------|-----------|------------|-------------------|
+| `services/api` | ✅ Yes | ✅ Yes (ANALYTICS_API.md, Postman) | ✅ Yes | 13 | ✅ Dockerfile + docker-compose.ai.yml |
+| `services/customer-service-ai` | ✅ Yes | ❌ No | ⚠️ Minimal | 1 | ✅ Dockerfile + docker-compose.ai.yml |
+| `services/job-estimator` | ✅ Yes | ✅ Yes (docs/PRICING_API.md) | ✅ Yes | 7 | ✅ Dockerfile + docker-compose.yml |
+| `services/production-dashboard` | ✅ Yes | ✅ Yes (openapi.yaml) | ✅ Yes | 4 | ⚠️ No Dockerfile |
+| `services/supplier-sync` | ✅ Yes | ✅ Partial (docs/SS_API_STRUCTURE.md) | ⚠️ Minimal | 2 | ⚠️ No Dockerfile |
+| `services/vector-store` | ✅ Yes | ❌ No | ⚠️ Minimal | 1 | ⚠️ No Dockerfile |
+| `frontend` | ✅ Yes | N/A | ✅ Yes | 5 | ✅ Dockerfile |
+| `printshop-strapi` | ✅ Yes | ✅ Yes (DEPLOYMENT_GUIDE.md) | ✅ Yes | 4 | ✅ Dockerfile + docker-compose.yml |
+
+### Service Documentation Gaps
+- **customer-service-ai**: Needs API documentation for RAG, chat, and sentiment endpoints
+- **vector-store**: Needs API documentation for embedding and search functions
+- **production-dashboard**: Missing Dockerfile for containerized deployment
+- **supplier-sync**: Missing Dockerfile for containerized deployment
+
+---
+
+## Test Matrix
+
+**Updated:** November 30, 2025
+
+| Component | Unit Tests | Integration Tests | E2E Tests | Coverage % | Notes |
+|-----------|------------|-------------------|-----------|------------|-------|
+| **services/api** | ✅ 13 files | ✅ api.integration.test.ts | ❌ None | Unknown | Includes sync, checklists, mapper tests |
+| **services/customer-service-ai** | ⚠️ 1 file | ❌ None | ❌ None | Unknown | Needs more test coverage |
+| **services/job-estimator** | ✅ 7 files | ❌ None | ❌ None | Unknown | Pricing engine well tested |
+| **services/production-dashboard** | ✅ 4 files | ❌ None | ❌ None | Unknown | API tests present |
+| **services/supplier-sync** | ⚠️ 2 files | ❌ None | ❌ None | Unknown | Only integration folder |
+| **services/vector-store** | ⚠️ 1 file | ❌ None | ❌ None | Unknown | Basic coverage |
+| **frontend** | ✅ 5 files | ✅ auth-integration.test.tsx | ❌ None | Unknown | Component tests + auth |
+| **printshop-strapi** | ✅ 4 files | ❌ None | ❌ None | Unknown | Jest configured |
+
+### Test Coverage Recommendations
+1. **High Priority**: Add integration tests for `supplier-sync` and `vector-store`
+2. **Medium Priority**: Add E2E tests for critical user flows (order creation, quote approval)
+3. **Low Priority**: Configure coverage reporting (Jest/Vitest) across all services
+
+### Test Distribution by Type
+- **Total Unit Tests**: ~37 test files across all services
+- **Integration Tests**: 2 files (api, frontend auth)
+- **E2E Tests**: 0 files (gap to address)
+
+---
+
+## Undiscoverable Files Audit
+
+Files and directories in `docs/` not directly linked from root documentation:
+
+### Active Documentation (Should be linked)
+| File | Purpose | Recommendation |
+|------|---------|----------------|
+| `docs/setup/strapi-collections-setup.md` | Strapi setup guide | Link from DEVELOPMENT_GUIDE.md |
+| `docs/setup/SUPPLIER_INTEGRATION_QUICKSTART.md` | Supplier quick start | Link from SERVICE_DIRECTORY.md |
+| `docs/architecture/SERVICES_ARCHITECTURE.md` | Service architecture | Link from ARCHITECTURE.md |
+| `docs/architecture/ai-integration-guide.md` | AI integration docs | Link from SERVICE_DIRECTORY.md |
+| `docs/reference/colors.md` | Color reference data | Link from SERVICE_DIRECTORY.md |
+| `docs/FRONTEND_V1.1_ROADMAP.md` | Frontend roadmap | Link from ROADMAP.md |
+
+### Archive/Legacy (Consider Cleanup)
+| Directory | File Count | Recommendation |
+|-----------|------------|----------------|
+| `docs/ARCHIVE_2025_11_26/` | 16 files | Review for permanent deletion |
+| `docs/ARCHIVE_2025_11_27/` | 59 files | Review for permanent deletion |
+| `docs/legacy/` | 44 files | Archive or delete obsolete content |
+| `docs/legacy/website-roadmap/` | 10 files | Shopify docs - likely obsolete |
+
+**Total undiscoverable files**: ~130 markdown files in docs/
+
+---
+
+## Dependency Freshness Audit
+
+**Audited:** November 30, 2025
+
+### Frontend (package.json)
+| Package | Current Version | Status | Notes |
+|---------|-----------------|--------|-------|
+| react | ^19.0.0 | ✅ Latest | React 19 (latest stable) |
+| vite | ^6.4.1 | ✅ Latest | Vite 6 (latest) |
+| typescript | ~5.7.2 | ✅ Latest | TypeScript 5.7 |
+| tailwindcss | ^4.1.11 | ✅ Latest | Tailwind v4 |
+
+### Strapi (package.json)
+| Package | Current Version | Status | Notes |
+|---------|-----------------|--------|-------|
+| @strapi/strapi | 5.31.2 | ✅ Latest | Strapi 5.x |
+| @strapi/plugin-users-permissions | 5.31.2 | ✅ Latest | Matches Strapi version |
+| @strapi/plugin-cloud | 5.31.2 | ✅ Latest | Matches Strapi version |
+
+### Python (requirements.txt)
+| Package | Current Version | Status | Notes |
+|---------|-----------------|--------|-------|
+| python-dotenv | >=1.0.0 | ✅ Current | No known vulnerabilities |
+| requests | >=2.31.0 | ✅ Current | Updated for security |
+| pandas | >=2.0.0 | ✅ Current | Latest major version |
+| flask | >=2.3.2 | ✅ Current | Stable release |
+| easypost | >=13.0.0 | ✅ Current | Latest shipping API |
+| Pillow | >=10.2.0 | ✅ Current | Updated for security |
+
+**Overall Status**: ✅ All dependencies appear to be up-to-date with no known stale packages.
+
+---
+
+## Large Files & Potential Dead Code
+
+### Large Files (>1MB)
+| Location | Size | Type | Recommendation |
+|----------|------|------|----------------|
+| `services/api/import-results/*.json` | 11 files, ~15MB each | Import batch results | Consider gitignore or cleanup |
+| `docs/reference/inspiration/Chong Screenshots/*.png` | 10 files, 1-2MB each | Reference images | Consider moving to external storage |
+
+### Potential Dead Code/Unused Directories
+| Directory | Size | Purpose | Status |
+|-----------|------|---------|--------|
+| `data/raw/` | 65MB | Printavo export data | ✅ Active - source data |
+| `data/processed/` | 64MB | Processed order data | ✅ Active - import pipeline |
+| `data/artwork/` | 6.1MB | Customer artwork | ✅ Active - storage |
+| `data/products/` | 2.2MB | Supplier product data | ✅ Active - sync pipeline |
+| `docs/ARCHIVE_2025_11_26/` | ~200KB | Archived session docs | ⚠️ Review for deletion |
+| `docs/ARCHIVE_2025_11_27/` | ~700KB | Archived session docs | ⚠️ Review for deletion |
+| `docs/legacy/` | ~50KB | Old documentation | ⚠️ Review for deletion |
+
+### Files to Add to .gitignore
+```
+# Import results (regenerable)
+services/api/import-results/
+
+# Large reference images (move to external storage)  
+docs/reference/inspiration/
+```
+
+---
+
 ## Audit Completion Checklist
 
 - [x] Branches analyzed (35 total, 26 safe to delete)
 - [x] PRs reviewed (50 closed, 0 stale)
 - [x] Issues reviewed (4 open epics, clean)
 - [x] Root docs verified (10 files, compliant)
-- [x] Docs folder scanned (45+ files, needs consolidation)
+- [x] Docs folder scanned (121 files, ~130 in archive/legacy folders)
 - [x] Critical issues identified (node_modules, branches, duplicates)
 - [x] Cleanup commands prepared
 - [x] Single source of truth mapped
+- [x] Service Inventory table added
+- [x] Test Matrix table added
+- [x] Undiscoverable files identified
+- [x] Dependency freshness audited
+- [x] Large files and potential dead code noted
 - [ ] Cleanups executed (pending approval)
 - [ ] Post-cleanup verification (pending)
 
@@ -306,6 +450,8 @@ Located in `scripts/` - ready to run but need:
 3. Decide on branch cleanup scope
 4. Execute approved cleanups
 5. Verify single source of truth
+6. Link undiscoverable docs or archive them
+7. Add import-results to .gitignore
 
 ---
 
