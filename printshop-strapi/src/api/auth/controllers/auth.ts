@@ -522,4 +522,100 @@ export default {
       return ctx.internalServerError('Failed to fetch quotes');
     }
   },
+
+  /**
+   * Change Customer Password
+   * POST /auth/customer/change-password
+   */
+  async changePassword(ctx: Context) {
+    const authHeader = ctx.request.headers.authorization;
+    const { currentPassword, newPassword } = ctx.request.body as {
+      currentPassword?: string;
+      newPassword?: string;
+    };
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return ctx.unauthorized('Authentication required');
+    }
+
+    if (!currentPassword || !newPassword) {
+      return ctx.badRequest('Current password and new password are required');
+    }
+
+    if (newPassword.length < 8) {
+      return ctx.badRequest('New password must be at least 8 characters');
+    }
+
+    const token = authHeader.substring(7);
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as {
+        id: number;
+        documentId: string;
+        email: string;
+        type: string;
+      };
+
+      if (decoded.type !== 'customer') {
+        return ctx.unauthorized('Customer authentication required');
+      }
+
+      // Find customer
+      const customer = await strapi.documents('api::customer.customer').findOne({
+        documentId: decoded.documentId,
+      });
+
+      if (!customer) {
+        return ctx.notFound('Customer not found');
+      }
+
+      if (!customer.passwordHash) {
+        return ctx.badRequest('Account does not have a password set');
+      }
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(currentPassword, customer.passwordHash);
+
+      if (!isValidPassword) {
+        return ctx.badRequest('Current password is incorrect');
+      }
+
+      // Hash and update new password
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+      await strapi.documents('api::customer.customer').update({
+        documentId: decoded.documentId,
+        data: {
+          passwordHash: hashedPassword,
+        },
+      });
+
+      // Log the activity (ignore type error - content type will be available at runtime)
+      try {
+        // @ts-expect-error - customer-activity content type registered at runtime
+        await strapi.documents('api::customer-activity.customer-activity').create({
+          data: {
+            customer: decoded.documentId,
+            activityType: 'password_changed',
+            description: 'Password changed',
+            ipAddress: ctx.request.ip || undefined,
+          },
+        });
+      } catch (activityError) {
+        // Don't fail if activity logging fails
+        strapi.log.warn('Failed to log password change activity:', activityError);
+      }
+
+      ctx.body = {
+        success: true,
+        message: 'Password changed successfully',
+      };
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        return ctx.unauthorized('Token expired');
+      }
+      strapi.log.error('Change password error:', error);
+      return ctx.internalServerError('Failed to change password');
+    }
+  },
 };

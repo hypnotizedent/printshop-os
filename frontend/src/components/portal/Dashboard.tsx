@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
+import { useNavigate } from "react-router-dom"
 import { 
   Breadcrumb, 
   BreadcrumbItem, 
@@ -13,6 +14,7 @@ import { DashboardWidgets } from "./DashboardWidgets"
 import { QuickActions } from "./QuickActions"
 import { RecentOrders } from "./RecentOrders"
 import { Notifications } from "./Notifications"
+import { searchPortal, type SearchResult } from "@/lib/portal-customer-api"
 import type { CustomerDashboardStats, CustomerOrder, CustomerNotification, QuoteRequest } from "@/lib/types"
 
 interface DashboardProps {
@@ -30,8 +32,46 @@ export function Dashboard({
   pendingQuotes,
   userName = "Customer"
 }: DashboardProps) {
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   const [notificationList, setNotificationList] = useState(notifications)
+
+  const handleSearch = useCallback(async (query: string) => {
+    setSearchQuery(query)
+    
+    if (!query || query.trim().length < 2) {
+      setSearchResults([])
+      return
+    }
+    
+    setIsSearching(true)
+    try {
+      const response = await searchPortal(query)
+      if (response.success && response.data) {
+        setSearchResults(response.data)
+      }
+    } catch (error) {
+      console.error('Search error:', error)
+    } finally {
+      setIsSearching(false)
+    }
+  }, [])
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchResults.length > 0) {
+      const result = searchResults[0]
+      if (result.type === 'order') {
+        navigate(`/portal/orders/${result.id}`)
+      } else if (result.type === 'quote') {
+        navigate(`/portal/quotes/${result.id}`)
+      }
+      setSearchQuery("")
+      setSearchResults([])
+    }
+  }
 
   const handleDismissNotification = (id: string) => {
     setNotificationList(prev => prev.filter(n => n.id !== id))
@@ -76,7 +116,7 @@ export function Dashboard({
           </div>
           
           {/* Search */}
-          <div className="relative w-full md:w-80">
+          <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
             <MagnifyingGlass 
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" 
               size={20} 
@@ -86,9 +126,52 @@ export function Dashboard({
               placeholder="Search orders, products..."
               className="pl-10"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
             />
-          </div>
+            {/* Search Results Dropdown */}
+            {searchQuery.length >= 2 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-3 text-sm text-muted-foreground text-center">
+                    Searching...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="py-1">
+                    {searchResults.map((result) => (
+                      <button
+                        key={`${result.type}-${result.id}`}
+                        type="button"
+                        className="w-full px-3 py-2 text-left hover:bg-muted transition-colors"
+                        onClick={() => {
+                          if (result.type === 'order') {
+                            navigate(`/portal/orders/${result.id}`)
+                          } else {
+                            navigate(`/portal/quotes/${result.id}`)
+                          }
+                          setSearchQuery("")
+                          setSearchResults([])
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium uppercase text-muted-foreground">
+                            {result.type}
+                          </span>
+                          <span className="text-sm font-medium">{result.title}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          {result.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3 text-sm text-muted-foreground text-center">
+                    No results found
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
         </div>
 
         {/* Dashboard Widgets */}

@@ -1,0 +1,49 @@
+{
+  "kind": "collectionType",
+  "collectionName": "customer_preferences",
+  "info": {
+    "singularName": "customer-preference",
+    "pluralName": "customer-preferences",
+    "displayName": "Customer Preference",
+    "description": "Customer notification and communication preferences"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "customer": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::customer.customer"
+    },
+    "orderConfirmation": {
+      "type": "boolean",
+      "default": true
+    },
+    "artApproval": {
+      "type": "boolean",
+      "default": true
+    },
+    "productionUpdates": {
+      "type": "boolean",
+      "default": true
+    },
+    "shipmentNotifications": {
+      "type": "boolean",
+      "default": true
+    },
+    "quoteReminders": {
+      "type": "boolean",
+      "default": true
+    },
+    "marketingEmails": {
+      "type": "boolean",
+      "default": false
+    },
+    "smsNotifications": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

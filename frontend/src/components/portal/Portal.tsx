@@ -1,11 +1,10 @@
-import { Routes, Route } from "react-router-dom"
+import { useCallback } from "react"
+import { Routes, Route, useNavigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Navigation } from "./Navigation"
 import { Dashboard } from "./Dashboard"
-import { OrderHistory as OrderHistoryComponent } from "./OrderHistory"
-import { QuotesPage } from "./QuotesPage"
-import { ProfileSettings } from "./ProfileSettings"
 import { useAuth } from "@/contexts/AuthContext"
+import { searchPortal } from "@/lib/portal-customer-api"
 import type { 
   CustomerUser, 
   CustomerDashboardStats, 
@@ -235,12 +234,29 @@ function OrderHistory() {
 
 export function Portal() {
   const { logout, customer } = useAuth()
+  const navigate = useNavigate()
   const user = getCustomerUser(customer)
   
-  const handleSearch = () => {
-    // TODO: Implement search functionality
-    // This will be connected to the backend search API
-  }
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query || query.trim().length < 2) {
+      return
+    }
+    
+    try {
+      const response = await searchPortal(query)
+      if (response.success && response.data && response.data.length === 1) {
+        // Navigate to first result if only one match
+        const result = response.data[0]
+        if (result.type === 'order') {
+          navigate(`/portal/orders/${result.id}`)
+        } else if (result.type === 'quote') {
+          navigate(`/portal/quotes/${result.id}`)
+        }
+      }
+    } catch (error) {
+      console.error('Search error:', error)
+    }
+  }, [navigate])
 
   const handleLogout = async () => {
     await logout()

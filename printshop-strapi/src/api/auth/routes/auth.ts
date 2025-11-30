@@ -26,6 +26,16 @@ export default {
     },
     {
       method: 'POST',
+      path: '/auth/customer/change-password',
+      handler: 'auth.changePassword',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
       path: '/auth/employee/validate-pin',
       handler: 'auth.validateEmployeePIN',
       config: {
