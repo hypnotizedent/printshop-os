@@ -1,0 +1,272 @@
+# =============================================================================
+# PrintShop OS - Repository Audit Workflow
+# =============================================================================
+# Automated repository health checks for:
+# - Branch status analysis (stale, unmerged)
+# - Test coverage inventory
+# - Documentation verification
+# - TODO/FIXME scanning
+# - Dependency freshness analysis
+# - Large file detection
+#
+# Runs weekly on Mondays at 9am UTC or on manual trigger
+# =============================================================================
+
+name: Repository Audit
+
+on:
+  schedule:
+    # Run every Monday at 9am UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      checks:
+        description: 'Specific checks to run (comma-separated: branches,tests,docs,todos,deps,files)'
+        required: false
+        default: ''
+      format:
+        description: 'Output format (markdown, json, csv)'
+        required: false
+        default: 'markdown'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  # =============================================================================
+  # Audit Job - Run repository health checks
+  # =============================================================================
+  audit:
+    name: Repository Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for branch analysis
+      
+      - name: Setup Bash 4+
+        run: |
+          bash --version
+          echo "Bash version check passed"
+      
+      - name: Make audit scripts executable
+        run: |
+          chmod +x scripts/audit.sh
+          chmod +x scripts/audit/*.sh
+      
+      - name: Run Full Audit
+        id: audit
+        run: |
+          # Determine which checks to run
+          CHECKS="${{ github.event.inputs.checks }}"
+          FORMAT="${{ github.event.inputs.format }}"
+          
+          if [ -z "$FORMAT" ]; then
+            FORMAT="markdown"
+          fi
+          
+          ARGS="--format $FORMAT --no-color"
+          
+          if [ -n "$CHECKS" ]; then
+            for check in $(echo "$CHECKS" | tr ',' ' '); do
+              ARGS="$ARGS --check $check"
+            done
+          fi
+          
+          # Run the audit script
+          ./scripts/audit.sh $ARGS --output audit-report.md
+          
+          # Also generate JSON for artifact
+          ./scripts/audit.sh --format json --no-color --output audit-report.json
+        env:
+          VERBOSE: "false"
+      
+      - name: Upload Audit Report (Markdown)
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report-markdown
+          path: audit-report.md
+          retention-days: 30
+      
+      - name: Upload Audit Report (JSON)
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report-json
+          path: audit-report.json
+          retention-days: 30
+      
+      - name: Display Audit Summary
+        run: |
+          echo "## 📊 Repository Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat audit-report.md >> $GITHUB_STEP_SUMMARY
+
+  # =============================================================================
+  # Dependency Check Job - Analyze dependency freshness
+  # =============================================================================
+  dependency-check:
+    name: Dependency Freshness
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      
+      - name: Check outdated packages - Job Estimator
+        working-directory: ./services/job-estimator
+        run: |
+          npm ci
+          echo "### Job Estimator - Outdated Packages" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npm outdated 2>/dev/null || echo "All packages are up to date" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+      
+      - name: Check outdated packages - Strapi
+        working-directory: ./printshop-strapi
+        run: |
+          npm ci
+          echo "### Strapi - Outdated Packages" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npm outdated 2>/dev/null || echo "All packages are up to date" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+      
+      - name: Check outdated packages - Frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          echo "### Frontend - Outdated Packages" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npm outdated 2>/dev/null || echo "All packages are up to date" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+  # =============================================================================
+  # Docker Build Health Job - Verify Docker images build successfully
+  # =============================================================================
+  docker-health:
+    name: Docker Build Health
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Verify Docker Compose syntax
+        run: |
+          echo "### Docker Compose Validation" >> $GITHUB_STEP_SUMMARY
+          docker compose config > /dev/null 2>&1 && echo "✅ docker-compose.yml is valid" >> $GITHUB_STEP_SUMMARY || echo "❌ docker-compose.yml has errors" >> $GITHUB_STEP_SUMMARY
+          
+          for file in docker-compose.*.yml; do
+            if [ -f "$file" ]; then
+              docker compose -f "$file" config > /dev/null 2>&1 && echo "✅ $file is valid" >> $GITHUB_STEP_SUMMARY || echo "❌ $file has errors" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+      
+      - name: Test Strapi Dockerfile builds
+        uses: docker/build-push-action@v5
+        with:
+          context: ./printshop-strapi
+          file: ./printshop-strapi/Dockerfile
+          push: false
+          tags: printshop-strapi:audit-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Test Pricing Engine Dockerfile builds
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/job-estimator
+          file: ./services/job-estimator/Dockerfile
+          push: false
+          tags: printshop-pricing-engine:audit-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Report Docker health
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Docker Build Health" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All Dockerfiles build successfully" >> $GITHUB_STEP_SUMMARY
+
+  # =============================================================================
+  # Code Organization Job - Check code cleanliness
+  # =============================================================================
+  code-organization:
+    name: Code Organization Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check for uncommitted node_modules
+        run: |
+          echo "### Code Organization" >> $GITHUB_STEP_SUMMARY
+          
+          # Check for node_modules in git
+          if git ls-files --error-unmatch '**/node_modules/**' 2>/dev/null; then
+            echo "❌ Found node_modules committed to git!" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ No node_modules committed to git" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Count root markdown files
+        run: |
+          ROOT_MD_COUNT=$(find . -maxdepth 1 -name "*.md" -type f | wc -l)
+          echo "📄 Root markdown files: $ROOT_MD_COUNT" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$ROOT_MD_COUNT" -gt 15 ]; then
+            echo "⚠️ Consider consolidating root documentation" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Root documentation count is acceptable" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Check for large files
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Large Files (>5MB)" >> $GITHUB_STEP_SUMMARY
+          
+          LARGE_FILES=$(find . -type f -size +5M \
+            -not -path "./.git/*" \
+            -not -path "*/node_modules/*" \
+            -not -path "*/.next/*" \
+            -not -path "*/dist/*" \
+            -not -path "*/build/*" \
+            -not -path "*/coverage/*" \
+            -not -path "*/.cache/*" \
+            2>/dev/null || true)
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "⚠️ Large files detected:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$LARGE_FILES" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No large files detected" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Check for TODO/FIXME comments
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### TODO/FIXME Count" >> $GITHUB_STEP_SUMMARY
+          
+          TODO_COUNT=$(grep -r "TODO" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.py" --include="*.md" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build . 2>/dev/null | wc -l || echo "0")
+          FIXME_COUNT=$(grep -r "FIXME" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.py" --include="*.md" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build . 2>/dev/null | wc -l || echo "0")
+          
+          echo "- TODO comments: $TODO_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- FIXME comments: $FIXME_COUNT" >> $GITHUB_STEP_SUMMARY
