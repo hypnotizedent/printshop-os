@@ -21,11 +21,12 @@ import {
   CheckCircle,
   Warning,
   Copy,
-  Plus
+  Receipt
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
-import { RecordPaymentDialog, PaymentHistory } from "@/components/payments"
-import type { OrderPayment } from "@/lib/types"
+import { generateInvoice, type Invoice } from "@/lib/api/invoices"
+import { printInvoice } from "@/lib/api/invoice-utils"
+import { InvoicePreview } from "@/components/invoices/InvoicePreview"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -91,20 +92,40 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-  const [paymentRefreshTrigger, setPaymentRefreshTrigger] = useState(0);
+  const [invoicePreview, setInvoicePreview] = useState<Invoice | null>(null);
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
 
-  const handlePaymentRecorded = (_payment: OrderPayment, newAmountPaid: number, newAmountOutstanding: number) => {
-    // Update local order state with new payment amounts from the API
-    if (order) {
-      setOrder({
-        ...order,
-        amountPaid: newAmountPaid,
-        amountOutstanding: newAmountOutstanding,
+  const handleGenerateInvoice = async () => {
+    if (!order) return;
+    
+    setIsGeneratingInvoice(true);
+    try {
+      const { success, invoice, error: invoiceError } = await generateInvoice({ 
+        orderId: order.documentId 
       });
+      
+      if (success && invoice) {
+        setInvoicePreview(invoice);
+        toast.success('Invoice generated');
+      } else {
+        toast.error(invoiceError || 'Failed to generate invoice');
+      }
+    } catch {
+      toast.error('Failed to generate invoice');
+    } finally {
+      setIsGeneratingInvoice(false);
     }
-    // Trigger payment history refresh
-    setPaymentRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleDownloadInvoice = () => {
+    if (!invoicePreview) return;
+    printInvoice(invoicePreview);
+    toast.success('Invoice ready for download');
+  };
+
+  const handlePrintInvoice = () => {
+    if (!invoicePreview) return;
+    printInvoice(invoicePreview);
   };
 
   useEffect(() => {
@@ -332,15 +353,15 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
           </div>
         </div>
         <div className="flex gap-2">
-          {order.amountOutstanding > 0 && (
-            <Button 
-              className="gap-2"
-              onClick={() => setIsPaymentDialogOpen(true)}
-            >
-              <Plus size={18} weight="bold" />
-              Record Payment
-            </Button>
-          )}
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={handleGenerateInvoice}
+            disabled={isGeneratingInvoice}
+          >
+            <Receipt size={18} />
+            {isGeneratingInvoice ? 'Generating...' : 'Generate Invoice'}
+          </Button>
           <Button variant="outline" className="gap-2">
             <Printer size={18} />
             Print
@@ -632,15 +653,15 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
         </div>
       </div>
 
-      {/* Record Payment Dialog */}
-      <RecordPaymentDialog
-        open={isPaymentDialogOpen}
-        onOpenChange={setIsPaymentDialogOpen}
-        orderDocumentId={order.documentId}
-        orderNumber={order.orderNumber}
-        amountOutstanding={order.amountOutstanding}
-        onPaymentRecorded={handlePaymentRecorded}
-      />
+      {/* Invoice Preview Modal */}
+      {invoicePreview && (
+        <InvoicePreview
+          invoice={invoicePreview}
+          onClose={() => setInvoicePreview(null)}
+          onDownload={handleDownloadInvoice}
+          onPrint={handlePrintInvoice}
+        />
+      )}
     </div>
   );
 }
