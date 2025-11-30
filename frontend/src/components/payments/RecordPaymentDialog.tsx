@@ -25,6 +25,7 @@ import {
 import { CurrencyDollar, Warning } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import { recordPayment } from "@/lib/api/payments"
+import { sanitizeTextInput } from "@/lib/utils"
 import type { PaymentMethodEnum, PaymentFormData, OrderPayment } from "@/lib/types"
 
 interface RecordPaymentDialogProps {
@@ -45,6 +46,10 @@ const PAYMENT_METHODS: { value: PaymentMethodEnum; label: string }[] = [
   { value: "other", label: "Other" },
 ]
 
+// Maximum lengths for text fields
+const MAX_REFERENCE_LENGTH = 100
+const MAX_NOTES_LENGTH = 500
+
 export function RecordPaymentDialog({
   open,
   onOpenChange,
@@ -62,19 +67,6 @@ export function RecordPaymentDialog({
   )
   const [notes, setNotes] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  // Sanitize text input to prevent XSS and limit length
-  const sanitizeTextInput = (value: string, maxLength: number): string => {
-    // Remove any HTML tags and limit length
-    return value
-      .replace(/<[^>]*>/g, '')
-      .slice(0, maxLength)
-      .trim()
-  }
-
-  // Maximum lengths for text fields
-  const MAX_REFERENCE_LENGTH = 100
-  const MAX_NOTES_LENGTH = 500
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
