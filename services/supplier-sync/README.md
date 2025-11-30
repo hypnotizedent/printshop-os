@@ -1,10 +1,17 @@
 # Supplier Sync Service
 
-**Version:** 2.0.0  
-**Status:** ✅ All APIs Verified Working | ⏳ Awaiting Strapi Admin Access  
-**Last Verified:** November 27, 2025
+**Version:** 2.1.0  
+**Status:** ✅ All APIs Verified Working | ✅ Curated Products System  
+**Last Updated:** November 29, 2025
 
 Product synchronization service for integrating with apparel suppliers. Normalizes disparate supplier APIs into a unified schema with intelligent caching and rate limiting.
+
+## 🎯 Key Features
+
+- **Curated Products Catalog**: Store top 500 products in Strapi, query full catalog on-demand via API
+- **Real-time Inventory API**: Query stock levels, colors, sizes, and pricing from live supplier APIs
+- **Multi-Supplier Support**: AS Colour, S&S Activewear, SanMar integration
+- **Smart Caching**: Redis 3-tier cache (24h products, 1h pricing, 15min inventory)
 
 ## Quick Links
 
@@ -22,32 +29,157 @@ Product synchronization service for integrating with apparel suppliers. Normaliz
 | **S&S Activewear** | ✅ | ✅ | ✅ | 211K+ | Ready for sync |
 | **SanMar** | ✅ | ✅ | ✅ | 415K+ | 494MB EPDD ready |
 
-**Blocking Item:** Strapi admin access needed to create API token for database sync.
-
-- **✅ Multi-Supplier Support**: AS Colour (production), S&S Activewear, SanMar (in progress)
-- **✅ Unified Schema**: Single `UnifiedProduct` format for all suppliers
-- **✅ Smart Caching**: Redis 3-tier cache (24h products, 1h pricing, 15min inventory)
-- **✅ Rate Limiting**: Automatic retry with exponential backoff (~$500/month API savings)
-- **✅ Incremental Sync**: Only fetch products updated since last sync
-- **✅ Variant Enrichment**: Optional deep enrichment with size/color inventory
-- **✅ CLI Tools**: Command-line tools for manual and automated syncs
-- **✅ JSONL Storage**: Append-only persistence for incremental tracking
-
 ## Architecture
 
 ```
-Application Layer
-    ↓
-Strapi API (Product Management)
-    ↓
-Redis Cache (3-tier TTL)
-    ↓
-Sync Service (CLI → Transformer → Client → Persistence)
-    ↓
-Supplier APIs (S&S, AS Colour, SanMar)
+┌─────────────────────────────────────────────────────────────┐
+│                    Frontend / Quote UI                       │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+        ┌──────────────┴──────────────┐
+        ▼                             ▼
+┌───────────────────┐      ┌──────────────────────────────────┐
+│ Strapi CMS        │      │ Inventory API (on-demand)        │
+│ (Top 500 Products)│      │ /api/inventory/check/:sku        │
+│ - isCurated=true  │      │ /api/inventory/colors/:sku       │
+│ - usageCount      │      │ /api/inventory/sizes/:sku        │
+│ - priority        │      │ /api/inventory/pricing/:sku      │
+└───────────────────┘      └──────────────────────────────────┘
+                                          │
+                           ┌──────────────┴──────────────┐
+                           ▼                             ▼
+                    ┌─────────────┐              ┌─────────────┐
+                    │ Redis Cache │◄────────────►│ Supplier    │
+                    │ (15min TTL) │              │ APIs        │
+                    └─────────────┘              └─────────────┘
 ```
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for full details.
+## Curated Products Management
+
+The curated products system allows you to:
+1. Store your top 500 most-used products in Strapi for fast browsing
+2. Query the full supplier catalog (500K+ products) on-demand via API
+3. Track product usage to automatically identify popular items
+
+### CLI Commands
+
+```bash
+# Import popular styles (Gildan, Bella+Canvas, etc.)
+npm run curate:import
+
+# List top curated products
+npm run curate:list
+
+# Sync products from supplier to Strapi
+npm run curate:sync -- --supplier ascolour --limit 100
+
+# Set product as curated with priority
+npm run curate -- set-curated --sku AC-5001 --priority 100
+```
+
+### Product Query Service
+
+```typescript
+import { ProductQueryService } from './services/product-query.service';
+
+const service = new ProductQueryService({
+  strapiUrl: 'http://localhost:1337',
+  strapiApiToken: 'your-token',
+  asColourApiKey: 'your-key',
+});
+
+// Search curated products (from Strapi)
+const products = await service.searchCuratedProducts('gildan', {
+  category: 't-shirts',
+  curatedOnly: true,
+  limit: 50
+});
+
+// Get top products by usage
+const topProducts = await service.getTopProducts(50, {
+  category: 't-shirts'
+});
+
+// Check stock (live API query)
+const stock = await service.checkStock('5001', {
+  color: 'Black',
+  size: 'L'
+});
+
+// Get available colors
+const colors = await service.getColorsAvailable('AC-5001');
+
+// Get pricing with quantity breaks
+const pricing = await service.getPricing('G500', 100);
+```
+
+## Inventory API Endpoints
+
+The inventory API provides real-time queries to supplier APIs with Redis caching:
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/inventory/check/:sku` | Full inventory check with all sizes/colors |
+| `GET /api/inventory/check/:sku/color/:color` | Filter inventory by color |
+| `GET /api/inventory/colors/:sku` | Get available colors with stock info |
+| `GET /api/inventory/sizes/:sku?color=X` | Get available sizes (optionally by color) |
+| `GET /api/inventory/pricing/:sku?quantity=N` | Get pricing with volume breaks |
+| `POST /api/inventory/batch` | Batch check multiple SKUs |
+| `GET /api/inventory/health` | Health check for all suppliers |
+
+### Example Responses
+
+```bash
+# Check stock for AS Colour 5001
+curl http://localhost:3002/api/inventory/check/5001
+
+# Response
+{
+  "sku": "5001",
+  "name": "Staple Tee",
+  "supplier": "as-colour",
+  "price": 8.50,
+  "totalQty": 15420,
+  "inventory": [
+    { "size": "S", "color": "Black", "qty": 850 },
+    { "size": "M", "color": "Black", "qty": 1200 },
+    ...
+  ],
+  "cached": false,
+  "cacheExpires": "2025-11-29T01:30:00Z"
+}
+
+# Get available colors
+curl http://localhost:3002/api/inventory/colors/5001
+
+# Response
+{
+  "sku": "5001",
+  "colorCount": 24,
+  "colors": [
+    { "color": "Black", "inStock": true, "totalQty": 5200, "sizes": ["XS","S","M","L","XL","2XL"] },
+    { "color": "White", "inStock": true, "totalQty": 4800, "sizes": ["XS","S","M","L","XL","2XL"] },
+    ...
+  ]
+}
+
+# Get pricing with quantity
+curl http://localhost:3002/api/inventory/pricing/G500?quantity=144
+
+# Response
+{
+  "sku": "G500",
+  "supplier": "s&s-activewear",
+  "basePrice": 3.22,
+  "priceBreaks": [
+    { "minQty": 1, "price": 3.22 },
+    { "minQty": 12, "price": 2.98 },
+    { "minQty": 72, "price": 2.75 },
+    { "minQty": 144, "price": 2.52 }
+  ],
+  "priceForQuantity": 2.52
+}
+```
 
 ## Setup
 
@@ -79,10 +211,15 @@ SS_ACTIVEWEAR_API_KEY=your_api_key_here
 SS_ACTIVEWEAR_ACCOUNT_NUMBER=your_account_number
 SS_ACTIVEWEAR_BASE_URL=https://api.ssactivewear.com
 
+# AS Colour
+ASCOLOUR_API_KEY=your_subscription_key
+ASCOLOUR_EMAIL=your_email
+ASCOLOUR_PASSWORD=your_password
+
 # Redis
 REDIS_URL=redis://localhost:6379
 
-# Strapi (optional - for database sync)
+# Strapi
 STRAPI_URL=http://localhost:1337
 STRAPI_API_TOKEN=your_strapi_api_token
 
@@ -92,118 +229,37 @@ LOG_LEVEL=info
 
 ## Usage
 
-### S&S Activewear Sync
-
-**Full catalog sync:**
-```bash
-npm run sync:ss
-```
-
-**List available categories:**
-```bash
-npm run sync:ss:categories
-```
-
-**List available brands:**
-```bash
-npm run sync:ss:brands
-```
-
-**Sync specific category:**
-```bash
-npm run sync:ss -- --category 1
-```
-
-**Sync specific brand:**
-```bash
-npm run sync:ss -- --brand 5
-```
-
-**Incremental sync (last 24 hours):**
-```bash
-npm run sync:ss -- --incremental
-```
-
-**Incremental sync (since specific date):**
-```bash
-npm run sync:ss -- --incremental --since 2024-11-20
-```
-
-**Dry run (preview without saving):**
-```bash
-npm run sync:ss -- --dry-run
-```
-
-### AS Colour Sync
-
-**Status:** ✅ Production Ready
-
-**Quick dry run:**
-```bash
-npm run sync:ascolour
-```
-
-**Full sync with enrichment:**
-```bash
-npm run sync:ascolour:full
-```
-
-**Incremental sync (last 7 days):**
-```bash
-npm run sync:ascolour:incremental
-```
-
-**Custom options:**
-```bash
-npx ts-node src/cli/sync-as-colour.ts --dry-run --limit=50 --enrich-variants --enrich-prices
-```
-
-See [AS Colour Integration Guide](./docs/suppliers/ASCOLOUR.md) for details.
-
-### SanMar Sync
-
-**Status:** 🚧 In Progress
-
-Coming soon:
-```bash
-npm run sync:sanmar
-```
-
-### Sync All Suppliers
+### Supplier Sync Commands
 
 ```bash
-npm run sync:all
+# S&S Activewear
+npm run sync:ss                    # Full sync
+npm run sync:ss:categories         # List categories
+npm run sync:ss:brands             # List brands
+
+# AS Colour
+npm run sync:ascolour              # Dry run
+npm run sync:ascolour:full         # Full sync with enrichment
+
+# Curated Products
+npm run curate:import              # Import popular styles
+npm run curate:list                # List top products
+npm run curate:sync                # Sync to Strapi
 ```
 
 ## Development
 
-**Build TypeScript:**
 ```bash
-npm run build
-```
-
-**Run tests:**
-```bash
-npm test
-npm run test:watch
-npm run test:coverage
-```
-
-**Lint code:**
-```bash
-npm run lint
-```
-
-**Format code:**
-```bash
-npm run format
+npm run build          # Build TypeScript
+npm test               # Run tests
+npm run test:watch     # Watch mode
+npm run lint           # Lint code
+npm run format         # Format code
 ```
 
 ## Data Models
 
 ### UnifiedProduct
-
-Normalized product schema used across all suppliers:
 
 ```typescript
 interface UnifiedProduct {
@@ -220,11 +276,6 @@ interface UnifiedProduct {
     currency: string;
     breaks?: PriceBreak[];
   };
-  specifications?: {
-    weight?: string;
-    fabric?: { type: string; content: string };
-    features?: string[];
-  };
   availability: {
     inStock: boolean;
     totalQuantity: number;
@@ -236,150 +287,13 @@ interface UnifiedProduct {
 }
 ```
 
-### ProductVariant
-
-Individual SKU for each color/size combination:
-
-```typescript
-interface ProductVariant {
-  sku: string;                    // e.g., "G200-BLACK-L"
-  color: {
-    name: string;
-    hex?: string;
-  };
-  size: string;
-  inStock: boolean;
-  quantity: number;
-  imageUrl?: string;
-}
-```
-
 ## Caching Strategy
 
-- **Product Catalog**: 24 hours (changes infrequently)
-- **Pricing**: 1 hour (price breaks, volume discounts)
-- **Inventory**: 15 minutes (real-time stock levels)
-
-Cache keys:
-- `product:{supplier}:{sku}` - Individual product
-- `products:{supplier}:all` - Full catalog
-- `pricing:{supplier}:{sku}` - Product pricing
-- `inventory:{supplier}:{sku}` - Stock levels
-
-## API Clients
-
-### SSActivewearClient
-
-```typescript
-const client = new SSActivewearClient({
-  apiKey: 'your_key',
-  accountNumber: 'your_account',
-});
-
-// Get all products (paginated)
-const { products, hasMore } = await client.getAllProducts({ page: 1, perPage: 100 });
-
-// Get product by style ID
-const product = await client.getProduct('G200');
-
-// Get products by category
-const categoryProducts = await client.getProductsByCategory(1);
-
-// Search products
-const results = await client.searchProducts('gildan');
-
-// Get updated products
-const updated = await client.getUpdatedProducts(new Date('2024-11-20'));
-```
-
-Rate limits: 120 requests per minute (automatically enforced).
-
-## Transformers
-
-### SSActivewearTransformer
-
-Converts S&S API responses to UnifiedProduct format:
-
-```typescript
-import { SSActivewearTransformer } from './transformers/ss-activewear.transformer';
-
-const ssProduct = await client.getProduct('G200');
-const unifiedProduct = SSActivewearTransformer.transformProduct(ssProduct);
-```
-
-Handles:
-- Color/size variant generation
-- Price break formatting
-- Category mapping
-- Image URL extraction
-- Inventory aggregation
-
-## Logging
-
-Logs are written to:
-- **Console**: Colorized output (all levels)
-- `logs/combined.log`: All logs (max 5MB × 5 files)
-- `logs/error.log`: Errors only (max 5MB × 5 files)
-
-Log levels: `error`, `warn`, `info`, `debug`
-
-Set via `LOG_LEVEL` env var.
-
-## Error Handling
-
-All API calls include:
-- Automatic retry with exponential backoff
-- Rate limit detection and blocking
-- Authentication error detection
-- Detailed error messages with context
-
-## Roadmap
-
-### Phase 1: Foundation ✅
-- [x] Unified product schema
-- [x] Redis cache service
-- [x] S&S Activewear API client
-- [x] S&S transformer
-- [x] CLI sync tool
-
-### Phase 2: S&S Integration (Current)
-- [x] Basic sync functionality
-- [ ] Strapi integration
-- [ ] Unit tests
-- [ ] Integration tests
-
-### Phase 3: AS Colour
-- [ ] AS Colour API client
-- [ ] AS Colour transformer
-- [ ] CLI sync tool
-
-### Phase 4: SanMar
-- [ ] SanMar API client
-- [ ] SanMar transformer
-- [ ] CLI sync tool
-
-### Phase 5: Optimization
-- [ ] Batch processing
-- [ ] Webhook support
-- [ ] Performance monitoring
-- [ ] API usage analytics
-
-## Troubleshooting
-
-**"Missing S&S Activewear credentials"**
-- Check `.env` file has `SS_ACTIVEWEAR_API_KEY` and `SS_ACTIVEWEAR_ACCOUNT_NUMBER`
-
-**"Rate limit exceeded"**
-- Wait 1 minute before retrying
-- Consider using `--incremental` for smaller syncs
-
-**"Redis connection failed"**
-- Ensure Redis is running: `redis-cli ping` should return `PONG`
-- Check `REDIS_URL` in `.env`
-
-**"API health check failed"**
-- Verify API credentials are correct
-- Check S&S Activewear API status
+| Data Type | TTL | Reason |
+|-----------|-----|--------|
+| Product Catalog | 24 hours | Changes infrequently |
+| Pricing | 1 hour | Price breaks, volume discounts |
+| Inventory | 15 minutes | Real-time stock levels |
 
 ## License
 

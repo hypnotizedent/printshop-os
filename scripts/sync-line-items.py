@@ -5,6 +5,7 @@ Resilient Line Items Import to Strapi
 - Checkpoint/resume on disconnect
 - Retry with exponential backoff
 - Connection monitoring
+- Links line items to orders via relation
 """
 
 import json
@@ -27,6 +28,9 @@ RETRY_DELAY = 2
 
 # Graceful shutdown
 shutdown_requested = False
+
+# Order cache - maps visualId to Strapi documentId
+ORDER_CACHE = {}
 
 def signal_handler(sig, frame):
     global shutdown_requested
@@ -73,6 +77,67 @@ def wait_for_connection():
     print("✅ Connection restored!")
     return True
 
+def load_order_cache(session):
+    """Pre-load all orders into cache for fast lookups"""
+    global ORDER_CACHE
+    print("📦 Loading order cache from Strapi...")
+    page = 1
+    page_size = 100
+    total_loaded = 0
+    
+    while True:
+        try:
+            r = session.get(
+                f"{STRAPI_URL}/api/orders?fields[0]=visualId&fields[1]=documentId&pagination[page]={page}&pagination[pageSize]={page_size}",
+                headers={"Authorization": f"Bearer {STRAPI_TOKEN}"},
+                timeout=30
+            )
+            if r.status_code != 200:
+                break
+            data = r.json()
+            orders = data.get("data", [])
+            if not orders:
+                break
+            for o in orders:
+                visual_id = str(o.get("visualId", ""))
+                doc_id = o.get("documentId")
+                if visual_id and doc_id:
+                    ORDER_CACHE[visual_id] = doc_id
+            total_loaded += len(orders)
+            total = data.get("meta", {}).get("pagination", {}).get("total", 0)
+            print(f"   Loaded {total_loaded:,} / {total:,} orders...", end="\r")
+            if total_loaded >= total:
+                break
+            page += 1
+        except Exception as e:
+            print(f"   Warning: {e}")
+            break
+    
+    print(f"✅ Loaded {len(ORDER_CACHE):,} orders into cache")
+
+def get_order_document_id(visual_id, session):
+    """Get order documentId from cache or fetch from Strapi"""
+    visual_id = str(visual_id)
+    if visual_id in ORDER_CACHE:
+        return ORDER_CACHE[visual_id]
+    
+    # Not in cache, fetch from Strapi
+    try:
+        r = session.get(
+            f"{STRAPI_URL}/api/orders?filters[visualId][$eq]={visual_id}&fields[0]=documentId",
+            headers={"Authorization": f"Bearer {STRAPI_TOKEN}"},
+            timeout=10
+        )
+        if r.status_code == 200:
+            data = r.json().get("data", [])
+            if data:
+                doc_id = data[0].get("documentId")
+                ORDER_CACHE[visual_id] = doc_id
+                return doc_id
+    except:
+        pass
+    return None
+
 def import_line_item(item, session):
     """Import a single line item with retry logic"""
     # Parse size_other if it's a string with quantity
@@ -83,11 +148,15 @@ def import_line_item(item, session):
         except (ValueError, TypeError):
             size_other = 0
     
+    # Look up order by visual_id
+    order_visual_id = str(item.get("order_visual_id", ""))
+    order_doc_id = get_order_document_id(order_visual_id, session) if order_visual_id else None
+    
     data = {
         "data": {
             "printavoId": str(item.get("id", "")),
             "orderId": int(item.get("order_id", 0)) if item.get("order_id") else None,
-            "orderVisualId": str(item.get("order_visual_id", "")),
+            "orderVisualId": order_visual_id,
             "styleDescription": item.get("style_description", "")[:500] if item.get("style_description") else None,
             "styleNumber": item.get("style_number", "")[:100] if item.get("style_number") else None,
             "color": item.get("color", "")[:100] if item.get("color") else None,
@@ -107,6 +176,10 @@ def import_line_item(item, session):
             "sizeOther": size_other,
         }
     }
+    
+    # Add order relation if we found the order (just pass documentId string)
+    if order_doc_id:
+        data["data"]["order"] = order_doc_id
     
     for attempt in range(MAX_RETRIES):
         try:
@@ -172,8 +245,11 @@ def main():
         sys.exit(1)
     print("✅ Connected!")
     
-    # Get current count
+    # Create session and load order cache
     session = requests.Session()
+    load_order_cache(session)
+    
+    # Get current count
     current_count = get_current_count(session)
     print(f"📊 Current line items in Strapi: {current_count:,}")
     

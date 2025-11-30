@@ -1,9 +1,9 @@
 /**
  * ShippingLabelForm Component
  * Create shipping labels using EasyPost API integration.
- * Connects to the Python EasyPost client via a Node.js wrapper.
+ * Features: Multi-box shipments, Order/Customer lookup
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,8 +11,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Package, Truck, MapPin, CurrencyDollar, Printer, Download, ArrowRight, CheckCircle, Warning } from '@phosphor-icons/react';
+import { Package, Truck, MapPin, CurrencyDollar, Printer, Download, ArrowRight, CheckCircle, Warning, MagnifyingGlass, Plus, Trash, User } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -51,6 +52,31 @@ interface Shipment {
   labelUrl: string;
   labelPdfUrl: string;
   selectedRate: ShippingRate;
+}
+
+interface OrderSearchResult {
+  id: string;
+  documentId: string;
+  orderNumber: string;
+  orderNickname?: string;
+  customerName: string;
+  customerEmail?: string;
+  shippingAddress?: Address;
+}
+
+interface CustomerSearchResult {
+  id: string;
+  documentId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  shippingAddress?: Address;
+}
+
+interface ParcelWithId extends Parcel {
+  id: string;
+  preset: string;
 }
 
 const PRESET_BOXES: Record<string, Parcel> = {
@@ -94,11 +120,32 @@ const SHOP_ADDRESS: Address = {
   phone: '(555) 123-4567',
 };
 
+// Generate unique ID for parcels
+const generateParcelId = () => `parcel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+// Create a new parcel with default values
+const createParcel = (preset: string = 'medium-box'): ParcelWithId => ({
+  id: generateParcelId(),
+  preset,
+  ...PRESET_BOXES[preset],
+});
+
 export function ShippingLabelForm() {
   const [fromAddress, setFromAddress] = useState<Address>(SHOP_ADDRESS);
   const [toAddress, setToAddress] = useState<Address>(emptyAddress);
-  const [parcel, setParcel] = useState<Parcel>(PRESET_BOXES['medium-box']);
-  const [boxPreset, setBoxPreset] = useState('medium-box');
+  
+  // Multi-box support
+  const [parcels, setParcels] = useState<ParcelWithId[]>([createParcel()]);
+  
+  // Order/Customer lookup
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<{
+    orders: OrderSearchResult[];
+    customers: CustomerSearchResult[];
+  }>({ orders: [], customers: [] });
+  const [showLookupDialog, setShowLookupDialog] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderSearchResult | null>(null);
   
   const [isGettingRates, setIsGettingRates] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -107,11 +154,156 @@ export function ShippingLabelForm() {
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [shipmentId, setShipmentId] = useState<string | null>(null);
 
-  const handleBoxPresetChange = (preset: string) => {
-    setBoxPreset(preset);
-    if (preset !== 'custom') {
-      setParcel(PRESET_BOXES[preset]);
+  // Add a new parcel/box
+  const addParcel = () => {
+    setParcels(prev => [...prev, createParcel()]);
+    toast.success('Added new box');
+  };
+
+  // Remove a parcel
+  const removeParcel = (id: string) => {
+    if (parcels.length === 1) {
+      toast.error('Must have at least one box');
+      return;
     }
+    setParcels(prev => prev.filter(p => p.id !== id));
+    toast.success('Removed box');
+  };
+
+  // Update a specific parcel
+  const updateParcel = (id: string, updates: Partial<ParcelWithId>) => {
+    setParcels(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  // Handle box preset change for a specific parcel
+  const handleBoxPresetChange = (id: string, preset: string) => {
+    if (preset !== 'custom') {
+      updateParcel(id, { preset, ...PRESET_BOXES[preset] });
+    } else {
+      updateParcel(id, { preset });
+    }
+  };
+
+  // Search for orders/customers
+  const searchOrdersAndCustomers = useCallback(async () => {
+    if (!lookupQuery.trim()) {
+      setSearchResults({ orders: [], customers: [] });
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // Search orders by number or nickname
+      const ordersResponse = await fetch(
+        `${API_BASE}/api/orders?` + new URLSearchParams({
+          'filters[$or][0][orderNumber][$containsi]': lookupQuery,
+          'filters[$or][1][orderNickname][$containsi]': lookupQuery,
+          'filters[$or][2][visualId][$containsi]': lookupQuery,
+          'populate': 'customer',
+          'pagination[limit]': '10',
+        })
+      );
+
+      // Search customers by name or email
+      const customersResponse = await fetch(
+        `${API_BASE}/api/customers?` + new URLSearchParams({
+          'filters[$or][0][name][$containsi]': lookupQuery,
+          'filters[$or][1][email][$containsi]': lookupQuery,
+          'filters[$or][2][company][$containsi]': lookupQuery,
+          'pagination[limit]': '10',
+        })
+      );
+
+      const ordersData = await ordersResponse.json();
+      const customersData = await customersResponse.json();
+
+      const orders: OrderSearchResult[] = (ordersData.data || []).map((o: any) => ({
+        id: o.id,
+        documentId: o.documentId,
+        orderNumber: o.orderNumber || o.visualId,
+        orderNickname: o.orderNickname,
+        customerName: o.customer?.name || o.customerName || 'Unknown',
+        customerEmail: o.customer?.email,
+        shippingAddress: o.shippingAddress ? {
+          name: o.shippingAddress.name || o.customer?.name || '',
+          company: o.shippingAddress.company || o.customer?.company || '',
+          street1: o.shippingAddress.street1 || o.shippingAddress.address1 || '',
+          street2: o.shippingAddress.street2 || o.shippingAddress.address2 || '',
+          city: o.shippingAddress.city || '',
+          state: o.shippingAddress.state || '',
+          zip: o.shippingAddress.zip || o.shippingAddress.postalCode || '',
+          country: o.shippingAddress.country || 'US',
+          phone: o.shippingAddress.phone || o.customer?.phone || '',
+        } : undefined,
+      }));
+
+      const customers: CustomerSearchResult[] = (customersData.data || []).map((c: any) => ({
+        id: c.id,
+        documentId: c.documentId,
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        company: c.company,
+        shippingAddress: c.shippingAddress ? {
+          name: c.name || '',
+          company: c.company || '',
+          street1: c.shippingAddress.street1 || c.shippingAddress.address1 || '',
+          street2: c.shippingAddress.street2 || c.shippingAddress.address2 || '',
+          city: c.shippingAddress.city || '',
+          state: c.shippingAddress.state || '',
+          zip: c.shippingAddress.zip || c.shippingAddress.postalCode || '',
+          country: c.shippingAddress.country || 'US',
+          phone: c.phone || '',
+        } : undefined,
+      }));
+
+      setSearchResults({ orders, customers });
+    } catch (error) {
+      console.error('Search failed:', error);
+      toast.error('Search failed');
+    } finally {
+      setIsSearching(false);
+    }
+  }, [lookupQuery]);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (lookupQuery.length >= 2) {
+        searchOrdersAndCustomers();
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [lookupQuery, searchOrdersAndCustomers]);
+
+  // Select an order and fill address
+  const selectOrder = (order: OrderSearchResult) => {
+    setSelectedOrder(order);
+    if (order.shippingAddress) {
+      setToAddress(order.shippingAddress);
+      toast.success(`Loaded address for order #${order.orderNumber}`);
+    } else {
+      toast.warning('No shipping address on this order');
+    }
+    setShowLookupDialog(false);
+  };
+
+  // Select a customer and fill address
+  const selectCustomer = (customer: CustomerSearchResult) => {
+    if (customer.shippingAddress) {
+      setToAddress(customer.shippingAddress);
+      toast.success(`Loaded address for ${customer.name}`);
+    } else {
+      // Use customer info as fallback
+      setToAddress({
+        ...emptyAddress,
+        name: customer.name,
+        company: customer.company || '',
+        phone: customer.phone || '',
+      });
+      toast.warning('Customer has no saved shipping address - partial info loaded');
+    }
+    setShowLookupDialog(false);
   };
 
   const validateAddresses = (): boolean => {
@@ -124,14 +316,20 @@ export function ShippingLabelForm() {
       }
     }
     
-    if (parcel.weight <= 0) {
-      toast.error('Package weight is required');
-      return false;
-    }
-    
-    if (parcel.length <= 0 || parcel.width <= 0 || parcel.height <= 0) {
-      toast.error('Package dimensions are required');
-      return false;
+    // Validate all parcels
+    for (let i = 0; i < parcels.length; i++) {
+      const parcel = parcels[i];
+      const boxNum = parcels.length > 1 ? ` (Box ${i + 1})` : '';
+      
+      if (parcel.weight <= 0) {
+        toast.error(`Package weight is required${boxNum}`);
+        return false;
+      }
+      
+      if (parcel.length <= 0 || parcel.width <= 0 || parcel.height <= 0) {
+        toast.error(`Package dimensions are required${boxNum}`);
+        return false;
+      }
     }
     
     return true;
@@ -146,10 +344,31 @@ export function ShippingLabelForm() {
     setShipment(null);
     
     try {
+      // For multi-box shipments, we get rates for each parcel
+      // The API will create multiple shipments if needed
+      const primaryParcel = {
+        weight: parcels[0].weight,
+        length: parcels[0].length,
+        width: parcels[0].width,
+        height: parcels[0].height,
+      };
+      
       const response = await fetch(`${API_BASE}/api/shipping/rates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fromAddress, toAddress, parcel }),
+        body: JSON.stringify({ 
+          fromAddress, 
+          toAddress, 
+          parcel: primaryParcel,
+          // Include all parcels for multi-box (backend can use this for future batch)
+          parcels: parcels.map(p => ({
+            weight: p.weight,
+            length: p.length,
+            width: p.width,
+            height: p.height,
+          })),
+          boxCount: parcels.length,
+        }),
       });
       
       const data = await response.json();
@@ -228,12 +447,19 @@ export function ShippingLabelForm() {
 
   const resetForm = () => {
     setToAddress(emptyAddress);
-    setParcel(PRESET_BOXES['medium-box']);
-    setBoxPreset('medium-box');
+    // Reset to single default parcel
+    setParcels([{
+      id: generateId(),
+      boxPreset: 'medium-box',
+      ...PRESET_BOXES['medium-box'],
+    }]);
     setRates([]);
     setSelectedRateId(null);
     setShipment(null);
     setShipmentId(null);
+    setLookupQuery('');
+    setSearchResults({ orders: [], customers: [] });
+    setShowLookupDialog(false);
   };
 
   return (
@@ -379,9 +605,112 @@ export function ShippingLabelForm() {
           {/* To Address */}
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Truck size={20} className="text-primary" />
-                <CardTitle>To Address</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Truck size={20} className="text-primary" />
+                  <CardTitle>To Address</CardTitle>
+                </div>
+                <Dialog open={showLookupDialog} onOpenChange={setShowLookupDialog}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <MagnifyingGlass size={16} />
+                      Look Up
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>Find Order or Customer</DialogTitle>
+                      <DialogDescription>
+                        Search by order number, customer name, or email
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Search orders or customers..."
+                          value={lookupQuery}
+                          onChange={(e) => setLookupQuery(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && searchOrdersAndCustomers()}
+                        />
+                        <Button 
+                          onClick={searchOrdersAndCustomers} 
+                          disabled={isSearching}
+                        >
+                          {isSearching ? 'Searching...' : 'Search'}
+                        </Button>
+                      </div>
+                      
+                      {/* Orders Results */}
+                      {searchResults.orders.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Orders</p>
+                          <div className="space-y-1 max-h-40 overflow-y-auto">
+                            {searchResults.orders.map(order => (
+                              <div
+                                key={order.id}
+                                className="p-2 border rounded cursor-pointer hover:bg-muted flex items-center justify-between"
+                                onClick={() => selectOrder(order)}
+                              >
+                                <div>
+                                  <p className="font-medium">#{order.orderNumber}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {order.customerName}
+                                    {order.orderNickname && ` • ${order.orderNickname}`}
+                                  </p>
+                                </div>
+                                {order.shippingAddress && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Has Address
+                                  </Badge>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Customers Results */}
+                      {searchResults.customers.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Customers</p>
+                          <div className="space-y-1 max-h-40 overflow-y-auto">
+                            {searchResults.customers.map(customer => (
+                              <div
+                                key={customer.id}
+                                className="p-2 border rounded cursor-pointer hover:bg-muted flex items-center justify-between"
+                                onClick={() => selectCustomer(customer)}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <User size={16} className="text-muted-foreground" />
+                                  <div>
+                                    <p className="font-medium">{customer.name}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {customer.company || customer.email}
+                                    </p>
+                                  </div>
+                                </div>
+                                {customer.shippingAddress && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Has Address
+                                  </Badge>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* No Results */}
+                      {lookupQuery && !isSearching && 
+                       searchResults.orders.length === 0 && 
+                       searchResults.customers.length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          No results found for "{lookupQuery}"
+                        </p>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
               <CardDescription>Recipient's shipping address</CardDescription>
             </CardHeader>
@@ -467,70 +796,123 @@ export function ShippingLabelForm() {
         </div>
       )}
 
-      {/* Package Details */}
+      {/* Package Details - Multi-box support */}
       {!shipment && (
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <Package size={20} className="text-primary" />
-              <CardTitle>Package Details</CardTitle>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Package size={20} className="text-primary" />
+                <CardTitle>
+                  Package Details
+                  {parcels.length > 1 && (
+                    <span className="ml-2 text-sm font-normal text-muted-foreground">
+                      ({parcels.length} boxes)
+                    </span>
+                  )}
+                </CardTitle>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addParcel}
+                className="gap-1"
+              >
+                <Plus size={16} />
+                Add Box
+              </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="space-y-2">
-                <Label>Box Size</Label>
-                <Select value={boxPreset} onValueChange={handleBoxPresetChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="small-box">Small Box</SelectItem>
-                    <SelectItem value="medium-box">Medium Box</SelectItem>
-                    <SelectItem value="large-box">Large Box</SelectItem>
-                    <SelectItem value="flat-mailer">Flat Mailer</SelectItem>
-                    <SelectItem value="custom">Custom Size</SelectItem>
-                  </SelectContent>
-                </Select>
+          <CardContent className="space-y-6">
+            {parcels.map((parcel, index) => (
+              <div key={parcel.id} className="relative">
+                {parcels.length > 1 && (
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Box {index + 1}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeParcel(parcel.id)}
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash size={16} />
+                    </Button>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label>Box Size</Label>
+                    <Select 
+                      value={parcel.boxPreset} 
+                      onValueChange={(value) => handleBoxPresetChange(parcel.id, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small-box">Small Box</SelectItem>
+                        <SelectItem value="medium-box">Medium Box</SelectItem>
+                        <SelectItem value="large-box">Large Box</SelectItem>
+                        <SelectItem value="flat-mailer">Flat Mailer</SelectItem>
+                        <SelectItem value="custom">Custom Size</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Length (in)</Label>
+                    <Input
+                      type="number"
+                      value={parcel.length || ''}
+                      onChange={(e) => updateParcel(parcel.id, { length: parseFloat(e.target.value) || 0 })}
+                      disabled={parcel.boxPreset !== 'custom'}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Width (in)</Label>
+                    <Input
+                      type="number"
+                      value={parcel.width || ''}
+                      onChange={(e) => updateParcel(parcel.id, { width: parseFloat(e.target.value) || 0 })}
+                      disabled={parcel.boxPreset !== 'custom'}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Height (in)</Label>
+                    <Input
+                      type="number"
+                      value={parcel.height || ''}
+                      onChange={(e) => updateParcel(parcel.id, { height: parseFloat(e.target.value) || 0 })}
+                      disabled={parcel.boxPreset !== 'custom'}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Weight (lbs) *</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={parcel.weight || ''}
+                      onChange={(e) => updateParcel(parcel.id, { weight: parseFloat(e.target.value) || 0 })}
+                      placeholder="0.0"
+                    />
+                  </div>
+                </div>
+                {index < parcels.length - 1 && (
+                  <Separator className="mt-6" />
+                )}
               </div>
-              <div className="space-y-2">
-                <Label>Length (in)</Label>
-                <Input
-                  type="number"
-                  value={parcel.length || ''}
-                  onChange={(e) => setParcel(prev => ({ ...prev, length: parseFloat(e.target.value) || 0 }))}
-                  disabled={boxPreset !== 'custom'}
-                />
+            ))}
+            
+            {/* Summary for multi-box */}
+            {parcels.length > 1 && (
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium">Shipment Summary</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {parcels.length} boxes • Total weight: {parcels.reduce((sum, p) => sum + p.weight, 0).toFixed(1)} lbs
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label>Width (in)</Label>
-                <Input
-                  type="number"
-                  value={parcel.width || ''}
-                  onChange={(e) => setParcel(prev => ({ ...prev, width: parseFloat(e.target.value) || 0 }))}
-                  disabled={boxPreset !== 'custom'}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Height (in)</Label>
-                <Input
-                  type="number"
-                  value={parcel.height || ''}
-                  onChange={(e) => setParcel(prev => ({ ...prev, height: parseFloat(e.target.value) || 0 }))}
-                  disabled={boxPreset !== 'custom'}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Weight (lbs) *</Label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={parcel.weight || ''}
-                  onChange={(e) => setParcel(prev => ({ ...prev, weight: parseFloat(e.target.value) || 0 }))}
-                  placeholder="0.0"
-                />
-              </div>
-            </div>
+            )}
             
             <div className="mt-6">
               <Button 
@@ -626,27 +1008,6 @@ export function ShippingLabelForm() {
                   </>
                 )}
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Info Notice */}
-      {!shipment && (
-        <Card className="bg-amber-50 dark:bg-amber-950 border-amber-200">
-          <CardContent className="pt-6">
-            <div className="flex gap-3">
-              <Warning size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-amber-800 dark:text-amber-200">
-                  EasyPost Integration Note
-                </p>
-                <p className="text-amber-700 dark:text-amber-300 mt-1">
-                  This form is connected to EasyPost for live shipping rates and label generation.
-                  Make sure your <code className="bg-amber-100 dark:bg-amber-900 px-1 rounded">EASYPOST_API_KEY</code> is 
-                  configured in your environment variables.
-                </p>
-              </div>
             </div>
           </CardContent>
         </Card>

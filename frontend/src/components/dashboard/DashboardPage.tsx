@@ -11,9 +11,10 @@ interface DashboardPageProps {
   recentJobs: Job[]
   machines: Machine[]
   onNavigate: (page: string) => void
+  onViewOrder?: (orderId: string) => void
 }
 
-export function DashboardPage({ stats, recentJobs, machines, onNavigate }: DashboardPageProps) {
+export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewOrder }: DashboardPageProps) {
   const getStatusColor = (status: string) => {
     const colors = {
       printing: 'bg-cyan text-white',
@@ -94,6 +95,7 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate }: Dashb
               <div
                 key={job.id}
                 className="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                onClick={() => onViewOrder?.(job.id)}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">

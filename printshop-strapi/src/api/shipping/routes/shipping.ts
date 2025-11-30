@@ -10,6 +10,7 @@ export default {
       path: '/shipping/rates',
       handler: 'shipping.getRates',
       config: {
+        auth: false,
         policies: [],
         middlewares: [],
       },
@@ -19,6 +20,7 @@ export default {
       path: '/shipping/buy',
       handler: 'shipping.buyLabel',
       config: {
+        auth: false,
         policies: [],
         middlewares: [],
       },
@@ -28,6 +30,7 @@ export default {
       path: '/shipping/track/:trackingCode',
       handler: 'shipping.track',
       config: {
+        auth: false,
         policies: [],
         middlewares: [],
       },
@@ -37,6 +40,7 @@ export default {
       path: '/shipping/validate-address',
       handler: 'shipping.validateAddress',
       config: {
+        auth: false,
         policies: [],
         middlewares: [],
       },
