@@ -49,7 +49,8 @@ describe('RecordPaymentDialog', () => {
   it('renders with correct outstanding balance', () => {
     render(<RecordPaymentDialog {...defaultProps} />)
     
-    expect(screen.getByText('Record Payment')).toBeInTheDocument()
+    // Check for dialog title using role
+    expect(screen.getByRole('heading', { name: /Record Payment/i })).toBeInTheDocument()
     expect(screen.getByText('$500.00')).toBeInTheDocument()
   })
 
