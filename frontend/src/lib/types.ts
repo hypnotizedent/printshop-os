@@ -79,6 +79,17 @@ export interface DashboardStats {
   urgentJobs: number
 }
 
+// Production Calendar Types
+export interface CapacityData {
+  date: string
+  scheduledJobs: number
+  totalCapacity: number
+  percentUtilized: number
+  isOverbooked: boolean
+}
+
+export type CalendarView = 'month' | 'week' | 'day'
+
 // Customer Portal Types - CustomerOrder uses full OrderStatus defined below
 export interface CustomerOrder {
   id: string
