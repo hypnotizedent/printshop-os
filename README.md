@@ -4,6 +4,8 @@
 [![Status: In Development](https://img.shields.io/badge/Status-In%20Development-blue.svg)]()
 [![Version: 0.1.0-alpha](https://img.shields.io/badge/Version-0.1.0--alpha-orange.svg)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](.github/PULL_REQUEST_TEMPLATE.md)
+[![CI/CD Pipeline](https://github.com/hypnotizedent/printshop-os/actions/workflows/ci.yml/badge.svg)](https://github.com/hypnotizedent/printshop-os/actions/workflows/ci.yml)
+[![Repository Audit](https://github.com/hypnotizedent/printshop-os/actions/workflows/audit.yml/badge.svg)](https://github.com/hypnotizedent/printshop-os/actions/workflows/audit.yml)
 
 > A mission-critical business operating system for apparel print shops, orchestrating production workflows, customer interactions, and operational efficiency through a modern, integrated software architecture.
 
@@ -516,6 +518,60 @@ netstat -tulpn | grep 5173
 | Frontend | `docker compose logs frontend` | Build failures, asset issues |
 | Pricing Engine | `docker compose logs pricing-engine` | Missing data files |
 | PostgreSQL | `docker compose logs postgres` | Connection refused, auth |
+| Redis | `docker compose logs redis` | Memory issues, persistence |
+| API | `docker compose logs api` | Connection to Strapi, supplier APIs |
+
+### Cloudflare Tunnel / cloudflared Troubleshooting
+
+If external access via Cloudflare Tunnel is failing:
+
+```bash
+# Check cloudflared status
+docker ps | grep cloudflared
+
+# View cloudflared logs
+docker logs cloudflared --tail 100
+
+# Test if cloudflared can reach services
+docker exec cloudflared ping -c 1 printshop-frontend
+
+# Check network connectivity
+docker network inspect printshop_network | grep cloudflared
+
+# Reconnect cloudflared to the PrintShop network
+docker network connect printshop_network cloudflared
+```
+
+**Common cloudflared issues:**
+
+| Issue | Symptom | Solution |
+|-------|---------|----------|
+| 502 Bad Gateway | Page shows Cloudflare error | Connect cloudflared to printshop_network |
+| SSL Certificate Error | Browser shows certificate warning | Use single-level subdomain (e.g., `printshop-app.domain.com` not `app.printshop.domain.com`) |
+| Connection Refused | Tunnel shows service offline | Verify container is running and bound to 0.0.0.0 |
+
+### Quick Diagnosis Commands
+
+```bash
+# Complete system status check
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Check container resource usage
+docker stats --no-stream
+
+# Check Docker network configuration
+docker network ls && docker network inspect printshop_network
+
+# Test service endpoints from inside Docker network
+docker exec printshop-strapi wget -qO- http://localhost:1337 > /dev/null && echo "Strapi OK" || echo "Strapi FAIL"
+docker exec printshop-frontend wget -qO- http://localhost:3000 > /dev/null && echo "Frontend OK" || echo "Frontend FAIL"
+
+# Check disk space
+docker system df
+
+# View system events
+docker events --since="1h" --until="0m"
+```
 
 ### Full System Reset
 ```bash
@@ -526,6 +582,106 @@ netstat -tulpn | grep 5173
 ./scripts/start-printshop.sh setup
 ./scripts/start-printshop.sh start
 ```
+
+### 🔥 Nuclear Reset (Complete Fresh Start)
+
+Use this when the system is in an unrecoverable state:
+
+```bash
+# Step 1: Stop all PrintShop containers
+docker compose down -v
+
+# Step 2: Remove any orphaned containers
+docker compose down --remove-orphans
+
+# Step 3: Prune all unused Docker resources (careful - affects all Docker projects!)
+docker system prune -a --volumes
+
+# Step 4: Remove all PrintShop-specific volumes
+docker volume rm $(docker volume ls -q | grep printshop) 2>/dev/null || true
+
+# Step 5: Remove all PrintShop images
+docker rmi $(docker images -q --filter reference='*printshop*') 2>/dev/null || true
+
+# Step 6: Recreate environment
+cp .env.example .env
+# Edit .env with your secrets
+
+# Step 7: Build and start fresh
+docker compose build --no-cache
+docker compose up -d
+
+# Step 8: Wait for services to initialize (Strapi takes 2-3 min)
+sleep 180 && docker compose ps
+
+# Step 9: Verify health
+./test-system.sh
+```
+
+### Nuclear Reset for cloudflared Only
+
+```bash
+# Stop cloudflared
+docker stop cloudflared
+
+# Remove cloudflared container
+docker rm cloudflared
+
+# Reconnect to Cloudflare (uses stored credentials)
+# Note: Ensure tunnel token is configured in your cloudflared config
+docker run -d --name cloudflared --restart unless-stopped \
+  cloudflare/cloudflared:latest tunnel run --token YOUR_TUNNEL_TOKEN
+
+# Reconnect to PrintShop network
+docker network connect printshop_network cloudflared
+
+# Verify tunnel is connected
+docker logs cloudflared --tail 50
+```
+
+### Recovery Checklist
+
+When troubleshooting a down system, check in this order:
+
+1. **[ ] Docker Engine Running?**
+   ```bash
+   docker info > /dev/null 2>&1 && echo "Docker OK" || echo "Docker NOT running"
+   ```
+
+2. **[ ] Disk Space Available?**
+   ```bash
+   df -h / | tail -1 | awk '{print "Available: " $4}'
+   ```
+
+3. **[ ] Memory Available?**
+   ```bash
+   free -h | head -2
+   ```
+
+4. **[ ] PostgreSQL Healthy?**
+   ```bash
+   docker compose exec postgres pg_isready -U strapi
+   ```
+
+5. **[ ] Redis Healthy?**
+   ```bash
+   docker compose exec redis redis-cli ping
+   ```
+
+6. **[ ] All Containers Running?**
+   ```bash
+   docker compose ps
+   ```
+
+7. **[ ] Can Containers Talk to Each Other?**
+   ```bash
+   docker exec printshop-strapi ping -c 1 postgres
+   ```
+
+8. **[ ] External Access Working (if using cloudflared)?**
+   ```bash
+   curl -I https://your-domain.com
+   ```
 
 ---
 
