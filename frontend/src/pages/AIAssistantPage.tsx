@@ -7,7 +7,7 @@ import { AIAssistant } from "@/components/ai/AIAssistant"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
-  Robot,
+  Brain,
   ChatCircleDots,
   Image,
   ChartLineUp,
@@ -27,7 +27,7 @@ export function AIAssistantPage() {
           </p>
         </div>
         <Badge variant="secondary" className="gap-1">
-          <Robot size={14} />
+          <Brain size={14} />
           RAG-Powered
         </Badge>
       </div>
