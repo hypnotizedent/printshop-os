@@ -198,9 +198,7 @@ services:
     environment:
       PENPOT_FLAGS: enable-registration enable-login-with-password disable-demo-users enable-smtp
       PENPOT_PUBLIC_URI: ${PENPOT_PUBLIC_URI:-http://localhost:9001}
-      PENPOT_DATABASE_URI: postgresql://postgres:5432/${PENPOT_DB_NAME:-penpot}
-      PENPOT_DATABASE_USERNAME: ${POSTGRES_USER:-strapi}
-      PENPOT_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-secure_password_change_this}
+      PENPOT_DATABASE_URI: postgresql://${POSTGRES_USER:-strapi}:${POSTGRES_PASSWORD:-secure_password_change_this}@postgres:5432/${PENPOT_DB_NAME:-penpot}
       PENPOT_REDIS_URI: redis://redis:6379/0
       PENPOT_ASSETS_STORAGE_BACKEND: assets-fs
       PENPOT_STORAGE_ASSETS_FS_DIRECTORY: /opt/data/assets
