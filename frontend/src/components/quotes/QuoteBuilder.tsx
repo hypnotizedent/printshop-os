@@ -28,10 +28,12 @@ import {
   Upload,
   Eye,
   Package,
+  ArrowRight,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { ProductSearch } from '@/components/products/ProductSearch';
 import type { Product } from '@/components/products/ProductsPage';
+import { ordersApi, jobsApi, DEFAULT_JOB_DUE_DAYS } from '@/lib/api-client';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 

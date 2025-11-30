@@ -270,6 +270,8 @@ function MainDashboard() {
         return <ShipmentTracking />
       case "invoices":
         return <InvoicesPage onViewOrder={handleViewOrder} />
+      case "ai-assistant":
+        return <AIAssistantPage />
       default:
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} onViewOrder={handleViewOrder} />
     }
