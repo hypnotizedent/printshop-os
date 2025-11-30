@@ -1,61 +1,79 @@
-# 🚀 Getting started with Strapi
+# 🚀 PrintShop OS - Strapi CMS
 
-Strapi comes with a full featured [Command Line Interface](https://docs.strapi.io/dev-docs/cli) (CLI) which lets you scaffold and manage your project in seconds.
+Strapi is the headless CMS powering PrintShop OS. It provides the REST API for all data operations.
 
-### `develop`
+## 🔧 Quick Setup
 
-Start your Strapi application with autoReload enabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-develop)
+```bash
+# Install dependencies
+npm install
 
-```
+# Start in development mode (auto-rebuilds admin panel)
 npm run develop
-# or
-yarn develop
-```
 
-### `start`
-
-Start your Strapi application with autoReload disabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-start)
-
-```
-npm run start
-# or
-yarn start
-```
-
-### `build`
-
-Build your admin panel. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-build)
-
-```
+# Build for production
 npm run build
-# or
-yarn build
+npm run start
 ```
 
-## ⚙️ Deployment
+## ⚠️ Troubleshooting: Admin Panel Not Loading
 
-Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
+**Problem:** Visiting `http://your-server:1337/admin` shows a blank page or 404, but `http://your-server:1337` works.
 
-```
-yarn strapi deploy
-```
+**Cause:** Strapi doesn't know its public URL, so admin panel assets are served from incorrect paths.
 
-## 📚 Learn more
+**Solution:**
 
-- [Resource center](https://strapi.io/resource-center) - Strapi resource center.
-- [Strapi documentation](https://docs.strapi.io) - Official Strapi documentation.
-- [Strapi tutorials](https://strapi.io/tutorials) - List of tutorials made by the core team and the community.
-- [Strapi blog](https://strapi.io/blog) - Official Strapi blog containing articles made by the Strapi team and the community.
-- [Changelog](https://strapi.io/changelog) - Find out about the Strapi product updates, new features and general improvements.
+1. **Set the `PUBLIC_URL` environment variable** to the URL where Strapi is publicly accessible:
 
-Feel free to check out the [Strapi GitHub repository](https://github.com/strapi/strapi). Your feedback and contributions are welcome!
+   ```bash
+   # In your .env file
+   PUBLIC_URL=http://100.92.156.118:1337  # For direct IP access
+   # OR
+   PUBLIC_URL=https://printshop.ronny.works  # For domain with reverse proxy
+   ```
 
-## ✨ Community
+2. **Rebuild the admin panel:**
 
-- [Discord](https://discord.strapi.io) - Come chat with the Strapi community including the core team.
-- [Forum](https://forum.strapi.io/) - Place to discuss, ask questions and find answers, show your Strapi project and get feedback or just talk with other Community members.
-- [Awesome Strapi](https://github.com/strapi/awesome-strapi) - A curated list of awesome things related to Strapi.
+   ```bash
+   npm run build
+   npm run start
+   ```
 
----
+3. **For Docker deployments:**
 
-<sub>🤫 Psst! [Strapi is hiring](https://strapi.io/careers).</sub>
+   ```bash
+   # Stop the container
+   docker compose down strapi
+   
+   # Rebuild and restart
+   docker compose up -d --build strapi
+   ```
+
+**Important:** Always rebuild after changing `PUBLIC_URL`. The admin panel assets are generated at build time with hardcoded URLs.
+
+## 📁 Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `config/server.ts` | Server host, port, and public URL |
+| `config/admin.ts` | Admin panel settings |
+| `config/database.ts` | Database connection (SQLite/PostgreSQL) |
+| `config/middlewares.ts` | Request processing middleware |
+
+## 🗄️ Content Types
+
+| Type | API Endpoint | Description |
+|------|-------------|-------------|
+| Customer | `/api/customers` | Customer records |
+| Order | `/api/orders` | Orders and quotes |
+| Job | `/api/jobs` | Production jobs |
+| Product | `/api/products` | Supplier product catalog |
+| Employee | `/api/employees` | Staff records |
+| Time Clock Entry | `/api/time-clock-entries` | Time tracking |
+
+## 📚 Learn More
+
+- [Strapi Documentation](https://docs.strapi.io)
+- [Resource Center](https://strapi.io/resource-center)
+- [Strapi Community Discord](https://discord.strapi.io)
