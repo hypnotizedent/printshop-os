@@ -957,7 +957,7 @@ docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE paperless;
 docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE penpot;"
 
 # Start business services
-docker-compose -f docker-compose.business-services.yml up -d
+docker compose -f docker-compose.business-services.yml up -d
 ```
 
 ---
