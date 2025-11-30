@@ -1,6 +1,6 @@
 # PrintShop OS - Repository Audit Report
 
-**Generated:** November 28, 2025 (Updated: November 30, 2025)  
+**Last Updated:** November 30, 2025  
 **Auditor:** GitHub Copilot  
 **Scope:** Full repository audit for documentation, organization, and single source of truth
 
@@ -312,16 +312,18 @@ Located in `scripts/` - ready to run but need:
 
 **Updated:** November 30, 2025
 
-| Component | Unit Tests | Integration Tests | E2E Tests | Coverage % | Notes |
-|-----------|------------|-------------------|-----------|------------|-------|
-| **services/api** | ✅ 13 files | ✅ api.integration.test.ts | ❌ None | Unknown | Includes sync, checklists, mapper tests |
-| **services/customer-service-ai** | ⚠️ 1 file | ❌ None | ❌ None | Unknown | Needs more test coverage |
-| **services/job-estimator** | ✅ 7 files | ❌ None | ❌ None | Unknown | Pricing engine well tested |
-| **services/production-dashboard** | ✅ 4 files | ❌ None | ❌ None | Unknown | API tests present |
-| **services/supplier-sync** | ⚠️ 2 files | ❌ None | ❌ None | Unknown | Only integration folder |
-| **services/vector-store** | ⚠️ 1 file | ❌ None | ❌ None | Unknown | Basic coverage |
-| **frontend** | ✅ 5 files | ✅ auth-integration.test.tsx | ❌ None | Unknown | Component tests + auth |
-| **printshop-strapi** | ✅ 4 files | ❌ None | ❌ None | Unknown | Jest configured |
+| Component | Unit Tests | Integration Tests | E2E Tests | Notes |
+|-----------|------------|-------------------|-----------|-------|
+| **services/api** | ✅ 13 files | ✅ api.integration.test.ts | ❌ None | Includes sync, checklists, mapper tests |
+| **services/customer-service-ai** | ⚠️ 1 file | ❌ None | ❌ None | Needs more test coverage |
+| **services/job-estimator** | ✅ 7 files | ❌ None | ❌ None | Pricing engine well tested |
+| **services/production-dashboard** | ✅ 4 files | ❌ None | ❌ None | API tests present |
+| **services/supplier-sync** | ⚠️ 2 files | ❌ None | ❌ None | Only integration folder |
+| **services/vector-store** | ⚠️ 1 file | ❌ None | ❌ None | Basic coverage |
+| **frontend** | ✅ 5 files | ✅ auth-integration.test.tsx | ❌ None | Component tests + auth |
+| **printshop-strapi** | ✅ 4 files | ❌ None | ❌ None | Jest configured |
+
+> **Note:** Coverage percentages are not currently tracked. See recommendations below for enabling coverage reporting.
 
 ### Test Coverage Recommendations
 1. **High Priority**: Add integration tests for `supplier-sync` and `vector-store`
