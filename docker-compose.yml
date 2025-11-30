@@ -111,7 +111,7 @@ services:
         condition: service_healthy
     healthcheck:
       # Note: Strapi returns 302 redirect on root, which is normal behavior
-      # Using --spider with -S to accept redirects as valid response
+      # Using -O /dev/null to discard output and accept any HTTP response
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:1337"]
       interval: 30s
       timeout: 10s

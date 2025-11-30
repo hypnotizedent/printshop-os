@@ -403,8 +403,8 @@ docker inspect --format='{{.State.Health.Status}}' printshop-strapi
 # View detailed health check logs
 docker inspect --format='{{json .State.Health}}' printshop-strapi | jq
 
-# Manual health check test
-docker exec printshop-strapi wget --spider http://localhost:1337
+# Manual health check test (uses -O /dev/null to accept 302 redirects)
+docker exec printshop-strapi wget --no-verbose --tries=1 -O /dev/null http://localhost:1337
 ```
 
 **Strapi shows unhealthy:**
