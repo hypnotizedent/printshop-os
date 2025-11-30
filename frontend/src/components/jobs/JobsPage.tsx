@@ -156,7 +156,7 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
       {/* Calendar View - TODO: Implement ProductionCalendar component */}
       {activeView === 'calendar' && (
         <div className="p-8 text-center text-muted-foreground border-2 border-dashed border-border rounded-lg">
-          Calendar view coming soon - use Kanban or List view
+          Calendar view coming soon - use Kanban view
         </div>
       )}
 
@@ -309,7 +309,7 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
       {/* List View - placeholder for future implementation */}
       {activeView === 'list' && (
         <div className="p-8 text-center text-muted-foreground border-2 border-dashed border-border rounded-lg">
-          List view coming soon - use Kanban or Calendar view
+          List view coming soon - use Kanban view
         </div>
       )}
 
