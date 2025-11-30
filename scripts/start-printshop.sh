@@ -132,7 +132,7 @@ start_services() {
     print_msg "  Strapi Admin:   http://localhost:1337/admin" "$NC"
     print_msg "  Strapi API:     http://localhost:1337/api" "$NC"
     print_msg "  API Service:    http://localhost:3001" "$NC"
-    print_msg "  Pricing Engine: http://localhost:3003" "$NC"
+    print_msg "  Pricing Engine: http://localhost:3004" "$NC"
     print_msg "  Appsmith:       http://localhost:8080" "$NC"
     print_msg "  Botpress:       http://localhost:3100" "$NC"
     print_msg "" "$NC"
