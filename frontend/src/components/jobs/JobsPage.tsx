@@ -14,17 +14,20 @@ import { jobsApi } from "@/lib/api-client"
 import type { Job, JobStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-// Column configuration for status colors
-const STATUS_COLUMNS = [
-  { id: 'quote', label: 'Quote', color: 'border-yellow', bgColor: 'bg-yellow/80 text-foreground' },
-  { id: 'design', label: 'Design', color: 'border-blue-500', bgColor: 'bg-blue-500 text-white' },
-  { id: 'prepress', label: 'Pre-press', color: 'border-purple-500', bgColor: 'bg-purple-500 text-white' },
-  { id: 'printing', label: 'Printing', color: 'border-cyan', bgColor: 'bg-cyan text-white' },
-  { id: 'finishing', label: 'Finishing', color: 'border-orange-500', bgColor: 'bg-orange-500 text-white' },
-  { id: 'delivery', label: 'Delivery', color: 'border-green-600', bgColor: 'bg-green-600 text-white' },
-  { id: 'completed', label: 'Completed', color: 'border-green-700', bgColor: 'bg-green-700 text-white' },
-  { id: 'cancelled', label: 'Cancelled', color: 'border-muted', bgColor: 'bg-muted text-muted-foreground' }
+// Status configuration - comprehensive list of all job statuses with styling
+const STATUS_CONFIG = [
+  { id: 'quote', label: 'Quote', color: 'border-yellow', bgColor: 'bg-yellow/80 text-foreground', legendColor: 'bg-yellow/80' },
+  { id: 'design', label: 'Design', color: 'border-blue-500', bgColor: 'bg-blue-500 text-white', legendColor: 'bg-blue-500' },
+  { id: 'prepress', label: 'Pre-press', color: 'border-purple-500', bgColor: 'bg-purple-500 text-white', legendColor: 'bg-purple-500' },
+  { id: 'printing', label: 'Printing', color: 'border-cyan', bgColor: 'bg-cyan text-white', legendColor: 'bg-cyan' },
+  { id: 'finishing', label: 'Finishing', color: 'border-orange-500', bgColor: 'bg-orange-500 text-white', legendColor: 'bg-orange-500' },
+  { id: 'delivery', label: 'Delivery', color: 'border-green-600', bgColor: 'bg-green-600 text-white', legendColor: 'bg-green-600' },
+  { id: 'completed', label: 'Completed', color: 'border-green-700', bgColor: 'bg-green-700 text-white', legendColor: 'bg-green-700' },
+  { id: 'cancelled', label: 'Cancelled', color: 'border-muted', bgColor: 'bg-muted text-muted-foreground', legendColor: 'bg-muted' }
 ] as const
+
+// Kanban board columns - only workflow stages that appear on the board
+const KANBAN_COLUMNS = STATUS_CONFIG.slice(0, 6)
 
 type SortField = 'title' | 'customer' | 'status' | 'dueDate' | 'priority' | 'estimatedCost'
 type SortDirection = 'asc' | 'desc'
@@ -49,14 +52,8 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
   const [calendarView, setCalendarView] = useState<'week' | 'month'>('week')
   const [currentDate, setCurrentDate] = useState(new Date())
 
-  const columns = [
-    { id: 'quote', label: 'Quote', color: 'border-yellow' },
-    { id: 'design', label: 'Design', color: 'border-blue-500' },
-    { id: 'prepress', label: 'Pre-press', color: 'border-purple-500' },
-    { id: 'printing', label: 'Printing', color: 'border-cyan' },
-    { id: 'finishing', label: 'Finishing', color: 'border-orange-500' },
-    { id: 'delivery', label: 'Delivery', color: 'border-green-600' }
-  ]
+  // Use KANBAN_COLUMNS for the Kanban board
+  const columns = KANBAN_COLUMNS
 
   // Filter jobs based on search query
   const filteredJobs = jobs.filter(job =>
@@ -81,10 +78,13 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
           bVal = b.customer.toLowerCase()
           break
         case 'status':
-          // Sort by status order in workflow
-          const statusOrder = columns.map(c => c.id)
+          // Sort by status order in workflow - use STATUS_CONFIG for complete status list
+          const statusOrder = STATUS_CONFIG.map(c => c.id)
           aVal = statusOrder.indexOf(a.status)
           bVal = statusOrder.indexOf(b.status)
+          // Put unknown statuses at the end
+          if (aVal === -1) aVal = statusOrder.length
+          if (bVal === -1) bVal = statusOrder.length
           break
         case 'dueDate':
           aVal = new Date(a.dueDate).getTime()
@@ -143,7 +143,7 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
 
   // Get status badge color for list/calendar views
   const getStatusBadgeColor = (status: JobStatus) => {
-    const col = STATUS_COLUMNS.find(c => c.id === status)
+    const col = STATUS_CONFIG.find(c => c.id === status)
     return col?.bgColor || 'bg-muted text-foreground'
   }
 
@@ -266,7 +266,7 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
         // Update local state via parent callback with validated status
         onUpdateJob(jobId, { status: newStatus })
         toast.success('Job status updated', {
-          description: `Moved to ${columns.find(c => c.id === newStatus)?.label || newStatus}`,
+          description: `Moved to ${STATUS_CONFIG.find(c => c.id === newStatus)?.label || newStatus}`,
         })
       } else {
         toast.error('Failed to update job status', {
@@ -466,9 +466,9 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
 
           {/* Status Legend */}
           <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border">
-            {STATUS_COLUMNS.slice(0, 6).map(col => (
+            {STATUS_CONFIG.slice(0, 6).map(col => (
               <div key={col.id} className="flex items-center gap-1.5">
-                <div className={cn("w-3 h-3 rounded", col.bgColor.split(' ')[0])} />
+                <div className={cn("w-3 h-3 rounded", col.legendColor)} />
                 <span className="text-xs text-muted-foreground">{col.label}</span>
               </div>
             ))}
@@ -736,7 +736,7 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
                     <TableCell className="text-muted-foreground">{job.customer}</TableCell>
                     <TableCell>
                       <Badge className={getStatusBadgeColor(job.status)}>
-                        {columns.find(c => c.id === job.status)?.label || job.status}
+                        {STATUS_CONFIG.find(c => c.id === job.status)?.label || job.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
