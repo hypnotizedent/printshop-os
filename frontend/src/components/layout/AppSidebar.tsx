@@ -1,4 +1,4 @@
-import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, MapTrifold, UserCircle, SignIn } from "@phosphor-icons/react"
+import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, Robot } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/ui/ThemeToggle"
 import { Link } from "react-router-dom"
@@ -24,7 +24,7 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
     { icon: FileText, label: "Quotes", href: "quotes" },
     { icon: ShoppingCart, label: "Products", href: "products" },
     { icon: Truck, label: "Shipping", href: "shipping" },
-    { icon: MapTrifold, label: "Tracking", href: "tracking" },
+    { icon: Robot, label: "AI Assistant", href: "ai-assistant" },
     { icon: FolderOpen, label: "Files", href: "files" },
     { icon: Users, label: "Customers", href: "customers" },
     { icon: Printer, label: "Schedule", href: "machines" },
