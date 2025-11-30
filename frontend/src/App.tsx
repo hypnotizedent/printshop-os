@@ -20,7 +20,7 @@ import { ShipmentTracking } from "./components/shipping/ShipmentTracking"
 import { Portal } from "./components/portal/Portal"
 import { AuthPage } from "./components/auth/AuthPage"
 import { useAuth } from "./contexts/AuthContext"
-import type { Job, Customer, Machine, FileItem, DashboardStats, StrapiCustomer, StrapiOrder } from "./lib/types"
+import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 import { toast } from "sonner"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
