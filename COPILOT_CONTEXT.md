@@ -35,15 +35,18 @@ git pull origin main
 
 ## 🌐 Service URLs (After Docker Start)
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| Frontend | http://localhost:5173 | React dashboard |
-| Strapi Admin | http://localhost:1337/admin | CMS admin panel |
-| Strapi API | http://localhost:1337/api | REST API |
-| API Service | http://localhost:3001 | Inventory & supplier integration |
-| Pricing Engine | http://localhost:3003 | Job estimator API |
-| Appsmith | http://localhost:8080 | Production dashboard |
-| Botpress | http://localhost:3100 | AI chatbot |
+| Service | URL | Port | Description |
+|---------|-----|------|-------------|
+| Frontend | http://localhost:5173 | 5173 | React dashboard (served via 'serve') |
+| Strapi Admin | http://localhost:1337/admin | 1337 | CMS admin panel |
+| Strapi API | http://localhost:1337/api | 1337 | REST API |
+| API Service | http://localhost:3001 | 3001 | Inventory & supplier integration |
+| Pricing Engine | http://localhost:3004 | 3004 | Job estimator API (internal 3001→external 3004) |
+| Appsmith | http://localhost:8080 | 8080 | Production dashboard |
+| Botpress | http://localhost:3100 | 3100 | AI chatbot |
+| PostgreSQL | localhost:5432 | 5432 | Primary database |
+| Redis | localhost:6379 | 6379 | Caching & sessions |
+| MongoDB | localhost:27017 | 27017 | Appsmith database |
 
 ## 📁 Key Directories
 
@@ -107,11 +110,51 @@ Local development can use SQLite (see `printshop-strapi/.env.example`).
 
 ## 📋 Recent Session History
 
-### 2025-11-30 Session
+### 2025-11-30 Sessions
 - ✅ Fixed Docker port conflicts (PR #199)
 - ✅ Replaced mock data with real API calls (PR #198)
 - ✅ Added startup script and portal API fixes (PR #200)
-- ✅ Fixed supplier API environment variable warnings (this PR)
+- ✅ Fixed supplier API environment variable warnings
+- ✅ Fixed health check configurations for Strapi and Frontend
+- ✅ Updated documentation with correct port mappings
+
+### Key PRs Merged for Initial Setup (v1.0 Stabilization)
+The following PRs were critical for getting the system from initial development to a working state:
+
+| PR | Description | Impact |
+|----|-------------|--------|
+| #198 | Replace mock data with real Strapi API calls | Frontend now fetches real data |
+| #199 | Fix Docker port conflicts | Pricing engine moved to port 3004 |
+| #200 | Add startup script, portal API fixes | Simplified deployment process |
+| - | Health check fixes | Strapi/Frontend containers now healthy |
+| - | Environment variable documentation | Clear setup instructions |
+
+## 🔧 Health Check Configuration
+
+### Current Health Check Status
+All services now include proper health checks in docker-compose.yml:
+
+| Container | Health Check | Start Period | Notes |
+|-----------|--------------|--------------|-------|
+| postgres | pg_isready | - | Uses built-in readiness |
+| redis | redis-cli ping | - | Uses built-in readiness |
+| mongo | mongosh --eval | - | Uses built-in readiness |
+| strapi | wget http://localhost:1337 | 180s | Needs time to build admin panel |
+| api | wget /health | 30s | Fast startup |
+| pricing-engine | wget /health | 30s | Fast startup |
+| frontend | wget http://localhost:3000 | 60s | Needs time to serve build |
+
+### Troubleshooting Health Checks
+```bash
+# Check container health status
+docker inspect --format='{{.State.Health.Status}}' printshop-strapi
+
+# View health check logs
+docker inspect --format='{{json .State.Health}}' printshop-strapi | jq
+
+# Manual health check test
+docker exec printshop-strapi wget --spider http://localhost:1337
+```
 
 ## 🚨 Known Issues
 

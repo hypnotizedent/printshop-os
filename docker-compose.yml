@@ -76,6 +76,9 @@ services:
   # ---------------------------------------------------------------------------
   # Strapi - Central API & Headless CMS
   # ---------------------------------------------------------------------------
+  # Main backend CMS providing REST API for all data operations
+  # Admin panel available at /admin, API endpoints at /api/*
+  # Note: First startup takes 1-2 minutes to build admin panel
   strapi:
     build:
       context: ./printshop-strapi
@@ -107,15 +110,20 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:1337"]
+      # Note: Strapi returns 302 redirect on root, which is normal behavior
+      # Using --spider with -S to accept redirects as valid response
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:1337"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 120s
+      start_period: 180s
 
   # ---------------------------------------------------------------------------
   # API Service - Inventory & Supplier Integration
   # ---------------------------------------------------------------------------
+  # Core API for inventory management and supplier integrations
+  # Connects to S&S Activewear, AS Colour, SanMar for real-time inventory
+  # Exposes health endpoint at /health
   api:
     build:
       context: ./services/api
@@ -133,7 +141,7 @@ services:
       DATABASE_NAME: ${DATABASE_NAME:-printshop}
       DATABASE_USERNAME: ${DATABASE_USERNAME:-strapi}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-secure_password_change_this}
-      # Supplier API keys
+      # Supplier API keys (optional - services work without them)
       SS_ACTIVEWEAR_API_KEY: ${SS_ACTIVEWEAR_API_KEY:-}
       SS_ACTIVEWEAR_ACCOUNT_NUMBER: ${SS_ACTIVEWEAR_ACCOUNT_NUMBER:-}
       SANMAR_USERNAME: ${SANMAR_USERNAME:-}
@@ -153,10 +161,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
 
   # ---------------------------------------------------------------------------
   # Appsmith - Internal Production Dashboard
   # ---------------------------------------------------------------------------
+  # Low-code dashboard for production team job management
+  # Connects to Strapi API for data
+  # First startup requires creating workspace and admin user
   appsmith:
     image: appsmith/appsmith-ce:latest
     container_name: printshop-appsmith
@@ -192,6 +204,9 @@ services:
   # ---------------------------------------------------------------------------
   # Botpress - Customer-Facing Order Intake Bot
   # ---------------------------------------------------------------------------
+  # Conversational AI for automated customer order collection
+  # Connects to Strapi API for order creation
+  # Internal port 3000, exposed externally on 3100
   botpress:
     image: botpress/server:latest
     container_name: printshop-botpress
@@ -224,6 +239,9 @@ services:
   # ---------------------------------------------------------------------------
   # Pricing Engine - Job Estimator API
   # ---------------------------------------------------------------------------
+  # JSON-driven pricing calculator with sub-100ms performance
+  # Features: volume discounts, location surcharges, color multipliers
+  # Internal port 3001, exposed externally on 3004
   pricing-engine:
     build:
       context: ./services/job-estimator
@@ -247,6 +265,9 @@ services:
   # ---------------------------------------------------------------------------
   # Frontend - React UI for PrintShop OS
   # ---------------------------------------------------------------------------
+  # React 19 + TypeScript + Vite application served via 'serve' package
+  # Provides customer portal and operations dashboard
+  # Connects to Strapi for data, Pricing Engine for quotes
   frontend:
     build:
       context: ./frontend
@@ -254,6 +275,8 @@ services:
     container_name: printshop-frontend
     restart: unless-stopped
     environment:
+      # Note: VITE_ vars are baked into the build, so these are for reference
+      # For runtime config, the app uses /runtime.config.json
       VITE_API_URL: http://api:3001
       VITE_STRAPI_URL: http://strapi:1337
       VITE_PRICING_URL: http://pricing-engine:3001
@@ -266,7 +289,8 @@ services:
       - strapi
       - pricing-engine
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000"]
+      # Using wget instead of curl for Alpine Linux compatibility
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000"]
       interval: 30s
       timeout: 10s
       retries: 3

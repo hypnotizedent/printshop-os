@@ -243,12 +243,15 @@ docker-compose -f <file> down -v
 
 After startup (allow 2-3 minutes for initialization):
 
-- **Frontend:** http://localhost:3000
-- **Strapi Admin:** http://localhost:1337/admin
-- **Strapi API:** http://localhost:1337/api
-- **Pricing API:** http://localhost:3001 (Job Estimator service)
-- **Appsmith Dashboard:** http://localhost:8080
-- **Botpress Studio:** http://localhost:3000 (note: Botpress may use same port in some configs)
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend** | http://localhost:5173 | React dashboard and customer portal |
+| **Strapi Admin** | http://localhost:1337/admin | CMS admin panel |
+| **Strapi API** | http://localhost:1337/api | REST API endpoints |
+| **API Service** | http://localhost:3001 | Inventory & supplier integration |
+| **Pricing Engine** | http://localhost:3004 | Job estimator API |
+| **Appsmith** | http://localhost:8080 | Production dashboard |
+| **Botpress** | http://localhost:3100 | AI chatbot |
 
 ### 4. Initial Configuration
 
@@ -383,6 +386,84 @@ python examples/easypost_example.py
 
 ### Contributing
 - [Contributing Guidelines](docs/CONTRIBUTING.md) - Development workflow and standards
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Container Health Check Failures
+If containers show as "unhealthy" even when services are responding:
+
+```bash
+# Check container health status
+docker inspect --format='{{.State.Health.Status}}' printshop-strapi
+
+# View detailed health check logs
+docker inspect --format='{{json .State.Health}}' printshop-strapi | jq
+
+# Manual health check test
+docker exec printshop-strapi wget --spider http://localhost:1337
+```
+
+**Strapi shows unhealthy:**
+- Strapi returns a 302 redirect on the root URL (normal behavior)
+- The health check has been configured to accept this response
+- First startup takes 2-3 minutes to build the admin panel
+- Check logs: `docker compose logs strapi`
+
+**Frontend shows unhealthy:**
+- Ensure the build completed successfully: `docker compose logs frontend`
+- The frontend uses `serve` to host static files
+- Check if port 3000 is accessible inside the container
+
+#### Strapi Admin Panel Slow on First Load
+This is expected behavior. Strapi builds the admin panel on first access in development mode.
+- Wait 1-2 minutes for the initial build
+- Subsequent loads will be fast
+
+#### Database Connection Errors
+```bash
+# Check if PostgreSQL is running
+docker compose exec postgres pg_isready -U strapi
+
+# View PostgreSQL logs
+docker compose logs postgres
+
+# Reset database (WARNING: deletes all data)
+docker compose down -v
+docker compose up -d
+```
+
+#### Port Conflicts
+If ports are already in use:
+```bash
+# Check what's using a port
+lsof -i :5173
+netstat -tulpn | grep 5173
+
+# Stop conflicting services or modify docker-compose.yml ports
+```
+
+### Service-Specific Troubleshooting
+
+| Service | Logs Command | Common Issues |
+|---------|--------------|---------------|
+| Strapi | `docker compose logs strapi` | Database connection, admin build |
+| Frontend | `docker compose logs frontend` | Build failures, asset issues |
+| Pricing Engine | `docker compose logs pricing-engine` | Missing data files |
+| PostgreSQL | `docker compose logs postgres` | Connection refused, auth |
+
+### Full System Reset
+```bash
+# Stop all services and remove volumes (WARNING: deletes all data)
+./scripts/start-printshop.sh clean
+
+# Recreate from scratch
+./scripts/start-printshop.sh setup
+./scripts/start-printshop.sh start
+```
 
 ---
 
