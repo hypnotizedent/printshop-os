@@ -1,4 +1,5 @@
-FROM node:20-alpine
+# Build stage
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -15,8 +16,19 @@ COPY src/ ./src/
 # Build TypeScript
 RUN npm run build
 
-# Remove dev dependencies for smaller image
-RUN npm prune --production
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files for production install
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production
+
+# Copy built files from builder stage
+COPY --from=builder /app/dist ./dist
 
 # Expose port
 EXPOSE 3001
