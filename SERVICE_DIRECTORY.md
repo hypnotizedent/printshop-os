@@ -303,6 +303,7 @@ This document provides a precise map of where every component, service, and feat
 | Analytics & reporting | `services/api/analytics/` |
 | AI quote optimizer | `services/customer-service-ai/` |
 | Supplier data sync | `services/supplier-sync/` |
+| Vector database / embeddings | `services/vector-store/` |
 | Frontend components | `frontend/src/components/` |
 | Strapi content types | `printshop-strapi/src/api/` |
 | Database schema | `printshop-strapi/schema.sql` |
@@ -615,7 +616,75 @@ services/label-formatter/
 
 ---
 
-### 7. Strapi CMS
+### 7. Vector Store Service (Milvus)
+
+**Location:** `services/vector-store/`
+
+```
+services/vector-store/
+├── src/
+│   ├── index.ts                    # Main entry point
+│   ├── client.ts                   # Milvus client wrapper
+│   ├── collections/
+│   │   ├── designs.ts              # Design embeddings collection
+│   │   ├── customers.ts            # Customer embeddings collection
+│   │   ├── orders.ts               # Order embeddings collection
+│   │   └── knowledge-base.ts       # RAG knowledge base collection
+│   ├── embeddings/
+│   │   ├── openai.ts               # OpenAI embedding generator
+│   │   └── types.ts                # Embedding types
+│   ├── search/
+│   │   ├── similarity.ts           # Similarity search functions
+│   │   └── rag.ts                  # RAG retrieval functions
+│   ├── scripts/
+│   │   └── init-collections.ts     # Collection initialization
+│   └── utils/
+│       └── logger.ts               # Winston logger
+├── tests/
+│   └── vector-store.test.ts
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+**Infrastructure:**
+
+| Component | Port | Purpose |
+|-----------|------|---------|
+| Milvus | 19530 | Vector database (gRPC) |
+| Milvus Metrics | 9091 | Health/metrics endpoint |
+| Attu | 8001 | Web UI for management |
+| etcd | 2379 | Milvus metadata storage |
+| MinIO | 9010/9011 | Milvus object storage |
+
+**Collections:**
+
+| Collection | Purpose |
+|------------|---------|
+| `designs` | Design similarity search, mockup matching |
+| `customers` | Customer intelligence, segmentation |
+| `orders` | Order pattern matching, pricing insights |
+| `knowledge_base` | RAG retrieval for chatbot context |
+
+**Responsibilities:**
+- Store and search vector embeddings
+- Power semantic search across designs, customers, orders
+- Enable RAG for customer service chatbot
+- Find similar historical orders for pricing
+- Generate embeddings via OpenAI API
+
+**Key Functions:**
+- `ensureCollection(name, dimension)` - Create collection if not exists
+- `insertVectors(collection, records)` - Insert vectors with metadata
+- `searchSimilar(collection, vector, topK)` - Vector similarity search
+- `findSimilarDesigns(description)` - Find similar design mockups
+- `retrieveRAGContext(query)` - Get context for LLM prompts
+
+**Documentation:** `docs/VECTOR_DATABASE.md`
+
+---
+
+### 8. Strapi CMS
 
 **Location:** `printshop-strapi/`  
 **Status:** ✅ All APIs Operational (Fixed Nov 26, 2025)
@@ -679,7 +748,7 @@ See: `docs/reference/STRAPI_TYPESCRIPT_API_FIX.md`
 
 ---
 
-### 7. Frontend Application
+### 9. Frontend Application
 
 **Location:** `frontend/`
 
