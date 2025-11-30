@@ -14,7 +14,7 @@ jest.mock('jsonwebtoken');
 import * as authService from '../services/auth';
 
 describe('Auth Service', () => {
-  const JWT_SECRET = 'printshop-os-secret-key-change-in-production';
+  const JWT_SECRET = 'dev-secret-do-not-use-in-production';
   
   beforeEach(() => {
     jest.clearAllMocks();

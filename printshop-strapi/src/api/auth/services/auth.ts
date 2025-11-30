@@ -7,7 +7,16 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 // Constants
-const JWT_SECRET = process.env.JWT_SECRET || 'printshop-os-secret-key-change-in-production';
+function getJWTSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  // Only use fallback in development/testing
+  return secret || 'dev-secret-do-not-use-in-production';
+}
+
+const JWT_SECRET = getJWTSecret();
 const JWT_EXPIRES_IN_CUSTOMER = '7d';
 const JWT_EXPIRES_IN_EMPLOYEE = '12h';
 const BCRYPT_SALT_ROUNDS = 12;
@@ -164,18 +173,37 @@ export function isValidPIN(pin: string): { valid: boolean; message?: string } {
 
 /**
  * Remove sensitive fields from customer data
+ * Returns customer data without passwordHash
  */
-export function sanitizeCustomer(customer: Record<string, any>): CustomerData {
+export function sanitizeCustomer(customer: Record<string, unknown>): CustomerData {
   const { passwordHash, ...customerData } = customer;
-  return customerData as CustomerData;
+  // Return the sanitized data - required fields come from Strapi schema
+  return {
+    id: customerData.id as number,
+    documentId: customerData.documentId as string,
+    email: customerData.email as string,
+    name: customerData.name as string,
+    phone: (customerData.phone as string | null | undefined) || null,
+    company: (customerData.company as string | null | undefined) || null,
+  };
 }
 
 /**
  * Remove sensitive fields from employee data
+ * Returns employee data without pin
  */
-export function sanitizeEmployee(employee: Record<string, any>): EmployeeData {
+export function sanitizeEmployee(employee: Record<string, unknown>): EmployeeData {
   const { pin, ...employeeData } = employee;
-  return employeeData as EmployeeData;
+  // Return the sanitized data - required fields come from Strapi schema
+  return {
+    id: employeeData.id as number,
+    documentId: employeeData.documentId as string,
+    firstName: employeeData.firstName as string,
+    lastName: employeeData.lastName as string,
+    email: employeeData.email as string | undefined,
+    role: employeeData.role as string,
+    department: employeeData.department as string,
+  };
 }
 
 export default {
