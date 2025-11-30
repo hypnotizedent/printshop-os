@@ -31,8 +31,9 @@ export class SentimentService {
       ]);
 
       return this.parseResponse(response, request.text);
-    } catch {
-      // If LLM fails completely, use fallback on original text
+    } catch (error) {
+      // If LLM fails completely, log and use fallback on original text
+      console.warn('LLM sentiment analysis failed:', error instanceof Error ? error.message : 'Unknown error');
       return this.fallbackAnalysis(request.text);
     }
   }

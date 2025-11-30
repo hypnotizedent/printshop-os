@@ -198,8 +198,8 @@ export function AIAssistant({ className, embedded = false }: AIAssistantProps) {
         return (
           <div key={i} className="flex gap-2 ml-2">
             <span>•</span>
-            <span>{formattedParts.slice(0).map((p, idx) => 
-              typeof p === 'string' ? p.replace(/^• /, '') : p
+            <span>{formattedParts.map((p, idx) => 
+              typeof p === 'string' ? p.replace(/^• /, '') : <span key={idx}>{p}</span>
             )}</span>
           </div>
         )

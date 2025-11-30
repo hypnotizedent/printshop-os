@@ -76,14 +76,26 @@ async function initializeServices(): Promise<void> {
 }
 
 // Health check endpoint
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/health', async (_req: Request, res: Response) => {
+  // Check Strapi connectivity
+  let strapiAvailable = false;
+  try {
+    const strapiHealth = await fetch(`${config.strapiUrl.replace('/api', '')}/_health`, { 
+      method: 'HEAD',
+      signal: AbortSignal.timeout(2000)
+    });
+    strapiAvailable = strapiHealth.ok;
+  } catch {
+    strapiAvailable = false;
+  }
+
   const status: HealthStatus = {
     status: servicesInitialized ? 'healthy' : 'degraded',
     services: {
       llm: !!llmClient?.isAvailable(),
       vectorDb: !!ragService,
       redis: !!chatService,
-      strapi: true, // Assume Strapi is available
+      strapi: strapiAvailable,
     },
     version: '1.0.0',
     uptime: Math.floor((Date.now() - startTime) / 1000),
