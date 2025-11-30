@@ -11,10 +11,13 @@ export const MobileNavigation = ({ currentPage, onNavigate }: MobileNavigationPr
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { id: 'time-clock', label: 'Time Clock', icon: '🕐' },
-    { id: 'checklists', label: 'Checklists', icon: '✓' },
+    { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
+    { id: 'queue', label: 'Job Queue', icon: '📋' },
+    { id: 'time-clock', label: 'Time Clock', icon: '⏱️' },
+    { id: 'checklists', label: 'Checklists', icon: '✅' },
     { id: 'sops', label: 'SOPs', icon: '📚' },
-    { id: 'dashboard', label: 'Dashboard', icon: '🏠' }
+    { id: 'supervisor', label: 'Supervisor', icon: '👁️' },
+    { id: 'team-metrics', label: 'Metrics', icon: '📊' }
   ];
 
   if (!isMobile) {
@@ -65,7 +68,7 @@ export const MobileNavigation = ({ currentPage, onNavigate }: MobileNavigationPr
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 bg-gray-900 text-white">
-              <h2 className="text-xl font-bold">Menu</h2>
+              <h2 className="text-xl font-bold">Production Menu</h2>
             </div>
             <nav className="p-2">
               {navItems.map((item) => (
