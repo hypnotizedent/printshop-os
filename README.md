@@ -404,6 +404,14 @@ python examples/easypost_example.py
 
 ---
 
+## 🤖 For AI/Copilot Sessions
+
+If you're a Copilot or AI agent starting a new session, please read:
+- **[COPILOT_CONTEXT.md](./COPILOT_CONTEXT.md)** - Server configuration and session context
+- **[MASTER_CONTEXT.md](./MASTER_CONTEXT.md)** - Full project documentation
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions! This project is being developed with AI assistance and is designed to be AI-friendly.
