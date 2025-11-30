@@ -162,20 +162,20 @@ export function ProductionReport({ dateFrom, dateTo }: ProductionReportProps) {
                 {data.averageTurnaroundDays} days
               </p>
               <div className="flex items-center gap-1 mt-2">
-                {/* For turnaround, lower is better (faster), so down arrow is green */}
-                {data.turnaroundChange <= 0 ? (
-                  <ArrowDown size={16} weight="bold" className="text-green-600" />
+                {/* Turnaround change is inverted at API level - positive = improvement (faster) */}
+                {data.turnaroundChange >= 0 ? (
+                  <ArrowUp size={16} weight="bold" className="text-green-600" />
                 ) : (
-                  <ArrowUp size={16} weight="bold" className="text-red-600" />
+                  <ArrowDown size={16} weight="bold" className="text-red-600" />
                 )}
                 <span className={cn(
                   "text-sm font-semibold",
-                  data.turnaroundChange <= 0 ? "text-green-600" : "text-red-600"
+                  data.turnaroundChange >= 0 ? "text-green-600" : "text-red-600"
                 )}>
                   {Math.abs(data.turnaroundChange)}%
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {data.turnaroundChange <= 0 ? 'faster' : 'slower'}
+                  {data.turnaroundChange >= 0 ? 'faster' : 'slower'}
                 </span>
               </div>
             </div>
@@ -220,31 +220,33 @@ export function ProductionReport({ dateFrom, dateTo }: ProductionReportProps) {
           </CardHeader>
           <CardContent>
             {data.jobsByStatus.length > 0 ? (
-              <ChartContainer config={chartConfig} className="h-64">
-                <BarChart data={data.jobsByStatus} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-                  <XAxis type="number" className="text-xs" />
-                  <YAxis 
-                    type="category" 
-                    dataKey="status" 
-                    width={100}
-                    className="text-xs"
-                    tickFormatter={(value) => value.replace(/_/g, ' ')}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar 
-                    dataKey="count" 
-                    radius={[0, 4, 4, 0]}
-                  >
-                    {data.jobsByStatus.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={STATUS_COLORS[entry.status] || CHART_COLORS[index % CHART_COLORS.length]} 
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
+              <figure aria-label="Jobs by status bar chart">
+                <ChartContainer config={chartConfig} className="h-64">
+                  <BarChart data={data.jobsByStatus} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                    <XAxis type="number" className="text-xs" />
+                    <YAxis 
+                      type="category" 
+                      dataKey="status" 
+                      width={100}
+                      className="text-xs"
+                      tickFormatter={(value) => value.replace(/_/g, ' ')}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar 
+                      dataKey="count" 
+                      radius={[0, 4, 4, 0]}
+                    >
+                      {data.jobsByStatus.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={STATUS_COLORS[entry.status] || CHART_COLORS[index % CHART_COLORS.length]} 
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </figure>
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground">
                 No job data for this period
@@ -260,27 +262,29 @@ export function ProductionReport({ dateFrom, dateTo }: ProductionReportProps) {
           </CardHeader>
           <CardContent>
             {data.productionByMethod.length > 0 ? (
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={data.productionByMethod}
-                      dataKey="count"
-                      nameKey="method"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      label={({ method, percentage }) => `${method}: ${percentage}%`}
-                      labelLine={false}
-                    >
-                      {data.productionByMethod.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              <figure aria-label="Production by method pie chart">
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={data.productionByMethod}
+                        dataKey="count"
+                        nameKey="method"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        label={({ method, percentage }) => `${method}: ${percentage}%`}
+                        labelLine={false}
+                      >
+                        {data.productionByMethod.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </figure>
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground">
                 No method data for this period

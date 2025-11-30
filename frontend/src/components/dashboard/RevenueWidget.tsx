@@ -96,9 +96,9 @@ export function RevenueWidget({ className }: RevenueWidgetProps) {
           </div>
         </div>
 
-        {/* Mini chart */}
+        {/* Mini chart - decorative, revenue value is shown in text above */}
         {data.revenueByDay.length > 0 && (
-          <div className="w-24 h-16">
+          <div className="w-24 h-16" aria-hidden="true">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data.revenueByDay.slice(-14)}>
                 <defs>

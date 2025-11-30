@@ -211,35 +211,37 @@ export function SalesReport({ dateFrom, dateTo }: SalesReportProps) {
           </CardHeader>
           <CardContent>
             {data.revenueByPeriod.length > 0 ? (
-              <ChartContainer config={chartConfig} className="h-64">
-                <LineChart data={data.revenueByPeriod}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis 
-                    dataKey="date" 
-                    tickFormatter={(value) => {
-                      const date = new Date(value)
-                      return `${date.getMonth() + 1}/${date.getDate()}`
-                    }}
-                    className="text-xs"
-                  />
-                  <YAxis 
-                    tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                    className="text-xs"
-                  />
-                  <ChartTooltip 
-                    content={<ChartTooltipContent 
-                      formatter={(value) => formatCurrency(Number(value))}
-                    />} 
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="var(--color-revenue)" 
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ChartContainer>
+              <figure aria-label="Revenue over time line chart">
+                <ChartContainer config={chartConfig} className="h-64">
+                  <LineChart data={data.revenueByPeriod}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis 
+                      dataKey="date" 
+                      tickFormatter={(value) => {
+                        const date = new Date(value)
+                        return `${date.getMonth() + 1}/${date.getDate()}`
+                      }}
+                      className="text-xs"
+                    />
+                    <YAxis 
+                      tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                      className="text-xs"
+                    />
+                    <ChartTooltip 
+                      content={<ChartTooltipContent 
+                        formatter={(value) => formatCurrency(Number(value))}
+                      />} 
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="revenue" 
+                      stroke="var(--color-revenue)" 
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ChartContainer>
+              </figure>
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground">
                 No revenue data for this period
@@ -255,29 +257,31 @@ export function SalesReport({ dateFrom, dateTo }: SalesReportProps) {
           </CardHeader>
           <CardContent>
             {data.salesByCategory.length > 0 ? (
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={data.salesByCategory}
-                      dataKey="revenue"
-                      nameKey="category"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      label={({ category, percentage }) => `${category}: ${percentage}%`}
-                      labelLine={false}
-                    >
-                      {data.salesByCategory.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip 
-                      formatter={(value) => formatCurrency(Number(value))}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              <figure aria-label="Sales by category pie chart">
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={data.salesByCategory}
+                        dataKey="revenue"
+                        nameKey="category"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        label={({ category, percentage }) => `${category}: ${percentage}%`}
+                        labelLine={false}
+                      >
+                        {data.salesByCategory.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip 
+                        formatter={(value) => formatCurrency(Number(value))}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </figure>
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground">
                 No category data for this period

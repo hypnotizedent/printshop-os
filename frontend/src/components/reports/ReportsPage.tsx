@@ -80,6 +80,15 @@ export function ReportsPage() {
             key={report.id}
             className={`cursor-pointer transition-all hover:shadow-md ${activeTab === report.id ? 'ring-2 ring-primary' : ''}`}
             onClick={() => setActiveTab(report.id)}
+            role="button"
+            tabIndex={0}
+            aria-pressed={activeTab === report.id}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setActiveTab(report.id);
+              }
+            }}
           >
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">

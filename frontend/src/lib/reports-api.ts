@@ -59,6 +59,10 @@ export interface DashboardStatsData {
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
+// Status constants for consistency across the module
+const COMPLETED_STATUSES = ['COMPLETED', 'INVOICE PAID', 'INVOICE_PAID', 'DELIVERED'];
+const PRODUCTION_STATUSES = ['IN_PRODUCTION', 'PENDING', 'PREPRESS'];
+
 /**
  * Calculate date range for a given period
  */
@@ -102,7 +106,7 @@ function getPreviousPeriodRange(dateFrom: string, dateTo: string) {
   const to = new Date(dateTo);
   const duration = to.getTime() - from.getTime();
   
-  const previousTo = new Date(from.getTime() - 1);
+  const previousTo = new Date(from.getTime() - 86400000); // Subtract 1 day instead of 1 ms
   const previousFrom = new Date(previousTo.getTime() - duration);
   
   return {
@@ -178,11 +182,23 @@ export async function getSalesReport(dateFrom: string, dateTo: string): Promise<
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
     
-    // Sales by category (using order status as category for now)
+    // Sales by category (by product/service category from line items)
     const categoryRevenue: Record<string, number> = {};
     orders.forEach((o: any) => {
-      const category = o.status || 'Other';
-      categoryRevenue[category] = (categoryRevenue[category] || 0) + (o.totalAmount || 0);
+      if (Array.isArray(o.lineItems) && o.lineItems.length > 0) {
+        o.lineItems.forEach((item: any) => {
+          const category = item.category || 'Other';
+          const amount = item.total || item.amount || 0;
+          categoryRevenue[category] = (categoryRevenue[category] || 0) + amount;
+        });
+      } else if (o.category) {
+        // Fallback: order-level category
+        const category = o.category;
+        categoryRevenue[category] = (categoryRevenue[category] || 0) + (o.totalAmount || 0);
+      } else {
+        // Fallback: unknown category
+        categoryRevenue['Other'] = (categoryRevenue['Other'] || 0) + (o.totalAmount || 0);
+      }
     });
     
     const salesByCategory = Object.entries(categoryRevenue)
@@ -253,12 +269,11 @@ export async function getProductionReport(dateFrom: string, dateTo: string): Pro
     const prevOrders = prevOrdersData.data || [];
     
     // Calculate completed jobs
-    const completedStatuses = ['COMPLETED', 'INVOICE PAID', 'INVOICE_PAID', 'DELIVERED'];
-    const jobsCompleted = orders.filter((o: any) => completedStatuses.includes(o.status)).length;
-    const previousPeriodJobsCompleted = prevOrders.filter((o: any) => completedStatuses.includes(o.status)).length;
+    const jobsCompleted = orders.filter((o: any) => COMPLETED_STATUSES.includes(o.status)).length;
+    const previousPeriodJobsCompleted = prevOrders.filter((o: any) => COMPLETED_STATUSES.includes(o.status)).length;
     
     // Calculate average turnaround (days from creation to completion)
-    const completedOrders = orders.filter((o: any) => completedStatuses.includes(o.status) && o.updatedAt);
+    const completedOrders = orders.filter((o: any) => COMPLETED_STATUSES.includes(o.status) && o.updatedAt);
     let totalTurnaround = 0;
     completedOrders.forEach((o: any) => {
       const created = new Date(o.createdAt);
@@ -268,7 +283,7 @@ export async function getProductionReport(dateFrom: string, dateTo: string): Pro
     });
     const averageTurnaroundDays = completedOrders.length > 0 ? Math.round(totalTurnaround / completedOrders.length) : 0;
     
-    const prevCompletedOrders = prevOrders.filter((o: any) => completedStatuses.includes(o.status) && o.updatedAt);
+    const prevCompletedOrders = prevOrders.filter((o: any) => COMPLETED_STATUSES.includes(o.status) && o.updatedAt);
     let prevTotalTurnaround = 0;
     prevCompletedOrders.forEach((o: any) => {
       const created = new Date(o.createdAt);
@@ -315,21 +330,30 @@ export async function getProductionReport(dateFrom: string, dateTo: string): Pro
       'Other': 0,
     };
     
-    // Try to infer from order notes or items
+    // Try to infer from order notes or items (allow orders to be counted in multiple methods)
     orders.forEach((o: any) => {
       const notes = (o.notes || '').toLowerCase();
       const nickname = (o.orderNickname || '').toLowerCase();
       const combined = notes + ' ' + nickname;
       
+      let matched = false;
       if (combined.includes('screen') || combined.includes('ink')) {
         methodCounts['Screen Print']++;
-      } else if (combined.includes('dtg') || combined.includes('direct to garment')) {
+        matched = true;
+      }
+      if (combined.includes('dtg') || combined.includes('direct to garment')) {
         methodCounts['DTG']++;
-      } else if (combined.includes('embroid') || combined.includes('stitch')) {
+        matched = true;
+      }
+      if (combined.includes('embroid') || combined.includes('stitch')) {
         methodCounts['Embroidery']++;
-      } else if (combined.includes('vinyl') || combined.includes('heat transfer')) {
+        matched = true;
+      }
+      if (combined.includes('vinyl') || combined.includes('heat transfer')) {
         methodCounts['Vinyl']++;
-      } else {
+        matched = true;
+      }
+      if (!matched) {
         methodCounts['Other']++;
       }
     });
@@ -350,7 +374,8 @@ export async function getProductionReport(dateFrom: string, dateTo: string): Pro
       jobsCompletedChange: calculateChange(jobsCompleted, previousPeriodJobsCompleted),
       averageTurnaroundDays,
       previousPeriodAverageTurnaroundDays,
-      turnaroundChange: calculateChange(averageTurnaroundDays, previousPeriodAverageTurnaroundDays),
+      // Invert the calculation so positive = improvement (faster turnaround)
+      turnaroundChange: calculateChange(previousPeriodAverageTurnaroundDays, averageTurnaroundDays),
       onTimeDeliveryRate,
       previousPeriodOnTimeDeliveryRate,
       onTimeDeliveryChange: calculateChange(onTimeDeliveryRate, previousPeriodOnTimeDeliveryRate),
@@ -522,7 +547,6 @@ export async function getDashboardStats(): Promise<DashboardStatsData> {
     startOfWeek.setDate(now.getDate() - now.getDay());
     
     const monthStart = startOfMonth.toISOString().split('T')[0];
-    const weekStart = startOfWeek.toISOString().split('T')[0];
     const today = now.toISOString().split('T')[0];
     
     // Fetch orders for this month
@@ -561,15 +585,13 @@ export async function getDashboardStats(): Promise<DashboardStatsData> {
     const ordersThisMonth = orders.length;
     const ordersTrend = calculateChange(ordersThisMonth, prevOrders.length);
     
-    // Jobs in production
-    const productionStatuses = ['IN_PRODUCTION', 'PENDING', 'PREPRESS'];
-    const jobsInProduction = orders.filter((o: any) => productionStatuses.includes(o.status)).length;
+    // Jobs in production (use module-level constant)
+    const jobsInProduction = orders.filter((o: any) => PRODUCTION_STATUSES.includes(o.status)).length;
     
-    // Completed today
-    const completedStatuses = ['COMPLETED', 'INVOICE PAID', 'INVOICE_PAID'];
+    // Completed today (use module-level constant)
     const completedToday = orders.filter((o: any) => {
       const updated = new Date(o.updatedAt).toISOString().split('T')[0];
-      return updated === today && completedStatuses.includes(o.status);
+      return updated === today && COMPLETED_STATUSES.includes(o.status);
     }).length;
     
     // Revenue by day for chart
@@ -620,6 +642,25 @@ export async function getDashboardStats(): Promise<DashboardStatsData> {
 }
 
 /**
+ * Sanitize a value to prevent CSV formula injection
+ * Prefixes dangerous characters with a single quote
+ */
+function sanitizeCSVValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  
+  const stringValue = String(value);
+  
+  // Characters that could trigger formula execution in spreadsheet apps
+  const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+  
+  if (dangerousChars.some(char => stringValue.startsWith(char))) {
+    return `'${stringValue}`;
+  }
+  
+  return stringValue;
+}
+
+/**
  * Export data to CSV format
  */
 export function exportToCSV(data: any[], filename: string): void {
@@ -633,12 +674,13 @@ export function exportToCSV(data: any[], filename: string): void {
     headers.join(','),
     ...data.map(row => 
       headers.map(header => {
-        const value = row[header];
+        const rawValue = row[header];
+        const value = sanitizeCSVValue(rawValue);
         // Handle values that need quoting
         if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n'))) {
           return `"${value.replace(/"/g, '""')}"`;
         }
-        return value ?? '';
+        return value;
       }).join(',')
     )
   ].join('\n');
