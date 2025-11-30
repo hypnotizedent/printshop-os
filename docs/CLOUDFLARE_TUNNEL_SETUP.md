@@ -216,11 +216,42 @@ curl -I https://api.ronny.works
 | Connection refused | Service binding to 127.0.0.1 | Update CMD to bind to 0.0.0.0 |
 | SSL certificate error | Using nested subdomain | Use single-level subdomain pattern |
 | Empty page loads | Wrong VITE_ URLs | Rebuild frontend with correct production URLs |
+| Stale assets after deploy | Docker build cache | Rebuild with `docker compose build --no-cache` |
+| Containers unreachable | Orphaned networks/volumes | Run `docker system prune -af && docker volume prune -f` |
+
+---
+
+## Nuclear Recovery (When Nothing Works)
+
+If standard troubleshooting fails, follow this escalation path:
+
+```bash
+# 1. Stop everything
+docker compose down
+
+# 2. Full cleanup (WARNING: removes all Docker data)
+docker system prune -af && docker volume prune -f
+
+# 3. Rebuild without cache
+docker compose build --no-cache
+
+# 4. Start fresh
+docker compose up -d
+
+# 5. Reconnect cloudflared to the network
+docker network connect printshop_network cloudflared
+
+# 6. Verify
+curl -I https://printshop-app.ronny.works
+```
+
+For a detailed case study, see [Troubleshooting Retrospective (Nov 30, 2025)](deployment/TROUBLESHOOTING_RETROSPECTIVE_2025-11-30.md).
 
 ---
 
 ## Related Documentation
 
-- `docker-compose.yml` - Container configuration
-- `.env.production.example` - Environment variables
-- `SERVICE_DIRECTORY.md` - Full service inventory
+- [docker-compose.yml](../../docker-compose.yml) - Container configuration
+- [.env.production.example](../../.env.production.example) - Environment variables
+- [SERVICE_DIRECTORY.md](../../SERVICE_DIRECTORY.md) - Full service inventory
+- [Troubleshooting Retrospective (Nov 30, 2025)](deployment/TROUBLESHOOTING_RETROSPECTIVE_2025-11-30.md) - Detailed case study of Docker/tunnel recovery
