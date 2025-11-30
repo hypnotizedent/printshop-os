@@ -304,8 +304,8 @@ export class ReportsService {
    * Helper: Calculate cost metrics
    */
   private static calculateCostMetrics(teamMetrics: TeamMetrics): any {
-    // TODO: Make laborCostPerHour configurable via environment variables or config
-    const laborCostPerHour = 20; // Default rate - should be configurable
+    // Labor cost per hour is now configurable via environment variable
+    const laborCostPerHour = parseFloat(process.env.LABOR_COST_PER_HOUR || '20');
     const totalLaborCost = teamMetrics.totalHoursWorked * laborCostPerHour;
     const costPerJob = teamMetrics.jobsCompleted > 0
       ? totalLaborCost / teamMetrics.jobsCompleted
@@ -318,6 +318,7 @@ export class ReportsService {
       totalLaborCost: Math.round(totalLaborCost),
       costPerJob: Math.round(costPerJob),
       revenuePerHour: Math.round(revenuePerHour),
+      laborCostPerHour: laborCostPerHour,
     };
   }
 

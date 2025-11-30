@@ -1,7 +1,7 @@
 // Comprehensive tests for production dashboard analytics
 
 import { MetricsService } from '../analytics/metrics.service';
-import { ReportsService, Report } from '../analytics/reports.service';
+import { ReportsService } from '../analytics/reports.service';
 import {
   JobEntry,
   TimeEntry,

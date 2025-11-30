@@ -10,6 +10,8 @@ import { SOPEditor } from "./SOPEditor"
 import { SOPSearch } from "./SOPSearch"
 import { SOPCategories } from "./SOPCategories"
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+
 export interface SOP {
   id: string
   title: string
@@ -40,87 +42,56 @@ export function SOPLibrary({ onNavigate }: SOPLibraryProps) {
   const [sops, setSOPs] = useState<SOP[]>([])
   const [favorites, setFavorites] = useState<SOP[]>([])
   const [mostViewed, setMostViewed] = useState<SOP[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Fetch SOPs from API
     fetchSOPs()
-    fetchFavorites()
-    fetchMostViewed()
   }, [])
 
   const fetchSOPs = async () => {
-    // TODO: Replace with actual API call
-    // const response = await fetch('/api/production/sops')
-    // const data = await response.json()
-    // setSOPs(data.sops)
-    
-    // Mock data for now
-    setSOPs([
-      {
-        id: '1',
-        title: 'Screen Press Setup',
-        slug: 'screen-press-setup',
-        category: 'Machines',
-        subcategory: 'Screen Printing',
-        tags: ['screen', 'printing', 'setup', 'press'],
-        summary: 'Complete setup procedure for manual and automatic screen printing presses.',
-        content: 'Step-by-step guide...',
-        difficulty: 'Intermediate',
-        estimatedTime: 30,
-        viewCount: 124,
-        version: 3.2,
-        updatedAt: '2025-11-15',
-        isFavorite: true,
-      },
-      {
-        id: '2',
-        title: 'Fixing Registration Issues',
-        slug: 'fixing-registration-issues',
-        category: 'Troubleshooting',
-        subcategory: 'Screen Issues',
-        tags: ['registration', 'troubleshooting', 'screen'],
-        summary: 'Step-by-step guide to diagnose and fix registration problems on screen press.',
-        content: 'Troubleshooting steps...',
-        difficulty: 'Advanced',
-        estimatedTime: 45,
-        viewCount: 89,
-        version: 2.1,
-        updatedAt: '2025-11-10',
-      },
-      {
-        id: '3',
-        title: 'DTG Pre-treatment Guide',
-        slug: 'dtg-pre-treatment-guide',
-        category: 'Processes',
-        subcategory: 'Pre-treatment',
-        tags: ['dtg', 'pre-treatment', 'process'],
-        summary: 'Complete guide for pre-treating garments for DTG printing.',
-        content: 'Pre-treatment process...',
-        difficulty: 'Beginner',
-        estimatedTime: 15,
-        viewCount: 67,
-        version: 1.5,
-        updatedAt: '2025-11-08',
-      },
-    ])
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`${API_BASE}/api/sops?pagination[limit]=100&sort=updatedAt:desc`)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch SOPs: ${response.status}`)
+      }
+      const data = await response.json()
+      
+      // Transform Strapi response to SOP format
+      const transformedSOPs: SOP[] = (data.data || []).map((item: any) => ({
+        id: item.documentId || item.id.toString(),
+        title: item.title || 'Untitled SOP',
+        slug: item.slug || item.title?.toLowerCase().replace(/\s+/g, '-') || 'untitled',
+        category: item.category || 'Processes',
+        subcategory: item.subcategory,
+        tags: item.tags || [],
+        summary: item.summary || item.description || '',
+        content: item.content || '',
+        difficulty: item.difficulty || 'Beginner',
+        estimatedTime: item.estimatedTime || 0,
+        viewCount: item.viewCount || 0,
+        version: item.version || 1,
+        updatedAt: item.updatedAt || new Date().toISOString(),
+        isFavorite: item.isFavorite || false,
+      }))
+      
+      setSOPs(transformedSOPs)
+    } catch (err) {
+      console.error('Error fetching SOPs:', err)
+      setError('Unable to load SOPs. Please try again later.')
+      setSOPs([])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const fetchFavorites = async () => {
-    // TODO: Replace with actual API call
-    // Filter favorites from SOPs
+  // Update favorites and most viewed when SOPs change
+  useEffect(() => {
     setFavorites(sops.filter(sop => sop.isFavorite))
-  }
-
-  const fetchMostViewed = async () => {
-    // TODO: Replace with actual API call
-    // Sort by viewCount
     const sorted = [...sops].sort((a, b) => b.viewCount - a.viewCount).slice(0, 5)
     setMostViewed(sorted)
-  }
-
-  useEffect(() => {
-    fetchFavorites()
-    fetchMostViewed()
   }, [sops])
 
   const handleSearch = (query: string) => {
@@ -145,18 +116,62 @@ export function SOPLibrary({ onNavigate }: SOPLibraryProps) {
     setIsCreating(true)
   }
 
-  const handleSave = (sop: SOP) => {
-    // TODO: Save to API
-    setSOPs(prev => {
-      const existing = prev.find(s => s.id === sop.id)
-      if (existing) {
-        return prev.map(s => s.id === sop.id ? sop : s)
+  const handleSave = async (sop: SOP) => {
+    try {
+      const isNew = !sops.some(s => s.id === sop.id)
+      const url = isNew 
+        ? `${API_BASE}/api/sops`
+        : `${API_BASE}/api/sops/${sop.id}`
+      
+      const response = await fetch(url, {
+        method: isNew ? 'POST' : 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: {
+            title: sop.title,
+            slug: sop.slug,
+            category: sop.category,
+            subcategory: sop.subcategory,
+            tags: sop.tags,
+            summary: sop.summary,
+            content: sop.content,
+            difficulty: sop.difficulty,
+            estimatedTime: sop.estimatedTime,
+            viewCount: sop.viewCount,
+            version: sop.version,
+            isFavorite: sop.isFavorite,
+          }
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to save SOP: ${response.status}`)
       }
-      return [...prev, sop]
-    })
-    setIsEditing(false)
-    setIsCreating(false)
-    setSelectedSOP(sop)
+
+      const savedData = await response.json()
+      const savedSOP: SOP = {
+        ...sop,
+        id: savedData.data?.documentId || savedData.data?.id?.toString() || sop.id,
+        updatedAt: savedData.data?.updatedAt || new Date().toISOString(),
+      }
+
+      setSOPs(prev => {
+        const existing = prev.find(s => s.id === savedSOP.id)
+        if (existing) {
+          return prev.map(s => s.id === savedSOP.id ? savedSOP : s)
+        }
+        return [...prev, savedSOP]
+      })
+      setIsEditing(false)
+      setIsCreating(false)
+      setSelectedSOP(savedSOP)
+      setError(null)
+    } catch (err) {
+      console.error('Error saving SOP:', err)
+      // Show error message to user instead of optimistic update
+      setError('Failed to save SOP. Please try again.')
+      // Keep editing mode open so user can retry
+    }
   }
 
   const handleCancel = () => {
@@ -227,15 +242,35 @@ export function SOPLibrary({ onNavigate }: SOPLibraryProps) {
         </Button>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <MagnifyingGlass size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search SOPs by title, tags, or content..."
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="pl-10"
-        />
+      {/* Error State */}
+      {error && (
+        <Card className="p-4 border-destructive bg-destructive/10">
+          <p className="text-destructive">{error}</p>
+          <Button variant="outline" size="sm" className="mt-2" onClick={fetchSOPs}>
+            Retry
+          </Button>
+        </Card>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
+
+      {/* Main Content - Only show when not loading */}
+      {!isLoading && (
+        <>
+          {/* Search Bar */}
+          <div className="relative">
+            <MagnifyingGlass size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search SOPs by title, tags, or content..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10"
+            />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -398,6 +433,8 @@ export function SOPLibrary({ onNavigate }: SOPLibraryProps) {
           </Tabs>
         </div>
       </div>
+      </>
+      )}
     </div>
   )
 }

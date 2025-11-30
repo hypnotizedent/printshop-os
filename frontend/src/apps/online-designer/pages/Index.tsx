@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { strapi } from '@/lib/strapi';
+import { strapi } from '../lib/strapi';
 
 export default function Home() {
   const [product, setProduct] = useState('AS Colour Staple Tee');
