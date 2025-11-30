@@ -1,12 +1,14 @@
-import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, MapTrifold, Robot } from "@phosphor-icons/react"
+import { House, FolderOpen, Users, Package, Printer, ChartBar, Gear, Bell, ClockAfternoon, FileText, ShoppingCart, Truck, MapTrifold, UserCircle, SignIn } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/ui/ThemeToggle"
+import { Link } from "react-router-dom"
 
 interface NavItem {
   icon: React.ElementType
   label: string
   href: string
   badge?: number
+  isExternal?: boolean
 }
 
 interface AppSidebarProps {
@@ -45,7 +47,7 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = currentPage === item.href
@@ -76,6 +78,27 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
             </button>
           )
         })}
+        
+        {/* Customer Portal Link */}
+        <div className="pt-4 mt-4 border-t border-border">
+          <p className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            External
+          </p>
+          <Link
+            to="/portal"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-foreground hover:bg-muted"
+          >
+            <UserCircle size={20} />
+            <span className="font-medium text-sm">Customer Portal</span>
+          </Link>
+          <Link
+            to="/login"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-foreground hover:bg-muted"
+          >
+            <SignIn size={20} />
+            <span className="font-medium text-sm">Login Page</span>
+          </Link>
+        </div>
       </nav>
 
       <div className="p-4 border-t border-border space-y-2">

@@ -377,3 +377,34 @@ export interface Quote {
 
   notes?: string
 }
+
+// Strapi API response types for data fetching
+export interface StrapiCustomer {
+  id: number
+  documentId?: string
+  name?: string
+  email?: string
+  phone?: string
+  company?: string
+  updatedAt?: string
+}
+
+export interface StrapiOrderItem {
+  quantity?: number
+}
+
+export interface StrapiOrder {
+  id: number
+  documentId?: string
+  orderNumber?: string
+  status?: string
+  dueDate?: string
+  createdAt?: string
+  notes?: string
+  totalAmount?: number
+  items?: StrapiOrderItem[]
+  customer?: {
+    documentId?: string
+    name?: string
+  }
+}

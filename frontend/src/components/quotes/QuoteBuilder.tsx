@@ -26,8 +26,10 @@ import {
   Check, 
   Upload,
   Eye,
+  ArrowRight,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { ordersApi, jobsApi, DEFAULT_JOB_DUE_DAYS } from '@/lib/api-client';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -215,6 +217,8 @@ export function QuoteBuilder() {
   });
   
   const [isSaving, setIsSaving] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
+  const [lastSavedOrderId, setLastSavedOrderId] = useState<string | null>(null);
   const [showCustomerSearch, setShowCustomerSearch] = useState(false);
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [customerSearchResults, setCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
@@ -491,17 +495,17 @@ export function QuoteBuilder() {
   }, []);
 
   // Save quote
-  const saveQuote = async (sendToCustomer = false) => {
+  const saveQuote = async (sendToCustomer = false): Promise<string | null> => {
     if (!formData.customer.name || !formData.customer.email) {
       toast.error('Please fill in customer name and email');
       setActiveTab('details');
-      return;
+      return null;
     }
     
     if (formData.lineItems.every(item => getTotalQuantity(item) === 0)) {
       toast.error('Please add at least one item with quantities');
       setActiveTab('items');
-      return;
+      return null;
     }
 
     setIsSaving(true);
@@ -555,10 +559,83 @@ export function QuoteBuilder() {
         throw new Error('Failed to save quote');
       }
 
+      const result = await response.json();
+      const savedOrderId = result.data?.documentId;
+      setLastSavedOrderId(savedOrderId);
+
       toast.success(sendToCustomer ? 'Quote sent to customer!' : 'Quote saved as draft!', {
         description: `Quote #${quoteNumber}`,
       });
       
+      return savedOrderId;
+      
+    } catch (error) {
+      toast.error('Failed to save quote');
+      console.error(error);
+      return null;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Convert quote to order
+  const convertToOrder = async () => {
+    // If no saved order, save it first
+    let orderIdToConvert = lastSavedOrderId;
+    
+    if (!orderIdToConvert) {
+      toast.info('Saving quote first...');
+      orderIdToConvert = await saveQuote(false);
+      if (!orderIdToConvert) {
+        return; // Save failed
+      }
+    }
+
+    setIsConverting(true);
+    try {
+      // Update order status to PENDING
+      const orderResult = await ordersApi.update(orderIdToConvert, {
+        status: 'PENDING',
+      });
+
+      if (!orderResult.success || !orderResult.data) {
+        toast.error('Failed to convert quote', {
+          description: orderResult.error || 'Could not update order status',
+        });
+        return;
+      }
+
+      const order = orderResult.data;
+
+      // Create associated job
+      const totalQty = formData.lineItems.reduce(
+        (sum, item) => sum + Object.values(item.sizes).reduce((s, q) => s + q, 0),
+        0
+      );
+
+      const jobResult = await jobsApi.create({
+        title: order.orderNumber || `Job ${order.id}`,
+        customer: formData.customer.name || 'Unknown Customer',
+        customerId: formData.customer.id,
+        status: 'design',
+        priority: formData.rushOrder ? 'high' : 'normal',
+        dueDate: formData.dueDate || new Date(Date.now() + DEFAULT_JOB_DUE_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+        quantity: totalQty || 1,
+        estimatedCost: totals.total,
+        order: { connect: [orderIdToConvert] },
+      });
+
+      if (jobResult.success) {
+        toast.success('Quote converted to order!', {
+          description: `Order ${order.orderNumber} created with job in design queue.`,
+        });
+      } else {
+        toast.success('Quote converted to order!', {
+          description: `Order ${order.orderNumber} created. Job creation failed: ${jobResult.error}`,
+        });
+      }
+
+      // Reset form
       setFormData({
         customer: { name: '', email: '', phone: '', company: '' },
         dueDate: '',
@@ -571,13 +648,14 @@ export function QuoteBuilder() {
         rushOrder: false,
         rushFee: 0,
       });
+      setLastSavedOrderId(null);
       setActiveTab('details');
-      
+
     } catch (error) {
-      toast.error('Failed to save quote');
-      console.error(error);
+      toast.error('Failed to convert quote');
+      console.error('Convert to order error:', error);
     } finally {
-      setIsSaving(false);
+      setIsConverting(false);
     }
   };
 
@@ -612,13 +690,22 @@ export function QuoteBuilder() {
               <Eye className="mr-2" size={16} />
               Preview
             </Button>
-            <Button variant="outline" onClick={() => saveQuote(false)} disabled={isSaving}>
+            <Button variant="outline" onClick={() => saveQuote(false)} disabled={isSaving || isConverting}>
               <FloppyDisk className="mr-2" size={16} />
               Save Draft
             </Button>
-            <Button onClick={() => saveQuote(true)} disabled={isSaving}>
+            <Button onClick={() => saveQuote(true)} disabled={isSaving || isConverting}>
               <PaperPlaneTilt className="mr-2" size={16} />
               Send Quote
+            </Button>
+            <Button 
+              variant="default" 
+              onClick={convertToOrder} 
+              disabled={isSaving || isConverting}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <ArrowRight className="mr-2" size={16} />
+              {isConverting ? 'Converting...' : 'Convert to Order'}
             </Button>
           </div>
         </div>
