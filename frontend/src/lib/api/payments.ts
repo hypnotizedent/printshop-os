@@ -156,7 +156,10 @@ export async function recordPayment(
 
     const currentAmountPaid = order.amountPaid || 0;
     const totalAmount = order.totalAmount || 0;
-    const currentOutstanding = order.amountOutstanding || (totalAmount - currentAmountPaid);
+    // Use amountOutstanding if explicitly set (even if 0), otherwise calculate
+    const currentOutstanding = order.amountOutstanding !== undefined 
+      ? order.amountOutstanding 
+      : (totalAmount - currentAmountPaid);
 
     // Validate payment data against current order state
     const validation = validatePaymentData(payment, currentOutstanding);
