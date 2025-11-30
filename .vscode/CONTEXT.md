@@ -1,11 +1,11 @@
-# Session Context - 11/28/2025
+# Session Context - 11/29/2025
 
 > Auto-generated. Do not edit manually.
 
 ## Git Status
 - **Branch:** main
-- **Last Commit:** 05069c2 - feat: Add frontend components, scripts, and Strapi schemas (5 hours ago)
-- **Uncommitted:** 7 files
+- **Last Commit:** 4ab4ad1 - chore: Track .vscode automation for session continuity (14 hours ago)
+- **Uncommitted:** 24 files
 
 ## Project Structure
 - **Services:** api, job-estimator, production-dashboard, supplier-sync
@@ -14,7 +14,7 @@
 ## Active Services
 | Service | Status |
 |---------|--------|
-| Strapi (1337) | stopped |
+| Strapi (1337) | running |
 | Frontend (5173) | stopped |
 | Redis (6379) | stopped |
 

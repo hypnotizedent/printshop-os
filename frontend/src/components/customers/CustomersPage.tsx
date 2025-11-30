@@ -3,15 +3,30 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { MagnifyingGlass, Plus, EnvelopeSimple, Phone, Buildings, Package, CurrencyDollar } from "@phosphor-icons/react"
+import { toast } from "sonner"
+import { customersApi, type CreateCustomerInput } from "@/lib/api-client"
 import type { Customer } from "@/lib/types"
 
 interface CustomersPageProps {
   customers: Customer[]
+  onViewCustomer?: (customerId: string) => void
+  onNewOrder?: (customerId: string) => void
+  onCustomerCreated?: (customer: Customer) => void
 }
 
-export function CustomersPage({ customers }: CustomersPageProps) {
+export function CustomersPage({ customers, onViewCustomer, onNewOrder, onCustomerCreated }: CustomersPageProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const [newCustomer, setNewCustomer] = useState<CreateCustomerInput>({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+  })
 
   const filteredCustomers = customers.filter(customer =>
     searchQuery === "" ||
@@ -24,6 +39,50 @@ export function CustomersPage({ customers }: CustomersPageProps) {
   const activeCustomers = customers.filter(c => c.status === 'active').length
   const totalOrders = customers.reduce((acc, c) => acc + c.totalOrders, 0)
 
+  const handleCreateCustomer = async () => {
+    if (!newCustomer.name.trim() || !newCustomer.email.trim()) {
+      toast.error("Please fill in name and email")
+      return
+    }
+
+    setIsCreating(true)
+    try {
+      const result = await customersApi.create(newCustomer)
+      
+      if (result.success && result.data) {
+        toast.success("Customer created successfully!", {
+          description: `${newCustomer.name} has been added to your customers.`,
+        })
+        
+        // Notify parent component
+        onCustomerCreated?.({
+          id: result.data.documentId,
+          name: result.data.name,
+          email: result.data.email,
+          phone: result.data.phone || "",
+          company: result.data.company || "",
+          totalOrders: 0,
+          totalRevenue: 0,
+          lastOrderDate: new Date().toISOString(),
+          status: 'active',
+        })
+        
+        // Reset form and close dialog
+        setNewCustomer({ name: "", email: "", phone: "", company: "" })
+        setShowAddDialog(false)
+      } else {
+        toast.error("Failed to create customer", {
+          description: result.error || "Please try again.",
+        })
+      }
+    } catch (error) {
+      toast.error("Failed to create customer")
+      console.error("Create customer error:", error)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -31,7 +90,7 @@ export function CustomersPage({ customers }: CustomersPageProps) {
           <h1 className="text-3xl font-bold text-foreground tracking-tight">Customers</h1>
           <p className="text-muted-foreground mt-1">Manage your customer relationships and orders</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setShowAddDialog(true)}>
           <Plus size={18} weight="bold" />
           Add Customer
         </Button>
@@ -132,10 +191,25 @@ export function CustomersPage({ customers }: CustomersPageProps) {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewCustomer?.(customer.id);
+                  }}
+                >
                   View Details
                 </Button>
-                <Button size="sm" className="flex-1">
+                <Button 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNewOrder?.(customer.id);
+                  }}
+                >
                   New Order
                 </Button>
               </div>
@@ -149,6 +223,65 @@ export function CustomersPage({ customers }: CustomersPageProps) {
           <p className="text-muted-foreground">No customers found matching your search.</p>
         </Card>
       )}
+
+      {/* Add Customer Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Customer</DialogTitle>
+            <DialogDescription>
+              Create a new customer record. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name *</Label>
+              <Input
+                id="name"
+                value={newCustomer.name}
+                onChange={(e) => setNewCustomer(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="John Doe"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newCustomer.email}
+                onChange={(e) => setNewCustomer(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="john@example.com"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                value={newCustomer.phone}
+                onChange={(e) => setNewCustomer(prev => ({ ...prev, phone: e.target.value }))}
+                placeholder="(555) 123-4567"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="company">Company</Label>
+              <Input
+                id="company"
+                value={newCustomer.company}
+                onChange={(e) => setNewCustomer(prev => ({ ...prev, company: e.target.value }))}
+                placeholder="Acme Inc."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateCustomer} disabled={isCreating}>
+              {isCreating ? "Creating..." : "Create Customer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

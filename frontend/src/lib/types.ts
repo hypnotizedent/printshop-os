@@ -79,6 +79,17 @@ export interface DashboardStats {
   urgentJobs: number
 }
 
+// Production Calendar Types
+export interface CapacityData {
+  date: string
+  scheduledJobs: number
+  totalCapacity: number
+  percentUtilized: number
+  isOverbooked: boolean
+}
+
+export type CalendarView = 'month' | 'week' | 'day'
+
 // Customer Portal Types - CustomerOrder uses full OrderStatus defined below
 export interface CustomerOrder {
   id: string
@@ -376,4 +387,35 @@ export interface Quote {
   changeRequests: ChangeRequest[]
 
   notes?: string
+}
+
+// Strapi API response types for data fetching
+export interface StrapiCustomer {
+  id: number
+  documentId?: string
+  name?: string
+  email?: string
+  phone?: string
+  company?: string
+  updatedAt?: string
+}
+
+export interface StrapiOrderItem {
+  quantity?: number
+}
+
+export interface StrapiOrder {
+  id: number
+  documentId?: string
+  orderNumber?: string
+  status?: string
+  dueDate?: string
+  createdAt?: string
+  notes?: string
+  totalAmount?: number
+  items?: StrapiOrderItem[]
+  customer?: {
+    documentId?: string
+    name?: string
+  }
 }

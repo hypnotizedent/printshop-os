@@ -5,7 +5,7 @@
     "singularName": "product",
     "pluralName": "products",
     "displayName": "Product",
-    "description": "Curated supplier products catalog. Live inventory via /api/inventory/check/:sku"
+    "description": "Curated supplier products catalog (Top 500). Live inventory via /api/inventory/check/:sku"
   },
   "options": {
     "draftAndPublish": false
@@ -30,12 +30,17 @@
         "t-shirts",
         "polos",
         "sweatshirts",
+        "hoodies",
         "jackets",
         "pants",
         "shorts",
         "hats",
         "bags",
         "accessories",
+        "workwear",
+        "athletic",
+        "outerwear",
+        "youth",
         "other"
       ],
       "default": "other"
@@ -77,6 +82,29 @@
     "isFavorite": {
       "type": "boolean",
       "default": false
+    },
+    "isCurated": {
+      "type": "boolean",
+      "default": false
+    },
+    "usageCount": {
+      "type": "integer",
+      "default": 0
+    },
+    "priority": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "max": 100
+    },
+    "tags": {
+      "type": "json"
+    },
+    "specifications": {
+      "type": "json"
+    },
+    "priceBreaks": {
+      "type": "json"
     }
   }
 }

@@ -1,7 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Navigation } from "./Navigation"
 import { Dashboard } from "./Dashboard"
+import { OrderHistory as OrderHistoryComponent } from "./OrderHistory"
+import { QuotesPage } from "./QuotesPage"
+import { ProfileSettings } from "./ProfileSettings"
+import { useAuth } from "@/contexts/AuthContext"
 import type { 
   CustomerUser, 
   CustomerDashboardStats, 
@@ -10,14 +14,14 @@ import type {
   QuoteRequest 
 } from "@/lib/types"
 
-// Mock data for demonstration
-const mockUser: CustomerUser = {
-  id: "1",
-  name: "John Smith",
-  email: "john.smith@example.com",
-  company: "Acme Corporation",
+// Transform auth customer to CustomerUser type for portal components
+const getCustomerUser = (customer: { id: number; documentId: string; name: string; email: string; company?: string | null } | null): CustomerUser => ({
+  id: customer?.documentId || "1",
+  name: customer?.name || "Customer",
+  email: customer?.email || "customer@example.com",
+  company: customer?.company || undefined,
   role: "customer"
-}
+})
 
 const mockStats: CustomerDashboardStats = {
   ordersThisMonth: 12,
@@ -38,7 +42,7 @@ const mockOrders: CustomerOrder[] = [
   {
     id: "2",
     orderNumber: "12344",
-    status: "in-production",
+    status: "in_production",
     total: 890,
     date: "2024-11-14",
     items: 2
@@ -128,16 +132,6 @@ const mockPendingQuotes: QuoteRequest[] = [
     expiresAt: "2024-11-25"
   }
 ]
-
-// Placeholder components for other routes
-function OrderHistory() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Order History</h1>
-      <p className="text-muted-foreground mt-2">View all your past orders</p>
-    </div>
-  )
-}
 
 function TrackOrders() {
   return (
@@ -229,58 +223,68 @@ function SupportTickets() {
   )
 }
 
+// Placeholder for OrderHistory until we remove the old one
+function OrderHistory() {
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold">Order History</h1>
+      <p className="text-muted-foreground mt-2">View all your past orders</p>
+    </div>
+  )
+}
+
 export function Portal() {
+  const { logout, customer } = useAuth()
+  const user = getCustomerUser(customer)
+  
   const handleSearch = () => {
     // TODO: Implement search functionality
     // This will be connected to the backend search API
   }
 
-  const handleLogout = () => {
-    // TODO: Implement logout functionality
-    // This will clear session and redirect to login page
+  const handleLogout = async () => {
+    await logout()
+    // Navigate to login after logout will be handled by the ProtectedRoute
   }
 
   return (
-    <Router>
-      <div className="flex min-h-screen bg-background">
-        <Navigation 
-          user={mockUser}
-          notificationCount={mockNotifications.filter(n => !n.read).length}
-          onSearch={handleSearch}
-          onLogout={handleLogout}
-        />
-        <main className="flex-1 lg:ml-0">
-          <div className="lg:hidden h-16" /> {/* Spacer for mobile header */}
-          <Routes>
-            <Route 
-              path="/portal" 
-              element={
-                <ProtectedRoute allowedUserTypes={["customer"]}>
-                  <Dashboard
-                    stats={mockStats}
-                    recentOrders={mockOrders}
-                    notifications={mockNotifications}
-                    pendingQuotes={mockPendingQuotes}
-                    userName={mockUser.name.split(' ')[0]}
-                  />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="/portal/orders/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><OrderHistory /></ProtectedRoute>} />
-            <Route path="/portal/orders/track" element={<ProtectedRoute allowedUserTypes={["customer"]}><TrackOrders /></ProtectedRoute>} />
-            <Route path="/portal/quotes/request" element={<ProtectedRoute allowedUserTypes={["customer"]}><RequestQuote /></ProtectedRoute>} />
-            <Route path="/portal/quotes/pending" element={<ProtectedRoute allowedUserTypes={["customer"]}><PendingQuotes /></ProtectedRoute>} />
-            <Route path="/portal/quotes/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><QuoteHistory /></ProtectedRoute>} />
-            <Route path="/portal/account/profile" element={<ProtectedRoute allowedUserTypes={["customer"]}><Profile /></ProtectedRoute>} />
-            <Route path="/portal/account/addresses" element={<ProtectedRoute allowedUserTypes={["customer"]}><Addresses /></ProtectedRoute>} />
-            <Route path="/portal/account/payment" element={<ProtectedRoute allowedUserTypes={["customer"]}><PaymentMethods /></ProtectedRoute>} />
-            <Route path="/portal/account/notifications" element={<ProtectedRoute allowedUserTypes={["customer"]}><NotificationSettings /></ProtectedRoute>} />
-            <Route path="/portal/support/contact" element={<ProtectedRoute allowedUserTypes={["customer"]}><ContactSupport /></ProtectedRoute>} />
-            <Route path="/portal/support/tickets" element={<ProtectedRoute allowedUserTypes={["customer"]}><SupportTickets /></ProtectedRoute>} />
-            <Route path="/" element={<Navigate to="/portal" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <div className="flex min-h-screen bg-background">
+      <Navigation 
+        user={user}
+        notificationCount={mockNotifications.filter(n => !n.read).length}
+        onSearch={handleSearch}
+        onLogout={handleLogout}
+      />
+      <main className="flex-1 lg:ml-0">
+        <div className="lg:hidden h-16" /> {/* Spacer for mobile header */}
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute allowedUserTypes={["customer"]}>
+                <Dashboard
+                  stats={mockStats}
+                  recentOrders={mockOrders}
+                  notifications={mockNotifications}
+                  pendingQuotes={mockPendingQuotes}
+                  userName={user.name.split(' ')[0]}
+                />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/orders/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><OrderHistory /></ProtectedRoute>} />
+          <Route path="/orders/track" element={<ProtectedRoute allowedUserTypes={["customer"]}><TrackOrders /></ProtectedRoute>} />
+          <Route path="/quotes/request" element={<ProtectedRoute allowedUserTypes={["customer"]}><RequestQuote /></ProtectedRoute>} />
+          <Route path="/quotes/pending" element={<ProtectedRoute allowedUserTypes={["customer"]}><PendingQuotes /></ProtectedRoute>} />
+          <Route path="/quotes/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><QuoteHistory /></ProtectedRoute>} />
+          <Route path="/account/profile" element={<ProtectedRoute allowedUserTypes={["customer"]}><Profile /></ProtectedRoute>} />
+          <Route path="/account/addresses" element={<ProtectedRoute allowedUserTypes={["customer"]}><Addresses /></ProtectedRoute>} />
+          <Route path="/account/payment" element={<ProtectedRoute allowedUserTypes={["customer"]}><PaymentMethods /></ProtectedRoute>} />
+          <Route path="/account/notifications" element={<ProtectedRoute allowedUserTypes={["customer"]}><NotificationSettings /></ProtectedRoute>} />
+          <Route path="/support/contact" element={<ProtectedRoute allowedUserTypes={["customer"]}><ContactSupport /></ProtectedRoute>} />
+          <Route path="/support/tickets" element={<ProtectedRoute allowedUserTypes={["customer"]}><SupportTickets /></ProtectedRoute>} />
+        </Routes>
+      </main>
+    </div>
   )
 }

@@ -315,4 +315,211 @@ export default {
       message: 'Logged out successfully',
     };
   },
+
+  /**
+   * Get Customer Orders
+   * GET /customer/orders
+   */
+  async getCustomerOrders(ctx: Context) {
+    const authHeader = ctx.request.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return ctx.unauthorized('Authentication required');
+    }
+
+    const token = authHeader.substring(7);
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as {
+        id: number;
+        documentId: string;
+        email: string;
+        type: string;
+      };
+
+      if (decoded.type !== 'customer') {
+        return ctx.unauthorized('Customer authentication required');
+      }
+
+      const page = parseInt(ctx.query.page as string) || 1;
+      const limit = Math.min(parseInt(ctx.query.limit as string) || 10, 50);
+      const start = (page - 1) * limit;
+
+      // Find orders for this customer
+      const orders = await strapi.documents('api::order.order').findMany({
+        filters: {
+          customer: { documentId: decoded.documentId },
+        },
+        populate: ['lineItems', 'customer'],
+        sort: { createdAt: 'desc' },
+        start,
+        limit,
+      });
+
+      // Transform to match frontend expectations
+      const transformedOrders = orders.map((order: any) => ({
+        id: order.documentId,
+        orderNumber: order.printavoId || order.orderNumber || `ORD-${order.id}`,
+        status: order.status || 'PENDING',
+        total: order.totalAmount || 0,
+        createdAt: order.createdAt,
+        items: order.lineItems || [],
+      }));
+
+      ctx.body = {
+        orders: transformedOrders,
+        pagination: {
+          page,
+          limit,
+          total: orders.length,
+        },
+      };
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        return ctx.unauthorized('Token expired');
+      }
+      strapi.log.error('Get customer orders error:', error);
+      return ctx.internalServerError('Failed to fetch orders');
+    }
+  },
+
+  /**
+   * Get Single Customer Order
+   * GET /customer/orders/:orderNumber
+   */
+  async getCustomerOrder(ctx: Context) {
+    const authHeader = ctx.request.headers.authorization;
+    const { orderNumber } = ctx.params;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return ctx.unauthorized('Authentication required');
+    }
+
+    const token = authHeader.substring(7);
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as {
+        id: number;
+        documentId: string;
+        email: string;
+        type: string;
+      };
+
+      if (decoded.type !== 'customer') {
+        return ctx.unauthorized('Customer authentication required');
+      }
+
+      // Find order by orderNumber or printavoId
+      const orders = await strapi.documents('api::order.order').findMany({
+        filters: {
+          $or: [
+            { printavoId: orderNumber },
+            { orderNumber: orderNumber },
+            { documentId: orderNumber },
+          ],
+        },
+        populate: ['lineItems', 'customer'],
+        limit: 1,
+      });
+
+      const order = orders[0];
+
+      if (!order) {
+        return ctx.notFound('Order not found');
+      }
+
+      // Verify this order belongs to the customer
+      if (order.customer?.documentId !== decoded.documentId) {
+        return ctx.forbidden('Access denied');
+      }
+
+      ctx.body = {
+        order: {
+          id: order.documentId,
+          orderNumber: order.printavoId || order.orderNumber || `ORD-${order.id}`,
+          status: order.status || 'PENDING',
+          total: order.totalAmount || 0,
+          createdAt: order.createdAt,
+          items: order.lineItems || [],
+          customer: {
+            name: order.customer?.name,
+            email: order.customer?.email,
+          },
+        },
+      };
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        return ctx.unauthorized('Token expired');
+      }
+      strapi.log.error('Get customer order error:', error);
+      return ctx.internalServerError('Failed to fetch order');
+    }
+  },
+
+  /**
+   * Get Customer Quotes
+   * GET /customer/quotes
+   */
+  async getCustomerQuotes(ctx: Context) {
+    const authHeader = ctx.request.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return ctx.unauthorized('Authentication required');
+    }
+
+    const token = authHeader.substring(7);
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as {
+        id: number;
+        documentId: string;
+        email: string;
+        type: string;
+      };
+
+      if (decoded.type !== 'customer') {
+        return ctx.unauthorized('Customer authentication required');
+      }
+
+      const page = parseInt(ctx.query.page as string) || 1;
+      const limit = Math.min(parseInt(ctx.query.limit as string) || 10, 50);
+      const start = (page - 1) * limit;
+
+      // Find quotes for this customer
+      const quotes = await strapi.documents('api::quote.quote').findMany({
+        filters: {
+          customer: { documentId: decoded.documentId },
+        },
+        populate: ['customer'],
+        sort: { createdAt: 'desc' },
+        start,
+        limit,
+      });
+
+      const transformedQuotes = quotes.map((quote: any) => ({
+        id: quote.documentId,
+        quoteNumber: quote.quoteNumber || `QT-${quote.id}`,
+        status: quote.status || 'PENDING',
+        total: quote.subtotal || 0,
+        createdAt: quote.createdAt,
+        expiresAt: quote.expiresAt,
+        items: quote.lineItems || [],
+      }));
+
+      ctx.body = {
+        quotes: transformedQuotes,
+        pagination: {
+          page,
+          limit,
+          total: quotes.length,
+        },
+      };
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        return ctx.unauthorized('Token expired');
+      }
+      strapi.log.error('Get customer quotes error:', error);
+      return ctx.internalServerError('Failed to fetch quotes');
+    }
+  },
 };

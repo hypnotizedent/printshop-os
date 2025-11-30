@@ -4,6 +4,19 @@ import { useOffline } from '../../../hooks/useOffline';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
+// UUID generator that works over HTTP (crypto.randomUUID requires HTTPS)
+const generateId = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for non-secure contexts
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 interface Employee {
   id: number;
   documentId: string;
@@ -139,7 +152,7 @@ export const MobileTimeClock = () => {
       } else {
         // Offline mode - save locally
         await saveTimeEntryOffline({
-          id: crypto.randomUUID(),
+          id: generateId(),
           userId: employee.documentId,
           timestamp: Date.now(),
           type: 'clock-in',

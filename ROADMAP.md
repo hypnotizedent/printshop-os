@@ -73,9 +73,10 @@ This document outlines the technical plan for building a custom digital operatio
     *   **Goal:** Single view of the customer.
 
 *   **Step 2A.3: Vector Context Store**
-    *   Implement a vector database (e.g., Pinecone or local pgvector).
+    *   ✅ Implement Milvus vector database (self-hosted, replacing Pinecone)
     *   Ingest `data/intelligence` summaries and recent order history.
     *   **Goal:** Enable Chatbots to answer "How much did Customer X spend last year?".
+    *   **Cost Savings:** $0/month vs $70+/month for cloud vector DB
 
 ### Part 2B: Customer Portal & Design System (New)
 
@@ -333,7 +334,7 @@ Customer self-service portal enabling secure login, order history, reorder funct
 AI-powered automation including intelligent workflow orchestration (n8n), design metadata extraction, customer chatbot, smart pricing, demand forecasting, quality control AI, document processing, and supplier enrichment.
 
 ### Sub-Tasks (10 executable items)
-1. AI/ML Stack Setup (OpenAI, Pinecone, n8n)
+1. ✅ AI/ML Stack Setup (OpenAI, Milvus, n8n) - Milvus replaces Pinecone for $0/month self-hosted
 2. Retrieval-Augmented Generation (RAG) System
 3. Customer Inquiry Chatbot
 4. Design Analysis AI (Computer Vision)
@@ -343,6 +344,13 @@ AI-powered automation including intelligent workflow orchestration (n8n), design
 8. Demand Forecasting
 9. Quality Control AI (Computer Vision)
 10. Analytics Dashboard & KPIs
+
+### Vector Database (Milvus)
+Self-hosted Milvus replaces cloud vector databases (Pinecone) for significant cost savings:
+- **Collections:** designs, customers, orders, knowledge_base
+- **Use Cases:** Semantic search, RAG, design similarity, customer intelligence
+- **Cost:** $0/month (vs $70+/month for Pinecone)
+- **Documentation:** `docs/VECTOR_DATABASE.md`
 
 ### Key Metrics
 | Metric | Target |

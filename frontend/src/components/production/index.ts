@@ -26,4 +26,10 @@ export { SOPViewer } from './SOPViewer';
 export { SOPEditor } from './SOPEditor';
 export { ProductionPage } from './ProductionPage';
 
+// Calendar and Scheduling Components
+export { ProductionCalendar } from './ProductionCalendar';
+export { CalendarDayView } from './CalendarDayView';
+export { JobQuickView } from './JobQuickView';
+export { CapacityWidget } from './CapacityWidget';
+
 export type { ChecklistData, ChecklistStepData } from './Checklist';
