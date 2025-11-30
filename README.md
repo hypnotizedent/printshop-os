@@ -629,8 +629,9 @@ docker rm cloudflared
 
 # Reconnect to Cloudflare (uses stored credentials)
 # Note: Ensure tunnel token is configured in your cloudflared config
+# Replace $CLOUDFLARED_TUNNEL_TOKEN with your actual tunnel token from Cloudflare dashboard
 docker run -d --name cloudflared --restart unless-stopped \
-  cloudflare/cloudflared:latest tunnel run --token YOUR_TUNNEL_TOKEN
+  cloudflare/cloudflared:latest tunnel run --token $CLOUDFLARED_TUNNEL_TOKEN
 
 # Reconnect to PrintShop network
 docker network connect printshop_network cloudflared

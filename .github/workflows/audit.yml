@@ -127,7 +127,7 @@ jobs:
           npm ci
           echo "### Job Estimator - Outdated Packages" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          npm outdated 2>/dev/null || echo "All packages are up to date"  >> $GITHUB_STEP_SUMMARY
+          npm outdated 2>/dev/null || echo "All packages are up to date" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
       
@@ -241,7 +241,15 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Large Files (>5MB)" >> $GITHUB_STEP_SUMMARY
           
-          LARGE_FILES=$(find . -type f -size +5M -not -path "./.git/*" -not -path "./node_modules/*" 2>/dev/null || true)
+          LARGE_FILES=$(find . -type f -size +5M \
+            -not -path "./.git/*" \
+            -not -path "*/node_modules/*" \
+            -not -path "*/.next/*" \
+            -not -path "*/dist/*" \
+            -not -path "*/build/*" \
+            -not -path "*/coverage/*" \
+            -not -path "*/.cache/*" \
+            2>/dev/null || true)
           
           if [ -n "$LARGE_FILES" ]; then
             echo "⚠️ Large files detected:" >> $GITHUB_STEP_SUMMARY
@@ -257,8 +265,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### TODO/FIXME Count" >> $GITHUB_STEP_SUMMARY
           
-          TODO_COUNT=$(grep -r "TODO" --include="*.ts" --include="*.tsx" --include="*.js" . 2>/dev/null | grep -v node_modules | wc -l || echo "0")
-          FIXME_COUNT=$(grep -r "FIXME" --include="*.ts" --include="*.tsx" --include="*.js" . 2>/dev/null | grep -v node_modules | wc -l || echo "0")
+          TODO_COUNT=$(grep -r "TODO" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.py" --include="*.md" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build . 2>/dev/null | wc -l || echo "0")
+          FIXME_COUNT=$(grep -r "FIXME" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.py" --include="*.md" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build . 2>/dev/null | wc -l || echo "0")
           
           echo "- TODO comments: $TODO_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "- FIXME comments: $FIXME_COUNT" >> $GITHUB_STEP_SUMMARY
