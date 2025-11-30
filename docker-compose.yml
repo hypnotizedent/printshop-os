@@ -272,15 +272,22 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # Build-time args for Vite - these get baked into the static bundle
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+        VITE_STRAPI_URL: ${VITE_STRAPI_URL:-http://localhost:1337}
+        VITE_PRICING_URL: ${VITE_PRICING_URL:-http://localhost:3004}
+        VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:3004}
     container_name: printshop-frontend
     restart: unless-stopped
     environment:
-      # Note: VITE_ vars are baked into the build, so these are for reference
-      # For runtime config, the app uses /runtime.config.json
-      VITE_API_URL: http://api:3001
-      VITE_STRAPI_URL: http://strapi:1337
-      VITE_PRICING_URL: http://pricing-engine:3001
-      VITE_WS_URL: ws://localhost:3004
+      # Note: VITE_ vars are baked into the build at build time
+      # These environment variables are passed as build args above
+      # For Cloudflare Tunnel, set these in .env to your public URLs
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+      VITE_STRAPI_URL: ${VITE_STRAPI_URL:-http://localhost:1337}
+      VITE_PRICING_URL: ${VITE_PRICING_URL:-http://localhost:3004}
+      VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:3004}
     ports:
       - "5173:3000"
     networks:

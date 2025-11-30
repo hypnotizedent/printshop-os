@@ -117,6 +117,7 @@ Local development can use SQLite (see `printshop-strapi/.env.example`).
 - ✅ Fixed supplier API environment variable warnings
 - ✅ Fixed health check configurations for Strapi and Frontend
 - ✅ Updated documentation with correct port mappings
+- ✅ Added Cloudflare Tunnel production configuration
 
 ### Key PRs Merged for Initial Setup (v1.0 Stabilization)
 The following PRs were critical for getting the system from initial development to a working state:
@@ -128,6 +129,30 @@ The following PRs were critical for getting the system from initial development 
 | #200 | Add startup script, portal API fixes | Simplified deployment process |
 | - | Health check fixes | Strapi/Frontend containers now healthy |
 | - | Environment variable documentation | Clear setup instructions |
+| - | Cloudflare Tunnel configuration | Frontend uses configurable public URLs |
+
+## 🌐 Production URLs (Cloudflare Tunnel)
+
+For production deployments via Cloudflare Tunnel, the frontend needs to use public URLs instead of internal Docker service names. The URLs are configured via environment variables in `.env`:
+
+```bash
+# Local development (default)
+VITE_API_URL=http://localhost:3001
+VITE_STRAPI_URL=http://localhost:1337
+VITE_PRICING_URL=http://localhost:3004
+VITE_WS_URL=ws://localhost:3004
+
+# Production with Cloudflare Tunnel (example)
+VITE_API_URL=https://api.printshop.example.com
+VITE_STRAPI_URL=https://cms.printshop.example.com
+VITE_PRICING_URL=https://api.printshop.example.com
+VITE_WS_URL=wss://api.printshop.example.com
+```
+
+**Important:** After changing VITE_* variables, rebuild the frontend:
+```bash
+docker compose up -d --build frontend
+```
 
 ## 🔧 Health Check Configuration
 
@@ -161,6 +186,16 @@ docker exec printshop-strapi wget --spider http://localhost:1337
 1. **Strapi /admin may be slow on first load** - Wait 1-2 minutes for admin panel to build
 2. **Supplier APIs are optional** - Services will start without API keys but inventory sync won't work
 3. **First run requires Strapi admin creation** - Visit http://localhost:1337/admin to create first admin user
+
+### Cloudflare Tunnel Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Frontend shows blank page | Wrong VITE_* URLs | Update `.env` with correct Cloudflare URLs, rebuild frontend |
+| API returns 404 | Tunnel route misconfigured | Check tunnel routes in Cloudflare Zero Trust dashboard |
+| CORS errors in browser | API URL mismatch | Ensure VITE_API_URL matches your actual tunnel domain |
+| WebSocket fails to connect | HTTP instead of HTTPS | Use `wss://` for VITE_WS_URL when using Cloudflare Tunnel |
+| 502 Bad Gateway | Container not running | Run `docker compose ps` to check container status |
 
 ## 📚 Additional Documentation
 

@@ -3,6 +3,19 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Build arguments for Vite environment variables
+# These get baked into the static bundle at build time
+ARG VITE_API_URL=http://localhost:3001
+ARG VITE_STRAPI_URL=http://localhost:1337
+ARG VITE_PRICING_URL=http://localhost:3004
+ARG VITE_WS_URL=ws://localhost:3004
+
+# Set as environment variables for the build
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_STRAPI_URL=$VITE_STRAPI_URL
+ENV VITE_PRICING_URL=$VITE_PRICING_URL
+ENV VITE_WS_URL=$VITE_WS_URL
+
 # Install dependencies
 COPY package*.json ./
 RUN npm ci
@@ -10,7 +23,7 @@ RUN npm ci
 # Copy source
 COPY . .
 
-# Build application
+# Build application (VITE_ vars are baked in during build)
 RUN npm run build
 
 # Production stage
