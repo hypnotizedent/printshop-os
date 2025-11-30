@@ -148,6 +148,18 @@ This document provides a precise map of where every component, service, and feat
 
 ## Recent Updates
 
+### November 27, 2025 (Business Services Stack)
+
+✅ **Self-Hosted Business Services Added**
+- Created `docker-compose.business-services.yml` with 5 services
+- Invoice Ninja (port 9000) - Invoicing, payments, quotes
+- n8n (port 5678) - Workflow automation
+- Paperless-ngx (port 8010) - Document management with OCR
+- Penpot (port 9001) - Design collaboration
+- Vaultwarden (port 8222) - Password management
+- Updated `.env.example` with all service configurations
+- Created `docs/BUSINESS_SERVICES.md` documentation
+
 ### November 27, 2025 (Session 10 - Supplier Sync & Deployment)
 
 ✅ **Strapi Production Deployment**
@@ -992,6 +1004,51 @@ Redis
 
 ---
 
+## Business Services Stack
+
+**Location:** `docker-compose.business-services.yml`  
+**Documentation:** `docs/BUSINESS_SERVICES.md`  
+**Status:** Ready for Deployment
+
+Self-hosted business tools for payments, automation, documents, design, and password management.
+
+| Service | Port | Purpose | Docker Image |
+|---------|------|---------|--------------|
+| **Invoice Ninja** | 9000 | Invoicing, Payments, Quotes | `invoiceninja/invoiceninja:5` |
+| **n8n** | 5678 | Workflow Automation | `n8nio/n8n:latest` |
+| **Paperless-ngx** | 8010 | Document Management, OCR | `ghcr.io/paperless-ngx/paperless-ngx:latest` |
+| **Penpot** | 9001 | Design Collaboration | `penpotapp/frontend:latest` |
+| **Vaultwarden** | 8222 | Password Management | `vaultwarden/server:latest` |
+
+### Integration with Core Services
+
+```
+Strapi CMS ←→ n8n ←→ Invoice Ninja
+                ↓
+         Paperless-ngx (documents)
+                ↓
+         Penpot (designs)
+```
+
+### Key Workflows (n8n)
+- Quote approved → Create Invoice Ninja draft
+- Payment received → Update Strapi order status
+- Document uploaded → OCR in Paperless-ngx → Tag and file
+
+### Startup Commands
+
+```bash
+# Create required databases
+docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE n8n;"
+docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE paperless;"
+docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE penpot;"
+
+# Start business services
+docker compose -f docker-compose.business-services.yml up -d
+```
+
+---
+
 ## Port Assignments
 
 | Service | Port | Protocol |
@@ -1003,6 +1060,11 @@ Redis
 | Frontend Dev Server | 5173 | HTTP |
 | PostgreSQL | 5432 | TCP |
 | Redis | 6379 | TCP |
+| Invoice Ninja | 9000 | HTTP |
+| n8n | 5678 | HTTP |
+| Paperless-ngx | 8010 | HTTP |
+| Penpot | 9001 | HTTP |
+| Vaultwarden | 8222 | HTTP |
 
 ---
 
