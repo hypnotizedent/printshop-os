@@ -354,7 +354,7 @@ BACKUP_DIR="/path/to/backups/$(date +%Y%m%d)"
 mkdir -p $BACKUP_DIR
 
 # Stop services for consistent backup
-docker-compose -f docker-compose.business-services.yml stop
+docker compose -f docker-compose.business-services.yml stop
 
 # Backup volumes
 for vol in invoiceninja_storage invoiceninja_db_data n8n_data paperless_data paperless_media penpot_assets vaultwarden_data; do
@@ -363,7 +363,7 @@ for vol in invoiceninja_storage invoiceninja_db_data n8n_data paperless_data pap
 done
 
 # Restart services
-docker-compose -f docker-compose.business-services.yml start
+docker compose -f docker-compose.business-services.yml start
 
 echo "Backup complete: $BACKUP_DIR"
 ```

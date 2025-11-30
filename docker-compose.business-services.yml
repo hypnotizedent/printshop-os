@@ -327,7 +327,7 @@ volumes:
 # Usage Instructions
 # =============================================================================
 # 1. Ensure main PrintShop OS services are running first:
-#    docker-compose up -d postgres redis
+#    docker compose up -d postgres redis
 #
 # 2. Create required databases for business services:
 #    docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE n8n;"
@@ -335,7 +335,7 @@ volumes:
 #    docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE penpot;"
 #
 # 3. Start business services:
-#    docker-compose -f docker-compose.business-services.yml up -d
+#    docker compose -f docker-compose.business-services.yml up -d
 #
 # 4. Access services:
 #    - Invoice Ninja: http://localhost:9000
@@ -345,10 +345,10 @@ volumes:
 #    - Vaultwarden:   http://localhost:8222
 #
 # 5. View logs:
-#    docker-compose -f docker-compose.business-services.yml logs -f [service-name]
+#    docker compose -f docker-compose.business-services.yml logs -f [service-name]
 #
 # 6. Stop all business services:
-#    docker-compose -f docker-compose.business-services.yml down
+#    docker compose -f docker-compose.business-services.yml down
 #
 # For detailed setup instructions, see /docs/BUSINESS_SERVICES.md
 # =============================================================================
