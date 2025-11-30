@@ -97,9 +97,8 @@ Identify any potential issues that would affect print quality.`;
           colorCount: parsed.colorCount || 1,
           hasGradient: parsed.hasGradient || false,
           resolution: {
-            // Use parsed dimensions if available, otherwise mark as unknown (-1)
-            width: parsed.resolution?.width || -1,
-            height: parsed.resolution?.height || -1,
+            width: 0, // Would need actual image dimensions
+            height: 0,
             dpi: dpiMap[parsed.resolution?.quality] || parsed.resolution?.estimatedDpi || 150,
           },
           textDetected: parsed.textDetected || false,
@@ -109,9 +108,8 @@ Identify any potential issues that would affect print quality.`;
           confidence: parsed.confidence || 0.7,
         };
       }
-    } catch (error) {
-      // Log parsing error for debugging
-      console.warn('Design analysis parsing error:', error instanceof Error ? error.message : 'Unknown error');
+    } catch {
+      // Fall through to default
     }
 
     // Return default response if parsing fails

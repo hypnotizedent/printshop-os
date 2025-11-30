@@ -12,8 +12,6 @@ export class LLMClient {
   private ollamaUrl?: string;
   private model: string;
   private embeddingModel: string;
-  private visionModel: string;
-  private ollamaVisionModel: string;
   private temperature: number;
   private maxTokens: number;
   private useOllama: boolean;
@@ -21,8 +19,6 @@ export class LLMClient {
   constructor(config: AIConfig) {
     this.model = config.model;
     this.embeddingModel = config.embeddingModel;
-    this.visionModel = config.visionModel || 'gpt-4o';
-    this.ollamaVisionModel = config.ollamaVisionModel || 'llava';
     this.temperature = config.temperature;
     this.maxTokens = config.maxTokens;
     this.ollamaUrl = config.ollamaUrl;
@@ -150,7 +146,7 @@ export class LLMClient {
     }
 
     const response = await this.openai.chat.completions.create({
-      model: this.visionModel,
+      model: 'gpt-4o', // Vision-capable model
       messages: [
         {
           role: 'user',
@@ -176,7 +172,7 @@ export class LLMClient {
     const base64Image = Buffer.from(imageResponse.data).toString('base64');
 
     const response = await axios.post(`${this.ollamaUrl}/api/generate`, {
-      model: this.ollamaVisionModel,
+      model: 'llava', // or another vision-capable model
       prompt,
       images: [base64Image],
       stream: false,

@@ -192,9 +192,8 @@ Please provide a helpful response based on the context above. If the context doe
           sources: sources.slice(0, 3), // Include top 3 sources
         };
       }
-    } catch (error) {
-      // If parsing fails, log for debugging and return a basic response
-      console.warn('RAG response parsing failed:', error instanceof Error ? error.message : 'Unknown error');
+    } catch {
+      // If parsing fails, return a basic response
     }
 
     // Fallback for non-JSON responses

@@ -14,12 +14,9 @@ import { SettingsPage } from "./components/settings/SettingsPage"
 import { ProductionPage } from "./components/production/ProductionPage"
 import LabelsDemo from "./pages/LabelsDemo"
 import { QuoteBuilder } from "./components/quotes/QuoteBuilder"
-import { ProductCatalog } from "./components/products/ProductCatalog"
+import { ProductsPage } from "./components/products/ProductsPage"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
-import { ShipmentTracking } from "./components/shipping/ShipmentTracking"
-import { Portal } from "./components/portal/Portal"
-import { AuthPage } from "./components/auth/AuthPage"
-import { useAuth } from "./contexts/AuthContext"
+import { AIAssistantPage } from "./pages/AIAssistantPage"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 import { toast } from "sonner"
 
@@ -260,13 +257,13 @@ function MainDashboard() {
       case "quotes":
         return <QuoteBuilder />
       case "products":
-        return <ProductCatalog />
+        return <ProductsPage />
       case "shipping":
         return <ShippingLabelForm />
       case "tracking":
         return <ShipmentTracking />
-      case "ai-assistant":
-        return <AIAssistantPage />
+      case "invoices":
+        return <InvoicesPage onViewOrder={handleViewOrder} />
       default:
         return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} onViewOrder={handleViewOrder} />
     }

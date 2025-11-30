@@ -32,13 +32,15 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
     { id: 'delivery', label: 'Delivery', color: 'border-green-600' }
   ]
 
+  // Filter jobs based on search query
+  const filteredJobs = jobs.filter(job =>
+    searchQuery === "" ||
+    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.customer.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   const getJobsByStatus = (status: string) => {
-    return jobs.filter(job =>
-      job.status === status &&
-      (searchQuery === "" ||
-        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.customer.toLowerCase().includes(searchQuery.toLowerCase()))
-    )
+    return filteredJobs.filter(job => job.status === status)
   }
 
   const getPriorityColor = (priority: string) => {
@@ -146,69 +148,101 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
           <TabsList>
             <TabsTrigger value="kanban">Kanban</TabsTrigger>
             <TabsTrigger value="list">List</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {columns.map((column) => {
-          const columnJobs = getJobsByStatus(column.id)
+      {/* Calendar View */}
+      {activeView === 'calendar' && (
+        <ProductionCalendar
+          jobs={filteredJobs}
+          onJobClick={handleJobClick}
+          onJobReschedule={handleJobReschedule}
+        />
+      )}
 
-          return (
-            <div key={column.id} className="flex-shrink-0 w-80">
-              <div className="mb-4">
-                <div className={cn(
-                  "flex items-center justify-between p-3 bg-card rounded-lg border-l-4",
-                  column.color
-                )}>
-                  <h3 className="font-semibold text-foreground">{column.label}</h3>
-                  <Badge variant="secondary" className="ml-2">
-                    {columnJobs.length}
-                  </Badge>
+      {/* Kanban View */}
+      {activeView === 'kanban' && (
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {columns.map((column) => {
+            const columnJobs = getJobsByStatus(column.id)
+
+            return (
+              <div key={column.id} className="flex-shrink-0 w-80">
+                <div className="mb-4">
+                  <div className={cn(
+                    "flex items-center justify-between p-3 bg-card rounded-lg border-l-4",
+                    column.color
+                  )}>
+                    <h3 className="font-semibold text-foreground">{column.label}</h3>
+                    <Badge variant="secondary" className="ml-2">
+                      {columnJobs.length}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                {columnJobs.map((job) => (
-                  <Card 
-                    key={job.id} 
-                    className="p-4 hover:shadow-md transition-shadow cursor-pointer group"
-                    onClick={() => onViewOrder?.(job.id)}
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {job.title}
-                        </h4>
-                        {job.priority === 'urgent' && (
-                          <Warning size={18} weight="fill" className="text-destructive flex-shrink-0" />
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">{job.customer}</p>
-
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <FileText size={14} />
-                          <span>{job.fileCount} files</span>
-                          <span className="mx-1">•</span>
-                          <span>{job.quantity} units</span>
+                <div className="space-y-3">
+                  {columnJobs.map((job) => (
+                    <Card 
+                      key={job.id} 
+                      className="p-4 hover:shadow-md transition-shadow cursor-pointer group"
+                      onClick={() => onViewOrder?.(job.id)}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            {job.title}
+                          </h4>
+                          {job.priority === 'urgent' && (
+                            <Warning size={18} weight="fill" className="text-destructive flex-shrink-0" />
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <CalendarBlank size={14} />
-                          <span>Due: {new Date(job.dueDate).toLocaleDateString()}</span>
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">{job.customer}</p>
+
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <FileText size={14} />
+                            <span>{job.fileCount} files</span>
+                            <span className="mx-1">•</span>
+                            <span>{job.quantity} units</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <CalendarBlank size={14} />
+                            <span>Due: {new Date(job.dueDate).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-2 border-t border-border">
+                          <Badge className={getPriorityColor(job.priority)} variant="secondary">
+                            {job.priority}
+                          </Badge>
+                          <span className="text-xs font-semibold text-foreground ml-auto">
+                            ${job.estimatedCost.toLocaleString()}
+                          </span>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div className="pt-2 flex justify-end">
+                          <PrintLabelButton
+                            job={{
+                              jobId: job.id,
+                              printavoId: job.id,
+                              customerName: job.customer,
+                              jobNickname: job.title,
+                              quantity: job.quantity,
+                              dueDate: job.dueDate,
+                            }}
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 text-xs"
+                          />
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-2 pt-2 border-t border-border">
-                        <Badge className={getPriorityColor(job.priority)} variant="secondary">
-                          {job.priority}
-                        </Badge>
-                        <span className="text-xs font-semibold text-foreground ml-auto">
-                          ${job.estimatedCost.toLocaleString()}
-                        </span>
-                      </div>
+                    </Card>
+                  ))}
 
                       {/* Quick Actions */}
                       <div className="pt-2 flex items-center justify-between gap-2">
@@ -285,19 +319,29 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
                         </div>
                       </div>
                     </div>
-                  </Card>
-                ))}
-
-                {columnJobs.length === 0 && (
-                  <div className="p-8 text-center text-muted-foreground text-sm border-2 border-dashed border-border rounded-lg">
-                    No jobs in {column.label.toLowerCase()}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* List View - placeholder for future implementation */}
+      {activeView === 'list' && (
+        <div className="p-8 text-center text-muted-foreground border-2 border-dashed border-border rounded-lg">
+          List view coming soon - use Kanban or Calendar view
+        </div>
+      )}
+
+      {/* Job Quick View Modal */}
+      <JobQuickView
+        job={selectedJob}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+        onStatusChange={handleStatusChange}
+        onViewDetails={handleViewDetails}
+      />
     </div>
   )
 }

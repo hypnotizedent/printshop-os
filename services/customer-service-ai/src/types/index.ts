@@ -117,8 +117,6 @@ export interface AIConfig {
   redisUrl?: string;
   model: string;
   embeddingModel: string;
-  visionModel?: string;
-  ollamaVisionModel?: string;
   temperature: number;
   maxTokens: number;
 }

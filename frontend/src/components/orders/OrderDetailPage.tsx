@@ -20,9 +20,13 @@ import {
   FileText,
   CheckCircle,
   Warning,
-  Copy
+  Copy,
+  Receipt
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
+import { generateInvoice, type Invoice } from "@/lib/api/invoices"
+import { printInvoice } from "@/lib/api/invoice-utils"
+import { InvoicePreview } from "@/components/invoices/InvoicePreview"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -88,6 +92,41 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [invoicePreview, setInvoicePreview] = useState<Invoice | null>(null);
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+
+  const handleGenerateInvoice = async () => {
+    if (!order) return;
+    
+    setIsGeneratingInvoice(true);
+    try {
+      const { success, invoice, error: invoiceError } = await generateInvoice({ 
+        orderId: order.documentId 
+      });
+      
+      if (success && invoice) {
+        setInvoicePreview(invoice);
+        toast.success('Invoice generated');
+      } else {
+        toast.error(invoiceError || 'Failed to generate invoice');
+      }
+    } catch {
+      toast.error('Failed to generate invoice');
+    } finally {
+      setIsGeneratingInvoice(false);
+    }
+  };
+
+  const handleDownloadInvoice = () => {
+    if (!invoicePreview) return;
+    printInvoice(invoicePreview);
+    toast.success('Invoice ready for download');
+  };
+
+  const handlePrintInvoice = () => {
+    if (!invoicePreview) return;
+    printInvoice(invoicePreview);
+  };
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -314,6 +353,15 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
           </div>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={handleGenerateInvoice}
+            disabled={isGeneratingInvoice}
+          >
+            <Receipt size={18} />
+            {isGeneratingInvoice ? 'Generating...' : 'Generate Invoice'}
+          </Button>
           <Button variant="outline" className="gap-2">
             <Printer size={18} />
             Print
@@ -480,6 +528,13 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
               </CardContent>
             </Card>
           )}
+
+          {/* Payment History */}
+          <PaymentHistory
+            orderDocumentId={order.documentId}
+            totalAmount={order.totalAmount}
+            refreshTrigger={paymentRefreshTrigger}
+          />
         </div>
 
         {/* Sidebar */}
@@ -597,6 +652,16 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
           </Card>
         </div>
       </div>
+
+      {/* Invoice Preview Modal */}
+      {invoicePreview && (
+        <InvoicePreview
+          invoice={invoicePreview}
+          onClose={() => setInvoicePreview(null)}
+          onDownload={handleDownloadInvoice}
+          onPrint={handlePrintInvoice}
+        />
+      )}
     </div>
   );
 }
