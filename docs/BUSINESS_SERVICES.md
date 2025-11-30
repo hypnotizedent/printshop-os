@@ -294,16 +294,16 @@ echo "VAULTWARDEN_ADMIN_TOKEN=$(openssl rand -base64 48)"
 
 ```bash
 # Ensure core services are running
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 
 # Start business services
-docker-compose -f docker-compose.business-services.yml up -d
+docker compose -f docker-compose.business-services.yml up -d
 
 # Check status
-docker-compose -f docker-compose.business-services.yml ps
+docker compose -f docker-compose.business-services.yml ps
 
 # View logs
-docker-compose -f docker-compose.business-services.yml logs -f
+docker compose -f docker-compose.business-services.yml logs -f
 ```
 
 ### 4. Access Services
