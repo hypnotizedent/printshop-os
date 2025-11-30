@@ -1,0 +1,354 @@
+# =============================================================================
+# PrintShop OS - Business Services Docker Compose Configuration
+# =============================================================================
+# Self-hosted business tools for payments, automation, documents, design, and
+# password management. Reduces monthly SaaS costs and improves workflow.
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Invoice Ninja - Invoicing, Payments, Quotes, Contracts
+  # ---------------------------------------------------------------------------
+  # Handles all payment processing, invoicing, and contract management
+  # Integrates with existing Quote and Payment content types in Strapi
+  # ---------------------------------------------------------------------------
+  invoiceninja:
+    image: invoiceninja/invoiceninja:5
+    container_name: printshop-invoiceninja
+    restart: unless-stopped
+    environment:
+      APP_URL: ${INVOICENINJA_URL:-http://localhost:9000}
+      APP_KEY: ${INVOICENINJA_APP_KEY:-base64:your-32-char-key-here-change-this}
+      APP_DEBUG: ${INVOICENINJA_DEBUG:-false}
+      REQUIRE_HTTPS: ${INVOICENINJA_REQUIRE_HTTPS:-false}
+      DB_HOST: invoiceninja-db
+      DB_PORT: 3306
+      DB_DATABASE: ${INVOICENINJA_DB_NAME:-invoiceninja}
+      DB_USERNAME: ${INVOICENINJA_DB_USER:-invoiceninja}
+      DB_PASSWORD: ${INVOICENINJA_DB_PASSWORD:-secure_password_change_this}
+      MAIL_MAILER: ${INVOICENINJA_MAIL_MAILER:-smtp}
+      MAIL_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${SMTP_PORT:-587}
+      MAIL_USERNAME: ${SMTP_USERNAME:-}
+      MAIL_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_ENCRYPTION: ${INVOICENINJA_MAIL_ENCRYPTION:-tls}
+      MAIL_FROM_ADDRESS: ${INVOICENINJA_MAIL_FROM:-invoices@printshop.com}
+      MAIL_FROM_NAME: ${INVOICENINJA_MAIL_FROM_NAME:-PrintShop OS}
+      TRUSTED_PROXIES: "*"
+    volumes:
+      - invoiceninja_public:/var/www/app/public
+      - invoiceninja_storage:/var/www/app/storage
+    ports:
+      - "9000:9000"
+    networks:
+      - printshop_network
+    depends_on:
+      invoiceninja-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/api/v1/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # ---------------------------------------------------------------------------
+  # Invoice Ninja Database (MariaDB)
+  # ---------------------------------------------------------------------------
+  invoiceninja-db:
+    image: mariadb:10.6
+    container_name: printshop-invoiceninja-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${INVOICENINJA_DB_ROOT_PASSWORD:-root_secure_password_change_this}
+      MYSQL_DATABASE: ${INVOICENINJA_DB_NAME:-invoiceninja}
+      MYSQL_USER: ${INVOICENINJA_DB_USER:-invoiceninja}
+      MYSQL_PASSWORD: ${INVOICENINJA_DB_PASSWORD:-secure_password_change_this}
+    volumes:
+      - invoiceninja_db_data:/var/lib/mysql
+    networks:
+      - printshop_network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # n8n - Workflow Automation Platform
+  # ---------------------------------------------------------------------------
+  # Connects Invoice Ninja <-> Strapi <-> Email <-> Social Media
+  # Enables automated workflows between all business services
+  # ---------------------------------------------------------------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: printshop-n8n
+    restart: unless-stopped
+    environment:
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-your-encryption-key-change-this}
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5678/}
+      GENERIC_TIMEZONE: ${TZ:-America/New_York}
+      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE:-true}
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:-secure_password_change_this}
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${N8N_DB_NAME:-n8n}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-strapi}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-secure_password_change_this}
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: 168
+    volumes:
+      - n8n_data:/home/node/.n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - printshop_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL -u ${N8N_BASIC_AUTH_USER}:${N8N_BASIC_AUTH_PASSWORD} http://localhost:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # Paperless-ngx - Document Management System
+  # ---------------------------------------------------------------------------
+  # Scan contracts, purchase orders, shipping labels with OCR
+  # All documents become searchable and organized automatically
+  # ---------------------------------------------------------------------------
+  paperless-ngx:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: printshop-paperless
+    restart: unless-stopped
+    environment:
+      PAPERLESS_REDIS: redis://redis:6379
+      PAPERLESS_DBHOST: postgres
+      PAPERLESS_DBPORT: 5432
+      PAPERLESS_DBNAME: ${PAPERLESS_DB_NAME:-paperless}
+      PAPERLESS_DBUSER: ${POSTGRES_USER:-strapi}
+      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD:-secure_password_change_this}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY:-your-secret-key-change-this}
+      PAPERLESS_TIME_ZONE: ${TZ:-America/New_York}
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng}
+      PAPERLESS_URL: ${PAPERLESS_URL:-http://localhost:8010}
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD:-secure_password_change_this}
+      PAPERLESS_CONSUMER_POLLING: 30
+      PAPERLESS_CONSUMER_RECURSIVE: "true"
+      PAPERLESS_FILENAME_FORMAT: "{created_year}/{correspondent}/{title}"
+    volumes:
+      - paperless_data:/usr/src/paperless/data
+      - paperless_media:/usr/src/paperless/media
+      - paperless_export:/usr/src/paperless/export
+      - paperless_consume:/usr/src/paperless/consume
+    ports:
+      - "8010:8000"
+    networks:
+      - printshop_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  # ---------------------------------------------------------------------------
+  # Penpot - Design Collaboration Platform
+  # ---------------------------------------------------------------------------
+  # Customer mockup collaboration and design tool
+  # Replaces need for external design tools like Figma/Adobe XD
+  # ---------------------------------------------------------------------------
+  penpot-frontend:
+    image: penpotapp/frontend:latest
+    container_name: printshop-penpot-frontend
+    restart: unless-stopped
+    environment:
+      PENPOT_FLAGS: enable-registration enable-login-with-password disable-demo-users
+      PENPOT_BACKEND_URI: http://penpot-backend:6060
+      PENPOT_EXPORTER_URI: http://penpot-exporter:6061
+    volumes:
+      - penpot_assets:/opt/data/assets
+    ports:
+      - "9001:80"
+    networks:
+      - printshop_network
+    depends_on:
+      - penpot-backend
+      - penpot-exporter
+
+  penpot-backend:
+    image: penpotapp/backend:latest
+    container_name: printshop-penpot-backend
+    restart: unless-stopped
+    environment:
+      PENPOT_FLAGS: enable-registration enable-login-with-password disable-demo-users enable-smtp
+      PENPOT_PUBLIC_URI: ${PENPOT_PUBLIC_URI:-http://localhost:9001}
+      PENPOT_DATABASE_URI: postgresql://${POSTGRES_USER:-strapi}:${POSTGRES_PASSWORD:-secure_password_change_this}@postgres:5432/${PENPOT_DB_NAME:-penpot}
+      PENPOT_REDIS_URI: redis://redis:6379/0
+      PENPOT_ASSETS_STORAGE_BACKEND: assets-fs
+      PENPOT_STORAGE_ASSETS_FS_DIRECTORY: /opt/data/assets
+      PENPOT_TELEMETRY_ENABLED: "false"
+      PENPOT_SMTP_DEFAULT_FROM: ${PENPOT_SMTP_FROM:-design@printshop.com}
+      PENPOT_SMTP_DEFAULT_REPLY_TO: ${PENPOT_SMTP_REPLY_TO:-design@printshop.com}
+      PENPOT_SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      PENPOT_SMTP_PORT: ${SMTP_PORT:-587}
+      PENPOT_SMTP_USERNAME: ${SMTP_USERNAME:-}
+      PENPOT_SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      PENPOT_SMTP_TLS: "true"
+    volumes:
+      - penpot_assets:/opt/data/assets
+    networks:
+      - printshop_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  penpot-exporter:
+    image: penpotapp/exporter:latest
+    container_name: printshop-penpot-exporter
+    restart: unless-stopped
+    environment:
+      PENPOT_PUBLIC_URI: ${PENPOT_PUBLIC_URI:-http://localhost:9001}
+      PENPOT_REDIS_URI: redis://redis:6379/0
+    networks:
+      - printshop_network
+
+  # ---------------------------------------------------------------------------
+  # Vaultwarden - Team Password Management
+  # ---------------------------------------------------------------------------
+  # Secure storage for API keys, supplier credentials, team passwords
+  # Bitwarden-compatible server for easy client access
+  # ---------------------------------------------------------------------------
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: printshop-vaultwarden
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${VAULTWARDEN_DOMAIN:-http://localhost:8222}
+      ADMIN_TOKEN: ${VAULTWARDEN_ADMIN_TOKEN:-your-admin-token-change-this}
+      SIGNUPS_ALLOWED: ${VAULTWARDEN_SIGNUPS_ALLOWED:-true}
+      INVITATIONS_ALLOWED: ${VAULTWARDEN_INVITATIONS_ALLOWED:-true}
+      WEBSOCKET_ENABLED: "true"
+      LOG_LEVEL: warn
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_FROM: ${VAULTWARDEN_SMTP_FROM:-vault@printshop.com}
+      SMTP_SECURITY: ${VAULTWARDEN_SMTP_SECURITY:-starttls}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    volumes:
+      - vaultwarden_data:/data
+    ports:
+      - "8222:80"
+    networks:
+      - printshop_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/alive"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  printshop_network:
+    external: true
+    name: printshop_network
+
+# =============================================================================
+# Volumes - Persistent data storage
+# =============================================================================
+volumes:
+  # Invoice Ninja volumes
+  invoiceninja_public:
+    name: printshop_invoiceninja_public
+    driver: local
+  
+  invoiceninja_storage:
+    name: printshop_invoiceninja_storage
+    driver: local
+  
+  invoiceninja_db_data:
+    name: printshop_invoiceninja_db
+    driver: local
+
+  # n8n volumes
+  n8n_data:
+    name: printshop_n8n_data
+    driver: local
+
+  # Paperless-ngx volumes
+  paperless_data:
+    name: printshop_paperless_data
+    driver: local
+  
+  paperless_media:
+    name: printshop_paperless_media
+    driver: local
+  
+  paperless_export:
+    name: printshop_paperless_export
+    driver: local
+  
+  paperless_consume:
+    name: printshop_paperless_consume
+    driver: local
+
+  # Penpot volumes
+  penpot_assets:
+    name: printshop_penpot_assets
+    driver: local
+
+  # Vaultwarden volumes
+  vaultwarden_data:
+    name: printshop_vaultwarden_data
+    driver: local
+
+# =============================================================================
+# Usage Instructions
+# =============================================================================
+# 1. Ensure main PrintShop OS services are running first:
+#    docker compose up -d postgres redis
+#
+# 2. Create required databases for business services:
+#    docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE n8n;"
+#    docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE paperless;"
+#    docker exec -it printshop-postgres psql -U strapi -c "CREATE DATABASE penpot;"
+#
+# 3. Start business services:
+#    docker compose -f docker-compose.business-services.yml up -d
+#
+# 4. Access services:
+#    - Invoice Ninja: http://localhost:9000
+#    - n8n:           http://localhost:5678
+#    - Paperless-ngx: http://localhost:8010
+#    - Penpot:        http://localhost:9001
+#    - Vaultwarden:   http://localhost:8222
+#
+# 5. View logs:
+#    docker compose -f docker-compose.business-services.yml logs -f [service-name]
+#
+# 6. Stop all business services:
+#    docker compose -f docker-compose.business-services.yml down
+#
+# For detailed setup instructions, see /docs/BUSINESS_SERVICES.md
+# =============================================================================

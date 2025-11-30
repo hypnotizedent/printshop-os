@@ -79,6 +79,17 @@ export interface DashboardStats {
   urgentJobs: number
 }
 
+// Production Calendar Types
+export interface CapacityData {
+  date: string
+  scheduledJobs: number
+  totalCapacity: number
+  percentUtilized: number
+  isOverbooked: boolean
+}
+
+export type CalendarView = 'month' | 'week' | 'day'
+
 // Customer Portal Types - CustomerOrder uses full OrderStatus defined below
 export interface CustomerOrder {
   id: string
@@ -378,49 +389,33 @@ export interface Quote {
   notes?: string
 }
 
-// Payment Tracking Types
-export type PaymentMethodEnum = 'cash' | 'check' | 'credit_card' | 'ach' | 'stripe' | 'bank_transfer' | 'other'
-export type PaymentStatusEnum = 'pending' | 'processing' | 'paid' | 'failed' | 'refunded' | 'expired' | 'cancelled'
-export type PaymentTypeEnum = 'deposit' | 'balance' | 'full' | 'refund'
-
-export interface OrderPayment {
-  id: string
-  documentId: string
-  amount: number
-  status: PaymentStatusEnum
-  paymentType?: PaymentTypeEnum
-  paymentMethod: PaymentMethodEnum
-  referenceNumber?: string
-  paymentDate?: string
-  recordedBy?: string
-  notes?: string
-  paidAt?: string
-  createdAt: string
+// Strapi API response types for data fetching
+export interface StrapiCustomer {
+  id: number
+  documentId?: string
+  name?: string
+  email?: string
+  phone?: string
+  company?: string
+  updatedAt?: string
 }
 
-export interface PaymentFormData {
-  amount: number
-  paymentMethod: PaymentMethodEnum
-  referenceNumber?: string
-  paymentDate: string
-  notes?: string
+export interface StrapiOrderItem {
+  quantity?: number
 }
 
-export interface OutstandingOrderSummary {
-  id: string
-  documentId: string
-  orderNumber: string
-  customerName: string
-  totalAmount: number
-  amountPaid: number
-  amountOutstanding: number
+export interface StrapiOrder {
+  id: number
+  documentId?: string
+  orderNumber?: string
+  status?: string
   dueDate?: string
-}
-
-export interface PaymentsDashboardSummary {
-  totalOutstanding: number
-  paymentsThisWeek: number
-  paymentsThisMonth: number
-  overdueCount: number
-  outstandingOrders: OutstandingOrderSummary[]
+  createdAt?: string
+  notes?: string
+  totalAmount?: number
+  items?: StrapiOrderItem[]
+  customer?: {
+    documentId?: string
+    name?: string
+  }
 }
