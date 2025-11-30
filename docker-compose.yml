@@ -127,6 +127,13 @@ services:
       PORT: 3001
       REDIS_URL: redis://redis:6379
       STRAPI_URL: http://strapi:1337
+      # Database connection (shares with Strapi)
+      DATABASE_HOST: postgres
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_NAME: ${DATABASE_NAME:-printshop}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-strapi}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-secure_password_change_this}
+      # Supplier API keys
       SS_ACTIVEWEAR_API_KEY: ${SS_ACTIVEWEAR_API_KEY:-}
       SS_ACTIVEWEAR_ACCOUNT_NUMBER: ${SS_ACTIVEWEAR_ACCOUNT_NUMBER:-}
       SANMAR_USERNAME: ${SANMAR_USERNAME:-}
@@ -137,6 +144,8 @@ services:
     networks:
       - printshop_network
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -225,7 +234,7 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3001
     ports:
-      - "3003:3001"
+      - "3004:3001"
     networks:
       - printshop_network
     healthcheck:
@@ -341,7 +350,7 @@ volumes:
 # - Botpress: http://localhost:3100
 # - Frontend: http://localhost:5173
 # - API: http://localhost:3001
-# - Pricing Engine: http://localhost:3003
+# - Pricing Engine: http://localhost:3004
 #
 # For detailed setup instructions, see /docs/deployment/docker-setup.md
 # =============================================================================
