@@ -153,13 +153,11 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
         </Tabs>
       </div>
 
-      {/* Calendar View */}
+      {/* Calendar View - TODO: Implement ProductionCalendar component */}
       {activeView === 'calendar' && (
-        <ProductionCalendar
-          jobs={filteredJobs}
-          onJobClick={handleJobClick}
-          onJobReschedule={handleJobReschedule}
-        />
+        <div className="p-8 text-center text-muted-foreground border-2 border-dashed border-border rounded-lg">
+          Calendar view coming soon - use Kanban or List view
+        </div>
       )}
 
       {/* Kanban View */}
@@ -225,101 +223,82 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="pt-2 flex justify-end">
-                          <PrintLabelButton
-                            job={{
-                              jobId: job.id,
-                              printavoId: job.id,
-                              customerName: job.customer,
-                              jobNickname: job.title,
-                              quantity: job.quantity,
-                              dueDate: job.dueDate,
-                            }}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 text-xs"
-                          />
+                        <div className="pt-2 flex items-center justify-between gap-2">
+                          {/* Status navigation buttons */}
+                          <div className="flex gap-1">
+                            {getAdjacentStatus(job.status, 'prev') && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                                disabled={updatingJobId === job.id}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  const prevStatus = getAdjacentStatus(job.status, 'prev')
+                                  if (prevStatus) handleStatusUpdate(job.id, prevStatus)
+                                }}
+                              >
+                                <ArrowLeft size={12} className="mr-1" />
+                                {columns.find(c => c.id === getAdjacentStatus(job.status, 'prev'))?.label}
+                              </Button>
+                            )}
+                            {getAdjacentStatus(job.status, 'next') && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                                disabled={updatingJobId === job.id}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  const nextStatus = getAdjacentStatus(job.status, 'next')
+                                  if (nextStatus) handleStatusUpdate(job.id, nextStatus)
+                                }}
+                              >
+                                {columns.find(c => c.id === getAdjacentStatus(job.status, 'next'))?.label}
+                                <ArrowRight size={12} className="ml-1" />
+                              </Button>
+                            )}
+                          </div>
+                          <div className="flex gap-1">
+                            {/* Status dropdown for direct selection */}
+                            <Select
+                              value={job.status}
+                              onValueChange={(value) => {
+                                handleDirectStatusChange(job.id, value)
+                              }}
+                            >
+                              <SelectTrigger 
+                                className="h-6 w-[100px] text-xs"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {columns.map(col => (
+                                  <SelectItem key={col.id} value={col.id}>
+                                    {col.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <PrintLabelButton
+                              job={{
+                                jobId: job.id,
+                                printavoId: job.id,
+                                customerName: job.customer,
+                                jobNickname: job.title,
+                                quantity: job.quantity,
+                                dueDate: job.dueDate,
+                              }}
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 text-xs"
+                            />
+                          </div>
                         </div>
                       </div>
                     </Card>
                   ))}
-
-                      {/* Quick Actions */}
-                      <div className="pt-2 flex items-center justify-between gap-2">
-                        {/* Status navigation buttons */}
-                        <div className="flex gap-1">
-                          {getAdjacentStatus(job.status, 'prev') && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2 text-xs"
-                              disabled={updatingJobId === job.id}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                const prevStatus = getAdjacentStatus(job.status, 'prev')
-                                if (prevStatus) handleStatusUpdate(job.id, prevStatus)
-                              }}
-                            >
-                              <ArrowLeft size={12} className="mr-1" />
-                              {columns.find(c => c.id === getAdjacentStatus(job.status, 'prev'))?.label}
-                            </Button>
-                          )}
-                          {getAdjacentStatus(job.status, 'next') && (
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="h-6 px-2 text-xs"
-                              disabled={updatingJobId === job.id}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                const nextStatus = getAdjacentStatus(job.status, 'next')
-                                if (nextStatus) handleStatusUpdate(job.id, nextStatus)
-                              }}
-                            >
-                              {columns.find(c => c.id === getAdjacentStatus(job.status, 'next'))?.label}
-                              <ArrowRight size={12} className="ml-1" />
-                            </Button>
-                          )}
-                        </div>
-                        <div className="flex gap-1">
-                          {/* Status dropdown for direct selection */}
-                          <Select
-                            value={job.status}
-                            onValueChange={(value) => {
-                              handleDirectStatusChange(job.id, value)
-                            }}
-                          >
-                            <SelectTrigger 
-                              className="h-6 w-[100px] text-xs"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {columns.map(col => (
-                                <SelectItem key={col.id} value={col.id}>
-                                  {col.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <PrintLabelButton
-                            job={{
-                              jobId: job.id,
-                              printavoId: job.id,
-                              customerName: job.customer,
-                              jobNickname: job.title,
-                              quantity: job.quantity,
-                              dueDate: job.dueDate,
-                            }}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 text-xs"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             )
@@ -334,14 +313,7 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
         </div>
       )}
 
-      {/* Job Quick View Modal */}
-      <JobQuickView
-        job={selectedJob}
-        isOpen={isQuickViewOpen}
-        onClose={() => setIsQuickViewOpen(false)}
-        onStatusChange={handleStatusChange}
-        onViewDetails={handleViewDetails}
-      />
+      {/* Job Quick View Modal - TODO: Implement JobQuickView component */}
     </div>
   )
 }
