@@ -165,19 +165,12 @@ export function SOPLibrary({ onNavigate }: SOPLibraryProps) {
       setIsEditing(false)
       setIsCreating(false)
       setSelectedSOP(savedSOP)
+      setError(null)
     } catch (err) {
       console.error('Error saving SOP:', err)
-      // Optimistic update fallback - still update local state
-      setSOPs(prev => {
-        const existing = prev.find(s => s.id === sop.id)
-        if (existing) {
-          return prev.map(s => s.id === sop.id ? sop : s)
-        }
-        return [...prev, sop]
-      })
-      setIsEditing(false)
-      setIsCreating(false)
-      setSelectedSOP(sop)
+      // Show error message to user instead of optimistic update
+      setError('Failed to save SOP. Please try again.')
+      // Keep editing mode open so user can retry
     }
   }
 

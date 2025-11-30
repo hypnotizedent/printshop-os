@@ -3,7 +3,11 @@
 import { JobEntry, TimeEntry } from './types';
 
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
+const DEFAULT_HOURS_WORKED = parseFloat(process.env.DEFAULT_HOURS_WORKED || '8.0');
+const DEFAULT_PRODUCTIVE_HOURS = parseFloat(process.env.DEFAULT_PRODUCTIVE_HOURS || '7.5');
+const DEFAULT_BREAK_TIME = parseFloat(process.env.DEFAULT_BREAK_TIME || '0.5');
 
+// Strapi response types
 interface StrapiResponse<T> {
   data: T[];
   meta?: {
@@ -11,6 +15,51 @@ interface StrapiResponse<T> {
       total: number;
     };
   };
+}
+
+interface StrapiJob {
+  documentId?: string;
+  id?: number;
+  employee?: { documentId?: string };
+  employeeId?: string;
+  jobType?: string;
+  type?: string;
+  estimatedTime?: number;
+  estimatedHours?: number;
+  actualTime?: number;
+  actualHours?: number;
+  completed?: boolean;
+  status?: string;
+  requiresRework?: boolean;
+  completedDate?: string;
+  completedAt?: string;
+  updatedAt?: string;
+}
+
+interface StrapiTimeEntry {
+  documentId?: string;
+  id?: number;
+  employee?: { documentId?: string; name?: string };
+  employeeId?: string;
+  employeeName?: string;
+  date?: string;
+  createdAt?: string;
+  hoursWorked?: number;
+  totalHours?: number;
+  productiveHours?: number;
+  breakTime?: number;
+  clockOut?: string | null;
+}
+
+interface StrapiEmployee {
+  documentId?: string;
+  id?: number;
+  name?: string;
+}
+
+interface StrapiOrder {
+  totalAmount?: number;
+  total?: number;
 }
 
 export class StrapiService {
@@ -29,9 +78,9 @@ export class StrapiService {
         return [];
       }
       
-      const data = await response.json() as StrapiResponse<any>;
+      const data = await response.json() as StrapiResponse<StrapiJob>;
       
-      return (data.data || []).map((job: any) => ({
+      return (data.data || []).map((job) => ({
         id: job.documentId || job.id?.toString() || '',
         employeeId: job.employee?.documentId || job.employeeId || '',
         jobType: job.jobType || job.type || 'Unknown',
@@ -62,9 +111,9 @@ export class StrapiService {
         return [];
       }
       
-      const data = await response.json() as StrapiResponse<any>;
+      const data = await response.json() as StrapiResponse<StrapiTimeEntry>;
       
-      return (data.data || []).map((entry: any) => ({
+      return (data.data || []).map((entry) => ({
         id: entry.documentId || entry.id?.toString() || '',
         employeeId: entry.employee?.documentId || entry.employeeId || '',
         employeeName: entry.employee?.name || entry.employeeName || 'Unknown',
@@ -93,18 +142,18 @@ export class StrapiService {
         return [];
       }
       
-      const data = await response.json() as StrapiResponse<any>;
+      const data = await response.json() as StrapiResponse<StrapiEmployee>;
       const today = new Date().toISOString().split('T')[0];
       
-      // Create time entries for each employee with default values
-      return (data.data || []).map((emp: any) => ({
+      // Create time entries for each employee with configurable default values
+      return (data.data || []).map((emp) => ({
         id: `time-${emp.documentId || emp.id}`,
         employeeId: emp.documentId || emp.id?.toString() || '',
         employeeName: emp.name || 'Unknown',
         date: today,
-        hoursWorked: 8.0, // Default hours
-        productiveHours: 7.5,
-        breakTime: 0.5,
+        hoursWorked: DEFAULT_HOURS_WORKED,
+        productiveHours: DEFAULT_PRODUCTIVE_HOURS,
+        breakTime: DEFAULT_BREAK_TIME,
       }));
     } catch (error) {
       console.error('Error fetching employees from Strapi:', error);
@@ -141,9 +190,9 @@ export class StrapiService {
         return 0;
       }
       
-      const data = await response.json() as StrapiResponse<any>;
+      const data = await response.json() as StrapiResponse<StrapiOrder>;
       
-      return (data.data || []).reduce((sum: number, order: any) => {
+      return (data.data || []).reduce((sum: number, order) => {
         return sum + (order.totalAmount || order.total || 0);
       }, 0);
     } catch (error) {
@@ -167,7 +216,7 @@ export class StrapiService {
         return 0;
       }
       
-      const data = await response.json() as StrapiResponse<any>;
+      const data = await response.json() as StrapiResponse<StrapiTimeEntry>;
       return data.meta?.pagination?.total || data.data?.length || 0;
     } catch (error) {
       console.error('Error fetching clocked in count from Strapi:', error);
