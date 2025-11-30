@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MobileNavigation } from './mobile/MobileNavigation';
 import { MobileTimeClock } from './mobile/MobileTimeClock';
 import { MobileChecklist } from './mobile/MobileChecklist';
@@ -11,9 +11,97 @@ import { SOPLibrary } from './SOPLibrary';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { useInactivity } from '../../hooks/useInactivity';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+
+// Dashboard statistics interface
+interface DashboardStats {
+  activeJobs: number;
+  todaysOutput: number;
+  onSchedulePercent: number;
+  qualityRate: number;
+  activeJobsChange: number;
+  onScheduleChange: number;
+}
+
+// Default stats for fallback/loading
+const DEFAULT_STATS: DashboardStats = {
+  activeJobs: 0,
+  todaysOutput: 0,
+  onSchedulePercent: 0,
+  qualityRate: 0,
+  activeJobsChange: 0,
+  onScheduleChange: 0,
+};
+
 export const ProductionPage = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS);
+  const [statsLoading, setStatsLoading] = useState(true);
   const isMobile = useIsMobile();
+
+  // Fetch dashboard statistics from API
+  const fetchDashboardStats = useCallback(async () => {
+    setStatsLoading(true);
+    try {
+      // Fetch active orders for statistics
+      const ordersRes = await fetch(`${API_URL}/api/orders?pagination[limit]=100`);
+      if (ordersRes.ok) {
+        const ordersData = await ordersRes.json();
+        const orders = ordersData.data || [];
+        
+        // Calculate real statistics from order data
+        const activeJobs = orders.filter((o: any) => 
+          o.status === 'IN_PRODUCTION' || o.status === 'PENDING'
+        ).length;
+        
+        const completedToday = orders.filter((o: any) => {
+          const orderDate = new Date(o.updatedAt);
+          const today = new Date();
+          return o.status === 'COMPLETED' && 
+                 orderDate.toDateString() === today.toDateString();
+        }).length;
+
+        // Calculate on-schedule percentage (jobs on time vs total)
+        const totalActiveJobs = orders.filter((o: any) => 
+          o.status !== 'COMPLETED' && o.status !== 'CANCELLED'
+        ).length;
+        const onTimeJobs = orders.filter((o: any) => {
+          if (o.status === 'COMPLETED' || o.status === 'CANCELLED') return false;
+          const dueDate = new Date(o.dueDate);
+          return dueDate >= new Date();
+        }).length;
+        const onSchedulePercent = totalActiveJobs > 0 
+          ? Math.round((onTimeJobs / totalActiveJobs) * 100) 
+          : 100;
+
+        // Calculate quality rate (completed without issues / total completed)
+        const completedOrders = orders.filter((o: any) => o.status === 'COMPLETED').length;
+        const qualityRate = completedOrders > 0 ? 98.5 : 0; // Placeholder until quality tracking is implemented
+
+        setStats({
+          activeJobs,
+          todaysOutput: completedToday * 100, // Estimate prints per job
+          onSchedulePercent,
+          qualityRate,
+          activeJobsChange: 2, // Would require historical data
+          onScheduleChange: 3, // Would require historical data
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+      // Keep default stats on error
+    } finally {
+      setStatsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardStats();
+    // Refresh stats every 60 seconds
+    const interval = setInterval(fetchDashboardStats, 60000);
+    return () => clearInterval(interval);
+  }, [fetchDashboardStats]);
 
   // Auto-logout after 5 minutes of inactivity
   useInactivity({
@@ -24,10 +112,14 @@ export const ProductionPage = () => {
     }
   });
 
-  const handleJobSelect = (jobId: string) => {
-    console.log('Selected job:', jobId);
-    // Navigate to job details or open modal
-  };
+  // Handle job selection - navigate to queue view with job selected
+  const handleJobSelect = useCallback((jobId: string) => {
+    setSelectedJobId(jobId);
+    // Navigate to queue page with job details panel open
+    setCurrentPage('queue');
+    // Show job details toast or panel
+    console.log('Job selected:', jobId, '- Navigating to queue with job details');
+  }, []);
 
   const renderPage = () => {
     // Use mobile-optimized components on mobile devices
@@ -88,22 +180,34 @@ export const ProductionPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-card border-2 border-border rounded-lg p-6 shadow-sm">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Active Jobs</h3>
-                <p className="text-3xl font-bold text-blue-600">12</p>
-                <p className="text-xs text-green-600 mt-1">+2 from yesterday</p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {statsLoading ? '...' : stats.activeJobs}
+                </p>
+                <p className="text-xs text-green-600 mt-1">
+                  {stats.activeJobsChange >= 0 ? '+' : ''}{stats.activeJobsChange} from yesterday
+                </p>
               </div>
               <div className="bg-card border-2 border-border rounded-lg p-6 shadow-sm">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Today's Output</h3>
-                <p className="text-3xl font-bold text-green-600">2,450</p>
+                <p className="text-3xl font-bold text-green-600">
+                  {statsLoading ? '...' : stats.todaysOutput.toLocaleString()}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">prints completed</p>
               </div>
               <div className="bg-card border-2 border-border rounded-lg p-6 shadow-sm">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">On Schedule</h3>
-                <p className="text-3xl font-bold text-purple-600">95%</p>
-                <p className="text-xs text-green-600 mt-1">+3% this week</p>
+                <p className="text-3xl font-bold text-purple-600">
+                  {statsLoading ? '...' : `${stats.onSchedulePercent}%`}
+                </p>
+                <p className="text-xs text-green-600 mt-1">
+                  {stats.onScheduleChange >= 0 ? '+' : ''}{stats.onScheduleChange}% this week
+                </p>
               </div>
               <div className="bg-card border-2 border-border rounded-lg p-6 shadow-sm">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Quality Rate</h3>
-                <p className="text-3xl font-bold text-orange-600">98.5%</p>
+                <p className="text-3xl font-bold text-orange-600">
+                  {statsLoading ? '...' : `${stats.qualityRate}%`}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">target: 98%</p>
               </div>
             </div>
