@@ -79,6 +79,9 @@ services:
   # Main backend CMS providing REST API for all data operations
   # Admin panel available at /admin, API endpoints at /api/*
   # Note: First startup takes 1-2 minutes to build admin panel
+  #
+  # IMPORTANT: PUBLIC_URL must be set for the admin panel to load correctly.
+  # Set this to the URL where Strapi will be accessed from externally.
   strapi:
     build:
       context: ./printshop-strapi
@@ -98,6 +101,11 @@ services:
       ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-your-admin-jwt-secret-change-this}
       APP_KEYS: ${STRAPI_APP_KEYS:-your-app-key-1,your-app-key-2}
       API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-your-api-token-salt-change-this}
+      # CRITICAL: PUBLIC_URL tells Strapi where it's publicly accessible.
+      # Without this, the /admin panel may not load correctly.
+      # For production, set STRAPI_PUBLIC_URL in your .env file to the actual URL
+      # (e.g., http://100.92.156.118:1337 or https://printshop.ronny.works)
+      PUBLIC_URL: ${STRAPI_PUBLIC_URL:-http://localhost:1337}
     volumes:
       - strapi_app:/srv/app
     ports:
