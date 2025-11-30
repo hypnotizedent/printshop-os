@@ -73,6 +73,11 @@ interface ProductFilters {
 }
 
 interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}
 
 // API Response types for Strapi
 interface StrapiVariant {
@@ -96,11 +101,6 @@ interface StrapiProduct {
   variants?: StrapiVariant[];
   supplier?: string;
   pricingTiers?: { minQty: number; price: number }[];
-}
-  page: number;
-  pageSize: number;
-  pageCount: number;
-  total: number;
 }
 
 const BRANDS = ['All Brands', 'Gildan', 'Bella+Canvas', 'Next Level', 'AS Colour', 'Comfort Colors', 'Champion', 'Hanes', 'Port & Company', 'Port Authority', 'Sport-Tek'];
