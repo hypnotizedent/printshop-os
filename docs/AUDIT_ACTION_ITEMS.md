@@ -1,6 +1,6 @@
 # PrintShop OS - Living Audit Dashboard
 
-**Last Updated:** November 29, 2025  
+**Last Updated:** November 30, 2025  
 **Parent Issue:** GitHub Issue for tracking audit action items  
 **Status:** 🟢 Active
 
@@ -17,11 +17,13 @@ This document serves as the **Living Audit Dashboard** for PrintShop OS, breakin
 | Category | Priority | Items | Status |
 |----------|----------|-------|--------|
 | [Branch Review](#1-branch-review) | High | 8 branches | ⏳ Pending |
-| [Test Coverage](#2-test-coverage-inventory) | Medium | 6 services | ⏳ Pending |
+| [Test Coverage](#2-test-coverage-inventory) | Medium | 8 services | ✅ Audited |
 | [Documentation](#3-service-documentation) | Medium | 4 services | ⏳ Pending |
 | [Doc Consolidation](#4-documentation-consolidation) | Low | 3 issues | ⏳ Pending |
 | [Archive Cleanup](#5-archive-cleanup) | Low | 3 directories | ⏳ Pending |
 | [Audit Automation](#6-audit-automation) | Medium | 2 scripts | ⏳ Pending |
+| [Service Inventory](#7-service-inventory-gaps) | Medium | 4 services | ✅ Audited |
+| [Undiscoverable Files](#8-undiscoverable-files) | Low | ~130 files | ✅ Audited |
 
 ---
 
@@ -75,20 +77,23 @@ The following 8 branches have unique commits that need to be reviewed, summarize
 
 **Parent:** Repository Audit → Code Quality  
 **Priority:** 🟡 Medium  
-**Effort:** ~4-6 hours
+**Effort:** ~4-6 hours  
+**Status:** ✅ Audited (November 30, 2025)
 
-Create a detailed test coverage inventory for each service to identify gaps and establish baseline metrics.
+Detailed test coverage inventory for each service with identified gaps.
 
 ### Current Test File Count
 
 | Service | Test Files | Test Count (est.) | Coverage Tool | Status |
 |---------|-----------|-------------------|---------------|--------|
-| `services/api` | 13 | ~100+ | Jest | ⏳ Needs inventory |
-| `services/job-estimator` | 6 | ~50+ | Jest | ⏳ Needs inventory |
-| `services/production-dashboard` | 4 | ~75+ | Jest | ⏳ Needs inventory |
-| `services/supplier-sync` | 1 | ~10+ | Jest | ⚠️ Low coverage |
-| `frontend` | 2 | ~20+ | Vitest | ⚠️ Low coverage |
-| `printshop-strapi` | 4 | ~30+ | Jest | ⏳ Needs inventory |
+| `services/api` | 13 | ~100+ | Jest | ✅ Well covered |
+| `services/job-estimator` | 7 | ~50+ | Jest | ✅ Well covered |
+| `services/production-dashboard` | 4 | ~75+ | Jest | ✅ Covered |
+| `services/supplier-sync` | 2 | ~10+ | Jest | ⚠️ Minimal coverage |
+| `services/customer-service-ai` | 1 | ~5+ | Jest | ⚠️ Minimal coverage |
+| `services/vector-store` | 1 | ~5+ | Jest | ⚠️ Minimal coverage |
+| `frontend` | 5 | ~30+ | Vitest | ✅ Component tests |
+| `printshop-strapi` | 4 | ~30+ | Jest | ✅ Covered |
 
 ### Test Coverage Sub-Issues
 
@@ -97,9 +102,11 @@ Create a detailed test coverage inventory for each service to identify gaps and 
 | 2.1 | [API] Create test coverage inventory | Document all tests in services/api, identify gaps | Medium |
 | 2.2 | [Job Estimator] Create test coverage inventory | Document all tests, ensure pricing logic covered | Medium |
 | 2.3 | [Production Dashboard] Create test coverage inventory | Document WebSocket and time clock tests | Medium |
-| 2.4 | [Supplier Sync] Increase test coverage | Only 1 test file - needs comprehensive tests | High |
-| 2.5 | [Frontend] Increase test coverage | Only 2 test files - add component tests | High |
-| 2.6 | [Strapi] Create test coverage inventory | Document custom controller/service tests | Medium |
+| 2.4 | [Supplier Sync] Increase test coverage | Only 2 test files - needs comprehensive tests | High |
+| 2.5 | [Customer Service AI] Increase test coverage | Only 1 test file - needs RAG/chat tests | High |
+| 2.6 | [Vector Store] Increase test coverage | Only 1 test file - needs embedding tests | High |
+| 2.7 | [Frontend] Add E2E tests | No E2E tests - add critical flow tests | Medium |
+| 2.8 | [All Services] Configure coverage reporting | Enable Jest/Vitest coverage across all services | Low |
 
 ### Template for Test Coverage Issues
 
@@ -369,6 +376,48 @@ jobs:
 
 ---
 
+## 7. Service Inventory Gaps
+
+**Parent:** Repository Audit → Service Inventory  
+**Priority:** 🟡 Medium  
+**Status:** ✅ Audited (November 30, 2025)
+
+Identified gaps in service documentation and integration.
+
+| Service | Issue | Action Required |
+|---------|-------|-----------------|
+| `services/customer-service-ai` | Missing API documentation | Create API docs for RAG, chat, sentiment endpoints |
+| `services/vector-store` | Missing API documentation | Create API docs for embedding and search functions |
+| `services/production-dashboard` | Missing Dockerfile | Create Dockerfile for containerized deployment |
+| `services/supplier-sync` | Missing Dockerfile | Create Dockerfile for containerized deployment |
+
+---
+
+## 8. Undiscoverable Files
+
+**Parent:** Repository Audit → Undiscoverable Files Audit  
+**Priority:** 🟢 Low  
+**Status:** ✅ Audited (November 30, 2025)
+
+Files not linked from root documentation:
+
+### Active Documentation Needing Links
+- `docs/setup/strapi-collections-setup.md` → Link from DEVELOPMENT_GUIDE.md
+- `docs/setup/SUPPLIER_INTEGRATION_QUICKSTART.md` → Link from SERVICE_DIRECTORY.md
+- `docs/architecture/SERVICES_ARCHITECTURE.md` → Link from ARCHITECTURE.md
+- `docs/architecture/ai-integration-guide.md` → Link from SERVICE_DIRECTORY.md
+- `docs/reference/colors.md` → Link from SERVICE_DIRECTORY.md
+- `docs/FRONTEND_V1.1_ROADMAP.md` → Link from ROADMAP.md
+
+### Archive Directories for Review
+| Directory | File Count | Recommendation |
+|-----------|------------|----------------|
+| `docs/ARCHIVE_2025_11_26/` | 16 files | Review for deletion |
+| `docs/ARCHIVE_2025_11_27/` | 59 files | Review for deletion |
+| `docs/legacy/` | 44 files | Archive or delete |
+
+---
+
 ## 📝 Issue Creation Checklist
 
 When creating GitHub Issues from this dashboard:
@@ -390,6 +439,7 @@ When creating GitHub Issues from this dashboard:
 | `cleanup` | Archive and consolidation |
 | `automation` | CI/CD and scripting |
 | `branch-review` | Branch merge/archive decisions |
+| `service-inventory` | Service documentation gaps |
 
 ---
 
