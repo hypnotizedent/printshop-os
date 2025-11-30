@@ -263,6 +263,68 @@ After startup (allow 2-3 minutes for initialization):
 
 ---
 
+## 🌐 Production Deployment with Cloudflare Tunnel
+
+### Prerequisites
+- Cloudflare account with a domain configured
+- Cloudflare Tunnel (`cloudflared`) installed and running on your server
+- Docker and Docker Compose installed
+
+### Cloudflare Tunnel Routes
+
+Configure these routes in your Cloudflare Zero Trust dashboard under **Access > Tunnels > Configure**:
+
+| Subdomain | Service URL | Description |
+|-----------|-------------|-------------|
+| `app.yourdomain.com` | `http://printshop-frontend:3000` | Frontend React App |
+| `cms.yourdomain.com` | `http://printshop-strapi:1337` | Strapi CMS Admin & API |
+| `api.yourdomain.com` | `http://printshop-api:3001` | Backend API Service |
+
+### Configuration Steps
+
+1. **Copy environment template:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Update the VITE_* URLs** in `.env` to match your Cloudflare tunnel subdomains:
+   ```env
+   # Example for domain "printshop.example.com"
+   VITE_API_URL=https://api.printshop.example.com
+   VITE_STRAPI_URL=https://cms.printshop.example.com
+   VITE_PRICING_URL=https://api.printshop.example.com
+   VITE_WS_URL=wss://api.printshop.example.com
+   ```
+
+3. **Generate secure values** for secrets:
+   ```bash
+   # Generate random keys for Strapi
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+   ```
+
+4. **Build and start with the new configuration:**
+   ```bash
+   docker compose up -d --build
+   ```
+
+### Verifying the Setup
+
+After deployment, verify each service is accessible:
+- Frontend: `https://app.yourdomain.com`
+- Strapi Admin: `https://cms.yourdomain.com/admin`
+- API Health: `https://api.yourdomain.com/health`
+
+### Troubleshooting Cloudflare Tunnel
+
+| Issue | Solution |
+|-------|----------|
+| Frontend shows blank page | Check browser console for CORS errors. Ensure VITE_* URLs match your tunnel domains. |
+| API requests fail | Verify tunnel routes point to correct container names and ports. |
+| WebSocket disconnects | Use `wss://` protocol for VITE_WS_URL with Cloudflare tunnels. |
+| 502 Bad Gateway | Container may not be running. Check `docker compose ps` and `docker compose logs`. |
+
+---
+
 ## 📁 Repository Structure
 
 ```
