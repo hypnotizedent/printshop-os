@@ -141,6 +141,12 @@
     },
     "shippingAddress": {
       "type": "json"
+    },
+    "payments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::payment.payment",
+      "mappedBy": "order"
     }
   }
 }
