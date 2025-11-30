@@ -383,6 +383,9 @@ export type PaymentMethodEnum = 'cash' | 'check' | 'credit_card' | 'ach' | 'stri
 export type PaymentStatusEnum = 'pending' | 'processing' | 'paid' | 'failed' | 'refunded' | 'expired' | 'cancelled'
 export type PaymentTypeEnum = 'deposit' | 'balance' | 'full' | 'refund'
 
+// Shared constant for valid payment methods
+export const VALID_PAYMENT_METHODS: PaymentMethodEnum[] = ['cash', 'check', 'credit_card', 'ach', 'stripe', 'bank_transfer', 'other']
+
 export interface OrderPayment {
   id: string
   documentId: string

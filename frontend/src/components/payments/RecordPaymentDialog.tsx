@@ -42,6 +42,7 @@ const PAYMENT_METHODS: { value: PaymentMethodEnum; label: string }[] = [
   { value: "check", label: "Check" },
   { value: "credit_card", label: "Credit Card" },
   { value: "ach", label: "ACH / Bank Transfer" },
+  { value: "bank_transfer", label: "Wire Transfer" },
   { value: "stripe", label: "Stripe" },
   { value: "other", label: "Other" },
 ]

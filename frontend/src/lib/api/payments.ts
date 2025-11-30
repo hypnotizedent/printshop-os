@@ -3,7 +3,8 @@
  * Communicates with Strapi payments endpoints
  */
 
-import type { OrderPayment, PaymentFormData, PaymentsDashboardSummary, OutstandingOrderSummary, PaymentMethodEnum } from '../types';
+import type { OrderPayment, PaymentFormData, PaymentsDashboardSummary, OutstandingOrderSummary } from '../types';
+import { VALID_PAYMENT_METHODS } from '../types';
 import { sanitizeTextInput } from '../utils';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
@@ -14,7 +15,6 @@ const MAX_NOTES_LENGTH = 500;
 const MAX_RECORDED_BY_LENGTH = 100;
 const MAX_DOCUMENT_ID_LENGTH = 100;
 const MAX_AMOUNT = 999999999.99;
-const VALID_PAYMENT_METHODS: PaymentMethodEnum[] = ['cash', 'check', 'credit_card', 'ach', 'stripe', 'bank_transfer', 'other'];
 
 /**
  * Validate payment form data
