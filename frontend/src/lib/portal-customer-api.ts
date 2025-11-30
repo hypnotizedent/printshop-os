@@ -4,7 +4,7 @@
  * API helpers for customer portal operations including preferences,
  * password management, and activity logging.
  * 
- * Created: November 30, 2025
+ * Created: November 30, 2024
  */
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://100.92.156.118:1337';
@@ -310,9 +310,16 @@ export async function changePassword(
     const result = await response.json();
     
     if (!response.ok) {
-      // Handle specific error cases
-      if (response.status === 400 && result.error?.message?.includes('incorrect')) {
-        return { success: false, error: 'Current password is incorrect' };
+      // Handle specific HTTP status codes for more reliable error detection
+      if (response.status === 400) {
+        // Bad request - likely incorrect password or validation error
+        return { 
+          success: false, 
+          error: result.error?.message || 'Current password is incorrect' 
+        };
+      }
+      if (response.status === 401) {
+        return { success: false, error: 'Authentication required' };
       }
       return { 
         success: false, 
