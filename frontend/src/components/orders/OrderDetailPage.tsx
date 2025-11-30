@@ -528,6 +528,13 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
               </CardContent>
             </Card>
           )}
+
+          {/* Payment History */}
+          <PaymentHistory
+            orderDocumentId={order.documentId}
+            totalAmount={order.totalAmount}
+            refreshTrigger={paymentRefreshTrigger}
+          />
         </div>
 
         {/* Sidebar */}
