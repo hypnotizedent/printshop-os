@@ -308,6 +308,20 @@ export async function fetchOrderDetail(
   }
 }
 
+/**
+ * Fetch single order with line items (alternative signature for portal components)
+ * @param orderId - Order ID or documentId
+ * @param _customerId - Customer ID (used for validation, currently not enforced)
+ */
+export async function fetchOrderDetails(
+  orderId: string,
+  _customerId: string
+): Promise<PortalOrder | null> {
+  // For now, we just call fetchOrderDetail since the API doesn't filter by customer
+  // In a production environment, you might want to verify customer ownership
+  return fetchOrderDetail(orderId);
+}
+
 // ============================================================================
 // Quotes
 // ============================================================================
