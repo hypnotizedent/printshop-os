@@ -4,6 +4,7 @@
  */
 
 import type { OrderPayment, PaymentFormData, PaymentsDashboardSummary, OutstandingOrderSummary, PaymentMethodEnum } from '../types';
+import { sanitizeTextInput } from '../utils';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -11,19 +12,9 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 const MAX_REFERENCE_LENGTH = 100;
 const MAX_NOTES_LENGTH = 500;
 const MAX_RECORDED_BY_LENGTH = 100;
+const MAX_DOCUMENT_ID_LENGTH = 100;
 const MAX_AMOUNT = 999999999.99;
 const VALID_PAYMENT_METHODS: PaymentMethodEnum[] = ['cash', 'check', 'credit_card', 'ach', 'stripe', 'bank_transfer', 'other'];
-
-/**
- * Sanitize text input by removing HTML tags and trimming
- */
-function sanitizeText(value: string | undefined, maxLength: number): string | undefined {
-  if (!value) return undefined;
-  return value
-    .replace(/<[^>]*>/g, '')
-    .slice(0, maxLength)
-    .trim() || undefined;
-}
 
 /**
  * Validate payment form data
@@ -48,13 +39,29 @@ function validatePaymentData(payment: PaymentFormData, maxAmount: number): { val
     return { valid: false, error: 'Invalid payment method' };
   }
 
-  // Validate payment date
+  // Validate payment date format
   if (!payment.paymentDate || !/^\d{4}-\d{2}-\d{2}$/.test(payment.paymentDate)) {
     return { valid: false, error: 'Invalid payment date format' };
   }
+  
   const paymentDate = new Date(payment.paymentDate);
   if (isNaN(paymentDate.getTime())) {
     return { valid: false, error: 'Invalid payment date' };
+  }
+
+  // Validate date is not in the future
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // End of today
+  if (paymentDate > today) {
+    return { valid: false, error: 'Payment date cannot be in the future' };
+  }
+
+  // Validate date is within reasonable range (1 year ago)
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  oneYearAgo.setHours(0, 0, 0, 0);
+  if (paymentDate < oneYearAgo) {
+    return { valid: false, error: 'Payment date cannot be more than 1 year ago' };
   }
 
   return { valid: true };
@@ -128,12 +135,12 @@ export async function recordPayment(
 ): Promise<{ success: boolean; payment?: OrderPayment; newAmountPaid?: number; newAmountOutstanding?: number; error?: string }> {
   try {
     // Validate orderDocumentId format (basic check)
-    if (!orderDocumentId || typeof orderDocumentId !== 'string' || orderDocumentId.length > 100) {
+    if (!orderDocumentId || typeof orderDocumentId !== 'string' || orderDocumentId.length > MAX_DOCUMENT_ID_LENGTH) {
       return { success: false, error: 'Invalid order ID' };
     }
 
     // Sanitize recordedBy
-    const sanitizedRecordedBy = sanitizeText(recordedBy, MAX_RECORDED_BY_LENGTH) || 'Staff';
+    const sanitizedRecordedBy = sanitizeTextInput(recordedBy, MAX_RECORDED_BY_LENGTH) || 'Staff';
 
     // First, fetch the current order to get latest amounts
     const orderRes = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(orderDocumentId)}`);
@@ -161,8 +168,8 @@ export async function recordPayment(
     const newAmountOutstanding = Math.max(0, totalAmount - newAmountPaid);
 
     // Sanitize text fields
-    const sanitizedReferenceNumber = sanitizeText(payment.referenceNumber, MAX_REFERENCE_LENGTH);
-    const sanitizedNotes = sanitizeText(payment.notes, MAX_NOTES_LENGTH);
+    const sanitizedReferenceNumber = sanitizeTextInput(payment.referenceNumber, MAX_REFERENCE_LENGTH);
+    const sanitizedNotes = sanitizeTextInput(payment.notes, MAX_NOTES_LENGTH);
 
     // Create the payment record
     const paymentRes = await fetch(`${API_BASE}/api/payments`, {
@@ -250,7 +257,7 @@ export async function recordPayment(
 export async function getPayments(orderDocumentId: string): Promise<OrderPayment[]> {
   try {
     // Validate and encode the orderDocumentId to prevent injection
-    if (!orderDocumentId || typeof orderDocumentId !== 'string' || orderDocumentId.length > 100) {
+    if (!orderDocumentId || typeof orderDocumentId !== 'string' || orderDocumentId.length > MAX_DOCUMENT_ID_LENGTH) {
       console.error('Invalid order document ID');
       return [];
     }
