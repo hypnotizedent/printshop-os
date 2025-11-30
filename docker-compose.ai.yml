@@ -33,7 +33,7 @@ services:
 
   # milvus-minio: Object storage for Milvus
   milvus-minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2024-01-01T00-00-00Z
     container_name: printshop-milvus-minio
     restart: unless-stopped
     environment:
