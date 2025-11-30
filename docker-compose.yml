@@ -144,6 +144,8 @@ services:
     networks:
       - printshop_network
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
