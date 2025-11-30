@@ -7,7 +7,17 @@ import { Context } from 'koa';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'printshop-os-secret-key-change-in-production';
+// Get JWT secret with production safety check
+function getJWTSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  // Only use fallback in development/testing
+  return secret || 'dev-secret-do-not-use-in-production';
+}
+
+const JWT_SECRET = getJWTSecret();
 const JWT_EXPIRES_IN = '7d';
 
 export default {
