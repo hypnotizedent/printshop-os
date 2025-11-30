@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
   PaperPlaneTilt,
-  Robot,
+  Brain,
   User,
   Sparkle,
   ArrowsClockwise,
@@ -224,7 +224,7 @@ export function AIAssistant({ className, embedded = false }: AIAssistantProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
-              <Robot className="text-white" size={22} weight="fill" />
+              <Brain className="text-white" size={22} weight="fill" />
             </div>
             <div>
               <CardTitle className="text-lg">AI Assistant</CardTitle>
@@ -256,7 +256,7 @@ export function AIAssistant({ className, embedded = false }: AIAssistantProps) {
               >
                 {message.role === "assistant" && (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                    <Robot className="text-white" size={16} weight="fill" />
+                    <Brain className="text-white" size={16} weight="fill" />
                   </div>
                 )}
 
@@ -319,7 +319,7 @@ export function AIAssistant({ className, embedded = false }: AIAssistantProps) {
             {isLoading && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                  <Robot className="text-white animate-pulse" size={16} weight="fill" />
+                  <Brain className="text-white animate-pulse" size={16} weight="fill" />
                 </div>
                 <div className="bg-muted rounded-lg px-4 py-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
