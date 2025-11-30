@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install ALL dependencies (including dev for TypeScript)
-RUN npm install
+RUN npm ci
 
 # Copy source code (only lib and data, not scripts which have type errors)
 COPY lib/ ./lib/
@@ -26,7 +26,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 # Copy built files from builder stage
 COPY --from=builder /app/build ./build
