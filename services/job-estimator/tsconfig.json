@@ -26,6 +26,6 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["node", "jest"]
   },
-  "include": ["lib/**/*", "tests/**/*", "scripts/**/*"],
-  "exclude": ["node_modules", "build"]
+  "include": ["lib/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "build", "scripts"]
 }
