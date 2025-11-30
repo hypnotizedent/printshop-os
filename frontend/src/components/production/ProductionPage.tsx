@@ -13,6 +13,13 @@ import { useInactivity } from '../../hooks/useInactivity';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
+// Configuration constants
+const ESTIMATED_PRINTS_PER_JOB = 100; // Placeholder until print tracking is implemented
+const DEFAULT_QUALITY_RATE = 98.5; // Placeholder until quality tracking is implemented
+const PLACEHOLDER_ACTIVE_JOBS_CHANGE = 2; // Would require historical data
+const PLACEHOLDER_ON_SCHEDULE_CHANGE = 3; // Would require historical data
+const STATS_REFRESH_INTERVAL_MS = 60000; // Refresh stats every 60 seconds
+
 // Dashboard statistics interface
 interface DashboardStats {
   activeJobs: number;
@@ -75,17 +82,17 @@ export const ProductionPage = () => {
           ? Math.round((onTimeJobs / totalActiveJobs) * 100) 
           : 100;
 
-        // Calculate quality rate (completed without issues / total completed)
+        // Calculate quality rate (placeholder until quality tracking is implemented)
         const completedOrders = orders.filter((o: any) => o.status === 'COMPLETED').length;
-        const qualityRate = completedOrders > 0 ? 98.5 : 0; // Placeholder until quality tracking is implemented
+        const qualityRate = completedOrders > 0 ? DEFAULT_QUALITY_RATE : 0;
 
         setStats({
           activeJobs,
-          todaysOutput: completedToday * 100, // Estimate prints per job
+          todaysOutput: completedToday * ESTIMATED_PRINTS_PER_JOB,
           onSchedulePercent,
           qualityRate,
-          activeJobsChange: 2, // Would require historical data
-          onScheduleChange: 3, // Would require historical data
+          activeJobsChange: PLACEHOLDER_ACTIVE_JOBS_CHANGE,
+          onScheduleChange: PLACEHOLDER_ON_SCHEDULE_CHANGE,
         });
       }
     } catch (error) {
@@ -98,8 +105,8 @@ export const ProductionPage = () => {
 
   useEffect(() => {
     fetchDashboardStats();
-    // Refresh stats every 60 seconds
-    const interval = setInterval(fetchDashboardStats, 60000);
+    // Refresh stats at configured interval
+    const interval = setInterval(fetchDashboardStats, STATS_REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [fetchDashboardStats]);
 
