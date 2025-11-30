@@ -3,9 +3,61 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Package, CheckCircle, CurrencyDollar, Printer, Warning, Clock, Plus } from "@phosphor-icons/react"
+import { Package, CheckCircle, CurrencyDollar, Printer, Warning, Clock, Plus, Info } from "@phosphor-icons/react"
 import { PaymentsSummary } from "@/components/payments"
-import type { DashboardStats, Job, Machine } from "@/lib/types"
+import type { DashboardStats, Job, Machine, MachineStatus } from "@/lib/types"
+
+// Demo machine data to show when no machines are configured
+const DEMO_MACHINES: Machine[] = [
+  { 
+    id: '1', 
+    name: 'DTG Printer 1', 
+    type: 'DTG',
+    status: 'printing' as MachineStatus, 
+    utilization: 75, 
+    currentJob: 'Order #1234',
+    lastMaintenance: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    nextMaintenance: new Date(Date.now() + 23 * 24 * 60 * 60 * 1000).toISOString(),
+    totalJobs: 342,
+    uptime: 98.5
+  },
+  { 
+    id: '2', 
+    name: 'Screen Press A', 
+    type: 'Screen Press',
+    status: 'idle' as MachineStatus, 
+    utilization: 0, 
+    currentJob: undefined,
+    lastMaintenance: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    nextMaintenance: new Date(Date.now() + 27 * 24 * 60 * 60 * 1000).toISOString(),
+    totalJobs: 156,
+    uptime: 95.2
+  },
+  { 
+    id: '3', 
+    name: 'Embroidery Machine', 
+    type: 'Embroidery',
+    status: 'maintenance' as MachineStatus, 
+    utilization: 0, 
+    currentJob: undefined,
+    lastMaintenance: new Date().toISOString(),
+    nextMaintenance: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    totalJobs: 89,
+    uptime: 92.1
+  },
+  { 
+    id: '4', 
+    name: 'Heat Press 1', 
+    type: 'Heat Press',
+    status: 'printing' as MachineStatus, 
+    utilization: 45, 
+    currentJob: 'Order #1235',
+    lastMaintenance: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    nextMaintenance: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
+    totalJobs: 267,
+    uptime: 99.1
+  },
+]
 
 interface DashboardPageProps {
   stats: DashboardStats
@@ -16,6 +68,9 @@ interface DashboardPageProps {
 }
 
 export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewOrder }: DashboardPageProps) {
+  // Use demo machines if no machines are configured
+  const displayMachines = machines.length > 0 ? machines : DEMO_MACHINES
+  const isUsingDemoData = machines.length === 0
   const getStatusColor = (status: string) => {
     const colors = {
       printing: 'bg-cyan text-white',
@@ -130,8 +185,14 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewO
               View All
             </Button>
           </div>
+          {isUsingDemoData && (
+            <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-md bg-muted/50 border border-dashed border-border">
+              <Info size={14} className="text-muted-foreground flex-shrink-0" />
+              <span className="text-xs text-muted-foreground">Demo data - configure machines to see real status</span>
+            </div>
+          )}
           <div className="space-y-4">
-            {machines.map((machine) => (
+            {displayMachines.map((machine) => (
               <div key={machine.id} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
