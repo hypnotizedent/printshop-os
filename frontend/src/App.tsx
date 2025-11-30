@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { Toaster } from "@/components/ui/sonner"
 import { AppSidebar } from "./components/layout/AppSidebar"
 import { DashboardPage } from "./components/dashboard/DashboardPage"
@@ -15,14 +16,14 @@ import LabelsDemo from "./pages/LabelsDemo"
 import { QuoteBuilder } from "./components/quotes/QuoteBuilder"
 import { ProductCatalog } from "./components/products/ProductCatalog"
 import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
-import { ShipmentTracking } from "./components/shipping/ShipmentTracking"
-import { InvoicesPage } from "./components/invoices/InvoicesPage"
+import { AIAssistantPage } from "./pages/AIAssistantPage"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 import { toast } from "sonner"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
-function App() {
+// Main admin/employee dashboard content
+function MainDashboard() {
   const [currentPage, setCurrentPage] = useState("dashboard")
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
@@ -273,11 +274,55 @@ function App() {
       <AppSidebar currentPage={currentPage} onNavigate={setCurrentPage} />
       <main className="flex-1 p-8 overflow-auto">
         <div className="max-w-[1600px] mx-auto">
-          {renderPage()}
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            renderPage()
+          )}
         </div>
       </main>
-      <Toaster />
     </div>
+  )
+}
+
+// Customer Portal Layout - wrapped in the portal-specific router
+function CustomerPortalLayout() {
+  return <Portal />
+}
+
+// Login/Auth Page
+function LoginPage() {
+  const { isAuthenticated, userType } = useAuth()
+  
+  // If already authenticated, redirect to appropriate page
+  if (isAuthenticated) {
+    if (userType === 'customer') {
+      return <Navigate to="/portal" replace />
+    }
+    return <Navigate to="/" replace />
+  }
+  
+  return <AuthPage />
+}
+
+// Main App with routing
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Login route */}
+        <Route path="/login" element={<LoginPage />} />
+        
+        {/* Customer Portal routes - has its own internal routing */}
+        <Route path="/portal/*" element={<CustomerPortalLayout />} />
+        
+        {/* Main admin/employee dashboard - root and all unmatched */}
+        <Route path="/*" element={<MainDashboard />} />
+      </Routes>
+      <Toaster />
+    </Router>
   )
 }
 
