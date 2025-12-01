@@ -273,8 +273,8 @@ class StrapiClient:
             }
             
             if fields:
-                for field in fields:
-                    params[f"fields[{fields.index(field)}]"] = field
+                for i, field in enumerate(fields):
+                    params[f"fields[{i}]"] = field
             
             if filters:
                 for key, value in filters.items():

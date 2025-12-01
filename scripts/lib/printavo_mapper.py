@@ -20,7 +20,7 @@ Usage:
     strapi_order = mapper.map_order(printavo_order)
 """
 
-from typing import Dict, Optional, Any, List
+from typing import Dict, Optional, Any, List, Tuple
 from datetime import datetime
 import re
 
@@ -330,7 +330,7 @@ class PrintavoMapper:
         # Remove None values
         return {k: v for k, v in result.items() if v is not None}
     
-    def validate_customer(self, customer: Dict) -> tuple[bool, List[str]]:
+    def validate_customer(self, customer: Dict) -> Tuple[bool, List[str]]:
         """
         Validate customer data for import.
         
@@ -414,7 +414,7 @@ class PrintavoMapper:
         # Remove None values
         return {k: v for k, v in result.items() if v is not None}
     
-    def validate_order(self, order: Dict) -> tuple[bool, List[str]]:
+    def validate_order(self, order: Dict) -> Tuple[bool, List[str]]:
         """
         Validate order data for import.
         
@@ -467,7 +467,7 @@ class PrintavoMapper:
         # Remove None values (but keep 0 for numeric fields)
         return {k: v for k, v in result.items() if v is not None}
     
-    def validate_line_item(self, item: Dict) -> tuple[bool, List[str]]:
+    def validate_line_item(self, item: Dict) -> Tuple[bool, List[str]]:
         """
         Validate line item data for import.
         
