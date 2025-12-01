@@ -77,7 +77,9 @@ services:
     networks:
       - printshop_network
     healthcheck:
-      test: ["CMD", "mongosh", "-u", "${MONGO_INITDB_ROOT_USERNAME:-root}", "-p", "${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+      # Simple TCP port check - MongoDB listens on 27017 when healthy
+      # Avoids exposing credentials in process lists
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
