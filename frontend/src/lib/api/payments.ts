@@ -35,7 +35,7 @@ function validatePaymentData(payment: PaymentFormData, maxAmount: number): { val
   }
 
   // Validate payment method
-  if (!VALID_PAYMENT_METHODS.includes(payment.paymentMethod)) {
+  if (!VALID_PAYMENT_METHODS.includes(payment.paymentMethod as typeof VALID_PAYMENT_METHODS[number])) {
     return { valid: false, error: 'Invalid payment method' };
   }
 

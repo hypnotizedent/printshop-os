@@ -77,9 +77,13 @@ export interface Supplier {
 
 // Strapi API response types
 interface StrapiVariant {
+  sku?: string;
   color?: { name: string };
+  colorCode?: string;
   size?: string;
+  price?: number;
   inStock?: boolean;
+  stockLevel?: number;
 }
 
 interface StrapiProduct {
@@ -97,6 +101,19 @@ interface StrapiProduct {
   variants?: StrapiVariant[];
   supplier?: string;
   pricingTiers?: { minQty: number; price: number }[];
+}
+
+// Transform a Strapi variant to our ProductVariant type
+function transformVariant(v: StrapiVariant): ProductVariant {
+  return {
+    sku: v.sku || '',
+    color: v.color?.name || '',
+    colorCode: v.colorCode,
+    size: v.size || '',
+    price: v.price || 0,
+    inStock: v.inStock !== false,
+    stockLevel: v.stockLevel,
+  };
 }
 
 // Transform Strapi product response to our Product type
@@ -128,12 +145,12 @@ function transformProduct(item: StrapiProduct): Product {
     brand: item.brand || 'Generic',
     category: item.category || 'other',
     description: item.description || '',
-    basePrice: parseFloat(item.pricing?.basePrice) || 0,
+    basePrice: parseFloat(item.pricing?.basePrice || '0') || 0,
     imageUrl: imageUrl,
     images: item.images || [],
     colors: uniqueColors.length > 0 ? uniqueColors : (item.colors || []),
     sizes: uniqueSizes.length > 0 ? uniqueSizes : (item.sizes || []),
-    variants: item.variants || [],
+    variants: (item.variants || []).map(transformVariant),
     supplier: item.supplier || 'Unknown',
     inStock: hasInStockVariants,
     pricingTiers: item.pricing?.tiers || item.pricingTiers || [],
