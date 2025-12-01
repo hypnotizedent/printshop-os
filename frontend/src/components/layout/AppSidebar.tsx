@@ -47,7 +47,7 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto" role="navigation" aria-label="Main navigation">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = currentPage === item.href
@@ -56,22 +56,27 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
             <button
               key={item.href}
               onClick={() => onNavigate(item.href)}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative group",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-foreground hover:bg-muted"
               )}
             >
-              <Icon size={20} weight={isActive ? "fill" : "regular"} />
+              <Icon size={20} weight={isActive ? "fill" : "regular"} aria-hidden="true" />
               <span className="font-medium text-sm">{item.label}</span>
               {item.badge && (
-                <span className={cn(
-                  "ml-auto text-xs font-semibold px-2 py-0.5 rounded-full",
-                  isActive 
-                    ? "bg-primary-foreground/20 text-primary-foreground" 
-                    : "bg-accent text-accent-foreground"
-                )}>
+                <span 
+                  className={cn(
+                    "ml-auto text-xs font-semibold px-2 py-0.5 rounded-full",
+                    isActive 
+                      ? "bg-primary-foreground/20 text-primary-foreground" 
+                      : "bg-accent text-accent-foreground"
+                  )}
+                  aria-label={`${item.badge} items`}
+                >
                   {item.badge}
                 </span>
               )}
@@ -80,7 +85,7 @@ export function AppSidebar({ currentPage, onNavigate }: AppSidebarProps) {
         })}
         
         {/* Customer Portal Link */}
-        <div className="pt-4 mt-4 border-t border-border">
+        <div className="pt-4 mt-4 border-t border-border" role="group" aria-label="External links">
           <p className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             External
           </p>

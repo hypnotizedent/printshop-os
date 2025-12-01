@@ -11,6 +11,7 @@ import { MagnifyingGlass, Plus, Funnel, CalendarBlank, FileText, Warning, ArrowR
 import { PrintLabelButton } from "@/components/labels"
 import { toast } from "sonner"
 import { jobsApi } from "@/lib/api-client"
+import { EmptyState } from "@/components/ui/states"
 import type { Job, JobStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -625,7 +626,10 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
       {/* List View */}
       {activeView === 'list' && (
         <Card className="overflow-hidden">
-          <Table>
+          <Table aria-label="Jobs list" aria-describedby="jobs-count">
+            <caption id="jobs-count" className="sr-only">
+              {sortedJobs.length} {sortedJobs.length === 1 ? 'job' : 'jobs'} found
+            </caption>
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="w-[40px]">
@@ -638,17 +642,21 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/80 transition-colors"
                   onClick={() => handleSort('title')}
+                  aria-sort={sortField === 'title' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  role="columnheader"
                 >
                   <div className="flex items-center gap-1">
                     Job Title
                     {sortField === 'title' && (
-                      sortDirection === 'asc' ? <CaretUp size={14} /> : <CaretDown size={14} />
+                      sortDirection === 'asc' ? <CaretUp size={14} aria-hidden="true" /> : <CaretDown size={14} aria-hidden="true" />
                     )}
                   </div>
                 </TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/80 transition-colors"
                   onClick={() => handleSort('customer')}
+                  aria-sort={sortField === 'customer' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  role="columnheader"
                 >
                   <div className="flex items-center gap-1">
                     Customer
@@ -706,8 +714,25 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
             <TableBody>
               {sortedJobs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                    No jobs found
+                  <TableCell colSpan={7} className="h-32 text-center">
+                    {searchQuery ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <MagnifyingGlass size={24} className="text-muted-foreground" />
+                        <p className="text-muted-foreground">No jobs match &quot;{searchQuery}&quot;</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setSearchQuery("")}
+                        >
+                          Clear search
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <FileText size={24} className="text-muted-foreground" />
+                        <p className="text-muted-foreground">No jobs found</p>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (
