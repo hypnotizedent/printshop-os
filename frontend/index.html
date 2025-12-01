@@ -14,6 +14,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="/src/main.css" rel="stylesheet" />
+    <style>
+        /* Prevent flash of unstyled content - set initial background */
+        html, body, #root {
+            background-color: #fafafa;
+            min-height: 100vh;
+        }
+        @media (prefers-color-scheme: dark) {
+            html, body, #root {
+                background-color: #1a1a1a;
+            }
+        }
+        .dark html, .dark body, .dark #root {
+            background-color: #1a1a1a;
+        }
+    </style>
 </head>
 
 <body>

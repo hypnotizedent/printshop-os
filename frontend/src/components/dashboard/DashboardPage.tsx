@@ -1,9 +1,10 @@
+import { useState } from "react"
 import { StatCard } from "./StatCard"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Package, CheckCircle, CurrencyDollar, Printer, Warning, Clock, Plus, Info } from "@phosphor-icons/react"
+import { Package, CheckCircle, CurrencyDollar, Printer, Warning, Clock, Plus, Info, X } from "@phosphor-icons/react"
 import { PaymentsSummary } from "@/components/payments"
 import type { DashboardStats, Job, Machine, MachineStatus } from "@/lib/types"
 
@@ -68,6 +69,9 @@ interface DashboardPageProps {
 }
 
 export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewOrder }: DashboardPageProps) {
+  // State for dismissing low stock alert
+  const [showLowStockAlert, setShowLowStockAlert] = useState(true)
+  
   // Use demo machines if no machines are configured
   const displayMachines = machines.length > 0 ? machines : DEMO_MACHINES
   const isUsingDemoData = machines.length === 0
@@ -102,7 +106,7 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewO
           <h1 className="text-3xl font-bold text-foreground tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Welcome back! Here's your shop overview.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => onNavigate('quotes')}>
           <Plus size={18} weight="bold" />
           New Job
         </Button>
@@ -226,7 +230,7 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewO
         </div>
       </div>
 
-      {stats.lowStockItems > 0 && (
+      {stats.lowStockItems > 0 && showLowStockAlert && (
         <Card className="p-4 bg-yellow/10 border-yellow">
           <div className="flex items-center gap-3">
             <Warning size={24} weight="fill" className="text-yellow" />
@@ -238,6 +242,14 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewO
             </div>
             <Button variant="outline" size="sm">
               View Inventory
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowLowStockAlert(false)}
+              aria-label="Dismiss low stock alert"
+            >
+              <X size={18} />
             </Button>
           </div>
         </Card>

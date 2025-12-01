@@ -2,11 +2,35 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { FolderOpen, File, FilePdf, FileImage, FileText, Upload, MagnifyingGlass, DotsThree } from "@phosphor-icons/react"
+import { FolderOpen, File, FilePdf, FileImage, FileText, Upload, MagnifyingGlass, DotsThree, CaretLeft, House } from "@phosphor-icons/react"
 import type { FileItem } from "@/lib/types"
+import { toast } from "sonner"
 
 interface FilesPageProps {
   files: FileItem[]
+}
+
+// Sample files for demo when in a folder
+const SAMPLE_FILES: Record<string, FileItem[]> = {
+  '/jobs': [
+    { id: '1', name: 'job-45678-artwork.pdf', type: 'application/pdf', size: 2500000, uploadedAt: new Date().toISOString(), uploadedBy: 'John', jobId: '45678' },
+    { id: '2', name: 'job-45679-mockup.png', type: 'image/png', size: 1200000, uploadedAt: new Date().toISOString(), uploadedBy: 'Sarah', jobId: '45679' },
+  ],
+  '/templates': [
+    { id: '3', name: 'invoice-template.pdf', type: 'application/pdf', size: 150000, uploadedAt: new Date().toISOString(), uploadedBy: 'Admin' },
+    { id: '4', name: 'quote-template.pdf', type: 'application/pdf', size: 180000, uploadedAt: new Date().toISOString(), uploadedBy: 'Admin' },
+  ],
+  '/assets': [
+    { id: '5', name: 'company-logo.png', type: 'image/png', size: 50000, uploadedAt: new Date().toISOString(), uploadedBy: 'Admin' },
+    { id: '6', name: 'brand-guidelines.pdf', type: 'application/pdf', size: 3500000, uploadedAt: new Date().toISOString(), uploadedBy: 'Admin' },
+  ],
+  '/customers': [
+    { id: '7', name: 'customer-list.csv', type: 'text/csv', size: 25000, uploadedAt: new Date().toISOString(), uploadedBy: 'John' },
+  ],
+  '/invoices': [
+    { id: '8', name: 'invoice-2024-001.pdf', type: 'application/pdf', size: 120000, uploadedAt: new Date().toISOString(), uploadedBy: 'System' },
+    { id: '9', name: 'invoice-2024-002.pdf', type: 'application/pdf', size: 115000, uploadedAt: new Date().toISOString(), uploadedBy: 'System' },
+  ],
 }
 
 export function FilesPage({ files }: FilesPageProps) {
@@ -33,10 +57,26 @@ export function FilesPage({ files }: FilesPageProps) {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
 
-  const filteredFiles = files.filter(file =>
+  // Get files for current path - use sample files when in a folder, or passed files at root
+  const currentFiles = currentPath === '/' 
+    ? files 
+    : (SAMPLE_FILES[currentPath] || [])
+
+  const filteredFiles = currentFiles.filter(file =>
     searchQuery === "" ||
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  const handleFolderClick = (folderPath: string) => {
+    setCurrentPath(folderPath)
+    toast.success(`Opened ${folderPath.replace('/', '')} folder`)
+  }
+
+  const handleNavigateUp = () => {
+    setCurrentPath("/")
+  }
+
+  const isInSubfolder = currentPath !== "/"
 
   return (
     <div className="space-y-6">
@@ -53,8 +93,25 @@ export function FilesPage({ files }: FilesPageProps) {
 
       <Card className="p-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <FolderOpen size={18} weight="fill" className="text-primary" />
-          <span className="font-medium text-foreground">{currentPath}</span>
+          {isInSubfolder && (
+            <Button variant="ghost" size="sm" onClick={handleNavigateUp} className="mr-2 -ml-2">
+              <CaretLeft size={16} className="mr-1" />
+              Back
+            </Button>
+          )}
+          <button 
+            onClick={() => setCurrentPath("/")}
+            className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+          >
+            <House size={18} weight="fill" className="text-primary" />
+            <span className="font-medium text-foreground">Home</span>
+          </button>
+          {isInSubfolder && (
+            <>
+              <span>/</span>
+              <span className="font-medium text-foreground">{currentPath.replace('/', '')}</span>
+            </>
+          )}
         </div>
       </Card>
 
@@ -70,33 +127,37 @@ export function FilesPage({ files }: FilesPageProps) {
         </div>
       </div>
 
-      <div>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Folders</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {folders.map((folder) => (
-            <Card
-              key={folder.path}
-              className="p-6 hover:shadow-lg hover:border-primary transition-all cursor-pointer group"
-              onClick={() => setCurrentPath(folder.path)}
-            >
-              <div className="flex flex-col items-center text-center gap-3">
-                <div className="p-4 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <FolderOpen size={32} weight="fill" className="text-primary" />
+      {!isInSubfolder && (
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Folders</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {folders.map((folder) => (
+              <Card
+                key={folder.path}
+                className="p-6 hover:shadow-lg hover:border-primary transition-all cursor-pointer group"
+                onClick={() => handleFolderClick(folder.path)}
+              >
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="p-4 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                    <FolderOpen size={32} weight="fill" className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {folder.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">{folder.fileCount} files</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {folder.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">{folder.fileCount} files</p>
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Recent Files</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">
+          {isInSubfolder ? `Files in ${currentPath.replace('/', '')}` : 'Recent Files'}
+        </h2>
         <Card>
           <div className="divide-y divide-border">
             {filteredFiles.map((file) => (
