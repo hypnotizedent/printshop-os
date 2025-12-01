@@ -21,11 +21,12 @@ describe('Audit Service', () => {
     it('should create an audit log entry', async () => {
       const mockAuditLog = {
         id: 1,
-        entityType: 'quote',
-        entityId: 1,
-        event: 'quote.approved',
-        oldStatus: 'Sent',
-        newStatus: 'OrderCreated',
+        documentId: 'doc-123',
+        action: 'CREATE',
+        entity_type: 'quote',
+        entity_id: '1',
+        user_id: 'user-1',
+        user_name: 'John Doe',
         timestamp: expect.any(String),
       };
 
@@ -34,11 +35,11 @@ describe('Audit Service', () => {
       });
 
       const result = await createAuditLog(mockStrapi as any, {
-        entityType: 'quote',
-        entityId: 1,
-        event: 'quote.approved',
-        oldStatus: 'Sent',
-        newStatus: 'OrderCreated',
+        action: 'CREATE',
+        entity_type: 'quote',
+        entity_id: '1',
+        user_id: 'user-1',
+        user_name: 'John Doe',
       });
 
       expect(result).toBeDefined();
@@ -48,13 +49,13 @@ describe('Audit Service', () => {
       );
     });
 
-    it('should include metadata in audit log', async () => {
+    it('should include changes in audit log', async () => {
       const mockAuditLog = {
         id: 1,
-        entityType: 'order',
-        entityId: 1,
-        event: 'order.created',
-        metadata: { orderId: 1, quoteId: 1 },
+        action: 'UPDATE',
+        entity_type: 'order',
+        entity_id: '1',
+        changes: { status: 'Completed' },
       };
 
       mockStrapi.documents.mockReturnValue({
@@ -62,16 +63,16 @@ describe('Audit Service', () => {
       });
 
       await createAuditLog(mockStrapi as any, {
-        entityType: 'order',
-        entityId: 1,
-        event: 'order.created',
-        metadata: { orderId: 1, quoteId: 1 },
+        action: 'UPDATE',
+        entity_type: 'order',
+        entity_id: '1',
+        changes: { status: 'Completed' },
       });
 
       const createCall = mockStrapi.documents().create;
       expect(createCall).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          metadata: { orderId: 1, quoteId: 1 },
+          changes: { status: 'Completed' },
         }),
       });
     });
@@ -83,31 +84,29 @@ describe('Audit Service', () => {
 
       await expect(
         createAuditLog(mockStrapi as any, {
-          entityType: 'quote',
-          entityId: 1,
-          event: 'test.event',
+          action: 'CREATE',
+          entity_type: 'quote',
+          entity_id: '1',
         })
       ).rejects.toThrow('Database error');
-
-      expect(mockStrapi.log.error).toHaveBeenCalled();
     });
   });
 
   describe('getAuditLogs', () => {
-    it('should retrieve audit logs for an entity', async () => {
+    it('should retrieve audit logs with filters', async () => {
       const mockLogs = [
         {
           id: 1,
-          entityType: 'quote',
-          entityId: 1,
-          event: 'quote.approved',
+          action: 'CREATE',
+          entity_type: 'quote',
+          entity_id: '1',
           timestamp: '2023-11-23T10:00:00Z',
         },
         {
           id: 2,
-          entityType: 'quote',
-          entityId: 1,
-          event: 'quote.sent',
+          action: 'UPDATE',
+          entity_type: 'quote',
+          entity_id: '1',
           timestamp: '2023-11-22T10:00:00Z',
         },
       ];
@@ -116,39 +115,36 @@ describe('Audit Service', () => {
         findMany: jest.fn().mockResolvedValue(mockLogs),
       });
 
-      const logs = await getAuditLogs(mockStrapi as any, 'quote', 1);
+      const result = await getAuditLogs(mockStrapi as any, { entity_type: 'quote' });
 
-      expect(logs).toHaveLength(2);
-      expect(logs[0].event).toBe('quote.approved');
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0].action).toBe('CREATE');
       expect(mockStrapi.documents).toHaveBeenCalledWith('api::audit-log.audit-log');
     });
 
-    it('should return empty array on error', async () => {
+    it('should handle errors gracefully', async () => {
       mockStrapi.documents.mockReturnValue({
         findMany: jest.fn().mockRejectedValue(new Error('Database error')),
       });
 
-      const logs = await getAuditLogs(mockStrapi as any, 'quote', 1);
-
-      expect(logs).toEqual([]);
-      expect(mockStrapi.log.error).toHaveBeenCalled();
+      await expect(
+        getAuditLogs(mockStrapi as any, { entity_type: 'quote' })
+      ).rejects.toThrow('Database error');
     });
 
-    it('should sort logs by timestamp descending', async () => {
+    it('should support pagination', async () => {
       mockStrapi.documents.mockReturnValue({
         findMany: jest.fn().mockResolvedValue([]),
       });
 
-      await getAuditLogs(mockStrapi as any, 'order', 1);
+      const result = await getAuditLogs(
+        mockStrapi as any,
+        { entity_type: 'order' },
+        { page: 2, pageSize: 10 }
+      );
 
-      const findManyCall = mockStrapi.documents().findMany;
-      expect(findManyCall).toHaveBeenCalledWith({
-        filters: {
-          entityType: 'order',
-          entityId: 1,
-        },
-        sort: { timestamp: 'desc' },
-      });
+      expect(result.pagination.page).toBe(2);
+      expect(result.pagination.pageSize).toBe(10);
     });
   });
 });

@@ -47,7 +47,8 @@ export interface EmailResult {
  */
 export async function sendEmail(params: SendEmailParams): Promise<EmailResult> {
   try {
-    const msg: MailDataRequired = {
+    // Build message object - using type assertion for flexible mail data structure
+    const msg = {
       to: params.to,
       from: DEFAULT_FROM,
       subject: params.subject,
@@ -58,7 +59,7 @@ export async function sendEmail(params: SendEmailParams): Promise<EmailResult> {
       attachments: params.attachments,
       categories: params.categories,
       replyTo: params.replyTo,
-    };
+    } as MailDataRequired;
 
     const [response] = await sgMail.send(msg);
 
@@ -66,11 +67,12 @@ export async function sendEmail(params: SendEmailParams): Promise<EmailResult> {
       success: true,
       messageId: response.headers['x-message-id'],
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Email send failed';
     console.error('SendGrid error:', error);
     return {
       success: false,
-      error: error.message || 'Email send failed',
+      error: errorMessage,
     };
   }
 }

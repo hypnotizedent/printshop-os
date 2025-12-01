@@ -2,17 +2,23 @@
  * Queue Service Tests
  */
 
-import { addWorkflowJob, WorkflowJobType, getQueueStats } from '../queue';
-
-// Mock Bull
-const mockAdd = jest.fn();
-const mockGetWaitingCount = jest.fn();
-const mockGetActiveCount = jest.fn();
-const mockGetCompletedCount = jest.fn();
-const mockGetFailedCount = jest.fn();
-const mockGetDelayedCount = jest.fn();
+// Store mocks at module level but define them inside the mock
+let mockAdd: jest.Mock;
+let mockGetWaitingCount: jest.Mock;
+let mockGetActiveCount: jest.Mock;
+let mockGetCompletedCount: jest.Mock;
+let mockGetFailedCount: jest.Mock;
+let mockGetDelayedCount: jest.Mock;
 
 jest.mock('bull', () => {
+  // Create mocks inside the factory
+  mockAdd = jest.fn().mockResolvedValue({ id: 'test-job-123' });
+  mockGetWaitingCount = jest.fn();
+  mockGetActiveCount = jest.fn();
+  mockGetCompletedCount = jest.fn();
+  mockGetFailedCount = jest.fn();
+  mockGetDelayedCount = jest.fn();
+  
   return jest.fn().mockImplementation(() => ({
     add: mockAdd,
     getWaitingCount: mockGetWaitingCount,
@@ -24,6 +30,8 @@ jest.mock('bull', () => {
     on: jest.fn(),
   }));
 });
+
+import { addWorkflowJob, WorkflowJobType, getQueueStats } from '../queue';
 
 describe('Queue Service', () => {
   beforeEach(() => {

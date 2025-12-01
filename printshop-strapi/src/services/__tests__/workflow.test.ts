@@ -80,6 +80,7 @@ describe('Workflow Service', () => {
         id: 1,
         documentId: 'quote-123',
         quoteNumber: 'QT-2023-001',
+        status: 'Approved',
         items: [],
         totalAmount: 0,
       };
@@ -100,6 +101,7 @@ describe('Workflow Service', () => {
         id: 1,
         documentId: 'order-123',
         orderNumber: 'ORD-2311-0001',
+        status: 'Pending',
         items: [{ description: 'T-Shirt', quantity: 100 }],
         totalAmount: 1000,
         customer: 'customer-1',
@@ -109,6 +111,7 @@ describe('Workflow Service', () => {
         id: 1,
         documentId: 'quote-123',
         quoteNumber: 'QT-2023-001',
+        status: 'Approved',
       };
 
       const mockJob = {
@@ -137,6 +140,7 @@ describe('Workflow Service', () => {
         id: 1,
         documentId: 'order-123',
         orderNumber: 'ORD-2311-0001',
+        status: 'Pending',
         items: [],
         totalAmount: 1000,
         customer: 'customer-1',
@@ -145,12 +149,15 @@ describe('Workflow Service', () => {
       const mockQuote = {
         id: 1,
         documentId: 'quote-123',
+        quoteNumber: 'QT-2023-001',
+        status: 'Approved',
       };
 
       const mockJob = {
         id: 1,
         documentId: 'job-123',
         jobNumber: 'JOB-2311-0001',
+        status: 'PendingArtwork',
         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       };
 
