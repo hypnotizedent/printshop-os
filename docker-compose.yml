@@ -294,6 +294,10 @@ services:
     networks:
       printshop_network:
         ipv4_address: 172.21.0.250
+      # Connect to external networks for cross-stack communication
+      # These allow cloudflared to reach Grafana, n8n, and other homelab services
+      observability:
+      automation:
     depends_on:
     - strapi
     - frontend
@@ -305,6 +309,14 @@ networks:
     ipam:
       config:
         - subnet: 172.21.0.0/16
+  # External networks for cross-stack communication (homelab infrastructure)
+  # These networks are created by other stacks and must exist before use
+  observability:
+    external: true
+    name: observability-stack_monitoring
+  automation:
+    external: true
+    name: automation-stack_n8n
 volumes:
   postgres_data:
     name: printshop_postgres_data
