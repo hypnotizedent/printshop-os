@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 # Overnight Supplier Data Sync
 # 
+# Two-Tier Product Sync:
+# 1. Top Products (Strapi) - ~500 most-used SKUs for quick quoting
+# 2. Full Catalog (JSONL) - 500K+ products for AI agent queries
+#
 # What this does:
-# 1. Downloads SanMar EPDD.csv (494MB) via SFTP
-# 2. Transforms to unified product format
-# 3. Saves to local JSONL files (no Strapi needed)
+# 1. Analyzes order history to identify top products
+# 2. Syncs top products to Strapi with full details
+# 3. Downloads SanMar EPDD.csv (494MB) via SFTP
+# 4. Transforms to unified product format
+# 5. Saves to local JSONL files for API queries
 #
 # Run with: nohup ./scripts/overnight-supplier-sync.sh > overnight.log 2>&1 &
 # Monitor with: tail -f overnight.log
 # 
+# Cron: 0 2 * * * /path/to/scripts/overnight-supplier-sync.sh
+#
 # Estimated time: 1-2 hours (mostly download time)
 # Estimated disk: ~600MB (raw CSV + transformed JSONL)
 
@@ -46,10 +54,51 @@ mkdir -p "$SUPPLIER_SYNC/data/sanmar"
 mkdir -p "$SUPPLIER_SYNC/data/ss-activewear"
 
 # ============================================================
-# TASK 1: SanMar SFTP Download + Transform
+# TASK 0: Analyze Order History for Top Products
 # ============================================================
 log "============================================================"
-log "TASK 1: SanMar EPDD Download (494MB expected)"
+log "TASK 0: Analyzing Order History for Top 500 Products"
+log "============================================================"
+
+if [ -f "$PROJECT_ROOT/scripts/supplier-sync.py" ]; then
+    log "Running product analyzer..."
+    cd "$PROJECT_ROOT"
+    
+    if python3 scripts/supplier-sync.py analyze --limit 500 2>&1; then
+        log_success "Product analysis complete!"
+    else
+        log_warn "Product analysis failed (non-critical)"
+    fi
+else
+    log_warn "supplier-sync.py not found, skipping analysis"
+fi
+
+# ============================================================
+# TASK 1: Sync Top Products to Strapi
+# ============================================================
+log ""
+log "============================================================"
+log "TASK 1: Syncing Top Products to Strapi"
+log "============================================================"
+
+if [ -n "$STRAPI_API_TOKEN" ] && [ -f "$PROJECT_ROOT/scripts/supplier-sync.py" ]; then
+    log "Syncing top 500 products to Strapi..."
+    cd "$PROJECT_ROOT"
+    
+    if python3 scripts/supplier-sync.py sync-top-products --limit 500 2>&1; then
+        log_success "Top products sync complete!"
+    else
+        log_warn "Top products sync failed (check STRAPI_API_TOKEN)"
+    fi
+else
+    log_warn "Skipping Strapi sync (STRAPI_API_TOKEN not set or script missing)"
+fi
+
+# ============================================================
+# TASK 2: SanMar SFTP Download + Transform
+# ============================================================
+log "============================================================"
+log "TASK 2: SanMar EPDD Download (494MB expected)"
 log "============================================================"
 
 cd "$SUPPLIER_SYNC"
@@ -81,11 +130,11 @@ else
 fi
 
 # ============================================================
-# TASK 2: S&S Activewear API Fetch (211K+ products)
+# TASK 3: S&S Activewear API Fetch (211K+ products)
 # ============================================================
 log ""
 log "============================================================"
-log "TASK 2: S&S Activewear API Fetch (211K+ products)"
+log "TASK 3: S&S Activewear API Fetch (211K+ products)"
 log "============================================================"
 
 # Set output location
@@ -124,10 +173,13 @@ echo "Files created:"
 ls -lh "$SUPPLIER_SYNC/data/"*/products.jsonl 2>/dev/null || echo "  No JSONL files found"
 
 echo ""
-echo "Next steps (when Strapi is accessible):"
-echo "  1. Create Strapi admin account at http://100.92.156.118:1337/admin"
-echo "  2. Generate API token in Strapi Settings"
-echo "  3. Run: node scripts/sync-products-to-strapi.js"
+echo "Top Products synced to Strapi: Check via API"
+echo "  curl -s ${STRAPI_URL:-http://localhost:1337}/api/products?filters[isTopProduct]=true | jq '.meta.pagination.total'"
+
+echo ""
+echo "Overnight sync schedule:"
+echo "  Daily (2 AM):  Inventory updates + Top products refresh"
+echo "  Weekly (Sun):  Full catalog refresh"
 echo ""
 
 log_success "Overnight sync completed at $(date)"

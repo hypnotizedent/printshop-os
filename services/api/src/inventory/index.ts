@@ -6,3 +6,4 @@
 export { default as inventoryRouter } from './router';
 export * from './types';
 export * from './clients';
+export * from './product-sync';

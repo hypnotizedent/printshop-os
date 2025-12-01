@@ -105,6 +105,25 @@
     },
     "priceBreaks": {
       "type": "json"
+    },
+    "isTopProduct": {
+      "type": "boolean",
+      "default": false
+    },
+    "orderCount": {
+      "type": "integer",
+      "default": 0
+    },
+    "totalUnitsOrdered": {
+      "type": "integer",
+      "default": 0
+    },
+    "lastOrderedAt": {
+      "type": "datetime"
+    },
+    "topProductScore": {
+      "type": "decimal",
+      "default": 0
     }
   }
 }
