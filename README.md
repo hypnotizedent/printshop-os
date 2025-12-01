@@ -316,6 +316,8 @@ After deployment, verify each service is accessible:
 - Strapi Admin: `https://cms.yourdomain.com/admin`
 - API Health: `https://api.yourdomain.com/health`
 
+> **💡 Tip:** After rebuilding the frontend, always hard refresh your browser (`Ctrl+Shift+R` on Windows/Linux, `Cmd+Shift+R` on Mac) or test in incognito mode to avoid cached content.
+
 ### Troubleshooting Cloudflare Tunnel
 
 | Issue | Solution |
@@ -324,6 +326,7 @@ After deployment, verify each service is accessible:
 | API requests fail | Verify tunnel routes point to correct container names and ports. |
 | WebSocket disconnects | Use `wss://` protocol for VITE_WS_URL with Cloudflare tunnels. |
 | 502 Bad Gateway | Container may not be running. Check `docker compose ps` and `docker compose logs`. |
+| Stale content after deploy | Hard refresh browser or use incognito/private mode. Wait 1-2 min for Cloudflare cache to expire. |
 
 ---
 
@@ -532,20 +535,22 @@ netstat -tulpn | grep 5173
 
 If external access via Cloudflare Tunnel is failing:
 
+> **Note:** PrintShop OS includes a built-in `printshop-cloudflared` container. If you're using an external `cloudflared` from homelab-infrastructure, adjust container names accordingly.
+
 ```bash
-# Check cloudflared status
-docker ps | grep cloudflared
+# Check printshop-cloudflared status (built-in container)
+docker ps | grep printshop-cloudflared
 
 # View cloudflared logs
-docker logs cloudflared --tail 100
+docker logs printshop-cloudflared --tail 100
 
 # Test if cloudflared can reach services
-docker exec cloudflared ping -c 1 printshop-frontend
+docker exec printshop-cloudflared ping -c 1 printshop-frontend
 
 # Check network connectivity
-docker network inspect printshop_network | grep cloudflared
+docker network inspect printshop_network | grep printshop-cloudflared
 
-# Reconnect cloudflared to the PrintShop network
+# If using external cloudflared, connect it to the PrintShop network
 docker network connect printshop_network cloudflared
 ```
 
@@ -553,9 +558,10 @@ docker network connect printshop_network cloudflared
 
 | Issue | Symptom | Solution |
 |-------|---------|----------|
-| 502 Bad Gateway | Page shows Cloudflare error | Connect cloudflared to printshop_network |
+| 502 Bad Gateway | Page shows Cloudflare error | Verify `printshop-cloudflared` is running, or connect external cloudflared to printshop_network |
 | SSL Certificate Error | Browser shows certificate warning | Use single-level subdomain (e.g., `printshop-app.domain.com` not `app.printshop.domain.com`) |
 | Connection Refused | Tunnel shows service offline | Verify container is running and bound to 0.0.0.0 |
+| Stale content after deploy | Old page content shows | Hard refresh browser (`Ctrl+Shift+R` / `Cmd+Shift+R`) or use incognito mode |
 
 ### Quick Diagnosis Commands
 
@@ -625,10 +631,29 @@ sleep 180 && docker compose ps
 ./test-system.sh
 ```
 
-### Nuclear Reset for cloudflared Only
+### Nuclear Reset for cloudflared
+
+#### Option 1: Built-in `printshop-cloudflared` (Recommended)
+
+If using the built-in cloudflared from docker-compose.yml:
 
 ```bash
-# Stop cloudflared
+# Restart the printshop-cloudflared container
+docker compose restart cloudflared
+
+# Or force rebuild
+docker compose up -d --build cloudflared
+
+# Verify tunnel is connected
+docker logs printshop-cloudflared --tail 50
+```
+
+#### Option 2: External cloudflared (Homelab Infrastructure)
+
+If using an external `cloudflared` container:
+
+```bash
+# Stop external cloudflared
 docker stop cloudflared
 
 # Remove cloudflared container
