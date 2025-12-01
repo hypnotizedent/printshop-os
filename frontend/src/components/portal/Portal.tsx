@@ -259,6 +259,12 @@ export function Portal() {
     }
   }, [navigate])
 
+  // Handler for search button click (opens search modal or triggers search UI)
+  const handleSearchClick = useCallback(() => {
+    // Currently a no-op - search UI should be implemented separately
+    console.log('Search clicked - implement search modal')
+  }, [])
+
   const handleLogout = async () => {
     await logout()
     // Navigate to login after logout will be handled by the ProtectedRoute
@@ -269,7 +275,7 @@ export function Portal() {
       <Navigation 
         user={user}
         notificationCount={mockNotifications.filter(n => !n.read).length}
-        onSearch={handleSearch}
+        onSearch={handleSearchClick}
         onLogout={handleLogout}
       />
       <main className="flex-1 lg:ml-0">

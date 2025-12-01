@@ -439,7 +439,7 @@ export type ValidPaymentMethod = typeof VALID_PAYMENT_METHODS[number];
 export type PaymentMethodEnum = 'cash' | 'check' | 'credit_card' | 'ach' | 'stripe' | 'bank_transfer' | 'other';
 
 // Payment status enum for UI display
-export type PaymentStatusEnum = 'paid' | 'pending' | 'processing' | 'failed' | 'refunded';
+export type PaymentStatusEnum = 'paid' | 'pending' | 'processing' | 'failed' | 'refunded' | 'expired' | 'cancelled';
 
 // Payment types used by the payments API
 export interface OrderPayment {

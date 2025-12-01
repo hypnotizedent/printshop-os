@@ -3,17 +3,21 @@
  * This demonstrates the pattern - actual implementation should be integrated into existing App.tsx
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { AuthPage } from './components/auth/AuthPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AppSidebar } from './components/layout/AppSidebar';
 import { SidebarProvider } from './components/ui/sidebar';
 
-// Import existing pages
+// Note: These pages are placeholders - actual implementations need to be created
+// @ts-expect-error - Example page import, not yet implemented
 import DashboardPage from './pages/DashboardPage';
+// @ts-expect-error - Example page import, not yet implemented
 import ProductionPage from './pages/ProductionPage';
+// @ts-expect-error - Example page import, not yet implemented
 import JobsPage from './pages/JobsPage';
+// @ts-expect-error - Example page import, not yet implemented
 import CustomersPage from './pages/CustomersPage';
 // ... other imports
 
@@ -40,6 +44,7 @@ export default function App() {
     <ProtectedRoute>
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
+          {/* @ts-expect-error - userType prop will be added when AppSidebar is updated */}
           <AppSidebar 
             currentPage={currentPage} 
             onNavigate={setCurrentPage}

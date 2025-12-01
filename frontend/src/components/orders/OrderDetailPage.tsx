@@ -27,6 +27,7 @@ import { toast } from "sonner"
 import { generateInvoice, type Invoice } from "@/lib/api/invoices"
 import { printInvoice } from "@/lib/api/invoice-utils"
 import { InvoicePreview } from "@/components/invoices/InvoicePreview"
+import { PaymentHistory } from "@/components/payments/PaymentHistory"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -94,6 +95,7 @@ export function OrderDetailPage({ orderId, onBack, onViewCustomer }: OrderDetail
   const [error, setError] = useState<string | null>(null);
   const [invoicePreview, setInvoicePreview] = useState<Invoice | null>(null);
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+  const [paymentRefreshTrigger, setPaymentRefreshTrigger] = useState(0);
 
   const handleGenerateInvoice = async () => {
     if (!order) return;

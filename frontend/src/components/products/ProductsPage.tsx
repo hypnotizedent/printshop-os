@@ -81,9 +81,13 @@ interface PaginationMeta {
 
 // API Response types for Strapi
 interface StrapiVariant {
+  sku?: string;
   color?: { name: string };
+  colorCode?: string;
   size?: string;
+  price?: number;
   inStock?: boolean;
+  stockLevel?: number;
 }
 
 interface StrapiProduct {
@@ -406,7 +410,15 @@ export function ProductsPage() {
           images: item.images || [],
           colors: uniqueColors.length > 0 ? uniqueColors : (item.colors || []),
           sizes: uniqueSizes.length > 0 ? uniqueSizes : (item.sizes || []),
-          variants: item.variants as ProductVariant[] || [],
+          variants: (item.variants || []).map((v: StrapiVariant) => ({
+            sku: v.sku || '',
+            color: v.color?.name || '',
+            colorCode: v.colorCode,
+            size: v.size || '',
+            price: v.price || 0,
+            inStock: v.inStock !== false,
+            stockLevel: v.stockLevel,
+          })) as ProductVariant[],
           supplier: item.supplier || 'Unknown',
           inStock: hasInStockVariants,
           pricingTiers: item.pricing?.tiers || item.pricingTiers || [],

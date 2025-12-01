@@ -226,7 +226,7 @@ export function PaymentHistory({
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {PAYMENT_METHOD_LABELS[payment.paymentMethod] ||
+                          {PAYMENT_METHOD_LABELS[payment.paymentMethod as PaymentMethodEnum] ||
                             payment.paymentMethod}
                           {payment.referenceNumber && (
                             <span className="ml-2">
