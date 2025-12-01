@@ -13,6 +13,9 @@ beautifulsoup4>=4.12.2
 pandas>=2.0.0
 numpy>=1.24.0
 
+# MinIO (Object Storage for Printavo archival)
+minio>=7.2.0
+
 # GitHub Integration (Issue creation & automation)
 PyGithub>=1.59.0
 
