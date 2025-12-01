@@ -15,7 +15,10 @@
     "import:historical": "ts-node scripts/run-import.ts",
     "import:batch": "ts-node scripts/run-import.ts",
     "upload:strapi": "ts-node scripts/upload-to-strapi.ts",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "printavo:extract": "ts-node scripts/extract-printavo-v2.ts",
+    "printavo:import": "ts-node scripts/import-printavo-v2.ts",
+    "printavo:migrate": "npm run printavo:extract && npm run printavo:import"
   },
   "keywords": [
     "printshop",

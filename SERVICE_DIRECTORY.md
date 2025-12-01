@@ -153,6 +153,25 @@ This document provides a precise map of where every component, service, and feat
 
 ## Recent Updates
 
+### December 1, 2025 (Printavo v2 Data Migration)
+
+✅ **Printavo v2 GraphQL API Data Recovery & Migration**
+- Created `services/api/scripts/extract-printavo-v2.ts` - Full data extraction
+  - Email/password authentication for bearer token
+  - Cursor-based pagination for all entities
+  - Rate limiting (500ms between requests)
+  - Extracts: customers, orders, quotes, products, invoices
+- Created `services/api/scripts/import-printavo-v2.ts` - Strapi import
+  - Upsert logic (create or update by printavoId)
+  - Relationship resolution (orders → customers)
+  - Checkpoint/resume for large imports
+- Updated `services/api/lib/printavo-mapper.ts` - v2 transformers
+  - Added `transformPrintavoV2Customer`, `transformPrintavoV2Order`
+  - Added `transformPrintavoV2Quote`, `transformPrintavoV2Invoice`
+- Added NPM scripts: `printavo:extract`, `printavo:import`, `printavo:migrate`
+- Created `services/api/scripts/PRINTAVO_V2_MIGRATION.md` - Documentation
+- Added tests for extraction and import scripts (39 tests)
+
 ### November 29, 2025 (Production Dashboard Epic #86)
 
 ✅ **Production Dashboard - Real-time Floor Visibility**
