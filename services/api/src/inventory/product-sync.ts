@@ -129,11 +129,8 @@ function extractBrand(styleName: string): string {
  */
 export class ProductSyncService {
   private strapiClient: AxiosInstance;
-  private config: ProductSyncConfig;
 
   constructor(config: ProductSyncConfig) {
-    this.config = config;
-
     this.strapiClient = axios.create({
       baseURL: config.strapiUrl,
       timeout: 30000,
