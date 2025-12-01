@@ -1,11 +1,17 @@
 #!/bin/bash
 # =============================================================================
-# PrintShop OS - Connect External Networks
+# PrintShop OS - Connect External Networks (Optional)
 # =============================================================================
 # Manually connects the printshop-cloudflared container to external Docker
 # networks for cross-stack communication (Grafana, n8n, etc.)
 #
+# NOTE: External networks are OPTIONAL. PrintShop OS core services
+# (frontend, strapi, api) work without them. This script is only needed
+# if you want cloudflared to also proxy external homelab services like
+# Grafana or n8n.
+#
 # This script is useful when:
+# - You want cross-stack communication to homelab services
 # - External networks weren't available during docker compose up
 # - You need to reconnect after network changes
 # - The networks were created after PrintShop OS was started
@@ -14,6 +20,7 @@
 #   ./scripts/connect-networks.sh           # Connect to all external networks
 #   ./scripts/connect-networks.sh --check   # Only check connection status
 #
+# See also: ./scripts/verify-network.sh for internal network diagnostics
 # =============================================================================
 
 set -euo pipefail

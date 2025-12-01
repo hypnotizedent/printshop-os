@@ -275,8 +275,15 @@ For detailed Cloudflare Tunnel configuration, see [CLOUDFLARE_TUNNEL_SETUP.md](.
 
 | cloudflared Type | Container Name | Network Setup |
 |------------------|----------------|---------------|
-| **Built-in** (docker-compose.yml) | `printshop-cloudflared` | Auto-configured on `printshop_network` |
+| **Built-in** (docker-compose.yml) | `printshop-cloudflared` | Auto-configured on `printshop_network` with healthcheck |
 | **External** (homelab-infrastructure) | `cloudflared` | Run: `docker network connect printshop_network cloudflared` |
+
+5. **Verify connectivity** after deployment:
+
+```bash
+# Run the network verification script
+./scripts/verify-network.sh
+```
 
 ### SSL Certificate Note
 
@@ -376,7 +383,20 @@ After running `docker compose up -d --build`:
 | Appsmith shows error | MongoDB not in replica set mode | Initialize replica set |
 | Strapi 502 error | Database not ready | Wait for postgres healthcheck, then restart strapi |
 | Frontend 502 (external access) | External cloudflared not on network | `docker network connect printshop_network cloudflared` |
-| Frontend 502 (built-in cloudflared) | Network issue or container not running | Check with `docker ps --filter name=printshop-cloudflared` |
+| Frontend 502 (built-in cloudflared) | Network issue or container not running | Run `./scripts/verify-network.sh` to diagnose |
+
+### Network Troubleshooting
+
+```bash
+# Quick network verification
+./scripts/verify-network.sh
+
+# Check if cloudflared can reach other containers
+docker exec printshop-cloudflared ping -c 1 printshop-frontend
+
+# List all networks cloudflared is connected to
+docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+```
 
 ### Checking Logs
 
@@ -405,7 +425,7 @@ docker inspect printshop-strapi --format='{{json .State.Health}}'
 
 # Manual health test
 curl -I http://localhost:1337/_health
-curl -I http://localhost:8080/api/v1/health
+curl -I http://localhost:8080
 ```
 
 ### Database Connection Issues

@@ -30,11 +30,23 @@ cloudflared:
   image: cloudflare/cloudflared:latest
   container_name: printshop-cloudflared
   networks:
-    printshop_network:
-      ipv4_address: 172.21.0.250
+    - printshop_network
+  depends_on:
+    strapi:
+      condition: service_healthy
+    frontend:
+      condition: service_healthy
+    api:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "cloudflared", "tunnel", "info"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 30s
 ```
 
-Just set `CLOUDFLARE_TUNNEL_TOKEN` in your `.env` file and start the stack.
+Just set `CLOUDFLARE_TUNNEL_TOKEN` in your `.env` file and start the stack. The container will wait for all core services to be healthy before starting.
 
 ### Option 2: External cloudflared (Homelab Infrastructure)
 
@@ -43,6 +55,23 @@ If you're using a shared `cloudflared` container from `homelab-infrastructure`:
 1. The external cloudflared must be connected to `printshop_network`
 2. Remove or disable `printshop-cloudflared` from docker-compose.yml to avoid conflicts
 3. Run: `docker network connect printshop_network cloudflared`
+
+### Connecting to External Networks (Optional)
+
+If you want cloudflared to also proxy services from other Docker stacks (Grafana, n8n, etc.), you can manually connect it to external networks after startup:
+
+```bash
+# Connect to observability stack (for Grafana)
+docker network connect observability-stack_monitoring printshop-cloudflared
+
+# Connect to automation stack (for n8n)
+docker network connect automation-stack_n8n printshop-cloudflared
+
+# Or use the helper script
+./scripts/connect-networks.sh
+```
+
+> **Note:** External network connections are optional. PrintShop OS core services work without them.
 
 ---
 
@@ -220,6 +249,29 @@ After every deployment, always test in incognito window first before reporting i
 
 ## Troubleshooting 502 Bad Gateway
 
+### Quick Diagnosis Script
+
+Run the network verification script for quick diagnosis:
+
+```bash
+./scripts/verify-network.sh
+```
+
+This checks:
+- Network configuration
+- Container connectivity
+- DNS resolution
+- HTTP reachability
+
+### Common Causes and Solutions
+
+| Cause | Symptom | Solution |
+|-------|---------|----------|
+| cloudflared not on network | Cannot resolve container names | `docker network connect printshop_network printshop-cloudflared` |
+| Services not healthy | cloudflared starts before services | Wait for healthchecks or restart cloudflared |
+| Static IP conflicts | IP mismatch in logs | Use dynamic IPs (default config) |
+| Subnet overlap | Network creation fails | Check for conflicting Docker networks |
+
 ### 1. Check if cloudflared is on the correct network
 
 ```bash
@@ -353,16 +405,22 @@ If standard troubleshooting fails, follow this escalation path:
 # 1. Stop everything
 docker compose down
 
-# 2. Full cleanup (WARNING: removes all Docker data)
+# 2. Remove the old network (important for subnet conflicts)
+docker network rm printshop_network 2>/dev/null || true
+
+# 3. Full cleanup (WARNING: removes all Docker data)
 docker system prune -af && docker volume prune -f
 
-# 3. Rebuild without cache
+# 4. Rebuild without cache
 docker compose build --no-cache
 
-# 4. Start fresh
+# 5. Start fresh
 docker compose up -d
 
-# 5. If using external cloudflared, reconnect it to the network
+# 6. Verify network connectivity
+./scripts/verify-network.sh
+
+# 7. If using external cloudflared, reconnect it to the network
 # (Skip this if using built-in printshop-cloudflared - it's auto-connected)
 docker network connect printshop_network cloudflared
 
