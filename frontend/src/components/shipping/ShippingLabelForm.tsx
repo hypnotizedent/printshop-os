@@ -79,6 +79,9 @@ interface ParcelWithId extends Parcel {
   preset: string;
 }
 
+// Simple ID generator
+const generateId = (): string => Math.random().toString(36).substring(2, 9);
+
 const PRESET_BOXES: Record<string, Parcel> = {
   'small-box': { length: 8, width: 6, height: 4, weight: 1 },
   'medium-box': { length: 12, width: 10, height: 6, weight: 3 },
@@ -450,7 +453,7 @@ export function ShippingLabelForm() {
     // Reset to single default parcel
     setParcels([{
       id: generateId(),
-      boxPreset: 'medium-box',
+      preset: 'medium-box',
       ...PRESET_BOXES['medium-box'],
     }]);
     setRates([]);
@@ -845,7 +848,7 @@ export function ShippingLabelForm() {
                   <div className="space-y-2">
                     <Label>Box Size</Label>
                     <Select 
-                      value={parcel.boxPreset} 
+                      value={parcel.preset} 
                       onValueChange={(value) => handleBoxPresetChange(parcel.id, value)}
                     >
                       <SelectTrigger>
@@ -866,7 +869,7 @@ export function ShippingLabelForm() {
                       type="number"
                       value={parcel.length || ''}
                       onChange={(e) => updateParcel(parcel.id, { length: parseFloat(e.target.value) || 0 })}
-                      disabled={parcel.boxPreset !== 'custom'}
+                      disabled={parcel.preset !== 'custom'}
                     />
                   </div>
                   <div className="space-y-2">
@@ -875,7 +878,7 @@ export function ShippingLabelForm() {
                       type="number"
                       value={parcel.width || ''}
                       onChange={(e) => updateParcel(parcel.id, { width: parseFloat(e.target.value) || 0 })}
-                      disabled={parcel.boxPreset !== 'custom'}
+                      disabled={parcel.preset !== 'custom'}
                     />
                   </div>
                   <div className="space-y-2">
@@ -884,7 +887,7 @@ export function ShippingLabelForm() {
                       type="number"
                       value={parcel.height || ''}
                       onChange={(e) => updateParcel(parcel.id, { height: parseFloat(e.target.value) || 0 })}
-                      disabled={parcel.boxPreset !== 'custom'}
+                      disabled={parcel.preset !== 'custom'}
                     />
                   </div>
                   <div className="space-y-2">

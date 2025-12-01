@@ -28,13 +28,15 @@ interface CustomOrder {
   customerEmail?: string;
   customerId?: string;
   garmentType: string;
-  designs: any[];
+  designs: Record<string, unknown> | unknown[];
   pricing: {
     basePrice: number;
-    designComplexity: number;
-    total: number;
+    designComplexity?: number;
+    total?: number;
+    quantity?: number;
   };
   status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  notes?: string;
 }
 
 class StrapiClient {

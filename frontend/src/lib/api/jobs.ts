@@ -3,12 +3,65 @@
  * API functions for job-related operations including calendar views
  */
 
-import type { Job, CapacityData } from '../types'
+import type { Job, CapacityData, JobStatus, Priority } from '../types'
 
 const STRAPI_API_URL = import.meta.env.VITE_STRAPI_API_URL || 'http://localhost:1337/api'
 
 // Default daily capacity - can be overridden via environment variable
 const DEFAULT_DAILY_CAPACITY = Number(import.meta.env.VITE_DAILY_JOB_CAPACITY) || 10
+
+// Type for Strapi job response attributes
+interface StrapiJobAttributes {
+  title?: string
+  name?: string
+  customer?: {
+    data?: {
+      id?: number
+      attributes?: {
+        name?: string
+      }
+    }
+  }
+  customerName?: string
+  customerId?: number | string
+  status?: JobStatus
+  priority?: Priority
+  dueDate?: string
+  createdAt?: string
+  description?: string
+  quantity?: number
+  fileCount?: number
+  assignedMachine?: string
+  estimatedCost?: number
+  progress?: number
+}
+
+// Type for Strapi job response item
+interface StrapiJobItem {
+  id: number
+  attributes?: StrapiJobAttributes
+}
+
+// Helper to map Strapi job item to Job type
+function mapStrapiJobToJob(item: StrapiJobItem): Job {
+  const attrs: StrapiJobAttributes = item.attributes || (item as unknown as StrapiJobAttributes)
+  return {
+    id: String(item.id),
+    title: attrs.title || attrs.name || 'Untitled Job',
+    customer: attrs.customer?.data?.attributes?.name || attrs.customerName || 'Unknown',
+    customerId: String(attrs.customer?.data?.id || attrs.customerId || ''),
+    status: attrs.status || 'quote',
+    priority: attrs.priority || 'normal',
+    dueDate: attrs.dueDate || new Date().toISOString(),
+    createdAt: attrs.createdAt || new Date().toISOString(),
+    description: attrs.description || '',
+    quantity: attrs.quantity || 0,
+    fileCount: attrs.fileCount || 0,
+    assignedMachine: attrs.assignedMachine || undefined,
+    estimatedCost: attrs.estimatedCost || 0,
+    progress: attrs.progress || 0,
+  }
+}
 
 /**
  * Get jobs within a date range for calendar views
@@ -35,25 +88,7 @@ export async function getJobsByDateRange(from: string, to: string): Promise<Job[
     const result = await response.json()
     
     // Map Strapi response to Job type
-    return (result.data || []).map((item: { id: number; attributes?: Record<string, unknown> }) => {
-      const attrs = item.attributes || item
-      return {
-        id: String(item.id),
-        title: attrs.title || attrs.name || 'Untitled Job',
-        customer: attrs.customer?.data?.attributes?.name || attrs.customerName || 'Unknown',
-        customerId: String(attrs.customer?.data?.id || attrs.customerId || ''),
-        status: attrs.status || 'quote',
-        priority: attrs.priority || 'normal',
-        dueDate: attrs.dueDate || new Date().toISOString(),
-        createdAt: attrs.createdAt || new Date().toISOString(),
-        description: attrs.description || '',
-        quantity: attrs.quantity || 0,
-        fileCount: attrs.fileCount || 0,
-        assignedMachine: attrs.assignedMachine || undefined,
-        estimatedCost: attrs.estimatedCost || 0,
-        progress: attrs.progress || 0,
-      }
-    })
+    return (result.data || []).map((item: StrapiJobItem) => mapStrapiJobToJob(item))
   } catch (error) {
     console.error('Error fetching jobs by date range:', error)
     return []
@@ -88,25 +123,7 @@ export async function updateJobDueDate(jobId: string, newDate: string): Promise<
     }
 
     const result = await response.json()
-    const item = result.data
-    const attrs = item.attributes || item
-    
-    return {
-      id: String(item.id),
-      title: attrs.title || attrs.name || 'Untitled Job',
-      customer: attrs.customer?.data?.attributes?.name || attrs.customerName || 'Unknown',
-      customerId: String(attrs.customer?.data?.id || attrs.customerId || ''),
-      status: attrs.status || 'quote',
-      priority: attrs.priority || 'normal',
-      dueDate: attrs.dueDate || new Date().toISOString(),
-      createdAt: attrs.createdAt || new Date().toISOString(),
-      description: attrs.description || '',
-      quantity: attrs.quantity || 0,
-      fileCount: attrs.fileCount || 0,
-      assignedMachine: attrs.assignedMachine || undefined,
-      estimatedCost: attrs.estimatedCost || 0,
-      progress: attrs.progress || 0,
-    }
+    return mapStrapiJobToJob(result.data)
   } catch (error) {
     console.error('Error updating job due date:', error)
     return null
@@ -138,14 +155,14 @@ export async function getCapacityByDate(from: string, to: string): Promise<Capac
     }
 
     const result = await response.json()
-    const jobs = result.data || []
+    const jobs: StrapiJobItem[] = result.data || []
     
     // Group jobs by date and calculate capacity
     const jobsByDate: Record<string, number> = {}
     
-    jobs.forEach((item: { id: number; attributes?: Record<string, unknown> }) => {
-      const attrs = item.attributes || item
-      const dueDate = (attrs.dueDate as string)?.split('T')[0]
+    jobs.forEach((item: StrapiJobItem) => {
+      const attrs: StrapiJobAttributes = item.attributes || (item as unknown as StrapiJobAttributes)
+      const dueDate = attrs.dueDate?.split('T')[0]
       if (dueDate) {
         jobsByDate[dueDate] = (jobsByDate[dueDate] || 0) + 1
       }
@@ -157,7 +174,7 @@ export async function getCapacityByDate(from: string, to: string): Promise<Capac
     const capacityData: CapacityData[] = []
     
     // Default capacity of 10 jobs per day (this could be made configurable)
-    const DAILY_CAPACITY = 10
+    const DAILY_CAPACITY = DEFAULT_DAILY_CAPACITY
     
     const currentDate = new Date(fromDate)
     while (currentDate <= toDate) {
@@ -211,25 +228,7 @@ export async function updateJobStatus(jobId: string, status: string): Promise<Jo
     }
 
     const result = await response.json()
-    const item = result.data
-    const attrs = item.attributes || item
-    
-    return {
-      id: String(item.id),
-      title: attrs.title || attrs.name || 'Untitled Job',
-      customer: attrs.customer?.data?.attributes?.name || attrs.customerName || 'Unknown',
-      customerId: String(attrs.customer?.data?.id || attrs.customerId || ''),
-      status: attrs.status || 'quote',
-      priority: attrs.priority || 'normal',
-      dueDate: attrs.dueDate || new Date().toISOString(),
-      createdAt: attrs.createdAt || new Date().toISOString(),
-      description: attrs.description || '',
-      quantity: attrs.quantity || 0,
-      fileCount: attrs.fileCount || 0,
-      assignedMachine: attrs.assignedMachine || undefined,
-      estimatedCost: attrs.estimatedCost || 0,
-      progress: attrs.progress || 0,
-    }
+    return mapStrapiJobToJob(result.data)
   } catch (error) {
     console.error('Error updating job status:', error)
     return null

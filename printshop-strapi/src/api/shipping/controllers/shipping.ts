@@ -4,6 +4,7 @@
  */
 
 import EasyPostClient from '@easypost/api';
+import type { Context } from 'koa';
 
 // Initialize EasyPost client
 const getClient = () => {
@@ -18,7 +19,7 @@ export default {
   /**
    * Get shipping rates for a shipment
    */
-  async getRates(ctx) {
+  async getRates(ctx: Context) {
     try {
       const { fromAddress, toAddress, parcel } = ctx.request.body;
       
@@ -89,7 +90,7 @@ export default {
   /**
    * Purchase a shipping label
    */
-  async buyLabel(ctx) {
+  async buyLabel(ctx: Context) {
     try {
       const { shipmentId, rateId } = ctx.request.body;
       
@@ -134,7 +135,7 @@ export default {
   /**
    * Track a shipment
    */
-  async track(ctx) {
+  async track(ctx: Context) {
     try {
       const { trackingCode } = ctx.params;
       
@@ -174,7 +175,7 @@ export default {
   /**
    * Validate an address
    */
-  async validateAddress(ctx) {
+  async validateAddress(ctx: Context) {
     try {
       const { address } = ctx.request.body;
       

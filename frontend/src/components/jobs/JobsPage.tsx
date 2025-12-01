@@ -227,7 +227,7 @@ export function JobsPage({ jobs, onUpdateJob, onViewOrder }: JobsPageProps) {
   // Get next/previous status for a job
   const getAdjacentStatus = (currentStatus: string, direction: 'next' | 'prev'): string | null => {
     const statusOrder = columns.map(c => c.id)
-    const currentIndex = statusOrder.indexOf(currentStatus)
+    const currentIndex = statusOrder.indexOf(currentStatus as typeof statusOrder[number])
     if (currentIndex === -1) return null
     
     if (direction === 'next' && currentIndex < statusOrder.length - 1) {

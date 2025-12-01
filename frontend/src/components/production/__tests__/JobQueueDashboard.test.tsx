@@ -5,7 +5,7 @@ import { JobQueueDashboard } from '../JobQueueDashboard'
 
 // Mock fetch API
 const mockFetch = vi.fn()
-global.fetch = mockFetch
+globalThis.fetch = mockFetch
 
 // Mock job data
 const mockJobs = [

@@ -7,6 +7,31 @@ import { Context } from 'koa';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+// Type declarations for Strapi custom content types
+// These are needed until proper type generation is run
+interface CustomerData {
+  id?: number;
+  documentId?: string;
+  email?: string | null;
+  name?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  passwordHash?: string | null;
+  notes?: string | null;
+}
+
+interface OrderData {
+  id?: number;
+  documentId?: string;
+  orderNumber?: string;
+  status?: string;
+  dueDate?: string;
+  totalAmount?: number;
+  customer?: CustomerData;
+  lineItems?: unknown[];
+  [key: string]: unknown;
+}
+
 // Get JWT secret with production safety check
 function getJWTSecret(): string {
   const secret = process.env.JWT_SECRET;
