@@ -199,8 +199,8 @@ Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your T
 |--------|--------|-------------|
 | Incognito test | Ctrl+Shift+N (Chrome) / Cmd+Shift+P (Firefox) | First test after any deployment |
 | Hard refresh | Ctrl+Shift+R / Cmd+Shift+R | Quick cache bypass |
-| Clear site data | DevTools → Application → Clear site data | Persistent cache issues |
-| Disable cache | DevTools → Network → "Disable cache" checkbox | During active debugging |
+| Clear site data | DevTools (F12) → Application tab → Clear site data | Persistent cache issues |
+| Disable cache | DevTools (F12) → Network tab → Check "Disable cache" | During active debugging (while DevTools open) |
 
 ### Why This Happens
 

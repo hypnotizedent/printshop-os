@@ -41,9 +41,12 @@ docker compose up -d --build frontend
 ### Step 3: Verify container connectivity
 
 ```bash
-# Check containers are on same network
+# Check containers are on same network (should show printshop_network)
 docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
 docker inspect printshop-frontend --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+
+# Verify network exists
+docker network inspect printshop_network --format='{{.Name}}'
 
 # Verify frontend is reachable internally
 docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000 && echo "Frontend reachable"
