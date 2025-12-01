@@ -59,6 +59,18 @@ api.ronny.works               ← Single level, SSL works
 | Strapi CMS | https://printshop.ronny.works | printshop-strapi:1337 |
 | API | https://api.ronny.works | printshop-api:3001 |
 
+### Infrastructure Services (Homelab Stacks)
+
+These services run in the `homelab-infrastructure` repository stacks and share the same tunnel:
+
+| Service | Production URL | Docker Container |
+|---------|----------------|------------------|
+| n8n (Automation) | https://n8n.ronny.works | n8n:5678 |
+| Grafana (Monitoring) | https://grafana.ronny.works | grafana:3000 |
+| Uptime Kuma | https://uptime.ronny.works | uptime-kuma:3001 |
+
+> **Note:** Keep Cloudflare tunnel routes in sync with running services. Update the tunnel configuration in Cloudflare Zero Trust dashboard whenever services are added or removed.
+
 ---
 
 ## Docker Network Requirements
@@ -111,6 +123,32 @@ Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your T
 | Domain | `ronny.works` |
 | Service Type | HTTP |
 | URL | `printshop-api:3001` |
+
+### Infrastructure Services Routes
+
+#### n8n (Workflow Automation)
+| Field | Value |
+|-------|-------|
+| Subdomain | `n8n` |
+| Domain | `ronny.works` |
+| Service Type | HTTP |
+| URL | `n8n:5678` |
+
+#### Grafana (Monitoring)
+| Field | Value |
+|-------|-------|
+| Subdomain | `grafana` |
+| Domain | `ronny.works` |
+| Service Type | HTTP |
+| URL | `grafana:3000` |
+
+#### Uptime Kuma (Status Page)
+| Field | Value |
+|-------|-------|
+| Subdomain | `uptime` |
+| Domain | `ronny.works` |
+| Service Type | HTTP |
+| URL | `uptime-kuma:3001` |
 
 ---
 

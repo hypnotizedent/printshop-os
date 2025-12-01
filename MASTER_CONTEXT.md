@@ -85,7 +85,26 @@ All container health checks use `127.0.0.1` instead of `localhost` to avoid IPv6
 | Products | 18 | Manual entry |
 
 ## 🔗 Related Repositories
+
 | Repo | Purpose |
 |------|---------|
 | `hypnotizedent/ptavo` | Printavo API analysis & scraper code |
-| `hypnotizedent/homelab-infrastructure` | Docker host infrastructure |
+| `hypnotizedent/homelab-infrastructure` | Docker host infrastructure (separate stacks) |
+
+## 🏠 Architecture Separation
+
+PrintShop OS uses a **two-repository architecture**:
+
+| Repository | Purpose | Location on docker-host |
+|------------|---------|------------------------|
+| **printshop-os** (this repo) | Business/application services | `/mnt/printshop/printshop-os` |
+| **homelab-infrastructure** | Infrastructure & monitoring | `/mnt/docker/*-stack` directories |
+
+### Homelab Infrastructure Stacks
+- `/mnt/docker/automation-stack` → n8n (workflow automation)
+- `/mnt/docker/observability-stack` → Grafana, Prometheus, Loki
+- `/mnt/docker/infrastructure-stack` → Uptime Kuma, MinIO, Dozzle, ntfy
+
+All stacks share `homelab-network` Docker network for cross-stack communication.
+
+For onboarding, see: **[docs/ONBOARDING.md](docs/ONBOARDING.md)**

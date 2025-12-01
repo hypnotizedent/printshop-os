@@ -1,7 +1,25 @@
 # PrintShop OS - Copilot Session Context
 
-> **Last Updated:** 2025-11-30
+> **Last Updated:** 2025-12-01
 > **Purpose:** Provide context for new Copilot/AI agent sessions
+
+## 🏠 Architecture Overview
+
+PrintShop OS uses a **two-repository architecture**:
+
+| Repository | Purpose | Location |
+|------------|---------|----------|
+| **printshop-os** (this repo) | Business/application services | `/mnt/printshop/printshop-os` |
+| **homelab-infrastructure** | Infra & monitoring | `/mnt/docker/*-stack` directories |
+
+**Infrastructure stacks (homelab-infrastructure):**
+- `/mnt/docker/automation-stack` - n8n workflows
+- `/mnt/docker/observability-stack` - Grafana, Prometheus, Loki
+- `/mnt/docker/infrastructure-stack` - Uptime Kuma, MinIO, Dozzle, ntfy
+
+All stacks share `homelab-network` Docker network.
+
+For complete onboarding, see: **[docs/ONBOARDING.md](docs/ONBOARDING.md)**
 
 ## 🖥️ Server Configuration
 

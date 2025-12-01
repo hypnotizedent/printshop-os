@@ -8,15 +8,65 @@ This guide provides comprehensive instructions for deploying PrintShop OS, inclu
 
 ## Table of Contents
 
-1. [Prerequisites](#prerequisites)
-2. [Service Port Reference](#service-port-reference)
-3. [First-Time Setup](#first-time-setup)
-4. [MongoDB Replica Set Setup](#mongodb-replica-set-setup)
-5. [Cloudflare Tunnel Setup](#cloudflare-tunnel-setup)
-6. [Credential Management](#credential-management)
-7. [Deployment Commands](#deployment-commands)
-8. [Troubleshooting](#troubleshooting)
-9. [Orphan Container Cleanup](#orphan-container-cleanup)
+1. [Architecture Overview](#architecture-overview)
+2. [Prerequisites](#prerequisites)
+3. [Service Port Reference](#service-port-reference)
+4. [First-Time Setup](#first-time-setup)
+5. [MongoDB Replica Set Setup](#mongodb-replica-set-setup)
+6. [Cloudflare Tunnel Setup](#cloudflare-tunnel-setup)
+7. [Credential Management](#credential-management)
+8. [Deployment Commands](#deployment-commands)
+9. [Troubleshooting](#troubleshooting)
+10. [Orphan Container Cleanup](#orphan-container-cleanup)
+
+---
+
+## Architecture Overview
+
+### Two-Repository Architecture
+
+PrintShop OS uses a **clear separation** between business/application services and infrastructure tools:
+
+| Repository | Purpose | Services |
+|------------|---------|----------|
+| **printshop-os** | Business/application services | Frontend, Strapi, PostgreSQL, Redis, APIs |
+| **homelab-infrastructure** | Infrastructure & monitoring | Uptime Kuma, MinIO, Dozzle, ntfy, Grafana, Prometheus |
+
+### Infrastructure Layout on docker-host
+
+```
+docker-host (100.92.156.118)
+├── /mnt/printshop/printshop-os/      # PrintShop OS (this repo)
+│   └── docker-compose.yml            # Business services
+│
+└── /mnt/docker/                      # Homelab Infrastructure
+    ├── automation-stack/             # n8n workflows
+    ├── observability-stack/          # Grafana, Prometheus, Loki
+    └── infrastructure-stack/         # Uptime Kuma, MinIO, Dozzle, ntfy
+```
+
+### Shared Network
+
+All stacks connect via the `homelab-network` Docker network for cross-stack communication:
+
+```bash
+# Services can reference each other by container name:
+# - printshop-strapi from n8n: http://printshop-strapi:1337
+# - Grafana from any stack: http://grafana:3000
+```
+
+### Cloudflare Tunnel Routes (Current)
+
+| Subdomain | Service | Container URL |
+|-----------|---------|---------------|
+| printshop-app.ronny.works | React Frontend | http://printshop-frontend:3000 |
+| printshop.ronny.works | Strapi CMS | http://printshop-strapi:1337 |
+| api.ronny.works | Backend API | http://printshop-api:3001 |
+| n8n.ronny.works | Workflow Automation | http://n8n:5678 |
+| grafana.ronny.works | Monitoring | http://grafana:3000 |
+| uptime.ronny.works | Status Page | http://uptime-kuma:3001 |
+
+> **Note:** Free Cloudflare SSL only covers one subdomain level. Use `printshop-app.ronny.works`, not `app.printshop.ronny.works`.
 
 ---
 
