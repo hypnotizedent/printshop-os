@@ -1,14 +1,4 @@
-# =============================================================================
-# PrintShop OS - Docker Compose Configuration
-# =============================================================================
-# This file provides a reference configuration for local development
-# All components run together in a shared Docker network
-# =============================================================================
-
 services:
-  # ---------------------------------------------------------------------------
-  # PostgreSQL Database - Shared by Strapi and Botpress
-  # ---------------------------------------------------------------------------
   postgres:
     image: postgres:15-alpine
     container_name: printshop-postgres
@@ -18,43 +8,41 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_password_change_this}
       POSTGRES_DB: ${POSTGRES_DB:-printshop}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    - postgres_data:/var/lib/postgresql/data
+    - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
     ports:
-      - "5432:5432"
+    - 5432:5432
     networks:
-      - printshop_network
+    - printshop_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-strapi}"]
+      test:
+      - CMD-SHELL
+      - pg_isready -U ${POSTGRES_USER:-strapi}
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # ---------------------------------------------------------------------------
-  # Redis - For caching and session management
-  # ---------------------------------------------------------------------------
   redis:
     image: redis:7-alpine
     container_name: printshop-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
-      - redis_data:/data
+    - redis_data:/data
     ports:
-      - "6379:6379"
+    - 6379:6379
     networks:
-      - printshop_network
+    - printshop_network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+      - CMD
+      - redis-cli
+      - ping
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # ---------------------------------------------------------------------------
-  # MongoDB - For Appsmith
-  # ---------------------------------------------------------------------------
   mongo:
     image: mongo:6
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--keyFile", "/data/mongo-keyfile"]
     container_name: printshop-mongo
     restart: unless-stopped
     environment:
@@ -62,26 +50,21 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-appsmith}
     volumes:
-      - mongo_data:/data/db
+    - mongo_data:/data/db
+    - ./mongo-keyfile:/data/mongo-keyfile:ro
     ports:
-      - "27017:27017"
+    - 27017:27017
     networks:
-      - printshop_network
+    - printshop_network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test:
+      - CMD
+      - mongosh
+      - --eval
+      - db.adminCommand('ping')
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # ---------------------------------------------------------------------------
-  # Strapi - Central API & Headless CMS
-  # ---------------------------------------------------------------------------
-  # Main backend CMS providing REST API for all data operations
-  # Admin panel available at /admin, API endpoints at /api/*
-  # Note: First startup takes 1-2 minutes to build admin panel
-  #
-  # IMPORTANT: PUBLIC_URL must be set for the admin panel to load correctly.
-  # Set this to the URL where Strapi will be accessed from externally.
   strapi:
     build:
       context: ./printshop-strapi
@@ -101,37 +84,31 @@ services:
       ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-your-admin-jwt-secret-change-this}
       APP_KEYS: ${STRAPI_APP_KEYS:-your-app-key-1,your-app-key-2}
       API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-your-api-token-salt-change-this}
-      # CRITICAL: PUBLIC_URL tells Strapi where it's publicly accessible.
-      # Without this, the /admin panel may not load correctly.
-      # For production, set STRAPI_PUBLIC_URL in your .env file to the actual URL
-      # (e.g., http://100.92.156.118:1337 or https://printshop.ronny.works)
       PUBLIC_URL: ${STRAPI_PUBLIC_URL:-http://localhost:1337}
     volumes:
-      - strapi_uploads:/srv/app/public/uploads
+    - strapi_uploads:/srv/app/public/uploads
     ports:
-      - "1337:1337"
+    - 1337:1337
     networks:
-      - printshop_network
+    - printshop_network
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      # Note: Strapi returns 302 redirect on root, which is normal behavior
-      # Using -O /dev/null to discard output and accept any HTTP response
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:1337"]
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - -O
+      - /dev/null
+      - http://localhost:1337
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 180s
-
-  # ---------------------------------------------------------------------------
-  # API Service - Inventory & Supplier Integration
-  # ---------------------------------------------------------------------------
-  # Core API for inventory management and supplier integrations
-  # Connects to S&S Activewear, AS Colour, SanMar for real-time inventory
-  # Exposes health endpoint at /health
   api:
     build:
       context: ./services/api
@@ -143,40 +120,37 @@ services:
       PORT: 3001
       REDIS_URL: redis://redis:6379
       STRAPI_URL: http://strapi:1337
-      # Database connection (shares with Strapi)
       DATABASE_HOST: postgres
       DATABASE_PORT: ${DATABASE_PORT:-5432}
       DATABASE_NAME: ${DATABASE_NAME:-printshop}
       DATABASE_USERNAME: ${DATABASE_USERNAME:-strapi}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-secure_password_change_this}
-      # Supplier API keys (optional - services work without them)
       SS_ACTIVEWEAR_API_KEY: ${SS_ACTIVEWEAR_API_KEY:-}
       SS_ACTIVEWEAR_ACCOUNT_NUMBER: ${SS_ACTIVEWEAR_ACCOUNT_NUMBER:-}
       SANMAR_USERNAME: ${SANMAR_USERNAME:-}
       SANMAR_PASSWORD: ${SANMAR_PASSWORD:-}
       ASCOLOUR_API_KEY: ${ASCOLOUR_API_KEY:-}
     ports:
-      - "3001:3001"
+    - 3001:3001
     networks:
-      - printshop_network
+    - printshop_network
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3001/health"]
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:3001/health
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-
-  # ---------------------------------------------------------------------------
-  # Appsmith - Internal Production Dashboard
-  # ---------------------------------------------------------------------------
-  # Low-code dashboard for production team job management
-  # Connects to Strapi API for data
-  # First startup requires creating workspace and admin user
   appsmith:
     image: appsmith/appsmith-ce:latest
     container_name: printshop-appsmith
@@ -185,16 +159,16 @@ services:
       APPSMITH_INSTANCE_NAME: ${APPSMITH_INSTANCE_NAME:-PrintShop Production Dashboard}
       APPSMITH_ENCRYPTION_PASSWORD: ${APPSMITH_ENCRYPTION_PASSWORD:-your-encryption-password-change-this}
       APPSMITH_ENCRYPTION_SALT: ${APPSMITH_ENCRYPTION_SALT:-your-encryption-salt-change-this}
-      APPSMITH_MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}@mongo:27017/appsmith
+      APPSMITH_MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}@mongo:27017/appsmith?authSource=admin
       APPSMITH_REDIS_URL: redis://redis:6379
       APPSMITH_MAIL_ENABLED: ${APPSMITH_MAIL_ENABLED:-false}
     volumes:
-      - appsmith_data:/appsmith-stacks
+    - appsmith_data:/appsmith-stacks
     ports:
-      - "8080:80"
-      - "8443:443"
+    - 8080:80
+    - 8443:443
     networks:
-      - printshop_network
+    - printshop_network
     depends_on:
       mongo:
         condition: service_healthy
@@ -203,18 +177,15 @@ services:
       strapi:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1/api/v1/health"]
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://127.0.0.1:1337/_health
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 90s
-
-  # ---------------------------------------------------------------------------
-  # Botpress - Customer-Facing Order Intake Bot
-  # ---------------------------------------------------------------------------
-  # Conversational AI for automated customer order collection
-  # Connects to Strapi API for order creation
-  # Internal port 3000, exposed externally on 3100
   botpress:
     image: botpress/server:latest
     container_name: printshop-botpress
@@ -227,29 +198,28 @@ services:
       EXTERNAL_URL: ${BOTPRESS_URL:-http://localhost:3100}
       BP_MODULE_NLU_LANGUAGESOURCES: '[{"endpoint":"https://lang-01.botpress.com"}]'
     volumes:
-      - botpress_data:/botpress/data
+    - botpress_data:/botpress/data
     ports:
-      - "3100:3000"
+    - 3100:3000
     networks:
-      - printshop_network
+    - printshop_network
     depends_on:
       postgres:
         condition: service_healthy
       strapi:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/status"]
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:3000/status
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  # ---------------------------------------------------------------------------
-  # Pricing Engine - Job Estimator API
-  # ---------------------------------------------------------------------------
-  # JSON-driven pricing calculator with sub-100ms performance
-  # Features: volume discounts, location surcharges, color multipliers
-  # Internal port 3001, exposed externally on 3004
   pricing-engine:
     build:
       context: ./services/job-estimator
@@ -260,137 +230,91 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3001
     ports:
-      - "3004:3001"
+    - 3004:3001
     networks:
-      - printshop_network
+    - printshop_network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3001/health"]
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:3001/health
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 30s
-
-  # ---------------------------------------------------------------------------
-  # Frontend - React UI for PrintShop OS
-  # ---------------------------------------------------------------------------
-  # React 19 + TypeScript + Vite application served via 'serve' package
-  # Provides customer portal and operations dashboard
-  # Connects to Strapi for data, Pricing Engine for quotes
-  #
-  # CLOUDFLARE TUNNEL NOTE:
-  # If using cloudflared container for external access, ensure it's on the
-  # same Docker network (printshop_network) to resolve container names.
-  # Connect cloudflared to this network:
-  #   docker network connect printshop_network cloudflared
-  # ---------------------------------------------------------------------------
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        # Build-time args for Vite - these get baked into the static bundle
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
         VITE_STRAPI_URL: ${VITE_STRAPI_URL:-http://localhost:1337}
         VITE_PRICING_URL: ${VITE_PRICING_URL:-http://localhost:3004}
         VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:3004}
     container_name: printshop-frontend
     restart: unless-stopped
-    # Note: VITE_* vars are baked into the build at build time via build args above
-    # For Cloudflare Tunnel, set these in .env to your public URLs before building
     ports:
-      - "5173:3000"
+    - 5173:3000
     networks:
-      - printshop_network
+    - printshop_network
     depends_on:
-      - strapi
-      - pricing-engine
+    - strapi
+    - pricing-engine
     healthcheck:
-      # Using wget instead of curl for Alpine Linux compatibility
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000"]
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:3000
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  # ---------------------------------------------------------------------------
-  # Nginx Reverse Proxy (Optional - for production-like setup)
-  # ---------------------------------------------------------------------------
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: printshop-nginx
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./nginx/ssl:/etc/nginx/ssl:ro
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   networks:
-  #     - printshop_network
-  #   depends_on:
-  #     - strapi
-  #     - appsmith
-  #     - botpress
-
-# =============================================================================
-# Networks
-# =============================================================================
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: printshop-cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+    - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      printshop_network:
+        ipv4_address: 172.21.0.250
+    depends_on:
+    - strapi
+    - frontend
+    - api
 networks:
   printshop_network:
     driver: bridge
     name: printshop_network
-
-# =============================================================================
-# Volumes - Persistent data storage
-# =============================================================================
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
 volumes:
   postgres_data:
     name: printshop_postgres_data
     driver: local
-  
   redis_data:
     name: printshop_redis_data
     driver: local
-  
   mongo_data:
     name: printshop_mongo_data
     driver: local
-  
   strapi_data:
     name: printshop_strapi_data
     driver: local
-  
   strapi_uploads:
     name: printshop_strapi_uploads
     driver: local
-  
   appsmith_data:
     name: printshop_appsmith_data
     driver: local
-  
   botpress_data:
     name: printshop_botpress_data
     driver: local
-
-# =============================================================================
-# Usage Instructions
-# =============================================================================
-# 1. Copy .env.example to .env and update with your values
-# 2. Start all services: docker compose up -d
-# 3. View logs: docker compose logs -f [service-name]
-# 4. Stop all services: docker compose down
-# 5. Remove all data: docker compose down -v
-#
-# NOTE: Use 'docker compose' (space, V2) not 'docker-compose' (hyphen, V1 deprecated)
-#
-# Service URLs (default):
-# - Strapi Admin: http://localhost:1337/admin
-# - Strapi API: http://localhost:1337/api
-# - Appsmith: http://localhost:8080
-# - Botpress: http://localhost:3100
-# - Frontend: http://localhost:5173
-# - API: http://localhost:3001
-# - Pricing Engine: http://localhost:3004
-#
-# For detailed setup instructions, see /docs/deployment/docker-setup.md
-# =============================================================================
