@@ -69,7 +69,8 @@ export function FilesPage({ files }: FilesPageProps) {
 
   const handleFolderClick = (folderPath: string) => {
     setCurrentPath(folderPath)
-    toast.success(`Opened ${folderPath.replace('/', '')} folder`)
+    // Use slice(1) to only remove the leading slash for folder name display
+    toast.success(`Opened ${folderPath.slice(1)} folder`)
   }
 
   const handleNavigateUp = () => {
@@ -109,7 +110,7 @@ export function FilesPage({ files }: FilesPageProps) {
           {isInSubfolder && (
             <>
               <span>/</span>
-              <span className="font-medium text-foreground">{currentPath.replace('/', '')}</span>
+              <span className="font-medium text-foreground">{currentPath.slice(1)}</span>
             </>
           )}
         </div>
@@ -156,7 +157,7 @@ export function FilesPage({ files }: FilesPageProps) {
 
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4">
-          {isInSubfolder ? `Files in ${currentPath.replace('/', '')}` : 'Recent Files'}
+          {isInSubfolder ? `Files in ${currentPath.slice(1)}` : 'Recent Files'}
         </h2>
         <Card>
           <div className="divide-y divide-border">

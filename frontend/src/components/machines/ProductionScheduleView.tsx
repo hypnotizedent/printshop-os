@@ -165,7 +165,7 @@ interface ProductionScheduleViewProps {
   onViewJob?: (orderId: string) => void;
 }
 
-export function ProductionScheduleView({ onViewJob }: ProductionScheduleViewProps = {}) {
+export function ProductionScheduleView({ onViewJob }: ProductionScheduleViewProps) {
   const [machines, setMachines] = useState<Machine[]>(DEMO_MACHINES);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'schedule' | 'timeline'>('schedule');
@@ -173,6 +173,7 @@ export function ProductionScheduleView({ onViewJob }: ProductionScheduleViewProp
 
   const handleJobClick = (job: ScheduledJob) => {
     if (onViewJob) {
+      // Use job.id for navigation but show orderNumber in UI for consistency with how users identify jobs
       onViewJob(job.id);
     }
   };
