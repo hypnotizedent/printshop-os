@@ -709,6 +709,44 @@ When troubleshooting a down system, check in this order:
 If you're a Copilot or AI agent starting a new session, please read:
 - **[COPILOT_CONTEXT.md](./COPILOT_CONTEXT.md)** - Server configuration and session context
 - **[MASTER_CONTEXT.md](./MASTER_CONTEXT.md)** - Full project documentation
+- **[Onboarding Guide](docs/ONBOARDING.md)** - Quick start and architecture overview
+
+---
+
+## 🏠 Infrastructure Architecture
+
+PrintShop OS uses a **two-repository architecture** that separates business services from infrastructure tooling:
+
+| Repository | Purpose | Location on docker-host |
+|------------|---------|------------------------|
+| **printshop-os** (this repo) | Business/application services | `/mnt/printshop/printshop-os` |
+| **homelab-infrastructure** | Infra & monitoring services | `/mnt/docker/*-stack` directories |
+
+### What Runs Where
+
+**PrintShop OS** contains only business/application services:
+- React Frontend, Strapi CMS, PostgreSQL, Redis
+- Inventory API, Job Estimator, Supplier Sync
+- Appsmith, Botpress
+
+**Homelab Infrastructure** runs via dedicated stacks:
+- `/mnt/docker/automation-stack` - n8n (workflow automation)
+- `/mnt/docker/observability-stack` - Grafana, Prometheus, Loki
+- `/mnt/docker/infrastructure-stack` - Uptime Kuma, MinIO, Dozzle, ntfy
+
+All stacks share a Docker network (`homelab-network`) for cross-stack communication.
+
+### Production URLs (Cloudflare Tunnel)
+
+| Service | URL |
+|---------|-----|
+| Frontend | https://printshop-app.ronny.works |
+| Strapi CMS | https://printshop.ronny.works |
+| API | https://api.ronny.works |
+| Grafana | https://grafana.ronny.works |
+| n8n | https://n8n.ronny.works |
+
+For detailed deployment instructions, see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ---
 
