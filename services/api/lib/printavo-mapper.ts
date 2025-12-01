@@ -479,3 +479,404 @@ export function transformPrintavoOrdersBatch(orders: PrintavoOrder[]): BatchTran
 
   return { successful, errors };
 }
+
+// ============================================================================
+// Printavo v2 GraphQL API Transformers
+// ============================================================================
+
+/**
+ * Printavo v2 API Types
+ */
+export interface PrintavoV2Address {
+  id: string;
+  name?: string;
+  address1?: string;
+  address2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+}
+
+export interface PrintavoV2Contact {
+  id: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface PrintavoV2Customer {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  addresses?: PrintavoV2Address[];
+  contacts?: PrintavoV2Contact[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PrintavoV2LineItem {
+  id: string;
+  description?: string;
+  color?: string;
+  quantity?: number;
+  items?: number;
+  price?: number;
+  category?: string;
+  itemNumber?: string;
+  taxable?: boolean;
+}
+
+export interface PrintavoV2LineItemGroup {
+  id: string;
+  position?: number;
+  lineItems?: PrintavoV2LineItem[];
+}
+
+export interface PrintavoV2Payment {
+  id: string;
+  amount?: number;
+  paymentMethod?: string;
+  createdAt?: string;
+  note?: string;
+}
+
+export interface PrintavoV2Order {
+  id: string;
+  visualId?: string;
+  orderNumber?: string;
+  nickname?: string;
+  status?: { id: string; name?: string; color?: string };
+  productionStatus?: string;
+  customerDueAt?: string;
+  inHandsDate?: string;
+  dueAt?: string;
+  total?: number;
+  subtotal?: number;
+  taxTotal?: number;
+  discountTotal?: number;
+  amountPaid?: number;
+  amountOutstanding?: number;
+  customer?: { id: string; company?: string; email?: string };
+  lineItemGroups?: PrintavoV2LineItemGroup[];
+  tasks?: Array<{
+    id: string;
+    name?: string;
+    description?: string;
+    dueAt?: string;
+    completedAt?: string;
+  }>;
+  payments?: PrintavoV2Payment[];
+  createdAt?: string;
+  updatedAt?: string;
+  productionNote?: string;
+  customerNote?: string;
+}
+
+export interface PrintavoV2Quote {
+  id: string;
+  visualId?: string;
+  status?: { id: string; name?: string };
+  total?: number;
+  expiresAt?: string;
+  customer?: { id: string; company?: string; email?: string };
+  lineItemGroups?: PrintavoV2LineItemGroup[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PrintavoV2Invoice {
+  id: string;
+  invoiceNumber?: string;
+  visualId?: string;
+  status?: { id: string; name?: string };
+  total?: number;
+  paidAmount?: number;
+  amountPaid?: number;
+  amountOutstanding?: number;
+  dueDate?: string;
+  dueAt?: string;
+  order?: { id: string; visualId?: string };
+  payments?: PrintavoV2Payment[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Transform Printavo v2 customer to Strapi format
+ */
+export function transformPrintavoV2Customer(customer: PrintavoV2Customer): Record<string, unknown> {
+  // Build full name from first/last or use company
+  const fullName =
+    [customer.firstName, customer.lastName].filter(Boolean).join(' ').trim() ||
+    customer.company ||
+    'Unknown Customer';
+
+  // Get primary contact email if customer email is missing
+  const email =
+    customer.email ||
+    customer.contacts?.find((c) => c.email)?.email ||
+    `no-email-${customer.id}@printavo.local`;
+
+  // Get primary address if available
+  const primaryAddress = customer.addresses?.[0];
+
+  const result: Record<string, unknown> = {
+    printavoId: customer.id,
+    name: fullName,
+    email: email,
+    published: true,
+  };
+
+  if (customer.firstName) {
+    result.firstName = customer.firstName;
+  }
+
+  if (customer.lastName) {
+    result.lastName = customer.lastName;
+  }
+
+  if (customer.company) {
+    result.company = customer.company;
+  }
+
+  if (customer.phone) {
+    result.phone = customer.phone;
+  }
+
+  if (primaryAddress) {
+    if (primaryAddress.address1) {
+      result.address1 = primaryAddress.address1;
+    }
+    if (primaryAddress.address2) {
+      result.address2 = primaryAddress.address2;
+    }
+    if (primaryAddress.city) {
+      result.city = primaryAddress.city;
+    }
+    if (primaryAddress.state) {
+      result.state = normalizeState(primaryAddress.state);
+    }
+    if (primaryAddress.zip) {
+      result.zip = primaryAddress.zip;
+    }
+    if (primaryAddress.country) {
+      result.country = primaryAddress.country;
+    }
+  }
+
+  if (customer.createdAt) {
+    result.createdAt = customer.createdAt;
+  }
+
+  if (customer.updatedAt) {
+    result.updatedAt = customer.updatedAt;
+  }
+
+  return result;
+}
+
+/**
+ * Map Printavo v2 status name to OrderStatus enum
+ */
+export function mapV2OrderStatus(statusName?: string): OrderStatus {
+  if (!statusName) return OrderStatus.PENDING;
+
+  const statusMap: Record<string, OrderStatus> = {
+    QUOTE: OrderStatus.QUOTE,
+    'AWAITING APPROVAL': OrderStatus.PENDING,
+    'APPROVED FOR PRODUCTION': OrderStatus.IN_PRODUCTION,
+    'IN PRODUCTION': OrderStatus.IN_PRODUCTION,
+    'READY TO SHIP': OrderStatus.READY_TO_SHIP,
+    SHIPPED: OrderStatus.SHIPPED,
+    DELIVERED: OrderStatus.DELIVERED,
+    COMPLETED: OrderStatus.COMPLETED,
+    COMPLETE: OrderStatus.COMPLETED,
+    CANCELLED: OrderStatus.CANCELLED,
+    CANCELED: OrderStatus.CANCELLED,
+    'INVOICE PAID': OrderStatus.INVOICE_PAID,
+    'PAYMENT DUE': OrderStatus.PAYMENT_DUE,
+    'PAYMENT NEEDED': OrderStatus.PAYMENT_DUE,
+  };
+
+  const normalized = statusName.toUpperCase().trim();
+  return statusMap[normalized] || OrderStatus.PENDING;
+}
+
+/**
+ * Convert Printavo v2 line item groups to flat line items array
+ */
+export function convertV2LineItems(
+  lineItemGroups?: PrintavoV2LineItemGroup[],
+): StrapiLineItem[] {
+  if (!lineItemGroups) return [];
+
+  const items: StrapiLineItem[] = [];
+
+  for (const group of lineItemGroups) {
+    if (!group.lineItems) continue;
+
+    for (const item of group.lineItems) {
+      const quantity = item.items || item.quantity || 0;
+      const unitCost = item.price || 0;
+
+      items.push({
+        id: item.id,
+        description: item.description || 'Unknown Item',
+        category: item.category || undefined,
+        quantity,
+        unitCost,
+        taxable: item.taxable === true,
+        total: quantity * unitCost,
+      });
+    }
+  }
+
+  return items;
+}
+
+/**
+ * Transform Printavo v2 order to Strapi format
+ */
+export function transformPrintavoV2Order(order: PrintavoV2Order): Record<string, unknown> {
+  const status = mapV2OrderStatus(order.status?.name);
+  const lineItems = convertV2LineItems(order.lineItemGroups);
+
+  // Calculate totals
+  const subtotal = order.subtotal || lineItems.reduce((sum, item) => sum + item.total, 0);
+  const tax = order.taxTotal || 0;
+  const discount = order.discountTotal || 0;
+  const total = order.total || subtotal + tax - discount;
+  const amountPaid = order.amountPaid || 0;
+  const amountOutstanding = order.amountOutstanding || total - amountPaid;
+
+  const result: Record<string, unknown> = {
+    printavoId: order.id,
+    status,
+    totals: {
+      subtotal,
+      tax,
+      discount,
+      shipping: 0,
+      fees: 0,
+      total,
+      amountPaid,
+      amountOutstanding,
+    },
+    lineItems,
+    timeline: {
+      createdAt: order.createdAt || new Date().toISOString(),
+      updatedAt: order.updatedAt || order.createdAt || new Date().toISOString(),
+      ...(order.customerDueAt && { customerDueDate: order.customerDueAt }),
+      ...(order.dueAt && { dueDate: order.dueAt }),
+    },
+    published: true,
+  };
+
+  if (order.visualId) {
+    result.visualId = order.visualId;
+  }
+
+  if (order.nickname) {
+    result.orderNickname = order.nickname;
+  }
+
+  if (order.productionNote) {
+    result.productionNotes = order.productionNote;
+  }
+
+  if (order.customerNote) {
+    result.notes = order.customerNote;
+  }
+
+  // Store customer reference (will be resolved to Strapi ID by import script)
+  if (order.customer) {
+    result.customerPrintavoId = order.customer.id;
+    result.customer = {
+      name: order.customer.company || order.customer.email || 'Unknown',
+      email: order.customer.email || `no-email-${order.customer.id}@printavo.local`,
+    };
+  }
+
+  return result;
+}
+
+/**
+ * Transform Printavo v2 quote to Strapi format
+ */
+export function transformPrintavoV2Quote(quote: PrintavoV2Quote): Record<string, unknown> {
+  const lineItems = convertV2LineItems(quote.lineItemGroups);
+  const total = quote.total || lineItems.reduce((sum, item) => sum + item.total, 0);
+
+  const result: Record<string, unknown> = {
+    printavoId: quote.id,
+    status: 'quote',
+    total,
+    lineItems,
+    createdAt: quote.createdAt || new Date().toISOString(),
+    updatedAt: quote.updatedAt || quote.createdAt || new Date().toISOString(),
+    published: true,
+  };
+
+  if (quote.visualId) {
+    result.visualId = quote.visualId;
+  }
+
+  if (quote.expiresAt) {
+    result.expiresAt = quote.expiresAt;
+  }
+
+  // Store customer reference
+  if (quote.customer) {
+    result.customerPrintavoId = quote.customer.id;
+  }
+
+  return result;
+}
+
+/**
+ * Transform Printavo v2 invoice to Strapi format
+ */
+export function transformPrintavoV2Invoice(invoice: PrintavoV2Invoice): Record<string, unknown> {
+  const total = invoice.total || 0;
+  const paidAmount = invoice.paidAmount || invoice.amountPaid || 0;
+  const amountOutstanding = invoice.amountOutstanding || total - paidAmount;
+
+  const result: Record<string, unknown> = {
+    printavoId: invoice.id,
+    invoiceNumber: invoice.invoiceNumber || invoice.visualId || invoice.id,
+    status: invoice.status?.name || 'pending',
+    total,
+    paidAmount,
+    amountOutstanding,
+    createdAt: invoice.createdAt || new Date().toISOString(),
+    updatedAt: invoice.updatedAt || invoice.createdAt || new Date().toISOString(),
+    published: true,
+  };
+
+  if (invoice.dueDate || invoice.dueAt) {
+    result.dueDate = invoice.dueDate || invoice.dueAt;
+  }
+
+  // Store order reference
+  if (invoice.order) {
+    result.orderPrintavoId = invoice.order.id;
+  }
+
+  // Include payments summary
+  if (invoice.payments && invoice.payments.length > 0) {
+    result.paymentsCount = invoice.payments.length;
+    result.payments = invoice.payments.map((p) => ({
+      id: p.id,
+      amount: p.amount || 0,
+      createdAt: p.createdAt,
+    }));
+  }
+
+  return result;
+}
