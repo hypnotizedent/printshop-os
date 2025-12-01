@@ -969,10 +969,11 @@ Examples:
     
     try:
         # Determine what to import
-        import_customers_flag = args.customers_only or not (args.customers_only or args.orders_only or args.line_items_only or args.link_only)
-        import_orders_flag = args.orders_only or not (args.customers_only or args.orders_only or args.line_items_only or args.link_only)
-        import_line_items_flag = args.line_items_only or not (args.customers_only or args.orders_only or args.line_items_only or args.link_only)
-        link_flag = args.link_only or not (args.customers_only or args.orders_only or args.line_items_only or args.link_only)
+        any_specific_flag = args.customers_only or args.orders_only or args.line_items_only or args.link_only
+        import_customers_flag = args.customers_only or not any_specific_flag
+        import_orders_flag = args.orders_only or not any_specific_flag
+        import_line_items_flag = args.line_items_only or not any_specific_flag
+        link_flag = args.link_only or not any_specific_flag
         
         # Run imports
         if import_customers_flag:
@@ -993,8 +994,8 @@ Examples:
                 resume=args.resume, dry_run=args.dry_run
             )
         
-        # Link relationships
-        if link_flag and not args.dry_run:
+        # Link relationships (functions handle dry_run internally)
+        if link_flag:
             results["customer_links"] = link_orders_to_customers(client, dry_run=args.dry_run)
             results["order_links"] = link_line_items_to_orders(client, dry_run=args.dry_run)
         
