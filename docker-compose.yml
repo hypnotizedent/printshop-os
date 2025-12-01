@@ -190,7 +190,7 @@ services:
       - CMD
       - curl
       - -f
-      - http://127.0.0.1:1337/_health
+      - http://127.0.0.1:80
       interval: 30s
       timeout: 10s
       retries: 3
@@ -292,43 +292,27 @@ services:
     environment:
     - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
-      printshop_network:
-        ipv4_address: 172.21.0.250
-      # Connect to external networks for cross-stack communication
-      # These allow cloudflared to reach Grafana, n8n, and other homelab services
-      observability:
-      automation:
+    - printshop_network
     depends_on:
-    - strapi
-    - frontend
-    - api
+      strapi:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "cloudflared", "tunnel", "info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 networks:
   printshop_network:
     driver: bridge
     name: printshop_network
     ipam:
       config:
-        - subnet: 172.21.0.0/16
-  # ---------------------------------------------------------------------------
-  # External Networks for Cross-Stack Communication
-  # ---------------------------------------------------------------------------
-  # These networks are created by other homelab infrastructure stacks and must
-  # exist before PrintShop OS starts. If they don't exist, docker compose will
-  # fail with "network not found" error.
-  #
-  # To create these networks manually (if running standalone):
-  #   docker network create observability-stack_monitoring
-  #   docker network create automation-stack_n8n
-  #
-  # Or use scripts/connect-networks.sh to connect after startup if the
-  # external networks weren't available initially.
-  # ---------------------------------------------------------------------------
-  observability:
-    external: true
-    name: observability-stack_monitoring
-  automation:
-    external: true
-    name: automation-stack_n8n
+        - subnet: 172.21.0.0/24
 volumes:
   postgres_data:
     name: printshop_postgres_data
