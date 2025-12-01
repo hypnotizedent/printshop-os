@@ -107,15 +107,19 @@ These services run in the `homelab-infrastructure` repository stacks and share t
 
 The cloudflared container must be on the **same Docker network** as the services it proxies.
 
-### Connect cloudflared to the PrintShop network
+### Connect External cloudflared to the PrintShop network
+
+If you're using an **external cloudflared container** (from homelab-infrastructure or elsewhere), connect it to the PrintShop network:
 
 ```bash
-# One-time command to connect cloudflared to printshop_network
+# One-time command to connect external cloudflared to printshop_network
 docker network connect printshop_network cloudflared
 
 # Verify connection
 docker network inspect printshop_network | grep cloudflared
 ```
+
+> **Note:** If using the **built-in `printshop-cloudflared`** container (from docker-compose.yml), it's already configured on `printshop_network` and no additional connection is needed.
 
 ### Why This Is Required
 
@@ -187,7 +191,10 @@ Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your T
 ### 1. Check if cloudflared is on the correct network
 
 ```bash
-# List networks for cloudflared
+# List networks for built-in printshop-cloudflared container
+docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+
+# Or if using external cloudflared:
 docker inspect cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
 
 # Should include: printshop_network
@@ -196,7 +203,10 @@ docker inspect cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}
 ### 2. Test container name resolution from cloudflared
 
 ```bash
-# Exec into cloudflared and test DNS
+# Exec into printshop-cloudflared and test DNS
+docker exec printshop-cloudflared ping -c 1 printshop-frontend
+
+# Or if using external cloudflared:
 docker exec cloudflared ping -c 1 printshop-frontend
 
 # If this fails, the network connection is missing
@@ -320,7 +330,8 @@ docker compose build --no-cache
 # 4. Start fresh
 docker compose up -d
 
-# 5. Reconnect cloudflared to the network
+# 5. If using external cloudflared, reconnect it to the network
+# (Skip this if using built-in printshop-cloudflared - it's auto-connected)
 docker network connect printshop_network cloudflared
 
 # 6. Verify
@@ -328,6 +339,107 @@ curl -I https://printshop-app.ronny.works
 ```
 
 For a detailed case study, see [Troubleshooting Retrospective (Nov 30, 2025)](deployment/TROUBLESHOOTING_RETROSPECTIVE_2025-11-30.md).
+
+---
+
+## Browser Cache and Hard Refresh
+
+After rebuilding the frontend or making deployment changes, the browser may serve cached content.
+
+### Clear Browser Cache After Deployments
+
+| Action | Windows/Linux | Mac |
+|--------|---------------|-----|
+| Hard Refresh | `Ctrl+Shift+R` | `Cmd+Shift+R` |
+| Hard Refresh (Alt) | `Ctrl+F5` | `Cmd+Option+R` |
+| Incognito/Private | `Ctrl+Shift+N` | `Cmd+Shift+N` |
+
+### When to Clear Cache
+
+1. **After rebuilding frontend**: Always hard refresh or use incognito mode
+2. **After updating VITE_* environment variables**: The frontend bundle is rebuilt with new values
+3. **If seeing stale content**: Old versions of pages, broken links, or missing features
+4. **After Cloudflare deploys**: Cloudflare may cache responses for 1-2 minutes
+
+### Testing Tips
+
+- **Use incognito/private window first** to verify changes without cache issues
+- **Wait 1-2 minutes after deploy** for Cloudflare edge caches to expire
+- **Check browser DevTools Network tab** for cached vs fresh responses
+
+---
+
+## Post-Deployment Verification Checklist
+
+After deploying PrintShop OS, verify everything is working with these commands:
+
+### 1. Verify Container Status
+
+```bash
+# Check all PrintShop containers are running
+docker ps --filter name=printshop --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+```
+
+### 2. Verify Network Connectivity
+
+```bash
+# Verify printshop-cloudflared is on the correct network (output should include: printshop_network)
+docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+
+# Verify printshop-frontend is on the correct network (output should include: printshop_network)
+docker inspect printshop-frontend --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+```
+
+### 3. Verify Container-to-Container Connectivity
+
+```bash
+# Test if frontend is reachable from API container (uses wget or curl)
+docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000 && echo "Frontend reachable from API" || \
+  docker exec printshop-api curl -sf http://printshop-frontend:3000 > /dev/null && echo "Frontend reachable from API" || echo "Frontend NOT reachable"
+
+# Test if Strapi is reachable from API container
+docker exec printshop-api wget -qO- --spider http://printshop-strapi:1337 && echo "Strapi reachable from API" || \
+  docker exec printshop-api curl -sf http://printshop-strapi:1337 > /dev/null && echo "Strapi reachable from API" || echo "Strapi NOT reachable"
+```
+
+### 4. Verify Tunnel Connection
+
+```bash
+# Check tunnel registration (for built-in printshop-cloudflared)
+docker logs printshop-cloudflared --tail 20 | grep -i "Registered tunnel connection"
+
+# Or for external cloudflared:
+docker logs cloudflared --tail 20 | grep -i "Registered tunnel connection"
+```
+
+### 5. Test Local Access
+
+```bash
+# Test frontend from host
+curl -I http://localhost:5173
+
+# Test Strapi from host
+curl -I http://localhost:1337
+
+# Test API from host
+curl -I http://localhost:3001/health
+```
+
+### 6. Test External Access (via Cloudflare Tunnel)
+
+```bash
+# Test production URLs
+curl -I https://printshop-app.ronny.works
+curl -I https://printshop.ronny.works
+curl -I https://api.ronny.works/health
+```
+
+### 7. Browser Verification
+
+1. Open https://printshop-app.ronny.works in incognito/private mode
+2. Verify the page loads correctly
+3. Check browser DevTools console for errors
+4. If testing after a rebuild, use hard refresh (`Ctrl+Shift+R` / `Cmd+Shift+R`)
 
 ---
 
