@@ -114,17 +114,19 @@ echo ""
 # =============================================================================
 echo -e "${YELLOW}Verifying tunnel connectivity...${NC}"
 
-# Test from inside a container
-if docker exec printshop-api wget -qO- --spider --timeout=5 http://printshop-frontend:3000 2>/dev/null; then
+# Test from inside a container - capture both success and error output
+if FRONTEND_TEST=$(docker exec printshop-api wget -qO- --spider --timeout=5 http://printshop-frontend:3000 2>&1); then
     echo -e "  ${GREEN}✓${NC} Frontend reachable internally"
 else
     echo -e "  ${RED}✗${NC} Frontend NOT reachable internally"
+    echo -e "     Error: ${FRONTEND_TEST}"
 fi
 
-if docker exec printshop-api wget -qO- --spider --timeout=5 http://printshop-strapi:1337 2>/dev/null; then
+if STRAPI_TEST=$(docker exec printshop-api wget -qO- --spider --timeout=5 http://printshop-strapi:1337 2>&1); then
     echo -e "  ${GREEN}✓${NC} Strapi reachable internally"
 else
     echo -e "  ${RED}✗${NC} Strapi NOT reachable internally"
+    echo -e "     Error: ${STRAPI_TEST}"
 fi
 
 echo ""
