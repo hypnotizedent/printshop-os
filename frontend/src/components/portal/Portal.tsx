@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate } from "react-router-dom"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Navigation } from "./Navigation"
 import { Dashboard } from "./Dashboard"
+import { OrderHistory } from "./OrderHistory"
 import { useAuth } from "@/contexts/AuthContext"
 import { searchPortal } from "@/lib/portal-customer-api"
 import type { 
@@ -222,12 +223,12 @@ function SupportTickets() {
   )
 }
 
-// Placeholder for OrderHistory until we remove the old one
-function OrderHistory() {
+// Wrapper for OrderHistory to pass customerId from auth context
+function OrderHistoryPage() {
+  const { customer } = useAuth()
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold">Order History</h1>
-      <p className="text-muted-foreground mt-2">View all your past orders</p>
+      <OrderHistory customerId={customer?.documentId} />
     </div>
   )
 }
@@ -288,7 +289,7 @@ export function Portal() {
               </ProtectedRoute>
             } 
           />
-          <Route path="/orders/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><OrderHistory /></ProtectedRoute>} />
+          <Route path="/orders/history" element={<ProtectedRoute allowedUserTypes={["customer"]}><OrderHistoryPage /></ProtectedRoute>} />
           <Route path="/orders/track" element={<ProtectedRoute allowedUserTypes={["customer"]}><TrackOrders /></ProtectedRoute>} />
           <Route path="/quotes/request" element={<ProtectedRoute allowedUserTypes={["customer"]}><RequestQuote /></ProtectedRoute>} />
           <Route path="/quotes/pending" element={<ProtectedRoute allowedUserTypes={["customer"]}><PendingQuotes /></ProtectedRoute>} />
