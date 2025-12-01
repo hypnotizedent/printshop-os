@@ -250,8 +250,8 @@ VITE_WS_URL=wss://api.ronny.works
 
 ```bash
 # Deploy to docker-host (via Tailscale)
-rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/
-ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'
+rsync -avz --exclude node_modules --exclude .git . docker-host:~/stacks/printshop-os/
+ssh docker-host 'cd ~/stacks/printshop-os && docker compose up -d --build'
 
 # Connect cloudflared to the network (if not already connected)
 ssh docker-host 'docker network connect printshop_network cloudflared'

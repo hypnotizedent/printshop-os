@@ -148,11 +148,12 @@ npm run dev
 
 ```bash
 # Deploy to docker-host (via Tailscale)
-rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/
-ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'
+# Canonical path: ~/stacks/printshop-os (expands to /home/docker-host/stacks/printshop-os)
+rsync -avz --exclude node_modules --exclude .git . docker-host:~/stacks/printshop-os/
+ssh docker-host 'cd ~/stacks/printshop-os && docker compose up -d --build'
 
 # View logs
-ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose logs -f printshop-strapi'
+ssh docker-host 'cd ~/stacks/printshop-os && docker compose logs -f printshop-strapi'
 
 # Quick status check
 ssh docker-host 'docker ps --format "table {{.Names}}\t{{.Status}}"'

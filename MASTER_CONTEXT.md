@@ -97,8 +97,10 @@ PrintShop OS uses a **two-repository architecture**:
 
 | Repository | Purpose | Location on docker-host |
 |------------|---------|------------------------|
-| **printshop-os** (this repo) | Business/application services | `/mnt/printshop/printshop-os` |
+| **printshop-os** (this repo) | Business/application services | `~/stacks/printshop-os` |
 | **homelab-infrastructure** | Infrastructure & monitoring | `/mnt/docker/*-stack` directories |
+
+> **📍 Canonical Path:** `~/stacks/printshop-os` expands to `/home/docker-host/stacks/printshop-os`. This is the active git repository where all deployments and git operations should be performed.
 
 ### Homelab Infrastructure Stacks
 - `/mnt/docker/automation-stack` → n8n (workflow automation)

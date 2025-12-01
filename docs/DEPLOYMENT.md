@@ -34,9 +34,11 @@ PrintShop OS uses a **clear separation** between business/application services a
 
 ### Infrastructure Layout on docker-host
 
+> **📍 Canonical Path:** The single source of truth for PrintShop OS on docker-host is `~/stacks/printshop-os` (expands to `/home/docker-host/stacks/printshop-os`). Always use this path for deployments and git operations.
+
 ```
 docker-host (100.92.156.118)
-├── /mnt/printshop/printshop-os/      # PrintShop OS (this repo)
+├── ~/stacks/printshop-os/            # PrintShop OS (this repo) - CANONICAL LOCATION
 │   └── docker-compose.yml            # Business services
 │
 └── /mnt/docker/                      # Homelab Infrastructure
@@ -334,10 +336,10 @@ docker compose up -d --remove-orphans
 
 ```bash
 # Deploy to docker-host (via Tailscale)
-rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/
+rsync -avz --exclude node_modules --exclude .git . docker-host:~/stacks/printshop-os/
 
 # SSH and start services
-ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'
+ssh docker-host 'cd ~/stacks/printshop-os && docker compose up -d --build'
 
 # Reconnect cloudflared if needed
 ssh docker-host 'docker network connect printshop_network cloudflared'

@@ -2611,8 +2611,8 @@ source .venv/bin/activate && python scripts/sync-line-items.py
 # Upload artwork to MinIO
 source .venv/bin/activate && python scripts/sync-artwork-minio.py
 
-# Deploy to homelab
-rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/ && ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'
+# Deploy to homelab (canonical path: ~/stacks/printshop-os)
+rsync -avz --exclude node_modules --exclude .git . docker-host:~/stacks/printshop-os/ && ssh docker-host 'cd ~/stacks/printshop-os && docker compose up -d --build'
 
 # View logs
 ssh docker-host 'cd ~/stacks/printshop-os && docker-compose logs -f --tail=100'
