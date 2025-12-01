@@ -56,7 +56,6 @@ services:
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--keyFile", "/data/mongo-keyfile"]
     container_name: printshop-mongo
     restart: unless-stopped
-    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--keyFile", "/data/mongo-keyfile"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}
