@@ -40,9 +40,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('createPaymentIntent', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should create a payment intent successfully', async () => {
       const mockPaymentIntent = {
@@ -139,9 +136,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('createCheckoutSession', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should create checkout session successfully', async () => {
       const mockSession = {
@@ -247,9 +241,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('createDepositPayment', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should create 50% deposit payment', async () => {
       mockStripeInstance.checkout.sessions.create.mockResolvedValue({
@@ -312,9 +303,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('createFullPayment', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should create full payment checkout session', async () => {
       mockStripeInstance.checkout.sessions.create.mockResolvedValue({
@@ -350,9 +338,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('createBalancePayment', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should create balance payment checkout session', async () => {
       mockStripeInstance.checkout.sessions.create.mockResolvedValue({
@@ -388,9 +373,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('getPaymentIntent', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should retrieve payment intent successfully', async () => {
       const mockPaymentIntent = {
@@ -424,9 +406,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('getCheckoutSession', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should retrieve checkout session successfully', async () => {
       const mockSession = {
@@ -461,9 +440,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('getOrCreateCustomer', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should return existing customer', async () => {
       mockStripeInstance.customers.list.mockResolvedValue({
@@ -516,9 +492,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('createRefund', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should create full refund', async () => {
       const mockRefund = {
@@ -574,9 +547,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('constructWebhookEvent', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should construct valid webhook event', () => {
       const mockEvent = {
@@ -612,9 +582,6 @@ describe('Stripe Payment Service', () => {
   });
 
   describe('Default Export', () => {
-    beforeEach(() => {
-      
-    });
 
     it('should export all payment functions', () => {
       expect(stripeService.default).toBeDefined();
