@@ -81,11 +81,33 @@ All stacks connect via the `homelab-network` Docker network for cross-stack comm
 - **Git** for version control
 - **SSH access** to deployment server (for remote deployments)
 
-### Cloudflare (for external access)
+### Cloudflare Tunnel Network
 
-- Cloudflare account with domain configured
-- Cloudflare Tunnel (`cloudflared`) installed and running
-- DNS records pointed to tunnel
+PrintShop OS uses a **centralized Cloudflare Tunnel** managed by `homelab-infrastructure/stacks/tunnel-stack/`. This must be running before starting PrintShop OS.
+
+#### 1. Clone homelab-infrastructure (if not already)
+
+```bash
+cd ~/stacks
+git clone https://github.com/hypnotizedent/homelab-infrastructure.git infrastructure
+```
+
+#### 2. Start the tunnel stack
+
+```bash
+cd ~/stacks/infrastructure/stacks/tunnel-stack
+cp .env.example .env
+# Edit .env with your CLOUDFLARE_TUNNEL_TOKEN
+docker compose up -d
+```
+
+#### 3. Verify tunnel_network exists
+
+```bash
+docker network ls | grep tunnel_network
+```
+
+For detailed tunnel configuration, see [CLOUDFLARE_TUNNEL_SETUP.md](./CLOUDFLARE_TUNNEL_SETUP.md).
 
 ### System Requirements
 
@@ -261,9 +283,17 @@ For detailed Cloudflare Tunnel configuration, see [CLOUDFLARE_TUNNEL_SETUP.md](.
 
 ### Quick Summary
 
-1. **Choose cloudflared option** - PrintShop OS includes a built-in `printshop-cloudflared` container, or you can use an external cloudflared
-2. **Create a tunnel** in Cloudflare Zero Trust dashboard
-3. **Configure public hostnames** to route to container names:
+PrintShop OS uses a **centralized Cloudflare Tunnel** from `homelab-infrastructure/stacks/tunnel-stack/`.
+
+1. **Start the tunnel stack first** (see [Prerequisites](#cloudflare-tunnel-network))
+2. **Start PrintShop OS with tunnel connectivity**:
+
+```bash
+cd ~/stacks/printshop-os
+./scripts/start-with-tunnel.sh
+```
+
+3. **Configure public hostnames** in Cloudflare Zero Trust dashboard:
 
 | Subdomain | Domain | Service URL |
 |-----------|--------|-------------|
@@ -271,18 +301,15 @@ For detailed Cloudflare Tunnel configuration, see [CLOUDFLARE_TUNNEL_SETUP.md](.
 | printshop | ronny.works | http://printshop-strapi:1337 |
 | api | ronny.works | http://printshop-api:3001 |
 
-4. **Network configuration**:
-
-| cloudflared Type | Container Name | Network Setup |
-|------------------|----------------|---------------|
-| **Built-in** (docker-compose.yml) | `printshop-cloudflared` | Auto-configured on `printshop_network` with healthcheck |
-| **External** (homelab-infrastructure) | `cloudflared` | Run: `docker network connect printshop_network cloudflared` |
-
-5. **Verify connectivity** after deployment:
+4. **Verify connectivity** after deployment:
 
 ```bash
 # Run the network verification script
 ./scripts/verify-network.sh
+
+# Test public URLs
+curl -I https://printshop-app.ronny.works
+curl -I https://printshop.ronny.works
 ```
 
 ### SSL Certificate Note
@@ -368,7 +395,7 @@ After running `docker compose up -d --build`:
 - [ ] Verify containers: `docker ps --filter "name=printshop"`
 - [ ] **Test in incognito/private window first** (browsers cache 502 errors!)
 - [ ] Hard refresh regular browser: Ctrl+Shift+R / Cmd+Shift+R
-- [ ] Check tunnel logs: `docker logs printshop-cloudflared --tail 20`
+- [ ] Check tunnel logs: `docker logs cloudflared --tail 20`
 - [ ] Verify internal connectivity: `docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000`
 
 ---
@@ -382,8 +409,8 @@ After running `docker compose up -d --build`:
 | MongoDB fails to start | Missing keyfile | Run `./scripts/init-mongo-replica.sh` |
 | Appsmith shows error | MongoDB not in replica set mode | Initialize replica set |
 | Strapi 502 error | Database not ready | Wait for postgres healthcheck, then restart strapi |
-| Frontend 502 (external access) | External cloudflared not on network | `docker network connect printshop_network cloudflared` |
-| Frontend 502 (built-in cloudflared) | Network issue or container not running | Run `./scripts/verify-network.sh` to diagnose |
+| Frontend 502 (external access) | Services not on tunnel_network | Run `./scripts/connect-networks.sh` |
+| tunnel_network not found | Tunnel stack not running | Start homelab-infrastructure/stacks/tunnel-stack first |
 
 ### Network Troubleshooting
 
@@ -391,11 +418,11 @@ After running `docker compose up -d --build`:
 # Quick network verification
 ./scripts/verify-network.sh
 
-# Check if cloudflared can reach other containers
-docker exec printshop-cloudflared ping -c 1 printshop-frontend
+# Check if services are on tunnel_network
+docker inspect printshop-frontend --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
 
-# List all networks cloudflared is connected to
-docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+# Reconnect services to tunnel_network if needed
+./scripts/connect-networks.sh
 ```
 
 ### Checking Logs
@@ -413,8 +440,8 @@ docker compose logs --tail 100 strapi
 # Since timestamp
 docker compose logs --since 30m
 
-# Check cloudflared logs (built-in)
-docker logs printshop-cloudflared --tail 50
+# Check cloudflared logs (centralized tunnel)
+docker logs cloudflared --tail 50
 ```
 
 ### Healthcheck Failures
@@ -453,16 +480,16 @@ After every deployment, verify the system is working correctly:
 # 1. Check all containers are running
 docker ps --filter name=printshop --format "table {{.Names}}\t{{.Status}}"
 
-# 2. Verify containers are on the correct network (should output: printshop_network)
-docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+# 2. Verify containers are on the correct networks (should include: printshop_network tunnel_network)
 docker inspect printshop-frontend --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+docker inspect printshop-strapi --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
 
 # 3. Test container-to-container connectivity (uses wget or curl depending on container)
 docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000 && echo "Frontend reachable" || \
   docker exec printshop-api curl -sf http://printshop-frontend:3000 > /dev/null && echo "Frontend reachable"
 
 # 4. Verify tunnel is connected
-docker logs printshop-cloudflared --tail 10 | grep -i "Registered tunnel connection"
+docker logs cloudflared --tail 10 | grep -i "Registered tunnel connection"
 
 # 5. Test from host
 curl -I http://localhost:5173

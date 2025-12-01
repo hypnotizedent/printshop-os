@@ -100,6 +100,7 @@ services:
     - 1337:1337
     networks:
     - printshop_network
+    - tunnel_network
     depends_on:
       postgres:
         condition: service_healthy
@@ -143,6 +144,7 @@ services:
     - 3001:3001
     networks:
     - printshop_network
+    - tunnel_network
     depends_on:
       postgres:
         condition: service_healthy
@@ -178,6 +180,7 @@ services:
     - 8443:443
     networks:
     - printshop_network
+    - tunnel_network
     depends_on:
       mongo:
         condition: service_healthy
@@ -212,6 +215,7 @@ services:
     - 3100:3000
     networks:
     - printshop_network
+    - tunnel_network
     depends_on:
       postgres:
         condition: service_healthy
@@ -269,6 +273,7 @@ services:
     - 5173:3000
     networks:
     - printshop_network
+    - tunnel_network
     depends_on:
     - strapi
     - pricing-engine
@@ -284,28 +289,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: printshop-cloudflared
-    restart: unless-stopped
-    command: tunnel run
-    environment:
-    - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-    networks:
-    - printshop_network
-    depends_on:
-      strapi:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
-      api:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "cloudflared", "tunnel", "info"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 networks:
   printshop_network:
     driver: bridge
@@ -313,6 +296,12 @@ networks:
     ipam:
       config:
         - subnet: 172.21.0.0/24
+
+  # External network for Cloudflare Tunnel connectivity
+  # Created and managed by homelab-infrastructure/stacks/tunnel-stack/
+  tunnel_network:
+    external: true
+    name: tunnel_network
 volumes:
   postgres_data:
     name: printshop_postgres_data
