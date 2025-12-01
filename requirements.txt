@@ -4,6 +4,7 @@
 # Core Utilities
 python-dotenv>=1.0.0
 requests>=2.31.0
+tqdm>=4.65.0
 
 # Shipping & Logistics
 easypost>=13.0.0
