@@ -12,26 +12,33 @@ This guide provides comprehensive disaster recovery (DR) procedures for PrintSho
 
 ## Quick Start: Enable Automated Backups
 
-To enable automated backups, follow these steps:
+The backup scripts are documented in this guide but need to be created on your server. Follow these steps:
 
 ```bash
-# 1. Create backup scripts directory
+# 1. Create backup directories
 sudo mkdir -p /opt/scripts
 sudo mkdir -p /backups/{postgres,mongo,strapi,appsmith,botpress}
 
-# 2. Copy backup scripts from repository
-sudo cp scripts/backup-*.sh /opt/scripts/ 2>/dev/null || echo "No backup scripts found in repo - create manually"
+# 2. Create the backup-all.sh master script (see "Automation" section below)
+sudo nano /opt/scripts/backup-all.sh
+# Copy the script content from the "Master Backup Script" section
 
-# 3. Make scripts executable
+# 3. Create individual backup scripts
+# See the "Database Backups" and "Application Backups" sections below
+sudo nano /opt/scripts/backup-postgres.sh
+sudo nano /opt/scripts/backup-mongo.sh
+# ... etc
+
+# 4. Make scripts executable
 sudo chmod +x /opt/scripts/*.sh
 
-# 4. Schedule daily backups (2 AM)
+# 5. Schedule daily backups (2 AM)
 (crontab -l 2>/dev/null; echo "0 2 * * * /opt/scripts/backup-all.sh >> /var/log/printshop-backup.log 2>&1") | crontab -
 
-# 5. Verify crontab
+# 6. Verify crontab
 crontab -l
 
-# 6. Test backup manually
+# 7. Test backup manually
 sudo /opt/scripts/backup-all.sh
 ```
 

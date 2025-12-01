@@ -30,7 +30,7 @@ PrintShop OS uses a **clear separation** between business/application services a
 
 | Repository | Purpose | Location on docker-host |
 |------------|---------|------------------------|
-| **printshop-os** | Business/application services | `/mnt/printshop/printshop-os` or `~/stacks/printshop-os` |
+| **printshop-os** | Business/application services | `/mnt/printshop/printshop-os` |
 | **homelab-infrastructure** | Infrastructure & monitoring | `/mnt/docker/*-stack` directories |
 
 ### What Runs Where
