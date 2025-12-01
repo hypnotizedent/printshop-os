@@ -638,13 +638,13 @@ sleep 180 && docker compose ps
 If using the built-in cloudflared from docker-compose.yml:
 
 ```bash
-# Restart the printshop-cloudflared container
+# Restart the cloudflared service (container name is printshop-cloudflared)
 docker compose restart cloudflared
 
 # Or force rebuild
 docker compose up -d --build cloudflared
 
-# Verify tunnel is connected
+# Verify tunnel is connected (use container name for logs)
 docker logs printshop-cloudflared --tail 50
 ```
 

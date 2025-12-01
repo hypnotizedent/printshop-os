@@ -383,23 +383,23 @@ docker ps --filter name=printshop --format "table {{.Names}}\t{{.Status}}\t{{.Po
 ### 2. Verify Network Connectivity
 
 ```bash
-# Verify printshop-cloudflared is on the correct network
+# Verify printshop-cloudflared is on the correct network (output should include: printshop_network)
 docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
 
-# Verify printshop-frontend is on the correct network
+# Verify printshop-frontend is on the correct network (output should include: printshop_network)
 docker inspect printshop-frontend --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
-
-# Both should include: printshop_network
 ```
 
 ### 3. Verify Container-to-Container Connectivity
 
 ```bash
-# Test if frontend is reachable from API container
-docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000 && echo "Frontend reachable from API" || echo "Frontend NOT reachable"
+# Test if frontend is reachable from API container (uses wget or curl)
+docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000 && echo "Frontend reachable from API" || \
+  docker exec printshop-api curl -sf http://printshop-frontend:3000 > /dev/null && echo "Frontend reachable from API" || echo "Frontend NOT reachable"
 
 # Test if Strapi is reachable from API container
-docker exec printshop-api wget -qO- --spider http://printshop-strapi:1337 && echo "Strapi reachable from API" || echo "Strapi NOT reachable"
+docker exec printshop-api wget -qO- --spider http://printshop-strapi:1337 && echo "Strapi reachable from API" || \
+  docker exec printshop-api curl -sf http://printshop-strapi:1337 > /dev/null && echo "Strapi reachable from API" || echo "Strapi NOT reachable"
 ```
 
 ### 4. Verify Tunnel Connection

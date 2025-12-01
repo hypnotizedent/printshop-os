@@ -422,12 +422,13 @@ After every deployment, verify the system is working correctly:
 # 1. Check all containers are running
 docker ps --filter name=printshop --format "table {{.Names}}\t{{.Status}}"
 
-# 2. Verify containers are on the correct network
+# 2. Verify containers are on the correct network (should output: printshop_network)
 docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
 docker inspect printshop-frontend --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
 
-# 3. Test container-to-container connectivity
-docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000 && echo "Frontend reachable"
+# 3. Test container-to-container connectivity (uses wget or curl depending on container)
+docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000 && echo "Frontend reachable" || \
+  docker exec printshop-api curl -sf http://printshop-frontend:3000 > /dev/null && echo "Frontend reachable"
 
 # 4. Verify tunnel is connected
 docker logs printshop-cloudflared --tail 10 | grep -i "Registered tunnel connection"
