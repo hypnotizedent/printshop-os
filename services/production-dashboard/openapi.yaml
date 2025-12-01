@@ -1,16 +1,55 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: Production Dashboard API
-  description: WebSocket + REST API for real-time production updates in PrintShop OS
+  description: |
+    WebSocket + REST API for real-time production updates in PrintShop OS.
+    
+    ## WebSocket Connection
+    Connect to the WebSocket server at `ws://localhost:3000` for real-time updates.
+    
+    ### Events (Server → Client)
+    - `employee:clocked-in` - Employee clock in notification
+    - `employee:clocked-out` - Employee clock out notification
+    - `timer:update` - Timer state update
+    - `timer:pause` - Timer paused notification
+    - `timer:resume` - Timer resumed notification
+    - `order:status_changed` - Order status change notification
+    - `queue:updated` - Production queue updated
+    
+    ### Events (Client → Server)
+    - `subscribe:queue` - Subscribe to queue updates
+    - `subscribe:order:{id}` - Subscribe to specific order updates
+    - `unsubscribe:queue` - Unsubscribe from queue updates
+    
+    ## Authentication
+    Most endpoints require JWT authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <access_token>
+    ```
+    
+    For WebSocket connections, include the token in the connection handshake:
+    ```javascript
+    const socket = io('ws://localhost:3000', {
+      auth: { token: 'your_jwt_token' }
+    });
+    ```
+    
+    ## Role-Based Access
+    - **operator**: Basic access to queue and own time clock
+    - **supervisor**: Queue reordering, resource allocation, employee management
+    - **admin**: Full access including system configuration
   version: 1.0.0
   contact:
     name: PrintShop OS Team
   license:
     name: MIT
+    url: https://opensource.org/licenses/MIT
 
 servers:
   - url: http://localhost:3000
     description: Development server
+  - url: http://docker-host:3000
+    description: Docker host server
   - url: ws://localhost:3000
     description: WebSocket server
 
@@ -23,6 +62,10 @@ tags:
     description: Machine and employee resource tracking
   - name: Orders
     description: Order management
+  - name: Time Clock
+    description: Employee time tracking and management
+  - name: SOPs
+    description: Standard Operating Procedures
   - name: Analytics
     description: Production KPIs and metrics
   - name: Admin
@@ -155,6 +198,39 @@ components:
             type: object
         quality:
           type: object
+
+    SOP:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+          description: Markdown content
+        category:
+          type: string
+        department:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        version:
+          type: integer
+        active:
+          type: boolean
+        viewCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
 
     RESTResponse:
       type: object
@@ -659,3 +735,653 @@ paths:
                               $ref: '#/components/schemas/User'
         '403':
           description: Insufficient permissions
+
+  # Time Clock endpoints
+  /api/production/time-clock/in:
+    post:
+      tags:
+        - Time Clock
+      summary: Clock in
+      description: Clock in an employee to start tracking time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - employeeId
+                - pin
+              properties:
+                employeeId:
+                  type: string
+                pin:
+                  type: string
+                  pattern: "^[0-9]{4}$"
+                jobId:
+                  type: string
+                  description: Optional job to associate with time entry
+      responses:
+        '200':
+          description: Clocked in successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          entryId:
+                            type: string
+                          clockInTime:
+                            type: string
+                            format: date-time
+                          employee:
+                            $ref: '#/components/schemas/Employee'
+        '401':
+          description: Invalid PIN
+        '409':
+          description: Already clocked in
+
+  /api/production/time-clock/out:
+    post:
+      tags:
+        - Time Clock
+      summary: Clock out
+      description: Clock out an employee to stop tracking time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - employeeId
+                - pin
+              properties:
+                employeeId:
+                  type: string
+                pin:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Clocked out successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          entryId:
+                            type: string
+                          clockInTime:
+                            type: string
+                            format: date-time
+                          clockOutTime:
+                            type: string
+                            format: date-time
+                          duration:
+                            type: integer
+                            description: Duration in minutes
+        '400':
+          description: Not clocked in
+
+  /api/production/time-clock/pause:
+    post:
+      tags:
+        - Time Clock
+      summary: Pause time tracking
+      description: Pause the current time entry (for breaks)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - employeeId
+              properties:
+                employeeId:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Timer paused
+
+  /api/production/time-clock/resume:
+    post:
+      tags:
+        - Time Clock
+      summary: Resume time tracking
+      description: Resume a paused time entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - employeeId
+              properties:
+                employeeId:
+                  type: string
+      responses:
+        '200':
+          description: Timer resumed
+
+  /api/production/time-clock/active:
+    get:
+      tags:
+        - Time Clock
+      summary: Get active clock entries
+      description: Get all currently active (clocked in) employees
+      responses:
+        '200':
+          description: Active entries
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            entryId:
+                              type: string
+                            employee:
+                              $ref: '#/components/schemas/Employee'
+                            clockInTime:
+                              type: string
+                              format: date-time
+                            currentDuration:
+                              type: integer
+                            isPaused:
+                              type: boolean
+                            currentJob:
+                              type: string
+
+  /api/production/time-entries:
+    get:
+      tags:
+        - Time Clock
+      summary: Get time entries
+      description: Get time entries with optional filtering
+      parameters:
+        - name: employeeId
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: jobId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Time entries
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            employee:
+                              $ref: '#/components/schemas/Employee'
+                            clockIn:
+                              type: string
+                              format: date-time
+                            clockOut:
+                              type: string
+                              format: date-time
+                            duration:
+                              type: integer
+                            jobId:
+                              type: string
+                            notes:
+                              type: string
+                            approved:
+                              type: boolean
+
+    post:
+      tags:
+        - Time Clock
+      summary: Create time entry (manual)
+      description: Manually create a time entry (supervisor/admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - employeeId
+                - clockIn
+                - clockOut
+              properties:
+                employeeId:
+                  type: string
+                clockIn:
+                  type: string
+                  format: date-time
+                clockOut:
+                  type: string
+                  format: date-time
+                jobId:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Entry created
+        '403':
+          description: Insufficient permissions
+
+  /api/production/time-entries/{id}:
+    patch:
+      tags:
+        - Time Clock
+      summary: Edit time entry
+      description: Edit a time entry (requires supervisor approval if not own entry)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clockIn:
+                  type: string
+                  format: date-time
+                clockOut:
+                  type: string
+                  format: date-time
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Entry updated (may require approval)
+        '404':
+          description: Entry not found
+
+  /api/production/time-entries/{id}/approve:
+    post:
+      tags:
+        - Time Clock
+      summary: Approve time entry edit
+      description: Approve a pending time entry edit (supervisor/admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - approved
+              properties:
+                approved:
+                  type: boolean
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Edit processed
+        '403':
+          description: Insufficient permissions
+
+  /api/production/employees/{id}/time:
+    get:
+      tags:
+        - Time Clock
+      summary: Get employee time summary
+      description: Get time tracking summary for an employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: week
+      responses:
+        '200':
+          description: Employee time summary
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          totalHours:
+                            type: number
+                          regularHours:
+                            type: number
+                          overtimeHours:
+                            type: number
+                          entries:
+                            type: array
+                            items:
+                              type: object
+
+  # SOP endpoints
+  /api/production/sops:
+    get:
+      tags:
+        - SOPs
+      summary: List SOPs
+      description: Get list of Standard Operating Procedures
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: SOP list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SOP'
+
+    post:
+      tags:
+        - SOPs
+      summary: Create SOP
+      description: Create a new SOP (supervisor/admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+                - category
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                  description: Markdown content
+                category:
+                  type: string
+                department:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: SOP created
+        '403':
+          description: Insufficient permissions
+
+  /api/production/sops/search:
+    get:
+      tags:
+        - SOPs
+      summary: Search SOPs
+      description: Full-text search across SOPs
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SOP'
+
+  /api/production/sops/analytics:
+    get:
+      tags:
+        - SOPs
+      summary: Get SOP analytics
+      description: Get usage analytics for SOPs
+      responses:
+        '200':
+          description: SOP analytics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          totalSOPs:
+                            type: integer
+                          mostViewed:
+                            type: array
+                            items:
+                              type: object
+                          byCategory:
+                            type: object
+
+  /api/production/sops/{id}:
+    get:
+      tags:
+        - SOPs
+      summary: Get SOP
+      description: Get a specific SOP by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SOP found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SOP'
+        '404':
+          description: SOP not found
+
+    patch:
+      tags:
+        - SOPs
+      summary: Update SOP
+      description: Update an existing SOP (supervisor/admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                category:
+                  type: string
+                department:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                active:
+                  type: boolean
+      responses:
+        '200':
+          description: SOP updated
+        '403':
+          description: Insufficient permissions
+
+    delete:
+      tags:
+        - SOPs
+      summary: Delete SOP
+      description: Delete an SOP (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: SOP deleted
+        '403':
+          description: Insufficient permissions
+
+  /api/production/sops/{id}/versions:
+    get:
+      tags:
+        - SOPs
+      summary: Get SOP version history
+      description: Get all versions of an SOP
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Version history
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RESTResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            version:
+                              type: integer
+                            createdAt:
+                              type: string
+                              format: date-time
+                            createdBy:
+                              type: string
+                            changes:
+                              type: string
+
+  /api/production/sops/{id}/favorite:
+    post:
+      tags:
+        - SOPs
+      summary: Toggle SOP favorite
+      description: Add or remove SOP from user's favorites
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Favorite toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isFavorite:
+                    type: boolean
