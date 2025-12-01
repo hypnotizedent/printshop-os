@@ -57,11 +57,20 @@ components:
 
     PricingInput:
       type: object
-      description: Input parameters for pricing calculation
+      description: |
+        Input parameters for pricing calculation.
+        
+        **Minimum viable input**: Only `quantity` is required. The engine will use 
+        default values for garment cost and no surcharges.
+        
+        **For accurate pricing**, include:
+        - `service` to enable service-specific calculations (color multipliers for screen, stitch pricing for embroidery)
+        - `print_locations` to calculate location surcharges
+        - `garment_id` to use stored garment base costs
       properties:
         garment_id:
           type: string
-          description: Unique identifier for the garment/product
+          description: Unique identifier for the garment/product. Used to lookup stored base cost.
           example: ss-activewear-6001
         quantity:
           type: integer
@@ -71,29 +80,29 @@ components:
         service:
           type: string
           enum: [screen, dtg, embroidery, vinyl, sublimation]
-          description: Print service type
+          description: Print service type. Required for service-specific pricing (color multipliers, stitch counts).
           example: screen
         print_locations:
           type: array
           items:
             type: string
             enum: [front, back, sleeve, chest, left-chest, pocket]
-          description: Print locations on the garment
+          description: Print locations on the garment. Each location may have a surcharge.
           example: [front, back]
         color_count:
           type: integer
           minimum: 1
-          description: Number of colors in the print (for screen printing)
+          description: Number of colors in the print (for screen printing). Triggers color multiplier rules.
           example: 2
         stitch_count:
           type: integer
           minimum: 1
-          description: Number of stitches (for embroidery)
+          description: Number of stitches (for embroidery). Required for embroidery pricing.
           example: 5000
         customer_type:
           type: string
           enum: [retail, wholesale, vip, nonprofit]
-          description: Customer tier for pricing
+          description: Customer tier for pricing. May trigger customer-specific discounts.
           example: wholesale
         garment_type:
           type: string

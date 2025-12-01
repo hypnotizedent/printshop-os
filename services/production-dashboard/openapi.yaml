@@ -806,6 +806,7 @@ paths:
                   type: string
                 pin:
                   type: string
+                  pattern: "^[0-9]{4}$"
                 notes:
                   type: string
       responses:

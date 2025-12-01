@@ -242,6 +242,7 @@ components:
           type: integer
         avg_order_value:
           type: string
+          description: Average order value formatted as currency string (e.g., "$150.00")
         period_revenue:
           type: array
           items:
@@ -251,6 +252,7 @@ components:
                 type: string
               revenue:
                 type: string
+                description: Revenue formatted as currency string
               orders:
                 type: integer
         growth_rate:
