@@ -85,6 +85,22 @@ export default {
         'api::line-item.line-item.create',
         'api::line-item.line-item.update',
         'api::line-item.line-item.delete',
+        // Quote permissions
+        'api::quote.quote.find',
+        'api::quote.quote.findOne',
+        'api::quote.quote.create',
+        'api::quote.quote.update',
+        'api::quote.quote.delete',
+        // Quote custom actions (approval workflow)
+        'api::quote.quote.getByToken',
+        'api::quote.quote.approve',
+        'api::quote.quote.reject',
+        // Payment permissions
+        'api::payment.payment.find',
+        'api::payment.payment.findOne',
+        'api::payment.payment.create',
+        'api::payment.payment.update',
+        'api::payment.payment.delete',
       ];
 
       for (const action of allPermissions) {
@@ -197,7 +213,28 @@ export default {
         { action: 'api::line-item.line-item.delete' }
       ];
 
-      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions, ...employeePermissions, ...timeClockEntryPermissions, ...machinePermissions, ...lineItemPermissions]) {
+      // Enable all permissions for quote content type
+      const quotePermissions = [
+        { action: 'api::quote.quote.find' },
+        { action: 'api::quote.quote.findOne' },
+        { action: 'api::quote.quote.create' },
+        { action: 'api::quote.quote.update' },
+        { action: 'api::quote.quote.delete' },
+        { action: 'api::quote.quote.getByToken' },
+        { action: 'api::quote.quote.approve' },
+        { action: 'api::quote.quote.reject' }
+      ];
+
+      // Enable all permissions for payment content type
+      const paymentPermissions = [
+        { action: 'api::payment.payment.find' },
+        { action: 'api::payment.payment.findOne' },
+        { action: 'api::payment.payment.create' },
+        { action: 'api::payment.payment.update' },
+        { action: 'api::payment.payment.delete' }
+      ];
+
+      for (const perm of [...colorPermissions, ...sopPermissions, ...customerPermissions, ...orderPermissions, ...jobPermissions, ...productPermissions, ...employeePermissions, ...timeClockEntryPermissions, ...machinePermissions, ...lineItemPermissions, ...quotePermissions, ...paymentPermissions]) {
         const existing = await strapi.db.query('admin::api-token-permission').findOne({
           where: { action: perm.action, token: token.id }
         });
