@@ -553,7 +553,9 @@ docker network connect printshop_network cloudflared
 
 | Issue | Symptom | Solution |
 |-------|---------|----------|
-| 502 Bad Gateway | Page shows Cloudflare error | Connect cloudflared to printshop_network |
+| Browser cached 502 | Works in incognito, 502 in regular browser | Hard refresh (Ctrl+Shift+R) or clear browser cache |
+| 502 Bad Gateway | Page shows Cloudflare error | Verify `printshop-cloudflared` is on `printshop_network` |
+| Blank page after deploy | White screen, no errors | Rebuild frontend with `--no-cache`, then hard refresh browser |
 | SSL Certificate Error | Browser shows certificate warning | Use single-level subdomain (e.g., `printshop-app.domain.com` not `app.printshop.domain.com`) |
 | Connection Refused | Tunnel shows service offline | Verify container is running and bound to 0.0.0.0 |
 
