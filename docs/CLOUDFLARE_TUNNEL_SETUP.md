@@ -197,7 +197,7 @@ Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your T
 
 | Method | How To | When to Use |
 |--------|--------|-------------|
-| Incognito test | Ctrl+Shift+N (Chrome) / Cmd+Shift+P (Firefox) | First test after any deployment |
+| Incognito test | Chrome: Ctrl+Shift+N / Firefox: Ctrl+Shift+P (Cmd on Mac) | First test after any deployment |
 | Hard refresh | Ctrl+Shift+R / Cmd+Shift+R | Quick cache bypass |
 | Clear site data | DevTools (F12) → Application tab → Clear site data | Persistent cache issues |
 | Disable cache | DevTools (F12) → Network tab → Check "Disable cache" | During active debugging (while DevTools open) |
