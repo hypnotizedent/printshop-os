@@ -5,7 +5,8 @@ set -e
 
 DIST_DIR="/Users/ronnyworks/Projects/printshop-os/frontend/dist"
 REMOTE_HOST="docker-host"
-REMOTE_PATH="/mnt/printshop/printshop-os/frontend/dist"
+# Canonical path: ~/stacks/printshop-os (expands to /home/docker-host/stacks/printshop-os)
+REMOTE_PATH="~/stacks/printshop-os/frontend/dist"
 
 echo "🚀 Deploying frontend to $REMOTE_HOST..."
 echo "📦 Source: $DIST_DIR"

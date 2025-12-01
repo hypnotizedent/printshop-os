@@ -726,8 +726,10 @@ PrintShop OS uses a **two-repository architecture** that separates business serv
 
 | Repository | Purpose | Location on docker-host |
 |------------|---------|------------------------|
-| **printshop-os** (this repo) | Business/application services | `/mnt/printshop/printshop-os` |
+| **printshop-os** (this repo) | Business/application services | `~/stacks/printshop-os` |
 | **homelab-infrastructure** | Infra & monitoring services | `/mnt/docker/*-stack` directories |
+
+> **📍 Note:** The canonical path `~/stacks/printshop-os` expands to `/home/docker-host/stacks/printshop-os`. This is the active git repository and the only location that should be used for deployments.
 
 ### What Runs Where
 

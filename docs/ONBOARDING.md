@@ -30,8 +30,10 @@ PrintShop OS uses a **clear separation** between business/application services a
 
 | Repository | Purpose | Location on docker-host |
 |------------|---------|------------------------|
-| **printshop-os** | Business/application services | `/mnt/printshop/printshop-os` |
+| **printshop-os** | Business/application services | `~/stacks/printshop-os` |
 | **homelab-infrastructure** | Infrastructure & monitoring | `/mnt/docker/*-stack` directories |
+
+> **📍 Canonical Path:** `~/stacks/printshop-os` expands to `/home/docker-host/stacks/printshop-os`. This is the active git repository where all deployments and git operations should be performed.
 
 ### What Runs Where
 
@@ -157,10 +159,10 @@ docker compose ps
 
 ```bash
 # Deploy to docker-host via Tailscale
-rsync -avz --exclude node_modules --exclude .git . docker-host:/mnt/printshop/printshop-os/
+rsync -avz --exclude node_modules --exclude .git . docker-host:~/stacks/printshop-os/
 
 # SSH and start services
-ssh docker-host 'cd /mnt/printshop/printshop-os && docker compose up -d --build'
+ssh docker-host 'cd ~/stacks/printshop-os && docker compose up -d --build'
 
 # Connect cloudflared to the network (if not already)
 ssh docker-host 'docker network connect printshop_network cloudflared'
