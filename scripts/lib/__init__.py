@@ -1,19 +1,9 @@
 """
-PrintShop OS - Printavo Extraction Library
-
-This package provides utilities for extracting data from Printavo
-and uploading to MinIO for permanent archival.
+PrintShop OS Scripts Library
+Utilities for data sync and analysis
 """
 
-from .file_detector import FileDetector, FileType
-from .printavo_api import PrintavoAPI
-from .printavo_scraper import PrintavoScraper
-from .minio_uploader import MinIOUploader
+from .product_analyzer import ProductAnalyzer
+from .supplier_clients import SupplierClients
 
-__all__ = [
-    'FileDetector',
-    'FileType',
-    'PrintavoAPI',
-    'PrintavoScraper',
-    'MinIOUploader',
-]
+__all__ = ['ProductAnalyzer', 'SupplierClients']
