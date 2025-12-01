@@ -3,6 +3,34 @@
 > **Last Updated:** 2025-12-01
 > **Purpose:** Provide context for new Copilot/AI agent sessions
 
+## 🗂️ Core Services (4 Buckets)
+
+| Service | Location | Port | Status |
+|---------|----------|------|--------|
+| Frontend | `/frontend` | 5173 | ✅ Active |
+| Strapi CMS | `/printshop-strapi` | 1337 | ✅ Active |
+| Job Estimator | `/services/job-estimator` | 3004 | ✅ Active |
+| Supplier Sync | `/services/supplier-sync` | 3002 | ✅ Active |
+
+## 📊 Current Data Counts
+
+| Content Type | Count | Source |
+|-------------|-------|--------|
+| Customers | 3,317 | Printavo 2025 |
+| Orders | 12,854 | Printavo 2025 |
+| Line Items | 49,216 | Printavo 2025 |
+| Products | 710 | Top Products Catalog |
+
+## 📍 Data Locations
+
+| Data Type | Location | Notes |
+|-----------|----------|-------|
+| Printavo Exports | `data/raw/printavo-exports/` | Raw exports, never modify |
+| Line Items | `data/line-item-import-checkpoint.json` | Import checkpoint |
+| Customers | `data/customer-import-checkpoint.json` | Import checkpoint |
+| Orders | `data/order-import-checkpoint.json` | Import checkpoint |
+| Artwork | `data/artwork/` | Customer artwork uploads |
+
 ## 🏠 Architecture Overview
 
 PrintShop OS uses a **two-repository architecture**:
@@ -219,8 +247,37 @@ docker exec printshop-strapi wget --spider http://localhost:1337
 
 ## 📚 Additional Documentation
 
-- `README.md` - Project overview
-- `docs/ARCHITECTURE.md` - System architecture
-- `docs/SERVICE_DIRECTORY.md` - Service inventory
-- `MASTER_CONTEXT.md` - Full project context
-- `DAILY_TASK_LOG.md` - Development history
+- `README.md` - Project overview and quick start
+- `docs/ARCHITECTURE_OVERVIEW.md` - High-level system architecture
+- `docs/SERVICE_DIRECTORY.md` - Service inventory and locations
+- `docs/DEVELOPMENT_GUIDE.md` - Development setup and workflows
+- `docs/DEPLOYMENT.md` - Deployment instructions
+
+## 🐳 Docker Compose V2 (Required)
+
+The production docker-host requires Docker Compose V2 (plugin version). The old Python-based `docker-compose` (v1) has bugs with newer Docker versions.
+
+**Install:**
+```bash
+sudo apt-get update && sudo apt-get install -y docker-compose-plugin
+docker compose version  # Verify: should show v2.x
+```
+
+**Usage:**
+```bash
+# Use space, not hyphen
+docker compose up -d        # ✅ Correct (V2)
+docker-compose up -d        # ❌ Old/deprecated (V1)
+```
+
+## 🔗 Related Repositories
+
+| Repo | Purpose |
+|------|---------|
+| `hypnotizedent/ptavo` | Printavo API analysis & scraper code |
+| `hypnotizedent/homelab-infrastructure` | Docker host infrastructure (separate stacks) |
+
+---
+
+**For detailed system architecture, see:** `docs/ARCHITECTURE_OVERVIEW.md`  
+**For service locations, see:** `docs/SERVICE_DIRECTORY.md`
