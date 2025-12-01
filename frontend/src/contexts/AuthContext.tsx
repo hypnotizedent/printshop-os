@@ -125,7 +125,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       
       if (!res.ok) {
-        return { success: false, error: data.error?.message || 'Login failed' };
+        // Handle various error response formats
+        const errorMessage = data.error?.message 
+          || data.message 
+          || (typeof data.error === 'string' ? data.error : null)
+          || 'Login failed. Please check your credentials.';
+        return { success: false, error: errorMessage };
       }
       
       setStoredToken(data.token);
@@ -137,7 +142,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return { success: true };
     } catch (err) {
-      return { success: false, error: 'Network error. Please try again.' };
+      console.error('Login error:', err);
+      return { success: false, error: 'Network error. Please check your connection and try again.' };
     }
   };
 
@@ -152,7 +158,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       
       if (!res.ok) {
-        return { success: false, error: data.error?.message || 'Signup failed' };
+        // Handle various error response formats
+        const errorMessage = data.error?.message 
+          || data.message 
+          || (typeof data.error === 'string' ? data.error : null)
+          || 'Signup failed. Please try again.';
+        return { success: false, error: errorMessage };
       }
       
       setStoredToken(data.token);
@@ -164,7 +175,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return { success: true };
     } catch (err) {
-      return { success: false, error: 'Network error. Please try again.' };
+      console.error('Signup error:', err);
+      return { success: false, error: 'Network error. Please check your connection and try again.' };
     }
   };
 

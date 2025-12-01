@@ -26,6 +26,7 @@ import {
   Play
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
 
@@ -160,11 +161,22 @@ const PRIORITY_COLORS: Record<string, string> = {
   'urgent': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
 };
 
-export function ProductionScheduleView() {
+interface ProductionScheduleViewProps {
+  onViewJob?: (orderId: string) => void;
+}
+
+export function ProductionScheduleView({ onViewJob }: ProductionScheduleViewProps) {
   const [machines, setMachines] = useState<Machine[]>(DEMO_MACHINES);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'schedule' | 'timeline'>('schedule');
   const [isAdmin] = useState(true); // Will come from auth context
+
+  const handleJobClick = (job: ScheduledJob) => {
+    if (onViewJob) {
+      // Use job.id for navigation but show orderNumber in UI for consistency with how users identify jobs
+      onViewJob(job.id);
+    }
+  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
@@ -330,11 +342,17 @@ export function ProductionScheduleView() {
                     <div
                       key={job.id}
                       className={cn(
-                        'p-3 rounded-lg border transition-colors',
+                        'p-3 rounded-lg border transition-colors cursor-pointer',
                         job.status === 'in-progress' 
                           ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800' 
                           : 'bg-card hover:bg-muted/50'
                       )}
+                      onClick={() => {
+                        handleJobClick(job);
+                        toast.info(`Viewing Order #${job.orderNumber}`, {
+                          description: `${job.customerName} - ${job.description}`
+                        });
+                      }}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
