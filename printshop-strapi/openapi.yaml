@@ -1,0 +1,1371 @@
+openapi: 3.0.3
+info:
+  title: PrintShop OS - Strapi CMS API
+  description: |
+    Strapi CMS API for PrintShop OS providing content management for customers, orders, jobs, quotes, and more.
+    
+    ## Authentication
+    - **Admin Panel**: Session-based authentication at `/admin`
+    - **API Endpoints**: Bearer token authentication
+    
+    To get an API token:
+    1. Login to Strapi Admin Panel
+    2. Go to Settings > API Tokens
+    3. Create a new token with appropriate permissions
+    
+    Include the token in requests:
+    ```
+    Authorization: Bearer <api_token>
+    ```
+    
+    ## Public vs Protected Endpoints
+    Most content types in PrintShop OS are configured with public access for find/findOne operations.
+    Create/Update/Delete operations may require authentication depending on configuration.
+    
+    ## Standard Response Format
+    All collection responses follow this format:
+    ```json
+    {
+      "data": [...],
+      "meta": {
+        "pagination": {
+          "page": 1,
+          "pageSize": 25,
+          "pageCount": 10,
+          "total": 250
+        }
+      }
+    }
+    ```
+    
+    ## Filtering, Sorting, and Pagination
+    - **Filtering**: `?filters[field][$eq]=value`
+    - **Sorting**: `?sort[0]=field:asc`
+    - **Pagination**: `?pagination[page]=1&pagination[pageSize]=25`
+    - **Populate relations**: `?populate=*` or `?populate[0]=customer`
+  version: 5.31.2
+  contact:
+    name: PrintShop OS Team
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:1337
+    description: Development server
+  - url: http://docker-host:1337
+    description: Docker host
+  - url: https://printshop.ronny.works
+    description: Production server
+
+tags:
+  - name: Customers
+    description: Customer accounts management
+  - name: Orders
+    description: Order management
+  - name: Jobs
+    description: Production job tracking
+  - name: Quotes
+    description: Quote workflow and approval
+  - name: Products
+    description: Supplier product catalog
+  - name: Employees
+    description: Employee management
+  - name: Time Clock
+    description: Employee time tracking
+  - name: Payments
+    description: Payment tracking
+  - name: Colors
+    description: Ink and thread colors
+  - name: SOPs
+    description: Standard operating procedures
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Strapi API Token from Settings > API Tokens
+
+  schemas:
+    # Standard Strapi response wrappers
+    PaginationMeta:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            pageSize:
+              type: integer
+              example: 25
+            pageCount:
+              type: integer
+              example: 10
+            total:
+              type: integer
+              example: 250
+
+    # Customer schemas
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentId:
+          type: string
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        phone:
+          type: string
+          example: "+1234567890"
+        company:
+          type: string
+          example: "Acme Corp"
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+        notes:
+          type: string
+        printavoId:
+          type: string
+          description: Legacy Printavo customer ID
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CustomerInput:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        company:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+        notes:
+          type: string
+
+    CustomerListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    CustomerResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Customer'
+        meta:
+          type: object
+
+    # Order schemas
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentId:
+          type: string
+        orderNumber:
+          type: string
+          example: "ORD-2025-001"
+        orderNickname:
+          type: string
+        status:
+          type: string
+          enum: [QUOTE, QUOTE_SENT, QUOTE_APPROVED, IN_PRODUCTION, COMPLETE, READY_FOR_PICKUP, SHIPPED, PAYMENT_NEEDED, INVOICE_PAID, CANCELLED]
+        customer:
+          $ref: '#/components/schemas/Customer'
+        totalAmount:
+          type: number
+          format: float
+        amountPaid:
+          type: number
+          format: float
+        amountOutstanding:
+          type: number
+          format: float
+        salesTax:
+          type: number
+          format: float
+        discount:
+          type: number
+          format: float
+        fees:
+          type: number
+          format: float
+        dueDate:
+          type: string
+          format: date
+        customerDueDate:
+          type: string
+          format: date
+        productionDueDate:
+          type: string
+          format: date
+        invoiceDate:
+          type: string
+          format: date
+        paymentDueDate:
+          type: string
+          format: date
+        deliveryMethod:
+          type: string
+          enum: [pickup, ship, delivery, other]
+        notes:
+          type: string
+        productionNotes:
+          type: string
+        customerPO:
+          type: string
+        approved:
+          type: boolean
+        approvedBy:
+          type: string
+        approvedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            type: object
+        printavoId:
+          type: string
+        visualId:
+          type: string
+        billingAddress:
+          type: object
+        shippingAddress:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderInput:
+      type: object
+      required:
+        - orderNumber
+      properties:
+        orderNumber:
+          type: string
+        orderNickname:
+          type: string
+        status:
+          type: string
+          enum: [QUOTE, QUOTE_SENT, QUOTE_APPROVED, IN_PRODUCTION, COMPLETE, READY_FOR_PICKUP, SHIPPED, PAYMENT_NEEDED, INVOICE_PAID, CANCELLED]
+        customer:
+          type: integer
+          description: Customer ID to link
+        totalAmount:
+          type: number
+        dueDate:
+          type: string
+          format: date
+        deliveryMethod:
+          type: string
+        notes:
+          type: string
+        productionNotes:
+          type: string
+
+    OrderListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # Quote schemas
+    Quote:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentId:
+          type: string
+        quoteNumber:
+          type: string
+        customer:
+          $ref: '#/components/schemas/Customer'
+        status:
+          type: string
+          enum: [draft, sent, viewed, approved, rejected, expired, converted]
+        lineItems:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+              quantity:
+                type: integer
+              unitPrice:
+                type: number
+              total:
+                type: number
+        subtotal:
+          type: number
+        taxRate:
+          type: number
+        taxAmount:
+          type: number
+        discount:
+          type: number
+        discountType:
+          type: string
+          enum: [percentage, fixed]
+        total:
+          type: number
+        depositRequired:
+          type: boolean
+        depositPercent:
+          type: number
+        depositAmount:
+          type: number
+        expiresAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: string
+          format: date-time
+        viewedAt:
+          type: string
+          format: date-time
+        approvedAt:
+          type: string
+          format: date-time
+        approvedBy:
+          type: string
+        approverSignature:
+          type: string
+        rejectedAt:
+          type: string
+          format: date-time
+        rejectionReason:
+          type: string
+        customerNotes:
+          type: string
+        internalNotes:
+          type: string
+        terms:
+          type: string
+        validDays:
+          type: integer
+        mockupUrls:
+          type: array
+          items:
+            type: string
+        revisionNumber:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    QuoteInput:
+      type: object
+      required:
+        - quoteNumber
+        - lineItems
+        - subtotal
+        - total
+      properties:
+        quoteNumber:
+          type: string
+        customer:
+          type: integer
+        status:
+          type: string
+          enum: [draft, sent, viewed, approved, rejected, expired, converted]
+        lineItems:
+          type: array
+          items:
+            type: object
+        subtotal:
+          type: number
+        taxRate:
+          type: number
+        discount:
+          type: number
+        discountType:
+          type: string
+        total:
+          type: number
+        depositRequired:
+          type: boolean
+        depositPercent:
+          type: number
+        validDays:
+          type: integer
+        customerNotes:
+          type: string
+        internalNotes:
+          type: string
+        terms:
+          type: string
+
+    QuoteListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quote'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # Job schemas
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentId:
+          type: string
+        jobNumber:
+          type: string
+        order:
+          $ref: '#/components/schemas/Order'
+        customer:
+          $ref: '#/components/schemas/Customer'
+        status:
+          type: string
+        priority:
+          type: integer
+        dueDate:
+          type: string
+          format: date
+        assignedTo:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Product schemas
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentId:
+          type: string
+        sku:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        brand:
+          type: string
+        category:
+          type: string
+        supplier:
+          type: string
+          enum: [as-colour, sanmar, s&s-activewear]
+        basePrice:
+          type: number
+        variants:
+          type: array
+          items:
+            type: object
+            properties:
+              color:
+                type: string
+              size:
+                type: string
+              sku:
+                type: string
+              price:
+                type: number
+        images:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProductListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # Employee schemas
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        pin:
+          type: string
+          description: 4-digit PIN for time clock (private)
+        role:
+          type: string
+          enum: [operator, supervisor, admin]
+        department:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        hourlyRate:
+          type: number
+        active:
+          type: boolean
+        hireDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Time Clock Entry schemas
+    TimeClockEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentId:
+          type: string
+        employee:
+          $ref: '#/components/schemas/Employee'
+        clockIn:
+          type: string
+          format: date-time
+        clockOut:
+          type: string
+          format: date-time
+        duration:
+          type: number
+          description: Duration in minutes
+        job:
+          $ref: '#/components/schemas/Job'
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Payment schemas
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        documentId:
+          type: string
+        order:
+          $ref: '#/components/schemas/Order'
+        amount:
+          type: number
+        method:
+          type: string
+          enum: [cash, check, credit_card, ach, other]
+        status:
+          type: string
+          enum: [pending, completed, failed, refunded]
+        transactionId:
+          type: string
+        stripePaymentIntentId:
+          type: string
+        stripeCheckoutSessionId:
+          type: string
+        notes:
+          type: string
+        paidAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Error response
+    Error:
+      type: object
+      properties:
+        data:
+          type: object
+          nullable: true
+        error:
+          type: object
+          properties:
+            status:
+              type: integer
+            name:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Customer endpoints
+  /api/customers:
+    get:
+      tags:
+        - Customers
+      summary: List all customers
+      description: Get a paginated list of customers with optional filtering
+      security: []
+      parameters:
+        - name: pagination[page]
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pagination[pageSize]
+          in: query
+          schema:
+            type: integer
+            default: 25
+            maximum: 100
+        - name: sort[0]
+          in: query
+          description: "Sort field and order (e.g., 'name:asc')"
+          schema:
+            type: string
+        - name: filters[email][$eq]
+          in: query
+          description: Filter by exact email
+          schema:
+            type: string
+        - name: filters[company][$contains]
+          in: query
+          description: Filter by company name containing
+          schema:
+            type: string
+        - name: populate
+          in: query
+          description: Populate relations (e.g., 'orders')
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerListResponse'
+
+    post:
+      tags:
+        - Customers
+      summary: Create a customer
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/CustomerInput'
+      responses:
+        '200':
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/customers/{documentId}:
+    get:
+      tags:
+        - Customers
+      summary: Get a customer
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: populate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '404':
+          description: Customer not found
+
+    put:
+      tags:
+        - Customers
+      summary: Update a customer
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/CustomerInput'
+      responses:
+        '200':
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+
+    delete:
+      tags:
+        - Customers
+      summary: Delete a customer
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer deleted
+
+  # Order endpoints
+  /api/orders:
+    get:
+      tags:
+        - Orders
+      summary: List all orders
+      security: []
+      parameters:
+        - name: pagination[page]
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pagination[pageSize]
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: sort[0]
+          in: query
+          schema:
+            type: string
+        - name: filters[status][$eq]
+          in: query
+          description: Filter by order status
+          schema:
+            type: string
+        - name: filters[customer][id][$eq]
+          in: query
+          description: Filter by customer ID
+          schema:
+            type: integer
+        - name: populate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+
+    post:
+      tags:
+        - Orders
+      summary: Create an order
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/OrderInput'
+      responses:
+        '200':
+          description: Order created
+
+  /api/orders/{documentId}:
+    get:
+      tags:
+        - Orders
+      summary: Get an order
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: populate
+          in: query
+          description: "Populate relations (e.g., 'customer,lineItems,jobs')"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order found
+
+    put:
+      tags:
+        - Orders
+      summary: Update an order
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/OrderInput'
+      responses:
+        '200':
+          description: Order updated
+
+    delete:
+      tags:
+        - Orders
+      summary: Delete an order
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order deleted
+
+  # Quote endpoints
+  /api/quotes:
+    get:
+      tags:
+        - Quotes
+      summary: List all quotes
+      security: []
+      parameters:
+        - name: pagination[page]
+          in: query
+          schema:
+            type: integer
+        - name: pagination[pageSize]
+          in: query
+          schema:
+            type: integer
+        - name: filters[status][$eq]
+          in: query
+          schema:
+            type: string
+        - name: populate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quote list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteListResponse'
+
+    post:
+      tags:
+        - Quotes
+      summary: Create a quote
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/QuoteInput'
+      responses:
+        '200':
+          description: Quote created
+
+  /api/quotes/{documentId}:
+    get:
+      tags:
+        - Quotes
+      summary: Get a quote
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: populate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quote found
+
+    put:
+      tags:
+        - Quotes
+      summary: Update a quote
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/QuoteInput'
+      responses:
+        '200':
+          description: Quote updated
+
+  # Quote approval endpoints (public with token)
+  /api/quotes/approve:
+    post:
+      tags:
+        - Quotes
+      summary: Approve a quote (public)
+      description: |
+        Public endpoint for customer quote approval using token-based authentication.
+        
+        ⚠️ **Security Note**: Uses approvalToken for authentication instead of bearer token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - signature
+              properties:
+                token:
+                  type: string
+                  description: Quote approval token
+                signature:
+                  type: string
+                  description: Customer signature (base64 or text)
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Quote approved
+        '400':
+          description: Invalid token or already processed
+        '404':
+          description: Quote not found
+
+  /api/quotes/reject:
+    post:
+      tags:
+        - Quotes
+      summary: Reject a quote (public)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Quote rejected
+
+  # Product endpoints
+  /api/products:
+    get:
+      tags:
+        - Products
+      summary: List all products
+      security: []
+      parameters:
+        - name: pagination[page]
+          in: query
+          schema:
+            type: integer
+        - name: pagination[pageSize]
+          in: query
+          schema:
+            type: integer
+        - name: filters[supplier][$eq]
+          in: query
+          schema:
+            type: string
+        - name: filters[category][$eq]
+          in: query
+          schema:
+            type: string
+        - name: filters[brand][$contains]
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+
+  /api/products/{documentId}:
+    get:
+      tags:
+        - Products
+      summary: Get a product
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product found
+
+  # Employee endpoints
+  /api/employees:
+    get:
+      tags:
+        - Employees
+      summary: List all employees
+      parameters:
+        - name: filters[active][$eq]
+          in: query
+          schema:
+            type: boolean
+        - name: filters[role][$eq]
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee list
+
+  /api/employees/{documentId}:
+    get:
+      tags:
+        - Employees
+      summary: Get an employee
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee found
+
+  # Time Clock Entry endpoints
+  /api/time-clock-entries:
+    get:
+      tags:
+        - Time Clock
+      summary: List time clock entries
+      parameters:
+        - name: filters[employee][id][$eq]
+          in: query
+          schema:
+            type: integer
+        - name: filters[clockIn][$gte]
+          in: query
+          description: Filter entries after date
+          schema:
+            type: string
+            format: date-time
+        - name: populate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Time clock entries
+
+    post:
+      tags:
+        - Time Clock
+      summary: Create time clock entry (clock in)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    employee:
+                      type: integer
+                    clockIn:
+                      type: string
+                      format: date-time
+                    job:
+                      type: integer
+                    notes:
+                      type: string
+      responses:
+        '200':
+          description: Entry created
+
+  /api/time-clock-entries/{documentId}:
+    put:
+      tags:
+        - Time Clock
+      summary: Update time clock entry (clock out)
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    clockOut:
+                      type: string
+                      format: date-time
+                    duration:
+                      type: number
+                    notes:
+                      type: string
+      responses:
+        '200':
+          description: Entry updated
+
+  # Payment endpoints
+  /api/payments:
+    get:
+      tags:
+        - Payments
+      summary: List all payments
+      parameters:
+        - name: filters[order][id][$eq]
+          in: query
+          schema:
+            type: integer
+        - name: filters[status][$eq]
+          in: query
+          schema:
+            type: string
+        - name: populate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment list
+
+    post:
+      tags:
+        - Payments
+      summary: Create a payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    order:
+                      type: integer
+                    amount:
+                      type: number
+                    method:
+                      type: string
+                    status:
+                      type: string
+                    notes:
+                      type: string
+      responses:
+        '200':
+          description: Payment created
+
+  # Color endpoints
+  /api/colors:
+    get:
+      tags:
+        - Colors
+      summary: List all colors
+      security: []
+      responses:
+        '200':
+          description: Color list
+
+  # SOP endpoints
+  /api/sops:
+    get:
+      tags:
+        - SOPs
+      summary: List all SOPs
+      security: []
+      parameters:
+        - name: filters[category][$eq]
+          in: query
+          schema:
+            type: string
+        - name: filters[active][$eq]
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: SOP list
+
+  /api/sops/{documentId}:
+    get:
+      tags:
+        - SOPs
+      summary: Get an SOP
+      security: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SOP found

@@ -445,8 +445,15 @@ python examples/easypost_example.py
 - [Disaster Recovery](docs/deployment/disaster-recovery.md) - Backup and recovery procedures
 
 ### API Reference
+- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete API documentation with OpenAPI specs
 - [Strapi Endpoints](docs/api/strapi-endpoints.md) - Complete API reference
 - [Integration Guide](docs/api/integration-guide.md) - Integration patterns
+
+#### OpenAPI Specifications
+- [`services/api/openapi.yaml`](services/api/openapi.yaml) - API Service (Auth, Analytics, Inventory)
+- [`services/job-estimator/openapi.yaml`](services/job-estimator/openapi.yaml) - Pricing Engine
+- [`services/production-dashboard/openapi.yaml`](services/production-dashboard/openapi.yaml) - Production Dashboard
+- [`printshop-strapi/openapi.yaml`](printshop-strapi/openapi.yaml) - Strapi CMS
 
 ### Contributing
 - [Contributing Guidelines](docs/CONTRIBUTING.md) - Development workflow and standards

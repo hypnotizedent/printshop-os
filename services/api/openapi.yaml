@@ -1,0 +1,1315 @@
+openapi: 3.0.3
+info:
+  title: PrintShop OS API Service
+  description: |
+    Main API service for PrintShop OS providing analytics, authentication, inventory, and job management.
+    
+    ## Authentication
+    Most endpoints require JWT authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <access_token>
+    ```
+    
+    ## Rate Limiting
+    - Login endpoints: 5 attempts per 15 minutes
+    - Registration endpoints: 3 attempts per hour
+    - Password reset: 3 attempts per hour
+    
+    ## Error Handling
+    All endpoints return consistent error responses with `error` and optionally `stack` (in development mode).
+  version: 1.0.0
+  contact:
+    name: PrintShop OS Team
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3001
+    description: Development server
+  - url: http://docker-host:3001
+    description: Docker host
+  - url: https://api.printshop-os.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Analytics
+    description: Business analytics and reporting
+  - name: Inventory
+    description: Real-time supplier inventory queries
+  - name: Jobs
+    description: Production job management
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /api/auth/login
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+
+    # Authentication schemas
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: securePassword123
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        phone:
+          type: string
+          example: "+1234567890"
+
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "User registered successfully. Please check your email to activate your account."
+        userId:
+          type: string
+        activationToken:
+          type: string
+          description: In production, this would be sent via email
+
+    ActivateRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login successful
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    TwoFactorLoginResponse:
+      type: object
+      properties:
+        requiresTwoFactor:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Please enter your 2FA code"
+
+    Verify2FARequest:
+      type: object
+      required:
+        - email
+        - code
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+          pattern: "^[0-9]{6}$"
+          example: "123456"
+
+    Setup2FAResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        secret:
+          type: string
+        qrCodeUrl:
+          type: string
+          format: uri
+        backupCodes:
+          type: array
+          items:
+            type: string
+
+    Enable2FARequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          pattern: "^[0-9]{6}$"
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+          format: password
+          minLength: 8
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [customer, employee, admin]
+
+    # Analytics schemas
+    RevenueAnalytics:
+      type: object
+      properties:
+        total_revenue:
+          type: number
+          format: float
+        order_count:
+          type: integer
+        avg_order_value:
+          type: string
+          description: Average order value formatted as currency string (e.g., "$150.00")
+        period_revenue:
+          type: array
+          items:
+            type: object
+            properties:
+              period:
+                type: string
+              revenue:
+                type: string
+                description: Revenue formatted as currency string
+              orders:
+                type: integer
+        growth_rate:
+          type: number
+          format: float
+        forecast_next_period:
+          type: number
+          format: float
+        period:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        cached:
+          type: boolean
+
+    ProductAnalytics:
+      type: object
+      properties:
+        top_products:
+          type: array
+          items:
+            type: object
+            properties:
+              product_name:
+                type: string
+              category:
+                type: string
+              units_sold:
+                type: integer
+              revenue:
+                type: string
+              margin:
+                type: string
+              order_count:
+                type: integer
+              avg_unit_price:
+                type: string
+              rank:
+                type: integer
+        category_breakdown:
+          type: object
+        trending:
+          type: array
+          items:
+            type: object
+        period:
+          type: string
+        sort_by:
+          type: string
+        cached:
+          type: boolean
+
+    CustomerAnalytics:
+      type: object
+      properties:
+        top_customers:
+          type: array
+          items:
+            type: object
+            properties:
+              customer_id:
+                type: string
+              name:
+                type: string
+              email:
+                type: string
+              lifetime_value:
+                type: string
+              order_count:
+                type: integer
+              avg_order_value:
+                type: string
+              last_order_date:
+                type: string
+                format: date
+              status:
+                type: string
+        churn_risk:
+          type: array
+          items:
+            type: object
+        acquisition_cost:
+          type: number
+          format: float
+        segments:
+          type: array
+          items:
+            type: object
+        period:
+          type: string
+        cached:
+          type: boolean
+
+    OrderMetrics:
+      type: object
+      properties:
+        status_breakdown:
+          type: object
+          additionalProperties:
+            type: integer
+        avg_cycle_time:
+          type: string
+        conversion_rate:
+          type: string
+        total_quotes:
+          type: integer
+        total_orders:
+          type: integer
+        bottlenecks:
+          type: array
+          items:
+            type: object
+            properties:
+              stage:
+                type: string
+              avg_wait:
+                type: string
+              order_count:
+                type: integer
+        daily_trend:
+          type: array
+          items:
+            type: object
+        period:
+          type: string
+        cached:
+          type: boolean
+
+    # Inventory schemas
+    InventoryItem:
+      type: object
+      properties:
+        color:
+          type: string
+          example: Black
+        size:
+          type: string
+          example: L
+        qty:
+          type: integer
+          example: 150
+
+    InventoryCheckResponse:
+      type: object
+      properties:
+        sku:
+          type: string
+          example: "5001"
+        name:
+          type: string
+          example: "Staple Tee"
+        supplier:
+          type: string
+          enum: [as-colour, s&s-activewear, sanmar]
+        price:
+          type: number
+          format: float
+          nullable: true
+        currency:
+          type: string
+          example: USD
+        inventory:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryItem'
+        totalQty:
+          type: integer
+        lastChecked:
+          type: string
+          format: date-time
+        cached:
+          type: boolean
+        cacheExpires:
+          type: string
+          format: date-time
+
+    InventoryError:
+      type: object
+      properties:
+        error:
+          type: string
+        sku:
+          type: string
+        supplier:
+          type: string
+        code:
+          type: string
+          enum: [INVALID_SKU, NOT_FOUND, SUPPLIER_ERROR]
+
+    InventoryHealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+        redis:
+          type: object
+          properties:
+            connected:
+              type: boolean
+        suppliers:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              configured:
+                type: boolean
+
+    BatchInventoryRequest:
+      type: object
+      required:
+        - skus
+      properties:
+        skus:
+          type: array
+          items:
+            type: string
+          maxItems: 50
+          example: ["5001", "3001", "PC54"]
+
+    BatchInventoryResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        results:
+          type: object
+          additionalProperties:
+            oneOf:
+              - $ref: '#/components/schemas/InventoryCheckResponse'
+              - $ref: '#/components/schemas/InventoryError'
+
+    ColorAvailability:
+      type: object
+      properties:
+        sku:
+          type: string
+        name:
+          type: string
+        supplier:
+          type: string
+        colorCount:
+          type: integer
+        colors:
+          type: array
+          items:
+            type: object
+            properties:
+              color:
+                type: string
+              inStock:
+                type: boolean
+              totalQty:
+                type: integer
+              sizes:
+                type: array
+                items:
+                  type: string
+        lastChecked:
+          type: string
+          format: date-time
+        cached:
+          type: boolean
+
+    SizeAvailability:
+      type: object
+      properties:
+        sku:
+          type: string
+        name:
+          type: string
+        supplier:
+          type: string
+        colorFilter:
+          type: string
+          nullable: true
+        sizeCount:
+          type: integer
+        sizes:
+          type: array
+          items:
+            type: object
+            properties:
+              size:
+                type: string
+              inStock:
+                type: boolean
+              totalQty:
+                type: integer
+              colors:
+                type: array
+                items:
+                  type: string
+        lastChecked:
+          type: string
+          format: date-time
+        cached:
+          type: boolean
+
+    PricingInfo:
+      type: object
+      properties:
+        sku:
+          type: string
+        supplier:
+          type: string
+        basePrice:
+          type: number
+          format: float
+        currency:
+          type: string
+        priceBreaks:
+          type: array
+          items:
+            type: object
+            properties:
+              minQty:
+                type: integer
+              maxQty:
+                type: integer
+              price:
+                type: number
+                format: float
+              casePrice:
+                type: number
+                format: float
+        quantity:
+          type: integer
+          nullable: true
+        priceForQuantity:
+          type: number
+          format: float
+          nullable: true
+        lastChecked:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        stack:
+          type: string
+          description: Only present in development mode
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the API server is running
+      security: []
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # Authentication endpoints
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: |
+        Register a new user account. An activation token will be provided (in production, sent via email).
+        
+        ⚠️ Rate limited: 3 attempts per hour
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Invalid input or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many registration attempts
+
+  /api/auth/activate:
+    post:
+      tags:
+        - Authentication
+      summary: Activate user account
+      description: Activate a user account using the token received during registration
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateRequest'
+      responses:
+        '200':
+          description: Account activated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login with email and password
+      description: |
+        Authenticate a user and receive JWT tokens. If 2FA is enabled, a partial response is returned.
+        
+        ⚠️ Rate limited: 5 attempts per 15 minutes
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful or 2FA required
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/LoginResponse'
+                  - $ref: '#/components/schemas/TwoFactorLoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many login attempts
+
+  /api/auth/verify-2fa:
+    post:
+      tags:
+        - Authentication
+      summary: Verify 2FA code
+      description: Complete login by verifying the 2FA code
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Verify2FARequest'
+      responses:
+        '200':
+          description: 2FA verified, login complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid 2FA code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/setup-2fa:
+    post:
+      tags:
+        - Authentication
+      summary: Setup two-factor authentication
+      description: Initialize 2FA setup and receive secret/QR code
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 2FA setup initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Setup2FAResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/enable-2fa:
+    post:
+      tags:
+        - Authentication
+      summary: Enable two-factor authentication
+      description: Verify the 2FA code and enable 2FA for the account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Enable2FARequest'
+      responses:
+        '200':
+          description: 2FA enabled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid 2FA code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Get a new access token using a refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout and invalidate refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid request
+
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Request password reset
+      description: |
+        Request a password reset link. For security, always returns success.
+        
+        ⚠️ Rate limited: 3 attempts per hour
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Password reset email sent (if account exists)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  resetToken:
+                    type: string
+                    description: In production, only sent via email
+        '429':
+          description: Too many password reset attempts
+
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password with token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Analytics endpoints
+  /api/analytics:
+    get:
+      tags:
+        - Analytics
+      summary: Get analytics API information
+      description: Returns available analytics endpoints
+      responses:
+        '200':
+          description: API information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  version:
+                    type: string
+                  documentation:
+                    type: string
+                  endpoints:
+                    type: object
+
+  /api/analytics/revenue:
+    get:
+      tags:
+        - Analytics
+      summary: Get revenue analytics
+      description: Returns revenue metrics with time-series data, growth rates, and forecasting
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month, year]
+            default: month
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: group_by
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: month
+      responses:
+        '200':
+          description: Revenue analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueAnalytics'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/analytics/products:
+    get:
+      tags:
+        - Analytics
+      summary: Get product analytics
+      description: Returns product performance metrics, top sellers, and trending products
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [month, quarter, year]
+            default: month
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [revenue, units, margin]
+            default: revenue
+      responses:
+        '200':
+          description: Product analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAnalytics'
+        '500':
+          description: Server error
+
+  /api/analytics/customers:
+    get:
+      tags:
+        - Analytics
+      summary: Get customer analytics
+      description: Returns customer metrics including lifetime value, churn risk, and segmentation
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [month, quarter, year, all_time]
+            default: all_time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: min_ltv
+          in: query
+          schema:
+            type: number
+            default: 0
+      responses:
+        '200':
+          description: Customer analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerAnalytics'
+        '500':
+          description: Server error
+
+  /api/analytics/orders:
+    get:
+      tags:
+        - Analytics
+      summary: Get order metrics
+      description: Returns order pipeline metrics, status breakdown, cycle times, and bottlenecks
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: month
+      responses:
+        '200':
+          description: Order metrics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderMetrics'
+        '500':
+          description: Server error
+
+  /api/analytics/export:
+    get:
+      tags:
+        - Analytics
+      summary: Export analytics report
+      description: Export analytics data as CSV or PDF
+      parameters:
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [csv, pdf]
+        - name: report
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [revenue, products, customers, orders]
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [month, quarter, year]
+            default: month
+      responses:
+        '200':
+          description: File download
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid parameters
+
+  # Inventory endpoints
+  /api/inventory/health:
+    get:
+      tags:
+        - Inventory
+      summary: Inventory service health check
+      description: Check inventory service status and supplier configurations
+      security: []
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryHealthResponse'
+
+  /api/inventory/check/{sku}:
+    get:
+      tags:
+        - Inventory
+      summary: Check inventory for a SKU
+      description: |
+        Check real-time inventory for a specific SKU. Automatically routes to the correct supplier based on SKU prefix:
+        - AC-* → AS Colour
+        - SS-* → S&S Activewear
+        - SM-* → SanMar
+        - 4-5 digit numbers → AS Colour
+        - Alphanumeric codes → SanMar
+        
+        Results are cached for 15 minutes.
+      security: []
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "5001"
+        - name: refresh
+          in: query
+          description: Force refresh from supplier (bypass cache)
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Inventory data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCheckResponse'
+        '400':
+          description: Invalid SKU format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryError'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryError'
+
+  /api/inventory/check/{sku}/color/{color}:
+    get:
+      tags:
+        - Inventory
+      summary: Check inventory for a SKU and color
+      description: Check inventory filtered by color
+      security: []
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: color
+          in: path
+          required: true
+          schema:
+            type: string
+          example: Black
+        - name: refresh
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Filtered inventory data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCheckResponse'
+        '404':
+          description: Product not found
+
+  /api/inventory/batch:
+    post:
+      tags:
+        - Inventory
+      summary: Batch inventory check
+      description: Check inventory for multiple SKUs (max 50 per request)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchInventoryRequest'
+      responses:
+        '200':
+          description: Batch results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchInventoryResponse'
+        '400':
+          description: Invalid request (empty array or too many SKUs)
+
+  /api/inventory/colors/{sku}:
+    get:
+      tags:
+        - Inventory
+      summary: Get available colors for a product
+      description: Get all available colors with stock information
+      security: []
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Color availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ColorAvailability'
+        '404':
+          description: Product not found
+
+  /api/inventory/sizes/{sku}:
+    get:
+      tags:
+        - Inventory
+      summary: Get available sizes for a product
+      description: Get all available sizes with stock information
+      security: []
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: color
+          in: query
+          description: Filter sizes by color
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Size availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SizeAvailability'
+        '404':
+          description: Product not found
+
+  /api/inventory/pricing/{sku}:
+    get:
+      tags:
+        - Inventory
+      summary: Get pricing with volume breaks
+      description: Get supplier pricing including volume discounts
+      security: []
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: quantity
+          in: query
+          description: Get price for specific quantity
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pricing information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingInfo'
+        '503':
+          description: Supplier client not configured

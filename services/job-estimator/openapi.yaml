@@ -1,0 +1,737 @@
+openapi: 3.0.3
+info:
+  title: PrintShop OS - Job Estimator (Pricing Engine) API
+  description: |
+    JSON-driven pricing calculator for PrintShop OS with sub-100ms performance.
+    
+    ## Features
+    - Volume discounts, location surcharges, color multipliers
+    - Embroidery stitch count pricing
+    - Configurable margin targets (35% default)
+    - Rule precedence system (most specific wins)
+    - In-memory caching with 5-minute TTL
+    - Complete pricing history and audit trail
+    
+    ## Authentication
+    This service does not require authentication for calculation endpoints.
+    Admin endpoints for rule management should be protected in production.
+    
+    ## Rate Limiting
+    No rate limiting is enforced on this internal service.
+  version: 1.0.0
+  contact:
+    name: PrintShop OS Team
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3001
+    description: Development server
+  - url: http://docker-host:3001
+    description: Docker host server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Pricing
+    description: Pricing calculation endpoints
+  - name: Admin
+    description: Rule management endpoints (should be protected in production)
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-12-01T03:00:00.000Z"
+      required:
+        - status
+        - timestamp
+
+    PricingInput:
+      type: object
+      description: |
+        Input parameters for pricing calculation.
+        
+        **Minimum viable input**: Only `quantity` is required. The engine will use 
+        default values for garment cost and no surcharges.
+        
+        **For accurate pricing**, include:
+        - `service` to enable service-specific calculations (color multipliers for screen, stitch pricing for embroidery)
+        - `print_locations` to calculate location surcharges
+        - `garment_id` to use stored garment base costs
+      properties:
+        garment_id:
+          type: string
+          description: Unique identifier for the garment/product. Used to lookup stored base cost.
+          example: ss-activewear-6001
+        quantity:
+          type: integer
+          minimum: 1
+          description: Number of items to price
+          example: 100
+        service:
+          type: string
+          enum: [screen, dtg, embroidery, vinyl, sublimation]
+          description: Print service type. Required for service-specific pricing (color multipliers, stitch counts).
+          example: screen
+        print_locations:
+          type: array
+          items:
+            type: string
+            enum: [front, back, sleeve, chest, left-chest, pocket]
+          description: Print locations on the garment. Each location may have a surcharge.
+          example: [front, back]
+        color_count:
+          type: integer
+          minimum: 1
+          description: Number of colors in the print (for screen printing). Triggers color multiplier rules.
+          example: 2
+        stitch_count:
+          type: integer
+          minimum: 1
+          description: Number of stitches (for embroidery). Required for embroidery pricing.
+          example: 5000
+        customer_type:
+          type: string
+          enum: [retail, wholesale, vip, nonprofit]
+          description: Customer tier for pricing. May trigger customer-specific discounts.
+          example: wholesale
+        garment_type:
+          type: string
+          description: Type of garment
+          example: t-shirt
+        supplier:
+          type: string
+          description: Garment supplier name
+          example: ss-activewear
+        is_rush:
+          type: boolean
+          description: Whether this is a rush order
+          example: false
+        rush_type:
+          type: string
+          enum: [standard, express, same-day]
+          description: Type of rush order
+      required:
+        - quantity
+
+    LineItem:
+      type: object
+      properties:
+        description:
+          type: string
+          example: "Garment x100"
+        unit_cost:
+          type: number
+          format: float
+          example: 4.50
+        qty:
+          type: integer
+          example: 100
+        total:
+          type: number
+          format: float
+          example: 450.00
+        factor:
+          type: number
+          format: float
+          description: Multiplier factor (for color adjustments)
+          example: 1.3
+        discount:
+          type: number
+          format: float
+          description: Discount percentage applied
+          example: 10
+
+    PricingBreakdown:
+      type: object
+      properties:
+        base_cost:
+          type: number
+          format: float
+          example: 450.00
+        location_surcharges:
+          type: number
+          format: float
+          example: 500.00
+        color_adjustments:
+          type: number
+          format: float
+          example: 285.00
+        volume_discounts:
+          type: number
+          format: float
+          example: 123.50
+        margin_amount:
+          type: number
+          format: float
+          example: 388.02
+
+    PricingOutput:
+      type: object
+      properties:
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        subtotal:
+          type: number
+          format: float
+          description: Total cost before margin
+          example: 1111.50
+        margin_pct:
+          type: number
+          format: float
+          description: Applied margin percentage
+          example: 35.0
+        total_price:
+          type: number
+          format: float
+          description: Final price including margin
+          example: 1500.52
+        breakdown:
+          $ref: '#/components/schemas/PricingBreakdown'
+        rules_applied:
+          type: array
+          items:
+            type: string
+          description: List of rule IDs that were applied
+          example: [volume-discount-100-499, color-multiplier-2x]
+        calculation_time_ms:
+          type: integer
+          description: Time taken for calculation in milliseconds
+          example: 5
+
+    PricingRuleConditions:
+      type: object
+      description: Conditions that must be met for the rule to apply
+      properties:
+        quantity_min:
+          type: integer
+          example: 100
+        quantity_max:
+          type: integer
+          example: 499
+        service:
+          type: array
+          items:
+            type: string
+          example: [screen, dtg]
+        colors_min:
+          type: integer
+          example: 1
+        colors_max:
+          type: integer
+          example: 4
+        location:
+          type: array
+          items:
+            type: string
+          example: [front, back]
+        customer_type:
+          type: array
+          items:
+            type: string
+          example: [wholesale, vip]
+        garment_type:
+          type: array
+          items:
+            type: string
+          example: [t-shirt, hoodie]
+        supplier:
+          type: array
+          items:
+            type: string
+          example: [ss-activewear, sanmar]
+
+    PricingRuleCalculations:
+      type: object
+      description: Pricing adjustments when rule conditions are met
+      properties:
+        discount_pct:
+          type: number
+          format: float
+          example: 10
+        surcharge_pct:
+          type: number
+          format: float
+          example: 5
+        location_surcharge:
+          type: object
+          additionalProperties:
+            type: number
+          example:
+            front: 2.00
+            back: 3.00
+            sleeve: 1.50
+        color_multiplier:
+          type: object
+          additionalProperties:
+            type: number
+          example:
+            "1": 1.0
+            "2": 1.3
+            "3": 1.6
+        stitch_price_per_1000:
+          type: number
+          format: float
+          example: 1.50
+        margin_target:
+          type: number
+          format: float
+          description: Target margin as decimal (0.35 = 35%)
+          example: 0.35
+        setup_fee:
+          type: number
+          format: float
+          example: 25.00
+        unit_price_override:
+          type: number
+          format: float
+          example: 15.00
+
+    PricingRule:
+      type: object
+      properties:
+        id:
+          type: string
+          example: volume-discount-100-499
+        description:
+          type: string
+          example: "10% discount for orders 100-499 units"
+        version:
+          type: integer
+          minimum: 1
+          example: 1
+        effective_date:
+          type: string
+          format: date
+          example: "2025-01-01"
+        expiry_date:
+          type: string
+          format: date
+          example: "2025-12-31"
+        conditions:
+          $ref: '#/components/schemas/PricingRuleConditions'
+        calculations:
+          $ref: '#/components/schemas/PricingRuleCalculations'
+        priority:
+          type: integer
+          description: Higher numbers = higher priority
+          example: 100
+        enabled:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - description
+        - version
+        - effective_date
+        - conditions
+        - calculations
+        - priority
+        - enabled
+
+    CacheStats:
+      type: object
+      properties:
+        size:
+          type: integer
+          description: Number of cached entries
+          example: 42
+        ttl:
+          type: integer
+          description: Cache TTL in seconds
+          example: 300
+
+    MetricsResponse:
+      type: object
+      properties:
+        avg_calculation_time_ms:
+          type: number
+          format: float
+          example: 12.5
+        total_calculations:
+          type: integer
+          example: 1250
+        cache_hit_rate:
+          type: number
+          format: float
+          example: 0.75
+        cache:
+          $ref: '#/components/schemas/CacheStats'
+
+    HistoryEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        input:
+          $ref: '#/components/schemas/PricingInput'
+        output:
+          $ref: '#/components/schemas/PricingOutput'
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Invalid request
+        message:
+          type: string
+          example: quantity is required and must be greater than 0
+      required:
+        - error
+        - message
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the pricing API server is running
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /pricing/calculate:
+    post:
+      tags:
+        - Pricing
+      summary: Calculate pricing for an order
+      description: |
+        Calculate pricing based on input parameters and applicable rules.
+        Uses caching to improve performance for repeated calculations.
+      operationId: calculatePricing
+      parameters:
+        - name: dry_run
+          in: query
+          description: If true, don't save calculation to history
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingInput'
+            examples:
+              screenPrint:
+                summary: Screen printing order
+                value:
+                  garment_id: ss-activewear-6001
+                  quantity: 100
+                  service: screen
+                  print_locations: [front, back]
+                  color_count: 2
+                  customer_type: wholesale
+              embroidery:
+                summary: Embroidery order
+                value:
+                  garment_id: bella-canvas-3001
+                  quantity: 50
+                  service: embroidery
+                  stitch_count: 8000
+                  print_locations: [left-chest]
+      responses:
+        '200':
+          description: Pricing calculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingOutput'
+              example:
+                line_items:
+                  - description: "Garment x100"
+                    unit_cost: 4.50
+                    qty: 100
+                    total: 450.00
+                  - description: "Print surcharge (front+back)"
+                    unit_cost: 5.00
+                    qty: 100
+                    total: 500.00
+                  - description: "Color multiplier (2x)"
+                    factor: 1.3
+                    total: 285.00
+                  - description: "Volume discount (100+ units)"
+                    discount: 10
+                    total: -123.50
+                subtotal: 1111.50
+                margin_pct: 35.0
+                total_price: 1500.52
+                breakdown:
+                  base_cost: 450.00
+                  location_surcharges: 500.00
+                  color_adjustments: 285.00
+                  volume_discounts: 123.50
+                  margin_amount: 388.02
+                rules_applied: [volume-discount-100-499]
+                calculation_time_ms: 5
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Calculation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /pricing/history:
+    get:
+      tags:
+        - Pricing
+      summary: Get pricing calculation history
+      description: Retrieve historical pricing calculations with optional filtering
+      operationId: getPricingHistory
+      parameters:
+        - name: garment_id
+          in: query
+          description: Filter by garment ID
+          schema:
+            type: string
+        - name: customer_type
+          in: query
+          description: Filter by customer type
+          schema:
+            type: string
+      responses:
+        '200':
+          description: History retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  calculations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HistoryEntry'
+        '500':
+          description: Failed to fetch history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /pricing/metrics:
+    get:
+      tags:
+        - Pricing
+      summary: Get performance metrics
+      description: Retrieve performance metrics for pricing calculations
+      operationId: getPricingMetrics
+      responses:
+        '200':
+          description: Metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+        '500':
+          description: Failed to fetch metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/rules:
+    get:
+      tags:
+        - Admin
+      summary: Get all pricing rules
+      description: |
+        Retrieve all pricing rules.
+        
+        ⚠️ **Security Note**: This endpoint should be protected with authentication in production.
+      operationId: getAllRules
+      responses:
+        '200':
+          description: Rules retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  rules:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PricingRule'
+        '500':
+          description: Failed to fetch rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Admin
+      summary: Create a new pricing rule
+      description: |
+        Create a new pricing rule.
+        
+        ⚠️ **Security Note**: This endpoint should be protected with authentication in production.
+      operationId: createRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingRule'
+      responses:
+        '201':
+          description: Rule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingRule'
+        '400':
+          description: Invalid rule definition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/rules/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get a specific pricing rule
+      operationId: getRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rule found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingRule'
+        '404':
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - Admin
+      summary: Update a pricing rule
+      description: |
+        Update an existing pricing rule.
+        
+        ⚠️ **Security Note**: This endpoint should be protected with authentication in production.
+      operationId: updateRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingRule'
+      responses:
+        '200':
+          description: Rule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingRule'
+        '400':
+          description: Invalid rule definition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Admin
+      summary: Delete a pricing rule
+      description: |
+        Delete a pricing rule.
+        
+        ⚠️ **Security Note**: This endpoint should be protected with authentication in production.
+      operationId: deleteRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Rule deleted successfully
+        '404':
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/cache/clear:
+    post:
+      tags:
+        - Admin
+      summary: Clear pricing cache
+      description: |
+        Clear all cached pricing calculations.
+        
+        ⚠️ **Security Note**: This endpoint should be protected with authentication in production.
+      operationId: clearCache
+      responses:
+        '200':
+          description: Cache cleared successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cache cleared successfully
+        '500':
+          description: Failed to clear cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
