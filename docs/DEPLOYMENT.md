@@ -261,7 +261,7 @@ For detailed Cloudflare Tunnel configuration, see [CLOUDFLARE_TUNNEL_SETUP.md](.
 
 ### Quick Summary
 
-1. **Install cloudflared** on your Docker host
+1. **Choose cloudflared option** - PrintShop OS includes a built-in `printshop-cloudflared` container, or you can use an external cloudflared
 2. **Create a tunnel** in Cloudflare Zero Trust dashboard
 3. **Configure public hostnames** to route to container names:
 
@@ -271,11 +271,12 @@ For detailed Cloudflare Tunnel configuration, see [CLOUDFLARE_TUNNEL_SETUP.md](.
 | printshop | ronny.works | http://printshop-strapi:1337 |
 | api | ronny.works | http://printshop-api:3001 |
 
-4. **Connect cloudflared to Docker network**:
+4. **Network configuration**:
 
-```bash
-docker network connect printshop_network cloudflared
-```
+| cloudflared Type | Container Name | Network Setup |
+|------------------|----------------|---------------|
+| **Built-in** (docker-compose.yml) | `printshop-cloudflared` | Auto-configured on `printshop_network` |
+| **External** (homelab-infrastructure) | `cloudflared` | Run: `docker network connect printshop_network cloudflared` |
 
 ### SSL Certificate Note
 
@@ -374,7 +375,8 @@ After running `docker compose up -d --build`:
 | MongoDB fails to start | Missing keyfile | Run `./scripts/init-mongo-replica.sh` |
 | Appsmith shows error | MongoDB not in replica set mode | Initialize replica set |
 | Strapi 502 error | Database not ready | Wait for postgres healthcheck, then restart strapi |
-| Frontend 502 | cloudflared not on network | `docker network connect printshop_network cloudflared` |
+| Frontend 502 (external access) | External cloudflared not on network | `docker network connect printshop_network cloudflared` |
+| Frontend 502 (built-in cloudflared) | Network issue or container not running | Check with `docker ps --filter name=printshop-cloudflared` |
 
 ### Checking Logs
 
@@ -390,6 +392,9 @@ docker compose logs --tail 100 strapi
 
 # Since timestamp
 docker compose logs --since 30m
+
+# Check cloudflared logs (built-in)
+docker logs printshop-cloudflared --tail 50
 ```
 
 ### Healthcheck Failures
@@ -415,6 +420,45 @@ docker exec printshop-mongo mongosh -u root -p $MONGO_INITDB_ROOT_PASSWORD --aut
 # Test Redis
 docker exec printshop-redis redis-cli ping
 ```
+
+---
+
+## Post-Deployment Verification
+
+After every deployment, verify the system is working correctly:
+
+### Quick Verification Commands
+
+```bash
+# 1. Check all containers are running
+docker ps --filter name=printshop --format "table {{.Names}}\t{{.Status}}"
+
+# 2. Verify containers are on the correct network (should output: printshop_network)
+docker inspect printshop-cloudflared --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+docker inspect printshop-frontend --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+
+# 3. Test container-to-container connectivity (uses wget or curl depending on container)
+docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000 && echo "Frontend reachable" || \
+  docker exec printshop-api curl -sf http://printshop-frontend:3000 > /dev/null && echo "Frontend reachable"
+
+# 4. Verify tunnel is connected
+docker logs printshop-cloudflared --tail 10 | grep -i "Registered tunnel connection"
+
+# 5. Test from host
+curl -I http://localhost:5173
+```
+
+### Browser Hard Refresh After Deployment
+
+After rebuilding the frontend, browsers may cache old content. Always:
+
+1. **Hard refresh the page**: `Ctrl+Shift+R` (Windows/Linux) or `Cmd+Shift+R` (Mac)
+2. **Or test in incognito/private mode** first
+3. **Wait 1-2 minutes** for Cloudflare edge caches to expire
+
+### Full Verification Checklist
+
+For a complete post-deployment verification checklist, see the [Cloudflare Tunnel Setup Guide](./CLOUDFLARE_TUNNEL_SETUP.md#post-deployment-verification-checklist).
 
 ---
 
