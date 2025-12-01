@@ -4,6 +4,7 @@
 # Core Utilities
 python-dotenv>=1.0.0
 requests>=2.31.0
+tqdm>=4.65.0
 
 # Shipping & Logistics
 easypost>=13.0.0
@@ -12,6 +13,9 @@ easypost>=13.0.0
 beautifulsoup4>=4.12.2
 pandas>=2.0.0
 numpy>=1.24.0
+
+# MinIO (Object Storage for Printavo archival)
+minio>=7.2.0
 
 # GitHub Integration (Issue creation & automation)
 PyGithub>=1.59.0
