@@ -1,7 +1,14 @@
 import path from 'path';
 
-export default ({ env }) => {
-  const client = env('DATABASE_CLIENT', 'sqlite');
+interface EnvFunction {
+  (key: string, defaultValue?: string): string;
+  int: (key: string, defaultValue?: number) => number;
+  bool: (key: string, defaultValue?: boolean) => boolean;
+  array: (key: string, defaultValue?: string[]) => string[];
+}
+
+export default ({ env }: { env: EnvFunction }) => {
+  const client = env('DATABASE_CLIENT', 'sqlite') as 'mysql' | 'postgres' | 'sqlite';
 
   const connections = {
     mysql: {

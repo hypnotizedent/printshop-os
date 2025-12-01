@@ -14,7 +14,7 @@ export const useInactivity = ({
   onInactive,
   events = DEFAULT_ACTIVITY_EVENTS
 }: UseInactivityOptions) => {
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) {

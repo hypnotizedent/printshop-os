@@ -435,12 +435,18 @@ export const VALID_PAYMENT_METHODS = [
 
 export type ValidPaymentMethod = typeof VALID_PAYMENT_METHODS[number];
 
+// Payment method enum for UI display
+export type PaymentMethodEnum = 'cash' | 'check' | 'credit_card' | 'ach' | 'stripe' | 'bank_transfer' | 'other';
+
+// Payment status enum for UI display
+export type PaymentStatusEnum = 'paid' | 'pending' | 'processing' | 'failed' | 'refunded';
+
 // Payment types used by the payments API
 export interface OrderPayment {
   id: string;
   documentId: string;
   amount: number;
-  status: 'pending' | 'paid' | 'failed' | 'refunded';
+  status: PaymentStatusEnum;
   paymentType?: 'deposit' | 'balance' | 'refund';
   paymentMethod: string;
   referenceNumber?: string;

@@ -70,7 +70,8 @@ export const saveTimeEntryOffline = async (entry: TimeEntry) => {
 export const getUnsyncedTimeEntries = async (): Promise<TimeEntry[]> => {
   const db = await initOfflineDB();
   const index = db.transaction('time-entries').store.index('synced');
-  return await index.getAll(false);
+  // Query for entries where synced is falsy (0/false in IndexedDB)
+  return await index.getAll(IDBKeyRange.only(0));
 };
 
 // Delete time entry after sync
@@ -89,7 +90,8 @@ export const saveChecklistOffline = async (entry: ChecklistEntry) => {
 export const getUnsyncedChecklists = async (): Promise<ChecklistEntry[]> => {
   const db = await initOfflineDB();
   const index = db.transaction('checklists').store.index('synced');
-  return await index.getAll(false);
+  // Query for entries where synced is falsy (0/false in IndexedDB)
+  return await index.getAll(IDBKeyRange.only(0));
 };
 
 // Delete checklist entry after sync

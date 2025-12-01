@@ -41,8 +41,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(OFFLINE_URL) || new Response('Offline');
+      fetch(event.request).catch(async () => {
+        const cachedResponse = await caches.match(OFFLINE_URL);
+        return cachedResponse || new Response('Offline', { status: 503 });
       })
     );
   } else {

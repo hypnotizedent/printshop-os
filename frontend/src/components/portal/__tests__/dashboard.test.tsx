@@ -34,7 +34,7 @@ const mockOrders: CustomerOrder[] = [
   {
     id: "2",
     orderNumber: "12344",
-    status: "in-production",
+    status: "in_production",
     total: 890,
     date: "2024-11-14",
     items: 2
