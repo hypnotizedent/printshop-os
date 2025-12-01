@@ -78,15 +78,44 @@ export interface JobData extends StrapiEntity {
 }
 
 export interface LineItemData extends StrapiEntity {
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice?: number;
-  style?: string;
+  // Core fields
+  description?: string;
+  styleDescription?: string;
+  styleNumber?: string;
+  category?: string;
   color?: string;
-  sizes?: Record<string, number>;
+  
+  // Quantity and pricing - supports both naming conventions
+  quantity?: number;        // Alias for totalQuantity
+  totalQuantity?: number;   // Strapi field name
+  unitPrice?: number;       // Alias for unitCost
+  unitCost?: number;        // Strapi field name
+  totalPrice?: number;      // Alias for totalCost
+  totalCost?: number;       // Strapi field name
+  taxable?: boolean;
+  
+  // Size breakdown (individual quantities)
+  sizeXS?: number;
+  sizeS?: number;
+  sizeM?: number;
+  sizeL?: number;
+  sizeXL?: number;
+  size2XL?: number;
+  size3XL?: number;
+  size4XL?: number;
+  size5XL?: number;
+  sizes?: Record<string, number>;  // Alternative size map
+  
+  // Print specifications
   printLocations?: string[];
   inkColors?: number;
+  goodsStatus?: string;
+  
+  // Relations
+  order?: OrderData;
+  printavoId?: string;
+  orderId?: number;
+  orderVisualId?: string;
 }
 
 export interface QuoteData extends StrapiEntity {
@@ -541,30 +570,216 @@ export const quotesApi = {
 // Line Items API
 // ============================================================================
 
+export interface CreateLineItemInput {
+  // Core fields
+  description?: string;
+  styleDescription?: string;
+  styleNumber?: string;
+  category?: string;
+  color?: string;
+  
+  // Quantity and pricing - Strapi field names
+  totalQuantity: number;
+  unitCost: number;
+  totalCost?: number;
+  taxable?: boolean;
+  
+  // Size breakdown
+  sizeXS?: number;
+  sizeS?: number;
+  sizeM?: number;
+  sizeL?: number;
+  sizeXL?: number;
+  size2XL?: number;
+  size3XL?: number;
+  size4XL?: number;
+  size5XL?: number;
+  
+  // Print specifications
+  printLocations?: string[];
+  inkColors?: number;
+  goodsStatus?: string;
+  
+  // Relation to order
+  order?: { connect: string[] };
+}
+
+export interface UpdateLineItemInput {
+  // Core fields
+  description?: string;
+  styleDescription?: string;
+  styleNumber?: string;
+  category?: string;
+  color?: string;
+  
+  // Quantity and pricing
+  totalQuantity?: number;
+  unitCost?: number;
+  totalCost?: number;
+  taxable?: boolean;
+  
+  // Size breakdown
+  sizeXS?: number;
+  sizeS?: number;
+  sizeM?: number;
+  sizeL?: number;
+  sizeXL?: number;
+  size2XL?: number;
+  size3XL?: number;
+  size4XL?: number;
+  size5XL?: number;
+  
+  // Print specifications
+  printLocations?: string[];
+  inkColors?: number;
+  goodsStatus?: string;
+}
+
 export const lineItemsApi = {
   /**
-   * Get all line items for an order
+   * Get all line items with optional filtering and pagination
    */
-  async listByOrder(orderDocumentId: string): Promise<ApiResult<LineItemData[]>> {
+  async list(options: {
+    page?: number;
+    pageSize?: number;
+    orderDocumentId?: string;
+    sort?: string;
+  } = {}): Promise<PaginatedResult<LineItemData>> {
+    const { page = 1, pageSize = 100, orderDocumentId, sort = 'createdAt:desc' } = options;
+    
     const params = new URLSearchParams({
-      'filters[order][documentId][$eq]': orderDocumentId,
+      'pagination[page]': page.toString(),
+      'pagination[pageSize]': pageSize.toString(),
+      'sort': sort,
     });
     
+    if (orderDocumentId) {
+      params.append('filters[order][documentId][$eq]', orderDocumentId);
+    }
+    
     const response = await fetch(`${API_BASE}/api/line-items?${params}`);
-    const result = await handlePaginatedResponse<LineItemData>(response);
+    return handlePaginatedResponse<LineItemData>(response);
+  },
+
+  /**
+   * Get all line items for an order (convenience method)
+   */
+  async listByOrder(orderDocumentId: string): Promise<ApiResult<LineItemData[]>> {
+    const result = await lineItemsApi.list({ orderDocumentId, pageSize: 100 });
     return { success: result.success, data: result.data, error: result.error };
   },
   
   /**
+   * Get a single line item by documentId
+   */
+  async get(documentId: string): Promise<ApiResult<LineItemData>> {
+    const response = await fetch(`${API_BASE}/api/line-items/${documentId}?populate=*`);
+    return handleResponse<LineItemData>(response);
+  },
+
+  /**
    * Create a line item
    */
-  async create(data: Omit<LineItemData, keyof StrapiEntity> & { order?: { connect: string[] } }): Promise<ApiResult<LineItemData>> {
+  async create(data: CreateLineItemInput): Promise<ApiResult<LineItemData>> {
+    // Auto-calculate totalCost if not provided
+    const lineItemData = {
+      ...data,
+      totalCost: data.totalCost ?? (data.totalQuantity * data.unitCost),
+    };
+
     const response = await fetch(`${API_BASE}/api/line-items`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data }),
+      body: JSON.stringify({ data: lineItemData }),
     });
     return handleResponse<LineItemData>(response);
+  },
+
+  /**
+   * Update a line item by documentId
+   */
+  async update(documentId: string, data: UpdateLineItemInput): Promise<ApiResult<LineItemData>> {
+    // Auto-recalculate totalCost if totalQuantity or unitCost changed
+    const updateData = { ...data };
+    if ((data.totalQuantity !== undefined || data.unitCost !== undefined) && data.totalCost === undefined) {
+      // We need the current item to recalculate
+      const currentItem = await lineItemsApi.get(documentId);
+      if (currentItem.success && currentItem.data) {
+        const quantity = data.totalQuantity ?? currentItem.data.totalQuantity ?? 0;
+        const unitCost = data.unitCost ?? currentItem.data.unitCost ?? 0;
+        updateData.totalCost = quantity * unitCost;
+      }
+    }
+
+    const response = await fetch(`${API_BASE}/api/line-items/${documentId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: updateData }),
+    });
+    return handleResponse<LineItemData>(response);
+  },
+
+  /**
+   * Delete a line item by documentId
+   */
+  async delete(documentId: string): Promise<ApiResult<LineItemData>> {
+    const response = await fetch(`${API_BASE}/api/line-items/${documentId}`, {
+      method: 'DELETE',
+    });
+    return handleResponse<LineItemData>(response);
+  },
+
+  /**
+   * Batch create multiple line items for an order
+   */
+  async batchCreate(orderDocumentId: string, items: Omit<CreateLineItemInput, 'order'>[]): Promise<ApiResult<LineItemData[]>> {
+    const results: LineItemData[] = [];
+    const errors: string[] = [];
+
+    for (const item of items) {
+      const result = await lineItemsApi.create({
+        ...item,
+        order: { connect: [orderDocumentId] },
+      });
+
+      if (result.success && result.data) {
+        results.push(result.data);
+      } else {
+        errors.push(result.error || 'Unknown error creating line item');
+      }
+    }
+
+    if (errors.length > 0) {
+      return {
+        success: false,
+        data: results,
+        error: `Failed to create ${errors.length} line item(s): ${errors.join(', ')}`,
+      };
+    }
+
+    return { success: true, data: results };
+  },
+
+  /**
+   * Update order totals after line item changes
+   * Recalculates the order's totalAmount based on all line items
+   */
+  async recalculateOrderTotal(orderDocumentId: string): Promise<ApiResult<OrderData>> {
+    // Get all line items for the order
+    const lineItemsResult = await lineItemsApi.listByOrder(orderDocumentId);
+    
+    if (!lineItemsResult.success) {
+      return { success: false, error: lineItemsResult.error || 'Failed to fetch line items' };
+    }
+
+    // Calculate total from line items (using totalCost or fallback to unitCost * totalQuantity)
+    const totalAmount = lineItemsResult.data?.reduce((sum, item) => {
+      const itemTotal = item.totalCost ?? (item.totalQuantity ?? 0) * (item.unitCost ?? 0);
+      return sum + itemTotal;
+    }, 0) ?? 0;
+
+    // Update the order
+    return ordersApi.update(orderDocumentId, { totalAmount });
   },
 };
 
