@@ -1,6 +1,6 @@
 # Cloudflare Tunnel Setup for PrintShop OS
 
-**Last Updated:** November 30, 2025
+**Last Updated:** December 2025
 
 This guide covers deploying PrintShop OS with Cloudflare Tunnel for secure external access with SSL termination.
 
@@ -13,6 +13,36 @@ Cloudflare Tunnel provides:
 - DDoS protection
 - No exposed ports required
 - Easy domain routing
+
+---
+
+## Cloudflared Container Options
+
+PrintShop OS supports two cloudflared configurations:
+
+### Option 1: Built-in cloudflared (Recommended for New Deployments)
+
+The docker-compose.yml includes a `printshop-cloudflared` container that's pre-configured on the `printshop_network`. This is the simplest setup:
+
+```yaml
+# Already defined in docker-compose.yml
+cloudflared:
+  image: cloudflare/cloudflared:latest
+  container_name: printshop-cloudflared
+  networks:
+    printshop_network:
+      ipv4_address: 172.21.0.250
+```
+
+Just set `CLOUDFLARE_TUNNEL_TOKEN` in your `.env` file and start the stack.
+
+### Option 2: External cloudflared (Homelab Infrastructure)
+
+If you're using a shared `cloudflared` container from `homelab-infrastructure`:
+
+1. The external cloudflared must be connected to `printshop_network`
+2. Remove or disable `printshop-cloudflared` from docker-compose.yml to avoid conflicts
+3. Run: `docker network connect printshop_network cloudflared`
 
 ---
 
@@ -251,11 +281,25 @@ curl -I https://api.ronny.works
 | Issue | Cause | Solution |
 |-------|-------|----------|
 | 502 Bad Gateway | cloudflared not on same network | `docker network connect printshop_network cloudflared` |
+| 502 on non-root paths only | SPA routing not configured | Rebuild frontend (uses serve.json for rewrites) |
 | Connection refused | Service binding to 127.0.0.1 | Update CMD to bind to 0.0.0.0 |
 | SSL certificate error | Using nested subdomain | Use single-level subdomain pattern |
 | Empty page loads | Wrong VITE_ URLs | Rebuild frontend with correct production URLs |
 | Stale assets after deploy | Docker build cache | Rebuild with `docker compose build --no-cache` |
 | Containers unreachable | Orphaned networks/volumes | Run `docker system prune -af && docker volume prune -f` |
+
+### Special Case: 502 Only on Non-Root URLs
+
+If the root URL (`/`) works but other paths like `/dashboard` or `/portal` return 502:
+
+1. **Verify SPA routing is configured** - The frontend uses `serve.json` for path rewrites
+2. **Check Cloudflare tunnel doesn't have path-specific routes** - All paths should go to the same service
+3. **Rebuild the frontend** to ensure the serve configuration is included:
+
+```bash
+docker compose build --no-cache frontend
+docker compose up -d frontend
+```
 
 ---
 

@@ -26,6 +26,10 @@ COPY . .
 # Build application (VITE_ vars are baked in during build)
 RUN npm run build
 
+# Copy serve.json to dist for SPA routing configuration
+# serve automatically reads serve.json from the served directory
+RUN cp serve.json dist/serve.json
+
 # Production stage
 FROM node:20-alpine
 
@@ -34,7 +38,7 @@ WORKDIR /app
 # Install serve to run the production build, and wget for health checks
 RUN npm install -g serve && apk add --no-cache wget
 
-# Copy built application from builder
+# Copy built application and serve config from builder
 COPY --from=builder /app/dist ./dist
 
 # Expose port
@@ -45,4 +49,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
 
 # Start server - bind to 0.0.0.0 for Docker network access (required for Cloudflare Tunnel)
-CMD ["serve", "-s", "dist", "-l", "tcp://0.0.0.0:3000"]
+# serve automatically loads serve.json from the served directory for SPA routing
+CMD ["serve", "dist", "-l", "tcp://0.0.0.0:3000"]
