@@ -165,3 +165,6 @@ data/artwork/*.pdf
 data/artwork/*.ai
 data/artwork/*.psd
 data/artwork/*.eps
+mongo-keyfile
+docker-compose. yml.backup*
+*. backup
