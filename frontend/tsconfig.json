@@ -10,7 +10,15 @@
     ],
     "module": "ESNext",
     "skipLibCheck": true,
+    /* Strict type checking */
+    "strict": true,
+    "noImplicitAny": true,
     "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -25,9 +33,13 @@
       "@/*": [
         "./src/*"
       ]
-    },
+    }
   },
   "include": [
-    "src"
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/apps/online-designer"
   ]
 }

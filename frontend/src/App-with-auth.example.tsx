@@ -44,10 +44,10 @@ export default function App() {
     <ProtectedRoute>
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
-          {/* @ts-expect-error - userType prop will be added when AppSidebar is updated */}
           <AppSidebar 
             currentPage={currentPage} 
             onNavigate={setCurrentPage}
+            // @ts-expect-error - userType and onLogout props to be added when AppSidebar is updated
             userType={userType}
             onLogout={logout}
           />
