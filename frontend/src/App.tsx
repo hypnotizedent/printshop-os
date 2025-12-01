@@ -23,6 +23,8 @@ import { InvoicesPage } from "./components/invoices/InvoicesPage"
 import { Portal } from "./components/portal/Portal"
 import { useAuth } from "./contexts/AuthContext"
 import { AuthPage } from "./components/auth/AuthPage"
+import { SkipNavLink, SkipNavContent } from "@/components/ui/skip-nav"
+import { PageLoading } from "@/components/ui/states"
 import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
 import { toast } from "sonner"
 
@@ -279,18 +281,19 @@ function MainDashboard() {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <SkipNavLink />
       <AppSidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-      <main className="flex-1 p-8 overflow-auto">
-        <div className="max-w-[1600px] mx-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            renderPage()
-          )}
-        </div>
-      </main>
+      <SkipNavContent>
+        <main className="flex-1 p-8 overflow-auto" role="main" aria-label="Main content">
+          <div className="max-w-[1600px] mx-auto">
+            {isLoading ? (
+              <PageLoading message="Loading your dashboard..." />
+            ) : (
+              renderPage()
+            )}
+          </div>
+        </main>
+      </SkipNavContent>
     </div>
   )
 }

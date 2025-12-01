@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { MagnifyingGlass, Plus, EnvelopeSimple, Phone, Buildings, Package, CurrencyDollar } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import { customersApi, type CreateCustomerInput } from "@/lib/api-client"
+import { EmptyState } from "@/components/ui/states"
 import type { Customer } from "@/lib/types"
 
 interface CustomersPageProps {
@@ -219,9 +220,27 @@ export function CustomersPage({ customers, onViewCustomer, onNewOrder, onCustome
       </div>
 
       {filteredCustomers.length === 0 && (
-        <Card className="p-12 text-center">
-          <p className="text-muted-foreground">No customers found matching your search.</p>
-        </Card>
+        searchQuery ? (
+          <EmptyState
+            variant="search"
+            title="No customers found"
+            description={`No customers match "${searchQuery}". Try adjusting your search.`}
+          />
+        ) : customers.length === 0 ? (
+          <EmptyState
+            variant="customers"
+            action={{
+              label: "Add Customer",
+              onClick: () => setShowAddDialog(true)
+            }}
+          />
+        ) : (
+          <EmptyState
+            variant="search"
+            title="No customers found"
+            description="Try adjusting your search criteria."
+          />
+        )
       )}
 
       {/* Add Customer Dialog */}
