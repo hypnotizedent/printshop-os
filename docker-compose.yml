@@ -51,24 +51,33 @@ services:
       retries: 5
 
   # ---------------------------------------------------------------------------
-  # MongoDB - For Appsmith
+  # MongoDB - For Appsmith (Replica Set Mode Required)
+  # ---------------------------------------------------------------------------
+  # IMPORTANT: Appsmith requires MongoDB to run as a replica set.
+  # First-time setup requires running: ./scripts/init-mongo-replica.sh
+  # This will:
+  #   1. Generate the mongo-keyfile for replica set authentication
+  #   2. Start MongoDB
+  #   3. Initialize the replica set
   # ---------------------------------------------------------------------------
   mongo:
     image: mongo:6
     container_name: printshop-mongo
     restart: unless-stopped
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--keyFile", "/data/mongo-keyfile"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-appsmith}
     volumes:
       - mongo_data:/data/db
+      - ./mongo-keyfile:/data/mongo-keyfile:ro
     ports:
       - "27017:27017"
     networks:
       - printshop_network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "-u", "${MONGO_INITDB_ROOT_USERNAME:-root}", "-p", "${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -375,13 +384,21 @@ volumes:
 # =============================================================================
 # Usage Instructions
 # =============================================================================
+# FIRST-TIME SETUP:
 # 1. Copy .env.example to .env and update with your values
-# 2. Start all services: docker compose up -d
-# 3. View logs: docker compose logs -f [service-name]
-# 4. Stop all services: docker compose down
-# 5. Remove all data: docker compose down -v
+# 2. Initialize MongoDB replica set: ./scripts/init-mongo-replica.sh
+# 3. Start all services: docker compose up -d
 #
-# NOTE: Use 'docker compose' (space, V2) not 'docker-compose' (hyphen, V1 deprecated)
+# DAILY OPERATIONS:
+# - View logs: docker compose logs -f [service-name]
+# - Stop all services: docker compose down
+# - Restart a service: docker compose restart [service-name]
+# - Remove all data: docker compose down -v
+#
+# IMPORTANT NOTES:
+# - Use 'docker compose' (space, V2) not 'docker-compose' (hyphen, V1 deprecated)
+# - Appsmith requires MongoDB replica set (initialized by init-mongo-replica.sh)
+# - Use --remove-orphans when services are removed: docker compose up -d --remove-orphans
 #
 # Service URLs (default):
 # - Strapi Admin: http://localhost:1337/admin
@@ -392,5 +409,5 @@ volumes:
 # - API: http://localhost:3001
 # - Pricing Engine: http://localhost:3004
 #
-# For detailed setup instructions, see /docs/deployment/docker-setup.md
+# For detailed setup instructions, see /docs/DEPLOYMENT.md
 # =============================================================================

@@ -114,6 +114,7 @@ ACTION-IMMEDIATE.md
 *.cert
 *.crt
 scripts/mongo-keyfile
+mongo-keyfile
 
 # Strapi
 printshop-strapi/.tmp/
