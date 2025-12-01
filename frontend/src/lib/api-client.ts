@@ -570,6 +570,14 @@ export const quotesApi = {
 // Line Items API
 // ============================================================================
 
+/**
+ * Input data for creating a new line item.
+ * 
+ * Required fields: totalQuantity, unitCost
+ * 
+ * Note: totalCost is auto-calculated as (totalQuantity * unitCost) if not provided.
+ * Provide totalCost explicitly if you need a different value (e.g., with discounts).
+ */
 export interface CreateLineItemInput {
   // Core fields
   description?: string;
@@ -579,8 +587,11 @@ export interface CreateLineItemInput {
   color?: string;
   
   // Quantity and pricing - Strapi field names
+  /** Total quantity of items (required) */
   totalQuantity: number;
+  /** Unit cost per item (required) */
   unitCost: number;
+  /** Total cost - auto-calculated as (totalQuantity * unitCost) if not provided */
   totalCost?: number;
   taxable?: boolean;
   
@@ -604,6 +615,14 @@ export interface CreateLineItemInput {
   order?: { connect: string[] };
 }
 
+/**
+ * Input data for updating an existing line item.
+ * All fields are optional - only provided fields will be updated.
+ * 
+ * Note: If you update totalQuantity or unitCost without providing totalCost,
+ * the update method will fetch the current item to recalculate totalCost.
+ * For better performance, provide totalCost explicitly when known.
+ */
 export interface UpdateLineItemInput {
   // Core fields
   description?: string;
@@ -696,13 +715,31 @@ export const lineItemsApi = {
   },
 
   /**
-   * Update a line item by documentId
+   * Update a line item by documentId.
+   * 
+   * Note: If you update totalQuantity or unitCost without providing totalCost,
+   * the method will fetch the current item to calculate the new totalCost.
+   * For better performance, provide totalCost explicitly when known.
+   * 
+   * @param documentId - The line item's documentId
+   * @param data - Fields to update
+   * @param options - Optional settings
+   * @param options.skipAutoCalculate - If true, skip auto-calculation of totalCost
    */
-  async update(documentId: string, data: UpdateLineItemInput): Promise<ApiResult<LineItemData>> {
-    // Auto-recalculate totalCost if totalQuantity or unitCost changed
+  async update(
+    documentId: string, 
+    data: UpdateLineItemInput,
+    options?: { skipAutoCalculate?: boolean }
+  ): Promise<ApiResult<LineItemData>> {
     const updateData = { ...data };
-    if ((data.totalQuantity !== undefined || data.unitCost !== undefined) && data.totalCost === undefined) {
-      // We need the current item to recalculate
+    
+    // Auto-recalculate totalCost if totalQuantity or unitCost changed and totalCost not provided
+    const shouldAutoCalculate = !options?.skipAutoCalculate && 
+      (data.totalQuantity !== undefined || data.unitCost !== undefined) && 
+      data.totalCost === undefined;
+    
+    if (shouldAutoCalculate) {
+      // Fetch current item to get missing values for calculation
       const currentItem = await lineItemsApi.get(documentId);
       if (currentItem.success && currentItem.data) {
         const quantity = data.totalQuantity ?? currentItem.data.totalQuantity ?? 0;
@@ -730,34 +767,48 @@ export const lineItemsApi = {
   },
 
   /**
-   * Batch create multiple line items for an order
+   * Batch create multiple line items for an order.
+   * Uses parallel processing for better performance.
+   * 
+   * @param orderDocumentId - The order's documentId to attach line items to
+   * @param items - Array of line items to create (without order relation)
+   * @returns Result with array of created items and any errors
    */
   async batchCreate(orderDocumentId: string, items: Omit<CreateLineItemInput, 'order'>[]): Promise<ApiResult<LineItemData[]>> {
-    const results: LineItemData[] = [];
-    const errors: string[] = [];
-
-    for (const item of items) {
-      const result = await lineItemsApi.create({
+    // Process items in parallel for better performance
+    const promises = items.map(item => 
+      lineItemsApi.create({
         ...item,
         order: { connect: [orderDocumentId] },
-      });
+      })
+    );
 
-      if (result.success && result.data) {
-        results.push(result.data);
+    const results = await Promise.allSettled(promises);
+    
+    const successfulItems: LineItemData[] = [];
+    const errors: string[] = [];
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        if (result.value.success && result.value.data) {
+          successfulItems.push(result.value.data);
+        } else {
+          errors.push(`Item ${index + 1}: ${result.value.error || 'Unknown error'}`);
+        }
       } else {
-        errors.push(result.error || 'Unknown error creating line item');
+        errors.push(`Item ${index + 1}: ${result.reason?.message || 'Request failed'}`);
       }
-    }
+    });
 
     if (errors.length > 0) {
       return {
         success: false,
-        data: results,
-        error: `Failed to create ${errors.length} line item(s): ${errors.join(', ')}`,
+        data: successfulItems,
+        error: `Failed to create ${errors.length}/${items.length} line item(s): ${errors.join('; ')}`,
       };
     }
 
-    return { success: true, data: results };
+    return { success: true, data: successfulItems };
   },
 
   /**
