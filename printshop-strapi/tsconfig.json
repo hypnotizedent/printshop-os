@@ -4,27 +4,25 @@
     "moduleResolution": "Node",
     "lib": ["ES2020"],
     "target": "ES2019",
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
+    "strict": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "noEmitOnError": false,
+    "noEmitOnError": true,
+    "noImplicitThis": true,
     "outDir": "dist",
     "rootDir": "."
   },
   "include": [
+    // Include root files
     "./",
+    // Include all ts files
     "./**/*.ts",
+    // Include all js files
     "./**/*.js",
+    // Force the JSON files in the src folder to be included
     "src/**/*.json"
   ],
 
@@ -34,14 +32,12 @@
     "dist/",
     ".cache/",
     ".tmp/",
+
+    // Do not include admin files in the server compilation
     "src/admin/",
+    // Do not include test files
     "**/*.test.*",
-    "src/plugins/**",
-    "src/api/custom-order/**",
-    "src/api/customer-activity/**",
-    "src/api/customer-preference/**",
-    "src/api/design-session/**",
-    "src/api/imprint/**",
-    "src/api/line-item/**"
+    // Do not include plugins in the server compilation
+    "src/plugins/**"
   ]
 }
