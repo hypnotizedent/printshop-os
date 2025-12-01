@@ -107,7 +107,7 @@ services:
       # (e.g., http://100.92.156.118:1337 or https://printshop.ronny.works)
       PUBLIC_URL: ${STRAPI_PUBLIC_URL:-http://localhost:1337}
     volumes:
-      - strapi_app:/srv/app
+      - strapi_uploads:/srv/app/public/uploads
     ports:
       - "1337:1337"
     networks:
@@ -360,8 +360,8 @@ volumes:
     name: printshop_strapi_data
     driver: local
   
-  strapi_app:
-    name: printshop_strapi_app
+  strapi_uploads:
+    name: printshop_strapi_uploads
     driver: local
   
   appsmith_data:

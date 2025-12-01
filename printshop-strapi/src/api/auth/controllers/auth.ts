@@ -602,7 +602,6 @@ export default {
 
       // Log the activity (ignore type error - content type will be available at runtime)
       try {
-        // @ts-expect-error - customer-activity content type registered at runtime
         await strapi.documents('api::customer-activity.customer-activity').create({
           data: {
             customer: decoded.documentId,
