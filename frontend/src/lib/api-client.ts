@@ -78,15 +78,44 @@ export interface JobData extends StrapiEntity {
 }
 
 export interface LineItemData extends StrapiEntity {
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice?: number;
-  style?: string;
+  // Core fields
+  description?: string;
+  styleDescription?: string;
+  styleNumber?: string;
+  category?: string;
   color?: string;
-  sizes?: Record<string, number>;
+  
+  // Quantity and pricing - supports both naming conventions
+  quantity?: number;        // Alias for totalQuantity
+  totalQuantity?: number;   // Strapi field name
+  unitPrice?: number;       // Alias for unitCost
+  unitCost?: number;        // Strapi field name
+  totalPrice?: number;      // Alias for totalCost
+  totalCost?: number;       // Strapi field name
+  taxable?: boolean;
+  
+  // Size breakdown (individual quantities)
+  sizeXS?: number;
+  sizeS?: number;
+  sizeM?: number;
+  sizeL?: number;
+  sizeXL?: number;
+  size2XL?: number;
+  size3XL?: number;
+  size4XL?: number;
+  size5XL?: number;
+  sizes?: Record<string, number>;  // Alternative size map
+  
+  // Print specifications
   printLocations?: string[];
   inkColors?: number;
+  goodsStatus?: string;
+  
+  // Relations
+  order?: OrderData;
+  printavoId?: string;
+  orderId?: number;
+  orderVisualId?: string;
 }
 
 export interface QuoteData extends StrapiEntity {
@@ -541,30 +570,267 @@ export const quotesApi = {
 // Line Items API
 // ============================================================================
 
+/**
+ * Input data for creating a new line item.
+ * 
+ * Required fields: totalQuantity, unitCost
+ * 
+ * Note: totalCost is auto-calculated as (totalQuantity * unitCost) if not provided.
+ * Provide totalCost explicitly if you need a different value (e.g., with discounts).
+ */
+export interface CreateLineItemInput {
+  // Core fields
+  description?: string;
+  styleDescription?: string;
+  styleNumber?: string;
+  category?: string;
+  color?: string;
+  
+  // Quantity and pricing - Strapi field names
+  /** Total quantity of items (required) */
+  totalQuantity: number;
+  /** Unit cost per item (required) */
+  unitCost: number;
+  /** Total cost - auto-calculated as (totalQuantity * unitCost) if not provided */
+  totalCost?: number;
+  taxable?: boolean;
+  
+  // Size breakdown
+  sizeXS?: number;
+  sizeS?: number;
+  sizeM?: number;
+  sizeL?: number;
+  sizeXL?: number;
+  size2XL?: number;
+  size3XL?: number;
+  size4XL?: number;
+  size5XL?: number;
+  
+  // Print specifications
+  printLocations?: string[];
+  inkColors?: number;
+  goodsStatus?: string;
+  
+  // Relation to order
+  order?: { connect: string[] };
+}
+
+/**
+ * Input data for updating an existing line item.
+ * All fields are optional - only provided fields will be updated.
+ * 
+ * Note: If you update totalQuantity or unitCost without providing totalCost,
+ * the update method will fetch the current item to recalculate totalCost.
+ * For better performance, provide totalCost explicitly when known.
+ */
+export interface UpdateLineItemInput {
+  // Core fields
+  description?: string;
+  styleDescription?: string;
+  styleNumber?: string;
+  category?: string;
+  color?: string;
+  
+  // Quantity and pricing
+  totalQuantity?: number;
+  unitCost?: number;
+  totalCost?: number;
+  taxable?: boolean;
+  
+  // Size breakdown
+  sizeXS?: number;
+  sizeS?: number;
+  sizeM?: number;
+  sizeL?: number;
+  sizeXL?: number;
+  size2XL?: number;
+  size3XL?: number;
+  size4XL?: number;
+  size5XL?: number;
+  
+  // Print specifications
+  printLocations?: string[];
+  inkColors?: number;
+  goodsStatus?: string;
+}
+
 export const lineItemsApi = {
   /**
-   * Get all line items for an order
+   * Get all line items with optional filtering and pagination
    */
-  async listByOrder(orderDocumentId: string): Promise<ApiResult<LineItemData[]>> {
+  async list(options: {
+    page?: number;
+    pageSize?: number;
+    orderDocumentId?: string;
+    sort?: string;
+  } = {}): Promise<PaginatedResult<LineItemData>> {
+    const { page = 1, pageSize = 100, orderDocumentId, sort = 'createdAt:desc' } = options;
+    
     const params = new URLSearchParams({
-      'filters[order][documentId][$eq]': orderDocumentId,
+      'pagination[page]': page.toString(),
+      'pagination[pageSize]': pageSize.toString(),
+      'sort': sort,
     });
     
+    if (orderDocumentId) {
+      params.append('filters[order][documentId][$eq]', orderDocumentId);
+    }
+    
     const response = await fetch(`${API_BASE}/api/line-items?${params}`);
-    const result = await handlePaginatedResponse<LineItemData>(response);
+    return handlePaginatedResponse<LineItemData>(response);
+  },
+
+  /**
+   * Get all line items for an order (convenience method)
+   */
+  async listByOrder(orderDocumentId: string): Promise<ApiResult<LineItemData[]>> {
+    const result = await lineItemsApi.list({ orderDocumentId, pageSize: 100 });
     return { success: result.success, data: result.data, error: result.error };
   },
   
   /**
+   * Get a single line item by documentId
+   */
+  async get(documentId: string): Promise<ApiResult<LineItemData>> {
+    const response = await fetch(`${API_BASE}/api/line-items/${documentId}?populate=*`);
+    return handleResponse<LineItemData>(response);
+  },
+
+  /**
    * Create a line item
    */
-  async create(data: Omit<LineItemData, keyof StrapiEntity> & { order?: { connect: string[] } }): Promise<ApiResult<LineItemData>> {
+  async create(data: CreateLineItemInput): Promise<ApiResult<LineItemData>> {
+    // Auto-calculate totalCost if not provided
+    const lineItemData = {
+      ...data,
+      totalCost: data.totalCost ?? (data.totalQuantity * data.unitCost),
+    };
+
     const response = await fetch(`${API_BASE}/api/line-items`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data }),
+      body: JSON.stringify({ data: lineItemData }),
     });
     return handleResponse<LineItemData>(response);
+  },
+
+  /**
+   * Update a line item by documentId.
+   * 
+   * Note: If you update totalQuantity or unitCost without providing totalCost,
+   * the method will fetch the current item to calculate the new totalCost.
+   * For better performance, provide totalCost explicitly when known.
+   * 
+   * @param documentId - The line item's documentId
+   * @param data - Fields to update
+   * @param options - Optional settings
+   * @param options.skipAutoCalculate - If true, skip auto-calculation of totalCost
+   */
+  async update(
+    documentId: string, 
+    data: UpdateLineItemInput,
+    options?: { skipAutoCalculate?: boolean }
+  ): Promise<ApiResult<LineItemData>> {
+    const updateData = { ...data };
+    
+    // Auto-recalculate totalCost if totalQuantity or unitCost changed and totalCost not provided
+    const shouldAutoCalculate = !options?.skipAutoCalculate && 
+      (data.totalQuantity !== undefined || data.unitCost !== undefined) && 
+      data.totalCost === undefined;
+    
+    if (shouldAutoCalculate) {
+      // Fetch current item to get missing values for calculation
+      const currentItem = await lineItemsApi.get(documentId);
+      if (currentItem.success && currentItem.data) {
+        const quantity = data.totalQuantity ?? currentItem.data.totalQuantity ?? 0;
+        const unitCost = data.unitCost ?? currentItem.data.unitCost ?? 0;
+        updateData.totalCost = quantity * unitCost;
+      }
+    }
+
+    const response = await fetch(`${API_BASE}/api/line-items/${documentId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: updateData }),
+    });
+    return handleResponse<LineItemData>(response);
+  },
+
+  /**
+   * Delete a line item by documentId
+   */
+  async delete(documentId: string): Promise<ApiResult<LineItemData>> {
+    const response = await fetch(`${API_BASE}/api/line-items/${documentId}`, {
+      method: 'DELETE',
+    });
+    return handleResponse<LineItemData>(response);
+  },
+
+  /**
+   * Batch create multiple line items for an order.
+   * Uses parallel processing for better performance.
+   * 
+   * @param orderDocumentId - The order's documentId to attach line items to
+   * @param items - Array of line items to create (without order relation)
+   * @returns Result with array of created items and any errors
+   */
+  async batchCreate(orderDocumentId: string, items: Omit<CreateLineItemInput, 'order'>[]): Promise<ApiResult<LineItemData[]>> {
+    // Process items in parallel for better performance
+    const promises = items.map(item => 
+      lineItemsApi.create({
+        ...item,
+        order: { connect: [orderDocumentId] },
+      })
+    );
+
+    const results = await Promise.allSettled(promises);
+    
+    const successfulItems: LineItemData[] = [];
+    const errors: string[] = [];
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        if (result.value.success && result.value.data) {
+          successfulItems.push(result.value.data);
+        } else {
+          errors.push(`Item ${index + 1}: ${result.value.error || 'Unknown error'}`);
+        }
+      } else {
+        errors.push(`Item ${index + 1}: ${result.reason?.message || 'Request failed'}`);
+      }
+    });
+
+    if (errors.length > 0) {
+      return {
+        success: false,
+        data: successfulItems,
+        error: `Failed to create ${errors.length}/${items.length} line item(s): ${errors.join('; ')}`,
+      };
+    }
+
+    return { success: true, data: successfulItems };
+  },
+
+  /**
+   * Update order totals after line item changes
+   * Recalculates the order's totalAmount based on all line items
+   */
+  async recalculateOrderTotal(orderDocumentId: string): Promise<ApiResult<OrderData>> {
+    // Get all line items for the order
+    const lineItemsResult = await lineItemsApi.listByOrder(orderDocumentId);
+    
+    if (!lineItemsResult.success) {
+      return { success: false, error: lineItemsResult.error || 'Failed to fetch line items' };
+    }
+
+    // Calculate total from line items (using totalCost or fallback to unitCost * totalQuantity)
+    const totalAmount = lineItemsResult.data?.reduce((sum, item) => {
+      const itemTotal = item.totalCost ?? (item.totalQuantity ?? 0) * (item.unitCost ?? 0);
+      return sum + itemTotal;
+    }, 0) ?? 0;
+
+    // Update the order
+    return ordersApi.update(orderDocumentId, { totalAmount });
   },
 };
 
