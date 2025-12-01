@@ -58,7 +58,8 @@ if [[ -z "$CONTAINERS" ]]; then
 fi
 
 for container in $CONTAINERS; do
-    IP=$(docker inspect "$container" --format "{{range .NetworkSettings.Networks}}{{if eq .NetworkID \"$(docker network inspect $NETWORK_NAME --format '{{.Id}}')\"}}{{.IPAddress}}{{end}}{{end}}" 2>/dev/null || echo "N/A")
+    NETWORK_ID=$(docker network inspect "$NETWORK_NAME" --format '{{.Id}}' 2>/dev/null)
+    IP=$(docker inspect "$container" --format "{{range .NetworkSettings.Networks}}{{if eq .NetworkID \"$NETWORK_ID\"}}{{.IPAddress}}{{end}}{{end}}" 2>/dev/null || echo "N/A")
     echo -e "  - $container (${IP:-N/A})"
 done
 echo ""
@@ -71,7 +72,7 @@ SERVICES["printshop-api"]="3001"
 SERVICES["printshop-cloudflared"]=""
 
 # Check if cloudflared container exists
-if ! docker inspect printshop-cloudflared &>/dev/null 2>&1; then
+if ! docker inspect printshop-cloudflared &>/dev/null; then
     echo -e "${YELLOW}⚠${NC} printshop-cloudflared container not found"
     echo -e "  Using printshop-api as test container instead\n"
     TEST_CONTAINER="printshop-api"
@@ -88,12 +89,12 @@ for service in "${!SERVICES[@]}"; do
     fi
     
     # Try to resolve the hostname
-    if docker exec "$TEST_CONTAINER" getent hosts "$service" &>/dev/null 2>&1; then
+    if docker exec "$TEST_CONTAINER" getent hosts "$service" &>/dev/null; then
         IP=$(docker exec "$TEST_CONTAINER" getent hosts "$service" 2>/dev/null | awk '{print $1}')
         echo -e "  ${GREEN}✓${NC} $service resolves to $IP"
     else
         # Try nslookup as fallback
-        if docker exec "$TEST_CONTAINER" nslookup "$service" &>/dev/null 2>&1; then
+        if docker exec "$TEST_CONTAINER" nslookup "$service" &>/dev/null; then
             echo -e "  ${GREEN}✓${NC} $service - DNS resolves"
         else
             echo -e "  ${RED}✗${NC} $service - DNS resolution FAILED"
