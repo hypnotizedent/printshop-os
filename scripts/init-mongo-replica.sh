@@ -64,15 +64,21 @@ echo -e "${YELLOW}Setting keyfile permissions...${NC}"
 chmod 400 "$KEYFILE_PATH"
 
 # Try to set ownership (requires sudo on Linux, may fail on macOS)
+# Note: UID 999 is the default MongoDB user in the official Docker image
+# This may not exist on the host system, but Docker maps it correctly inside the container
 if command -v sudo &> /dev/null; then
+    # Attempt to set ownership - this is best effort on the host
+    # The Docker container will use the file regardless, as long as permissions are 400
     if sudo chown 999:999 "$KEYFILE_PATH" 2>/dev/null; then
         echo -e "${GREEN}✓ Keyfile ownership set to mongodb user (999:999)${NC}"
     else
-        echo -e "${YELLOW}⚠ Could not change keyfile ownership (may require running with sudo)${NC}"
-        echo -e "${YELLOW}  On some systems, Docker will handle this automatically${NC}"
+        echo -e "${YELLOW}⚠ Could not change keyfile ownership${NC}"
+        echo -e "${YELLOW}  This is usually fine - Docker handles the file mapping internally${NC}"
+        echo -e "${YELLOW}  If MongoDB fails to start, try running this script with sudo${NC}"
     fi
 else
     echo -e "${YELLOW}⚠ sudo not available, skipping ownership change${NC}"
+    echo -e "${YELLOW}  Docker should handle the file permissions internally${NC}"
 fi
 
 # Step 4: Start MongoDB container
@@ -100,22 +106,21 @@ echo ""
 echo -e "${YELLOW}Initializing replica set...${NC}"
 
 # Check if replica set is already initialized
-RS_STATUS=$(docker exec printshop-mongo mongosh \
-    -u "$MONGO_USER" \
-    -p "$MONGO_PASS" \
-    --authenticationDatabase admin \
-    --quiet \
-    --eval "try { rs.status().ok } catch(e) { 0 }" 2>/dev/null || echo "0")
+# Using -e to pass credentials via environment variables instead of command line
+RS_STATUS=$(docker exec -e MONGO_USER="$MONGO_USER" -e MONGO_PASS="$MONGO_PASS" printshop-mongo \
+    mongosh --quiet \
+    --eval 'try { db.getSiblingDB("admin").auth(process.env.MONGO_USER, process.env.MONGO_PASS); rs.status().ok } catch(e) { 0 }' \
+    2>/dev/null || echo "0")
 
 if [ "$RS_STATUS" = "1" ]; then
     echo -e "${GREEN}✓ Replica set is already initialized${NC}"
 else
-    # Initialize the replica set
-    docker exec printshop-mongo mongosh \
-        -u "$MONGO_USER" \
-        -p "$MONGO_PASS" \
-        --authenticationDatabase admin \
-        --eval "rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] })"
+    # Initialize the replica set using environment variables for credentials
+    docker exec -e MONGO_USER="$MONGO_USER" -e MONGO_PASS="$MONGO_PASS" printshop-mongo \
+        mongosh --eval '
+            db.getSiblingDB("admin").auth(process.env.MONGO_USER, process.env.MONGO_PASS);
+            rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "localhost:27017" }] });
+        '
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Replica set initialized successfully${NC}"
@@ -131,11 +136,11 @@ echo ""
 echo -e "${YELLOW}Verifying replica set status...${NC}"
 sleep 5
 
-docker exec printshop-mongo mongosh \
-    -u "$MONGO_USER" \
-    -p "$MONGO_PASS" \
-    --authenticationDatabase admin \
-    --eval "rs.status()" | head -30
+docker exec -e MONGO_USER="$MONGO_USER" -e MONGO_PASS="$MONGO_PASS" printshop-mongo \
+    mongosh --eval '
+        db.getSiblingDB("admin").auth(process.env.MONGO_USER, process.env.MONGO_PASS);
+        rs.status();
+    ' | head -30
 
 echo ""
 echo -e "${YELLOW}═══════════════════════════════════════════════════${NC}"
