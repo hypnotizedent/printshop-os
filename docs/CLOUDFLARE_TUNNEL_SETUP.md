@@ -186,6 +186,38 @@ Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your T
 
 ---
 
+## ⚠️ Browser Cache Issues (False 502 Errors)
+
+**IMPORTANT:** Browsers aggressively cache error responses, including 502 Bad Gateway errors.
+
+### Symptoms
+
+- Site works in incognito/private window
+- Regular browser shows 502 or blank page
+- Server logs show successful requests
+- `curl` from server works fine
+
+### Solutions
+
+| Method | How To | When to Use |
+|--------|--------|-------------|
+| Incognito test | Chrome: Ctrl+Shift+N / Firefox: Ctrl+Shift+P (Cmd on Mac) | First test after any deployment |
+| Hard refresh | Ctrl+Shift+R / Cmd+Shift+R | Quick cache bypass |
+| Clear site data | DevTools (F12) → Application tab → Clear site data | Persistent cache issues |
+| Disable cache | DevTools (F12) → Network tab → Check "Disable cache" | During active debugging (while DevTools open) |
+
+### Why This Happens
+
+1. Cloudflare edge caches responses (including errors) for performance
+2. Browser caches responses locally
+3. Even after server fix, cached 502 persists until cache expires or is cleared
+
+### Prevention
+
+After every deployment, always test in incognito window first before reporting issues.
+
+---
+
 ## Troubleshooting 502 Bad Gateway
 
 ### 1. Check if cloudflared is on the correct network
@@ -338,7 +370,7 @@ docker network connect printshop_network cloudflared
 curl -I https://printshop-app.ronny.works
 ```
 
-For a detailed case study, see [Troubleshooting Retrospective (Nov 30, 2025)](deployment/TROUBLESHOOTING_RETROSPECTIVE_2025-11-30.md).
+For a detailed case study, see [Troubleshooting Retrospective (Nov 30, 2025)](deployment/TROUBLESHOOTING_RETROSPECTIVE_2025-11-30.md) and [Troubleshooting Log (Dec 1, 2025)](deployment/TROUBLESHOOTING_LOG_2025-12-01.md).
 
 ---
 
@@ -449,3 +481,4 @@ curl -I https://api.ronny.works/health
 - [.env.production.example](../../.env.production.example) - Environment variables
 - [SERVICE_DIRECTORY.md](../../SERVICE_DIRECTORY.md) - Full service inventory
 - [Troubleshooting Retrospective (Nov 30, 2025)](deployment/TROUBLESHOOTING_RETROSPECTIVE_2025-11-30.md) - Detailed case study of Docker/tunnel recovery
+- [Troubleshooting Log (Dec 1, 2025)](deployment/TROUBLESHOOTING_LOG_2025-12-01.md) - Browser cache issues and deployment troubleshooting

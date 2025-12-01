@@ -353,6 +353,17 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
+### Post-Deployment Checklist
+
+After running `docker compose up -d --build`:
+
+- [ ] Wait 30 seconds for containers to become healthy
+- [ ] Verify containers: `docker ps --filter "name=printshop"`
+- [ ] **Test in incognito/private window first** (browsers cache 502 errors!)
+- [ ] Hard refresh regular browser: Ctrl+Shift+R / Cmd+Shift+R
+- [ ] Check tunnel logs: `docker logs printshop-cloudflared --tail 20`
+- [ ] Verify internal connectivity: `docker exec printshop-api wget -qO- --spider http://printshop-frontend:3000`
+
 ---
 
 ## Troubleshooting
@@ -489,7 +500,8 @@ docker compose up -d
 - [Docker Setup Guide](./deployment/docker-setup.md) - Detailed Docker configuration
 - [Environment Variables](./deployment/environment-variables.md) - All environment variables
 - [Cloudflare Tunnel Setup](./CLOUDFLARE_TUNNEL_SETUP.md) - External access configuration
-- [Troubleshooting Retrospective](./deployment/TROUBLESHOOTING_RETROSPECTIVE_2025-11-30.md) - Case study of common issues
+- [Troubleshooting Retrospective (Nov 30, 2025)](./deployment/TROUBLESHOOTING_RETROSPECTIVE_2025-11-30.md) - Case study of common issues
+- [Troubleshooting Log (Dec 1, 2025)](./deployment/TROUBLESHOOTING_LOG_2025-12-01.md) - Browser cache issues
 - [Disaster Recovery](./deployment/disaster-recovery.md) - Backup and restore procedures
 
 ---
