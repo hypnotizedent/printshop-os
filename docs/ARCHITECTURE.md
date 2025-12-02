@@ -17,6 +17,41 @@
 
 PrintShop OS uses a **microservices architecture** with a central CMS (Strapi) acting as the single source of truth for all data. Services communicate via REST APIs and WebSocket for real-time updates.
 
+### Three-Portal Architecture
+
+The frontend implements a three-portal system separating user experiences:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         PrintShop OS                             │
+├─────────────────┬────────────────────┬─────────────────────────┤
+│  Customer Portal │   Employee Portal  │    Admin Dashboard      │
+│   /portal/*      │   /production/*    │      /admin/*           │
+├─────────────────┼────────────────────┼─────────────────────────┤
+│ • Order History  │ • My Jobs          │ • Full Dashboard        │
+│ • Quote Requests │ • Production       │ • All Jobs              │
+│ • Profile        │   Schedule         │ • All Customers         │
+│ • Support        │ • Help             │ • Reports               │
+│                  │ • Clock In/Out     │ • Settings              │
+│                  │                    │ • Invoices              │
+│                  │                    │ • AI Assistant          │
+└─────────────────┴────────────────────┴─────────────────────────┘
+```
+
+**Route Structure:**
+- `/` - Customer Landing (public)
+- `/login/customer` - Customer email/password login
+- `/login/employee` - Employee PIN login (tablet-friendly)
+- `/login/admin` - Owner email/password + 2FA login
+- `/portal/*` - Customer Portal (auth: customer)
+- `/production/*` - Employee Portal (auth: employee)
+- `/admin/*` - Owner Dashboard (auth: owner)
+- `/designer` - Online Designer (public)
+- `/track/:orderNumber` - Public order tracking
+- `/quote/:token` - Public quote approval
+
+### System Architecture Diagram
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         Frontend Layer                           │

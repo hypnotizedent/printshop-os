@@ -1,7 +1,8 @@
 /**
  * Authentication Context
- * Provides authentication state and actions for customer and employee login.
+ * Provides authentication state and actions for customer, employee, and owner login.
  * Uses JWT token auth with Strapi backend.
+ * Supports three-portal architecture: Customer Portal, Employee Portal, Admin Dashboard
  */
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
@@ -23,22 +24,41 @@ export interface Employee {
   email: string;
   role: string;
   department: string;
+  assignedJobIds?: string[];
 }
 
-export type UserType = 'customer' | 'employee' | null;
+export interface Owner {
+  id: number;
+  documentId: string;
+  email: string;
+  name: string;
+}
+
+// User role type now includes 'owner'
+export type UserRole = 'owner' | 'employee' | 'customer';
+export type UserType = UserRole | null;
 
 export interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   userType: UserType;
+  userRole: UserRole | null;
   customer: Customer | null;
   employee: Employee | null;
+  owner: Owner | null;
   token: string | null;
+  // Login methods
   loginCustomer: (payload: { email: string; password: string }) => Promise<{ success: boolean; error?: string }>;
   signupCustomer: (payload: { name: string; email: string; password: string; phone?: string; company?: string }) => Promise<{ success: boolean; error?: string }>;
   validateEmployeePIN: (payload: { pin: string }) => Promise<{ success: boolean; error?: string }>;
+  loginAsOwner: (payload: { email: string; password: string; twoFactorCode?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
+  // Permission helpers
+  canViewFinancials: () => boolean;
+  canViewAllJobs: () => boolean;
+  canEditSettings: () => boolean;
+  getRedirectPath: () => string;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -64,15 +84,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userType, setUserType] = useState<UserType>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [employee, setEmployee] = useState<Employee | null>(null);
+  const [owner, setOwner] = useState<Owner | null>(null);
   const [token, setToken] = useState<string | null>(getStoredToken());
+
+  // Clear all user state
+  const clearUserState = () => {
+    setCustomer(null);
+    setEmployee(null);
+    setOwner(null);
+  };
 
   const refreshAuth = async () => {
     const storedToken = getStoredToken();
     if (!storedToken) {
       setIsAuthenticated(false);
       setUserType(null);
-      setCustomer(null);
-      setEmployee(null);
+      clearUserState();
       setToken(null);
       setIsLoading(false);
       return;
@@ -88,22 +115,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       setIsAuthenticated(true);
       setToken(storedToken);
+      clearUserState();
       
       if (data.type === 'customer') {
         setUserType('customer');
         setCustomer(data.user);
-        setEmployee(null);
       } else if (data.type === 'employee') {
         setUserType('employee');
         setEmployee(data.employee);
-        setCustomer(null);
+      } else if (data.type === 'owner') {
+        setUserType('owner');
+        setOwner(data.owner);
       }
     } catch {
       clearStoredToken();
       setIsAuthenticated(false);
       setUserType(null);
-      setCustomer(null);
-      setEmployee(null);
+      clearUserState();
       setToken(null);
     } finally {
       setIsLoading(false);
@@ -137,8 +165,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.token);
       setIsAuthenticated(true);
       setUserType('customer');
+      clearUserState();
       setCustomer(data.user);
-      setEmployee(null);
       
       return { success: true };
     } catch (err) {
@@ -170,8 +198,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.token);
       setIsAuthenticated(true);
       setUserType('customer');
+      clearUserState();
       setCustomer(data.user);
-      setEmployee(null);
       
       return { success: true };
     } catch (err) {
@@ -198,12 +226,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.token);
       setIsAuthenticated(true);
       setUserType('employee');
+      clearUserState();
       setEmployee(data.employee);
-      setCustomer(null);
+      
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Network error. Please try again.' };
+    }
+  };
+
+  const loginAsOwner: AuthContextValue['loginAsOwner'] = async ({ email, password, twoFactorCode }) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/owner/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, twoFactorCode }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        const errorMessage = data.error?.message 
+          || data.message 
+          || (typeof data.error === 'string' ? data.error : null)
+          || 'Login failed. Please check your credentials.';
+        return { success: false, error: errorMessage };
+      }
+      
+      setStoredToken(data.token);
+      setToken(data.token);
+      setIsAuthenticated(true);
+      setUserType('owner');
+      clearUserState();
+      setOwner(data.owner || { id: 0, documentId: '', email, name: 'Owner' });
       
       return { success: true };
     } catch (err) {
-      return { success: false, error: 'Network error. Please try again.' };
+      console.error('Owner login error:', err);
+      return { success: false, error: 'Network error. Please check your connection and try again.' };
     }
   };
 
@@ -221,8 +281,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(null);
       setIsAuthenticated(false);
       setUserType(null);
-      setCustomer(null);
-      setEmployee(null);
+      clearUserState();
+    }
+  };
+
+  // Permission helpers - based on user role
+  const canViewFinancials = (): boolean => {
+    return userType === 'owner';
+  };
+
+  const canViewAllJobs = (): boolean => {
+    return userType === 'owner' || userType === 'employee';
+  };
+
+  const canEditSettings = (): boolean => {
+    return userType === 'owner';
+  };
+
+  // Get the appropriate redirect path based on user role
+  const getRedirectPath = (): string => {
+    switch (userType) {
+      case 'owner':
+        return '/admin';
+      case 'employee':
+        return '/production';
+      case 'customer':
+        return '/portal';
+      default:
+        return '/';
     }
   };
 
@@ -231,16 +317,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated,
       isLoading,
       userType,
+      userRole: userType, // alias for userType
       customer,
       employee,
+      owner,
       token,
       loginCustomer,
       signupCustomer,
       validateEmployeePIN,
+      loginAsOwner,
       logout,
       refreshAuth,
+      canViewFinancials,
+      canViewAllJobs,
+      canEditSettings,
+      getRedirectPath,
     }),
-    [isAuthenticated, isLoading, userType, customer, employee, token]
+    [isAuthenticated, isLoading, userType, customer, employee, owner, token]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

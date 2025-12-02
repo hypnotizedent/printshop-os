@@ -1,339 +1,125 @@
-import { useState, useEffect } from "react"
+/**
+ * PrintShop OS - Main Application
+ * Three-Portal Architecture: Owner/Employee/Customer
+ */
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { Toaster } from "@/components/ui/sonner"
-import { AppSidebar } from "./components/layout/AppSidebar"
-import { DashboardPage } from "./components/dashboard/DashboardPage"
-import { JobsPage } from "./components/jobs/JobsPage"
-import { ProductionScheduleView } from "./components/machines/ProductionScheduleView"
-import { CustomersPage } from "./components/customers/CustomersPage"
-import { CustomerDetailPage } from "./components/customers/CustomerDetailPage"
-import { OrderDetailPage } from "./components/orders/OrderDetailPage"
-import { FilesPage } from "./components/files/FilesPage"
-import { ReportsPage } from "./components/reports/ReportsPage"
-import { SettingsPage } from "./components/settings/SettingsPage"
-import { ProductionPage } from "./components/production/ProductionPage"
-import LabelsDemo from "./pages/LabelsDemo"
-import { QuoteBuilder } from "./components/quotes/QuoteBuilder"
-import { ProductsPage } from "./components/products/ProductsPage"
-import { ShippingLabelForm } from "./components/shipping/ShippingLabelForm"
-import { AIAssistantPage } from "./pages/AIAssistantPage"
-import OnlineDesignerPage from "./apps/online-designer/pages/Index"
-import { ShipmentTracking } from "./components/shipping/ShipmentTracking"
-import { InvoicesPage } from "./components/invoices/InvoicesPage"
-import { Portal } from "./components/portal/Portal"
 import { useAuth } from "./contexts/AuthContext"
+
+// Page imports
+import { CustomerLanding } from "./pages/public/CustomerLanding"
+import { CustomerLogin } from "./pages/auth/CustomerLogin"
+import { EmployeeLogin } from "./pages/auth/EmployeeLogin"
+import { AdminLogin } from "./pages/auth/AdminLogin"
+import { EmployeeLayout } from "./pages/employee/EmployeeLayout"
+import { AdminLayout } from "./pages/admin/AdminLayout"
+import { Portal } from "./components/portal/Portal"
 import { AuthPage } from "./components/auth/AuthPage"
-import { SkipNavLink, SkipNavContent } from "@/components/ui/skip-nav"
-import { PageLoading } from "@/components/ui/states"
-import type { Job, Customer, Machine, FileItem, DashboardStats } from "./lib/types"
-import { toast } from "sonner"
+import OnlineDesignerPage from "./apps/online-designer/pages/Index"
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+// Legacy imports for backward compatibility
+import OrderStatus from "./pages/OrderStatus"
+import QuoteApproval from "./pages/QuoteApproval"
 
-// Main admin/employee dashboard content
-function MainDashboard() {
-  const [currentPage, setCurrentPage] = useState("dashboard")
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [jobs, setJobs] = useState<Job[]>([])
-  const [machines] = useState<Machine[]>([])
-  const [files] = useState<FileItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Fetch customers from Strapi
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch customers first - we need them for order lookups
-        let customersRawData: any[] = [];
-        const customersRes = await fetch(`${API_BASE}/api/customers?pagination[limit]=5000`);
-        if (customersRes.ok) {
-          const customersData = await customersRes.json();
-          customersRawData = customersData.data || [];
-          const transformedCustomers: Customer[] = customersRawData.map((c: any) => ({
-            id: c.documentId || c.id.toString(),
-            name: c.name || 'Unknown',
-            email: c.email || '',
-            phone: c.phone || '',
-            company: c.company || '',
-            totalOrders: 0, // Will be calculated from orders
-            totalRevenue: 0,
-            lastOrderDate: c.updatedAt || new Date().toISOString(),
-            status: 'active' as const,
-          }));
-          setCustomers(transformedCustomers);
-        }
-        
-        // Build customer lookup by printavoId for orders without populated customer
-        const customersLookup: Record<string, string> = {};
-        customersRawData.forEach((c: any) => {
-          if (c.printavoId) {
-            customersLookup[c.printavoId] = c.name || 'Unknown';
-          }
-        });
-
-        // Fetch orders and transform to jobs for the Kanban board
-        // Server-side filter: exclude completed statuses to reduce payload
-        const ordersRes = await fetch(`${API_BASE}/api/orders?populate=customer&pagination[limit]=5000&filters[$or][0][status][$ne]=INVOICE_PAID&filters[$or][1][status][$ne]=COMPLETE`);
-        if (ordersRes.ok) {
-          const ordersData = await ordersRes.json();
-          
-          const transformedJobs: Job[] = (ordersData.data || []).map((o: any) => {
-            // Map Strapi order status to Job status
-            const statusMap: Record<string, Job['status']> = {
-              'QUOTE': 'quote',
-              'QUOTE_SENT': 'quote',
-              'Quote Out For Approval - Email': 'quote',
-              'PENDING': 'design',
-              'IN_PRODUCTION': 'printing',
-              'READY_TO_SHIP': 'finishing',
-              'SHIPPED': 'delivery',
-              'DELIVERED': 'completed',
-              'COMPLETED': 'completed',
-              'INVOICE PAID': 'completed',
-              'CANCELLED': 'cancelled',
-            };
-            
-            // Get customer name: from relation OR lookup by printavoCustomerId
-            const customerName = o.customer?.name || 
-              (o.printavoCustomerId ? customersLookup[o.printavoCustomerId] : null) || 
-              'Unknown Customer';
-            
-            return {
-              id: o.documentId || o.id.toString(),
-              title: o.orderNickname || `Order #${o.orderNumber}`,
-              customer: customerName,
-              customerId: o.customer?.documentId || '',
-              status: statusMap[o.status] || 'quote',
-              priority: 'normal' as const,
-              dueDate: o.dueDate || new Date().toISOString(),
-              createdAt: o.createdAt,
-              description: o.notes || '',
-              quantity: o.items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0,
-              fileCount: 0,
-              estimatedCost: o.totalAmount || 0,
-              progress: o.status === 'COMPLETED' || o.status === 'INVOICE PAID' ? 100 : 50,
-            };
-          });
-          setJobs(transformedJobs);
-
-          // Update customer order counts
-          const customerOrderCounts: Record<string, { count: number; revenue: number }> = {};
-          (ordersData.data || []).forEach((o: any) => {
-            const custId = o.customer?.documentId;
-            if (custId) {
-              if (!customerOrderCounts[custId]) {
-                customerOrderCounts[custId] = { count: 0, revenue: 0 };
-              }
-              customerOrderCounts[custId].count++;
-              customerOrderCounts[custId].revenue += o.totalAmount || 0;
-            }
-          });
-
-          setCustomers(prev => prev.map(c => ({
-            ...c,
-            totalOrders: customerOrderCounts[c.id]?.count || 0,
-            totalRevenue: customerOrderCounts[c.id]?.revenue || 0,
-          })));
-        }
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const jobsList = jobs
-  // Filter out completed/cancelled jobs for Kanban view
-  const activeJobsList = jobs.filter(j => j.status !== 'completed' && j.status !== 'cancelled')
-  const customersList = customers
-  const machinesList = machines
-  const filesList = files
-
-  const stats: DashboardStats = {
-    activeJobs: jobsList.filter(j => j.status !== 'completed' && j.status !== 'cancelled').length,
-    completedToday: jobsList.filter(j => j.status === 'completed').length,
-    revenue: jobsList.reduce((acc, j) => acc + j.estimatedCost, 0),
-    machinesOnline: machinesList.filter(m => m.status !== 'offline').length,
-    lowStockItems: 3,
-    urgentJobs: jobsList.filter(j => j.priority === 'urgent').length
+// Root redirect component - redirects based on authentication state
+function RootRedirect() {
+  const { isAuthenticated, userType, isLoading } = useAuth()
+  
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    )
   }
-
-  const recentJobs = jobsList.slice(0, 5)
-
-  const handleUpdateJob = (jobId: string, updates: Partial<Job>) => {
-    console.log("Update job:", jobId, updates)
+  
+  if (!isAuthenticated) {
+    return <CustomerLanding />
   }
-
-  // Handler for viewing customer details
-  const handleViewCustomer = (customerId: string) => {
-    setSelectedCustomerId(customerId);
-    setCurrentPage("customer-detail");
+  
+  // Redirect authenticated users to their appropriate portal
+  switch (userType) {
+    case 'owner':
+      return <Navigate to="/admin" replace />
+    case 'employee':
+      return <Navigate to="/production" replace />
+    case 'customer':
+      return <Navigate to="/portal" replace />
+    default:
+      return <CustomerLanding />
   }
-
-  // Handler for creating new order for a customer
-  const handleNewOrder = (customerId: string) => {
-    // Navigate to quotes page with customer pre-selected
-    setSelectedCustomerId(customerId);
-    setCurrentPage("quotes");
-    toast.success("Creating new quote", {
-      description: "Customer info has been pre-filled"
-    });
-  }
-
-  // Get the selected customer for quotes
-  const selectedCustomer = customersList.find(c => c.id === selectedCustomerId);
-
-  // Handler for going back from customer detail
-  const handleBackFromCustomer = () => {
-    setSelectedCustomerId(null);
-    setCurrentPage("customers");
-  }
-
-  // Handler for viewing order details
-  const handleViewOrder = (orderId: string) => {
-    setSelectedOrderId(orderId);
-    setCurrentPage("order-detail");
-  }
-
-  // Handler for going back from order detail
-  const handleBackFromOrder = () => {
-    setSelectedOrderId(null);
-    // Go back to customer detail if we came from there, otherwise customers
-    if (selectedCustomerId) {
-      setCurrentPage("customer-detail");
-    } else {
-      setCurrentPage("jobs");
-    }
-  }
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case "dashboard":
-        return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} onViewOrder={handleViewOrder} />
-      case "production":
-        return <ProductionPage />
-      case "jobs":
-        return <JobsPage jobs={activeJobsList} onUpdateJob={handleUpdateJob} onViewOrder={handleViewOrder} />
-      case "machines":
-        return <ProductionScheduleView />
-      case "customers":
-        return (
-          <CustomersPage 
-            customers={customersList} 
-            onViewCustomer={handleViewCustomer}
-            onNewOrder={handleNewOrder}
-          />
-        )
-      case "customer-detail":
-        return selectedCustomerId ? (
-          <CustomerDetailPage
-            customerId={selectedCustomerId}
-            onBack={handleBackFromCustomer}
-            onNewOrder={handleNewOrder}
-            onViewOrder={handleViewOrder}
-          />
-        ) : (
-          <CustomersPage 
-            customers={customersList}
-            onViewCustomer={handleViewCustomer}
-            onNewOrder={handleNewOrder}
-          />
-        )
-      case "order-detail":
-        return selectedOrderId ? (
-          <OrderDetailPage
-            orderId={selectedOrderId}
-            onBack={handleBackFromOrder}
-          />
-        ) : (
-          <JobsPage jobs={jobsList} onUpdateJob={handleUpdateJob} onViewOrder={handleViewOrder} />
-        )
-      case "files":
-        return <FilesPage files={filesList} />
-      case "reports":
-        return <ReportsPage />
-      case "settings":
-        return <SettingsPage />
-      case "labels-demo":
-        return <LabelsDemo />
-      case "quotes":
-        return <QuoteBuilder />
-      case "products":
-        return <ProductsPage />
-      case "shipping":
-        return <ShippingLabelForm />
-      case "tracking":
-        return <ShipmentTracking />
-      case "invoices":
-        return <InvoicesPage onViewOrder={handleViewOrder} />
-      case "ai-assistant":
-        return <AIAssistantPage />
-      default:
-        return <DashboardPage stats={stats} recentJobs={recentJobs} machines={machinesList} onNavigate={setCurrentPage} onViewOrder={handleViewOrder} />
-    }
-  }
-
-  return (
-    <div className="flex min-h-screen bg-background">
-      <SkipNavLink />
-      <AppSidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-      <SkipNavContent>
-        <main className="flex-1 p-8 overflow-auto" role="main" aria-label="Main content">
-          <div className="max-w-[1600px] mx-auto">
-            {isLoading ? (
-              <PageLoading message="Loading your dashboard..." />
-            ) : (
-              renderPage()
-            )}
-          </div>
-        </main>
-      </SkipNavContent>
-    </div>
-  )
 }
 
-// Customer Portal Layout - wrapped in the portal-specific router
-function CustomerPortalLayout() {
-  return <Portal />
-}
-
-// Login/Auth Page
-function LoginPage() {
+// Legacy login page that redirects to appropriate login
+function LegacyLoginPage() {
   const { isAuthenticated, userType } = useAuth()
   
   // If already authenticated, redirect to appropriate page
   if (isAuthenticated) {
-    if (userType === 'customer') {
-      return <Navigate to="/portal" replace />
+    switch (userType) {
+      case 'owner':
+        return <Navigate to="/admin" replace />
+      case 'employee':
+        return <Navigate to="/production" replace />
+      case 'customer':
+        return <Navigate to="/portal" replace />
     }
-    return <Navigate to="/" replace />
   }
   
+  // Default to the combined auth page for backward compatibility
   return <AuthPage />
 }
 
-// Main App with routing
+// Main App with three-portal routing
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Login route */}
-        <Route path="/login" element={<LoginPage />} />
+        {/* ===== Public Routes ===== */}
+        {/* Root - Customer Landing or redirect based on auth */}
+        <Route path="/" element={<RootRedirect />} />
         
-        {/* Customer Portal routes - has its own internal routing */}
-        <Route path="/portal/*" element={<CustomerPortalLayout />} />
-        
-        {/* Online Designer route */}
+        {/* Online Designer - public access */}
         <Route path="/designer" element={<OnlineDesignerPage />} />
         
-        {/* Main admin/employee dashboard - root and all unmatched */}
-        <Route path="/*" element={<MainDashboard />} />
+        {/* Public order tracking */}
+        <Route path="/track/:orderNumber" element={<OrderStatus />} />
+        <Route path="/track" element={<OrderStatus />} />
+        
+        {/* Public quote approval */}
+        <Route path="/quote/:token" element={<QuoteApproval />} />
+        
+        {/* ===== Login Routes ===== */}
+        {/* Role-specific login pages */}
+        <Route path="/login/customer" element={<CustomerLogin />} />
+        <Route path="/login/employee" element={<EmployeeLogin />} />
+        <Route path="/login/admin" element={<AdminLogin />} />
+        
+        {/* Legacy combined login (for backward compatibility) */}
+        <Route path="/login" element={<LegacyLoginPage />} />
+        
+        {/* ===== Customer Portal Routes ===== */}
+        {/* Customer portal with internal routing */}
+        <Route path="/portal/*" element={<Portal />} />
+        
+        {/* ===== Employee Portal Routes ===== */}
+        {/* Employee production dashboard */}
+        <Route path="/production/*" element={<EmployeeLayout />} />
+        
+        {/* ===== Admin/Owner Routes ===== */}
+        {/* Full admin dashboard */}
+        <Route path="/admin/*" element={<AdminLayout />} />
+        
+        {/* ===== Fallback Routes ===== */}
+        {/* Redirect old dashboard routes to admin */}
+        <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
+        <Route path="/jobs" element={<Navigate to="/admin" replace />} />
+        <Route path="/customers" element={<Navigate to="/admin" replace />} />
+        <Route path="/settings" element={<Navigate to="/admin" replace />} />
+        
+        {/* Catch-all redirect to root */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />
     </Router>
