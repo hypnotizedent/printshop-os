@@ -86,8 +86,15 @@ const TASK_TYPES = [
   { value: 'rework', label: 'Rework' }
 ]
 
-const DEFAULT_HOURLY_RATE = parseFloat(import.meta.env.VITE_DEFAULT_HOURLY_RATE || '25.00')
-const DEFAULT_OVERHEAD_PERCENTAGE = parseFloat(import.meta.env.VITE_OVERHEAD_PERCENTAGE || '15.0')
+// Parse and validate environment variables with fallbacks
+const parseEnvNumber = (value: string | undefined, fallback: number, min = 0, max = 10000): number => {
+  const parsed = parseFloat(value || String(fallback))
+  if (isNaN(parsed) || parsed < min || parsed > max) return fallback
+  return parsed
+}
+
+const DEFAULT_HOURLY_RATE = parseEnvNumber(import.meta.env.VITE_DEFAULT_HOURLY_RATE, 25.00, 0, 1000)
+const DEFAULT_OVERHEAD_PERCENTAGE = parseEnvNumber(import.meta.env.VITE_OVERHEAD_PERCENTAGE, 15.0, 0, 100)
 
 export function JobCostEntry({ jobId, jobNumber, onSave, onCancel }: JobCostEntryProps) {
   const [isLoading, setIsLoading] = useState(true)

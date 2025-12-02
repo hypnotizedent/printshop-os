@@ -15,18 +15,21 @@ jest.mock('../../utils/cache', () => ({
   ...jest.requireActual('../../utils/cache'),
   getCache: jest.fn(),
   setCache: jest.fn(),
+  delCache: jest.fn(),
   generateCacheKey: jest.fn((...args) => JSON.stringify(args)),
 }));
 
 const mockQuery = db.query as jest.MockedFunction<typeof db.query>;
 const mockGetCache = cache.getCache as jest.MockedFunction<typeof cache.getCache>;
 const mockSetCache = cache.setCache as jest.MockedFunction<typeof cache.setCache>;
+const mockDelCache = cache.delCache as jest.MockedFunction<typeof cache.delCache>;
 
 describe('Job Costs API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetCache.mockResolvedValue(null);
     mockSetCache.mockResolvedValue();
+    mockDelCache.mockResolvedValue();
   });
 
   describe('calculateCostMetrics', () => {

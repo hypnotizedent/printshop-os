@@ -59,18 +59,27 @@ router.get('/overview', async (req: Request, res: Response) => {
   try {
     const { start_date, end_date, period = 'month' } = req.query;
 
+    // Validate period parameter to prevent SQL injection
+    const validPeriods = ['day', 'week', 'month', 'year'] as const;
+    const validatedPeriod = validPeriods.includes(period as typeof validPeriods[number]) 
+      ? period as typeof validPeriods[number]
+      : 'month';
+
     // Generate cache key
-    const cacheKey = generateCacheKey('profit-overview', { start_date, end_date, period });
+    const cacheKey = generateCacheKey('profit-overview', { start_date, end_date, period: validatedPeriod });
     const cached = await getCache(cacheKey);
     if (cached) {
       return res.json({ ...cached, cached: true });
     }
 
-    // Calculate date range
+    // Calculate date range using constants for better maintainability
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const PERIOD_DAYS = { day: 1, week: 7, month: 30, year: 365 } as const;
+    
     const endDate = end_date ? new Date(end_date as string) : new Date();
     const startDate = start_date 
       ? new Date(start_date as string) 
-      : new Date(endDate.getTime() - (period === 'year' ? 365 : period === 'week' ? 7 : 30) * 24 * 60 * 60 * 1000);
+      : new Date(endDate.getTime() - PERIOD_DAYS[validatedPeriod] * DAY_MS);
 
     // Get aggregate profit metrics
     const aggregateResult = await query(
@@ -87,18 +96,19 @@ router.get('/overview', async (req: Request, res: Response) => {
       [startDate.toISOString(), endDate.toISOString()]
     );
 
-    // Get profit trend by period
+    // Get profit trend by period - use validated period value for DATE_TRUNC
+    const dateTruncPeriod = validatedPeriod === 'week' ? 'week' : 'month';
     const trendResult = await query(
       `SELECT 
-        DATE_TRUNC('${period === 'week' ? 'week' : 'month'}', "costEnteredAt") as period,
+        DATE_TRUNC($3, "costEnteredAt") as period,
         COALESCE(SUM(profit), 0) as profit,
         COALESCE(AVG("profitMargin"), 0) as margin
       FROM job_costs
       WHERE "costEnteredAt" BETWEEN $1 AND $2
-      GROUP BY DATE_TRUNC('${period === 'week' ? 'week' : 'month'}', "costEnteredAt")
+      GROUP BY DATE_TRUNC($3, "costEnteredAt")
       ORDER BY period DESC
       LIMIT 12`,
-      [startDate.toISOString(), endDate.toISOString()]
+      [startDate.toISOString(), endDate.toISOString(), dateTruncPeriod]
     );
 
     const row = aggregateResult.rows[0] || {};

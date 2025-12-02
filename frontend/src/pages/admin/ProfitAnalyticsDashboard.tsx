@@ -361,8 +361,13 @@ export function ProfitAnalyticsDashboard() {
                       <XAxis 
                         dataKey="period" 
                         tickFormatter={(value) => {
-                          const date = new Date(value)
-                          return `${date.getMonth() + 1}/${date.getDate()}`
+                          try {
+                            const date = new Date(value)
+                            if (isNaN(date.getTime())) return String(value)
+                            return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date)
+                          } catch {
+                            return String(value)
+                          }
                         }}
                         className="text-xs"
                       />

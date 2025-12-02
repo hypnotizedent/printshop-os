@@ -6,7 +6,7 @@
 
 import { Router, Request, Response } from 'express';
 import { query } from '../utils/db';
-import { getCache, setCache, generateCacheKey, CACHE_TTL } from '../utils/cache';
+import { getCache, setCache, delCache, generateCacheKey, CACHE_TTL } from '../utils/cache';
 
 const router = Router();
 
@@ -220,9 +220,9 @@ router.post('/:id/costs', async (req: Request, res: Response) => {
       );
     }
 
-    // Invalidate cache
+    // Invalidate cache for this job's costs
     const cacheKey = generateCacheKey('job-costs', { jobId });
-    await setCache(cacheKey, null, 0);
+    await delCache(cacheKey);
 
     const response: JobCostResponse = {
       jobId,
