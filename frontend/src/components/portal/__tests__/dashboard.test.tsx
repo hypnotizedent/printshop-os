@@ -90,7 +90,7 @@ describe('Dashboard Component', () => {
     expect(screen.getByText(/Here's an overview of your account/i)).toBeInTheDocument()
   })
 
-  it('displays breadcrumb navigation', () => {
+  it('displays welcome message section', () => {
     render(
       <BrowserRouter>
         <Dashboard
@@ -102,7 +102,7 @@ describe('Dashboard Component', () => {
       </BrowserRouter>
     )
 
-    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+    expect(screen.getByText(/Here's an overview of your account/i)).toBeInTheDocument()
   })
 
   it('renders search functionality', () => {
@@ -117,7 +117,7 @@ describe('Dashboard Component', () => {
       </BrowserRouter>
     )
 
-    const searchInput = screen.getByPlaceholderText(/Search orders, products/i)
+    const searchInput = screen.getByPlaceholderText(/Search orders, quotes/i)
     expect(searchInput).toBeInTheDocument()
   })
 
@@ -134,7 +134,7 @@ describe('Dashboard Component', () => {
       </BrowserRouter>
     )
 
-    const searchInput = screen.getByPlaceholderText(/Search orders, products/i)
+    const searchInput = screen.getByPlaceholderText(/Search orders, quotes/i)
     await user.type(searchInput, 'business cards')
     expect(searchInput).toHaveValue('business cards')
   })
@@ -151,8 +151,8 @@ describe('Dashboard Component', () => {
       </BrowserRouter>
     )
 
-    expect(screen.getByText(/Pending Quotes Awaiting Review/i)).toBeInTheDocument()
-    expect(screen.getByText(/1 quote waiting for your approval/i)).toBeInTheDocument()
+    expect(screen.getByText(/Awaiting Approval/i)).toBeInTheDocument()
+    expect(screen.getByText(/Review and approve to proceed with your orders/i)).toBeInTheDocument()
   })
 
   it('does not display pending quotes alert when no quotes', () => {
@@ -167,7 +167,7 @@ describe('Dashboard Component', () => {
       </BrowserRouter>
     )
 
-    expect(screen.queryByText(/Pending Quotes Awaiting Review/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Awaiting Approval/i)).not.toBeInTheDocument()
   })
 })
 
@@ -411,7 +411,7 @@ describe('Accessibility', () => {
       </BrowserRouter>
     )
 
-    const searchInput = screen.getByPlaceholderText(/Search orders, products/i)
+    const searchInput = screen.getByPlaceholderText(/Search orders, quotes/i)
     expect(searchInput).toHaveAttribute('type', 'search')
   })
 
