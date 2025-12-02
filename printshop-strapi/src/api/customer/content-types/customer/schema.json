@@ -62,6 +62,26 @@
       "relation": "oneToMany",
       "target": "api::job.job",
       "mappedBy": "customer"
+    },
+    "segment": {
+      "type": "enumeration",
+      "enum": [
+        "vip",
+        "b2b",
+        "middleman",
+        "b2c"
+      ],
+      "default": "b2c"
+    },
+    "segmentAutoDetected": {
+      "type": "boolean",
+      "default": true
+    },
+    "segmentDetails": {
+      "type": "json"
+    },
+    "lastSegmentUpdate": {
+      "type": "datetime"
     }
   }
 }

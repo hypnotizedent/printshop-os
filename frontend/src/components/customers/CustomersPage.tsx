@@ -5,14 +5,26 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { MagnifyingGlass, Plus, EnvelopeSimple, Phone, Buildings, Package, CurrencyDollar } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import { customersApi, type CreateCustomerInput } from "@/lib/api-client"
 import { EmptyState } from "@/components/ui/states"
+import { CustomerSegmentBadge, type CustomerSegment, segmentConfig } from "./CustomerSegmentBadge"
 import type { Customer } from "@/lib/types"
 
+interface ExtendedCustomer extends Customer {
+  segment?: CustomerSegment;
+}
+
 interface CustomersPageProps {
-  customers: Customer[]
+  customers: ExtendedCustomer[]
   onViewCustomer?: (customerId: string) => void
   onNewOrder?: (customerId: string) => void
   onCustomerCreated?: (customer: Customer) => void
@@ -20,6 +32,7 @@ interface CustomersPageProps {
 
 export function CustomersPage({ customers, onViewCustomer, onNewOrder, onCustomerCreated }: CustomersPageProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const [segmentFilter, setSegmentFilter] = useState<CustomerSegment | 'all'>('all')
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [newCustomer, setNewCustomer] = useState<CreateCustomerInput>({
@@ -29,12 +42,18 @@ export function CustomersPage({ customers, onViewCustomer, onNewOrder, onCustome
     company: "",
   })
 
-  const filteredCustomers = customers.filter(customer =>
-    searchQuery === "" ||
-    customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    customer.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredCustomers = customers.filter(customer => {
+    const matchesSearch = searchQuery === "" ||
+      customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      customer.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const matchesSegment = segmentFilter === 'all' || 
+      customer.segment === segmentFilter ||
+      (!customer.segment && segmentFilter === 'b2c') // Default to B2C if no segment
+    
+    return matchesSearch && matchesSegment
+  })
 
   const totalRevenue = customers.reduce((acc, c) => acc + c.totalRevenue, 0)
   const activeCustomers = customers.filter(c => c.status === 'active').length
@@ -145,6 +164,22 @@ export function CustomersPage({ customers, onViewCustomer, onNewOrder, onCustome
             className="pl-10"
           />
         </div>
+        <Select
+          value={segmentFilter}
+          onValueChange={(value) => setSegmentFilter(value as CustomerSegment | 'all')}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="All Segments" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Segments</SelectItem>
+            {Object.entries(segmentConfig).map(([key, config]) => (
+              <SelectItem key={key} value={key}>
+                {config.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -153,9 +188,14 @@ export function CustomersPage({ customers, onViewCustomer, onNewOrder, onCustome
             <div className="space-y-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors truncate">
-                    {customer.name}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors truncate">
+                      {customer.name}
+                    </h3>
+                    {customer.segment && (
+                      <CustomerSegmentBadge segment={customer.segment} size="sm" showLabel={false} />
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground truncate">{customer.company}</p>
                 </div>
                 <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
