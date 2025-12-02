@@ -362,9 +362,12 @@ export function CustomerLanding() {
                 <div className="text-center">
                   <div className="relative inline-flex mb-4">
                     <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                      <step.icon className="w-7 h-7 text-primary" />
+                      <step.icon className="w-7 h-7 text-primary" aria-hidden="true" />
                     </div>
-                    <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                    <span 
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center"
+                      aria-label={`Step ${index + 1} of ${steps.length}`}
+                    >
                       {index + 1}
                     </span>
                   </div>

@@ -356,7 +356,15 @@ export function Dashboard({
                     <div 
                       key={order.id}
                       className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => navigate(`/portal/orders/${order.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(`/portal/orders/${order.id}`);
+                        }
+                      }}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium text-sm">Order #{order.orderNumber}</span>

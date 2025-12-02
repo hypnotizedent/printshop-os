@@ -275,7 +275,15 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewO
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       className="flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer group"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => onViewOrder?.(job.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onViewOrder?.(job.id);
+                        }
+                      }}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
