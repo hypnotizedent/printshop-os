@@ -10,6 +10,7 @@ import swaggerUi from 'swagger-ui-express';
 import analyticsRouter from './routes/analytics';
 import authRoutes from './routes/auth';
 import jobsRouter from './routes/jobs';
+import jobCostsRouter from './routes/job-costs';
 import { inventoryRouter } from './inventory';
 import { swaggerDocument } from './swagger';
 
@@ -33,6 +34,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobsRouter);
+app.use('/api/jobs', jobCostsRouter);
 app.use('/api/inventory', inventoryRouter);
 
 // 404 handler

@@ -1,0 +1,38 @@
+{
+  "collectionName": "components_cost_material_costs",
+  "info": {
+    "displayName": "Material Cost",
+    "description": "Tracks material costs including ink, thread, screens, vinyl, and supplies"
+  },
+  "options": {},
+  "attributes": {
+    "inkCost": {
+      "type": "decimal",
+      "min": 0,
+      "default": 0
+    },
+    "threadCost": {
+      "type": "decimal",
+      "min": 0,
+      "default": 0
+    },
+    "screenCost": {
+      "type": "decimal",
+      "min": 0,
+      "default": 0
+    },
+    "vinylCost": {
+      "type": "decimal",
+      "min": 0,
+      "default": 0
+    },
+    "otherSupplies": {
+      "type": "decimal",
+      "min": 0,
+      "default": 0
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}

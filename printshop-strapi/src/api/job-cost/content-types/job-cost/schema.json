@@ -1,0 +1,88 @@
+{
+  "kind": "collectionType",
+  "collectionName": "job_costs",
+  "info": {
+    "singularName": "job-cost",
+    "pluralName": "job-costs",
+    "displayName": "Job Cost",
+    "description": "Cost tracking and profit calculation for jobs"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "job": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::job.job"
+    },
+    "supplierCosts": {
+      "type": "component",
+      "repeatable": true,
+      "component": "cost.supplier-cost"
+    },
+    "laborCosts": {
+      "type": "component",
+      "repeatable": true,
+      "component": "cost.labor-cost"
+    },
+    "materialCosts": {
+      "type": "component",
+      "repeatable": false,
+      "component": "cost.material-cost"
+    },
+    "overheadPercentage": {
+      "type": "decimal",
+      "default": 15.0,
+      "min": 0,
+      "max": 100
+    },
+    "totalSupplierCost": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "totalLaborCost": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "totalMaterialCost": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "overheadCost": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "totalCost": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "revenue": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "profit": {
+      "type": "decimal",
+      "default": 0
+    },
+    "profitMargin": {
+      "type": "decimal",
+      "default": 0
+    },
+    "costEnteredBy": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "costEnteredAt": {
+      "type": "datetime"
+    }
+  }
+}

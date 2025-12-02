@@ -1,0 +1,35 @@
+{
+  "collectionName": "components_cost_supplier_costs",
+  "info": {
+    "displayName": "Supplier Cost",
+    "description": "Tracks costs for garments and blanks from suppliers"
+  },
+  "options": {},
+  "attributes": {
+    "supplier": {
+      "type": "string",
+      "required": true
+    },
+    "itemName": {
+      "type": "string",
+      "required": true
+    },
+    "quantity": {
+      "type": "integer",
+      "required": true,
+      "min": 0
+    },
+    "unitCost": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "totalCost": {
+      "type": "decimal",
+      "min": 0
+    },
+    "invoiceNumber": {
+      "type": "string"
+    }
+  }
+}
