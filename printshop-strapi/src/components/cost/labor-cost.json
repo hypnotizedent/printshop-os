@@ -1,0 +1,37 @@
+{
+  "collectionName": "components_cost_labor_costs",
+  "info": {
+    "displayName": "Labor Cost",
+    "description": "Tracks employee hours and labor costs for jobs"
+  },
+  "options": {},
+  "attributes": {
+    "employee": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::employee.employee"
+    },
+    "hoursWorked": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "hourlyRate": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "totalCost": {
+      "type": "decimal",
+      "min": 0
+    },
+    "taskType": {
+      "type": "enumeration",
+      "enum": ["setup", "production", "cleanup", "rework"],
+      "required": true
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}

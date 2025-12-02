@@ -9,6 +9,7 @@ import productsRouter from './analytics/products';
 import customersRouter from './analytics/customers';
 import ordersRouter from './analytics/orders';
 import exportRouter from './analytics/export';
+import profitRouter from './profit-analytics';
 
 const router = Router();
 
@@ -18,6 +19,7 @@ router.use('/products', productsRouter);
 router.use('/customers', customersRouter);
 router.use('/orders', ordersRouter);
 router.use('/export', exportRouter);
+router.use('/profit', profitRouter);
 
 // Root analytics endpoint
 router.get('/', (_req, res) => {
@@ -31,6 +33,7 @@ router.get('/', (_req, res) => {
       customers: '/api/analytics/customers',
       orders: '/api/analytics/orders',
       export: '/api/analytics/export',
+      profit: '/api/analytics/profit',
     },
   });
 });
