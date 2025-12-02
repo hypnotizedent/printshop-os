@@ -12,6 +12,7 @@ import authRoutes from './routes/auth';
 import jobsRouter from './routes/jobs';
 import jobCostsRouter from './routes/job-costs';
 import customerSegmentsRouter from './routes/customer-segments';
+import designsRouter, { quotesRouter } from './routes/designs';
 import { inventoryRouter } from './inventory';
 import { swaggerDocument } from './swagger';
 
@@ -38,6 +39,8 @@ app.use('/api/jobs', jobsRouter);
 app.use('/api/jobs', jobCostsRouter);
 app.use('/api/inventory', inventoryRouter);
 app.use('/api/customers', customerSegmentsRouter);
+app.use('/api/designs', designsRouter);
+app.use('/api/quotes', quotesRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
@@ -45,9 +48,9 @@ app.use((_req: Request, res: Response) => {
 });
 
 // Error handling middleware
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
-  res.status(err.status || 500).json({
+  res.status(500).json({
     error: err.message || 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
@@ -62,6 +65,8 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth/*`);
     console.log(`📦 Inventory API: http://localhost:${PORT}/api/inventory/*`);
     console.log(`👥 Customer Segments: http://localhost:${PORT}/api/customers/*`);
+    console.log(`🎨 Designs API: http://localhost:${PORT}/api/designs/*`);
+    console.log(`💰 Quotes API: http://localhost:${PORT}/api/quotes/*`);
     console.log(`📚 API Docs: http://localhost:${PORT}/api-docs`);
   });
 }

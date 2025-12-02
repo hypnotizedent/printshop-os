@@ -31,14 +31,54 @@
         "tank-top",
         "long-sleeve",
         "polo",
-        "sweatshirt"
+        "sweatshirt",
+        "hat",
+        "jacket"
       ],
       "default": "t-shirt",
       "required": true
     },
+    "garmentColor": {
+      "type": "string",
+      "default": "#FFFFFF"
+    },
+    "garmentSize": {
+      "type": "enumeration",
+      "enum": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL",
+        "4XL",
+        "5XL"
+      ],
+      "default": "M"
+    },
+    "printMethod": {
+      "type": "enumeration",
+      "enum": [
+        "screen-print",
+        "dtg",
+        "embroidery",
+        "heat-transfer",
+        "sublimation"
+      ],
+      "default": "screen-print"
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 1,
+      "min": 1
+    },
     "designs": {
       "type": "json",
       "required": true
+    },
+    "canvasData": {
+      "type": "json"
     },
     "pricing": {
       "type": "json",
@@ -47,7 +87,10 @@
     "status": {
       "type": "enumeration",
       "enum": [
+        "draft",
         "active",
+        "quoted",
+        "ordered",
         "completed",
         "abandoned"
       ],
@@ -57,10 +100,16 @@
     "productId": {
       "type": "string"
     },
-    "canvasData": {
-      "type": "json"
-    },
     "thumbnailUrl": {
+      "type": "string"
+    },
+    "mockupUrl": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "shareToken": {
       "type": "string"
     }
   }

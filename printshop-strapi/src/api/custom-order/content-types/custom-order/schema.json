@@ -40,13 +40,33 @@
         "tank-top",
         "long-sleeve",
         "polo",
-        "sweatshirt"
+        "sweatshirt",
+        "hat",
+        "jacket"
       ],
       "required": true
+    },
+    "garmentColor": {
+      "type": "string",
+      "default": "#FFFFFF"
+    },
+    "printMethod": {
+      "type": "enumeration",
+      "enum": [
+        "screen-print",
+        "dtg",
+        "embroidery",
+        "heat-transfer",
+        "sublimation"
+      ],
+      "default": "screen-print"
     },
     "designs": {
       "type": "json",
       "required": true
+    },
+    "canvasData": {
+      "type": "json"
     },
     "pricing": {
       "type": "json",
@@ -57,6 +77,7 @@
       "enum": [
         "pending",
         "processing",
+        "in-production",
         "completed",
         "cancelled"
       ],
@@ -83,6 +104,13 @@
     },
     "productionFiles": {
       "type": "json"
+    },
+    "mockupUrl": {
+      "type": "string"
+    },
+    "rushOrder": {
+      "type": "boolean",
+      "default": false
     }
   }
 }
