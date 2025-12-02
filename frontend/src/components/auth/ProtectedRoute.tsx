@@ -1,10 +1,12 @@
 /**
  * Protected Route Component
  * Redirects to login if user is not authenticated
+ * Supports role-based access control for three-portal architecture
  */
 
 import { ReactNode } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -12,16 +14,21 @@ interface ProtectedRouteProps {
   /**
    * Allowed user types - if specified, only these types can access
    */
-  allowedUserTypes?: ('customer' | 'employee')[];
+  allowedUserTypes?: UserRole[];
   /**
    * Fallback component to show when not authenticated
    */
   fallback?: ReactNode;
+  /**
+   * Custom redirect path when not authorized (overrides default role-based redirect)
+   */
+  redirectTo?: string;
 }
 
 /**
  * Wraps components that require authentication
  * Shows loading state while checking auth, redirects to login if not authenticated
+ * Supports role-based access control with appropriate redirects
  * 
  * @example
  * ```tsx
@@ -30,23 +37,25 @@ interface ProtectedRouteProps {
  *   <CustomerDashboard />
  * </ProtectedRoute>
  * 
- * // Protect employee dashboard
- * <ProtectedRoute allowedUserTypes={['employee']}>
+ * // Protect employee production dashboard
+ * <ProtectedRoute allowedUserTypes={['employee', 'owner']}>
  *   <ProductionDashboard />
  * </ProtectedRoute>
  * 
- * // Protect any authenticated route
- * <ProtectedRoute>
- *   <Settings />
+ * // Protect admin-only route
+ * <ProtectedRoute allowedUserTypes={['owner']}>
+ *   <AdminSettings />
  * </ProtectedRoute>
  * ```
  */
 export function ProtectedRoute({ 
   children, 
   allowedUserTypes,
-  fallback 
+  fallback,
+  redirectTo 
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, userType } = useAuth();
+  const { isAuthenticated, isLoading, userType, getRedirectPath } = useAuth();
+  const location = useLocation();
 
   // Show loading spinner while checking authentication
   if (isLoading) {
@@ -60,45 +69,35 @@ export function ProtectedRoute({
     );
   }
 
-  // Not authenticated - show fallback or redirect message
+  // Not authenticated - redirect to appropriate login page based on route
   if (!isAuthenticated) {
     if (fallback) {
       return <>{fallback}</>;
     }
     
-    return (
-      <div className="flex h-screen items-center justify-center bg-muted/50">
-        <div className="text-center space-y-4 p-8 rounded-lg bg-card border max-w-md">
-          <h2 className="text-2xl font-bold">Authentication Required</h2>
-          <p className="text-muted-foreground">
-            Please log in to access this page.
-          </p>
-          <a 
-            href="/login" 
-            className="inline-block px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Go to Login
-          </a>
-        </div>
-      </div>
-    );
+    // Determine appropriate login page based on current path
+    let loginPath = '/login/customer';
+    if (location.pathname.startsWith('/admin')) {
+      loginPath = '/login/admin';
+    } else if (location.pathname.startsWith('/production')) {
+      loginPath = '/login/employee';
+    } else if (location.pathname.startsWith('/portal')) {
+      loginPath = '/login/customer';
+    }
+    
+    return <Navigate to={redirectTo || loginPath} state={{ from: location }} replace />;
   }
 
   // Check if user type is allowed
   if (allowedUserTypes && userType && !allowedUserTypes.includes(userType)) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-muted/50">
-        <div className="text-center space-y-4 p-8 rounded-lg bg-card border max-w-md">
-          <h2 className="text-2xl font-bold">Access Denied</h2>
-          <p className="text-muted-foreground">
-            You don't have permission to access this page.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Current user type: {userType}
-          </p>
-        </div>
-      </div>
-    );
+    // Owner can access all areas (for testing/troubleshooting)
+    if (userType === 'owner') {
+      return <>{children}</>;
+    }
+    
+    // Redirect to user's appropriate portal
+    const redirectPath = redirectTo || getRedirectPath();
+    return <Navigate to={redirectPath} replace />;
   }
 
   // User is authenticated and authorized
