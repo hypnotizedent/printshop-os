@@ -25,7 +25,7 @@ export function RecentOrders({ orders }: RecentOrdersProps) {
   }
 
   const formatStatus = (status: string) => {
-    return status.split('-').map(word => 
+    return status.split(/[-_]/).map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ')
   }
