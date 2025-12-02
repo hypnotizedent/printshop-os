@@ -11,6 +11,7 @@ import analyticsRouter from './routes/analytics';
 import authRoutes from './routes/auth';
 import jobsRouter from './routes/jobs';
 import jobCostsRouter from './routes/job-costs';
+import customerSegmentsRouter from './routes/customer-segments';
 import { inventoryRouter } from './inventory';
 import { swaggerDocument } from './swagger';
 
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobsRouter);
 app.use('/api/jobs', jobCostsRouter);
 app.use('/api/inventory', inventoryRouter);
+app.use('/api/customers', customerSegmentsRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
@@ -59,6 +61,7 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`📊 Analytics API: http://localhost:${PORT}/api/analytics`);
     console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth/*`);
     console.log(`📦 Inventory API: http://localhost:${PORT}/api/inventory/*`);
+    console.log(`👥 Customer Segments: http://localhost:${PORT}/api/customers/*`);
     console.log(`📚 API Docs: http://localhost:${PORT}/api-docs`);
   });
 }

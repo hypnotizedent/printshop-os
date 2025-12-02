@@ -48,6 +48,22 @@
     },
     "printavoId": {
       "type": "string"
+    },
+    "department": {
+      "type": "enumeration",
+      "enum": [
+        "screen_printing",
+        "embroidery",
+        "digital"
+      ]
+    },
+    "printMethod": {
+      "type": "string"
+    },
+    "assignedEmployee": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::employee.employee"
     }
   }
 }
