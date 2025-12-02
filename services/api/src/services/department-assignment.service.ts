@@ -3,7 +3,17 @@
  * Handles auto-routing of jobs to the correct department based on print method
  */
 
-export type Department = 'screen_printing' | 'embroidery' | 'digital';
+import {
+  Department,
+  SCREEN_PRINTING_PATTERNS,
+  EMBROIDERY_PATTERNS,
+  DIGITAL_PATTERNS,
+  DEPARTMENT_DISPLAY_NAMES,
+  ALL_DEPARTMENTS,
+} from './department-constants';
+
+// Re-export the Department type for external consumers
+export type { Department };
 
 export interface DepartmentAssignmentResult {
   department: Department | null;
@@ -39,11 +49,6 @@ export interface DepartmentOverview {
   totalEmployees: number;
   totalActiveJobs: number;
 }
-
-// Pattern definitions for print method matching
-const SCREEN_PRINTING_PATTERNS = ['screen print', 'silk screen', 'screen-print', 'silkscreen', 'screen printing'];
-const EMBROIDERY_PATTERNS = ['embroidery', 'embroidered', 'embroider'];
-const DIGITAL_PATTERNS = ['dtg', 'vinyl', 'heat press', 'sublimation', 'heat transfer', 'direct to garment', 'dye sublimation'];
 
 /**
  * Department Assignment Service
@@ -175,16 +180,9 @@ export class DepartmentAssignmentService {
    * @returns Department overview with counts
    */
   static getDepartmentOverview(employees: Employee[], jobs: Job[]): DepartmentOverview {
-    const departmentNames: Department[] = ['screen_printing', 'embroidery', 'digital'];
-    const displayNames: Record<Department, string> = {
-      screen_printing: 'Screen Printing',
-      embroidery: 'Embroidery',
-      digital: 'Digital',
-    };
-
-    const departments = departmentNames.map((name) => ({
+    const departments = ALL_DEPARTMENTS.map((name) => ({
       name,
-      displayName: displayNames[name],
+      displayName: DEPARTMENT_DISPLAY_NAMES[name],
       employeeCount: employees.filter((emp) => emp.department === name && emp.isActive).length,
       activeJobCount: jobs.filter((job) => job.department === name).length,
     }));
@@ -203,7 +201,7 @@ export class DepartmentAssignmentService {
    */
   static isValidDepartment(department: string | undefined | null): department is Department {
     if (!department) return false;
-    return ['screen_printing', 'embroidery', 'digital'].includes(department);
+    return (ALL_DEPARTMENTS as readonly string[]).includes(department);
   }
 
   /**
@@ -211,7 +209,7 @@ export class DepartmentAssignmentService {
    * @returns Array of valid department values
    */
   static getAllDepartments(): Department[] {
-    return ['screen_printing', 'embroidery', 'digital'];
+    return [...ALL_DEPARTMENTS];
   }
 
   /**
@@ -220,12 +218,7 @@ export class DepartmentAssignmentService {
    * @returns Human-readable display name
    */
   static getDepartmentDisplayName(department: Department): string {
-    const displayNames: Record<Department, string> = {
-      screen_printing: 'Screen Printing',
-      embroidery: 'Embroidery',
-      digital: 'Digital',
-    };
-    return displayNames[department];
+    return DEPARTMENT_DISPLAY_NAMES[department];
   }
 }
 

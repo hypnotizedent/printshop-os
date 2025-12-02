@@ -1,9 +1,12 @@
 /**
  * Job Lifecycle Hooks
  * Auto-assigns department when job is created or updated with print method
+ * 
+ * NOTE: These patterns must stay in sync with services/api/src/services/department-constants.ts
  */
 
 // Department patterns for print method matching
+// Keep in sync with: services/api/src/services/department-constants.ts
 const SCREEN_PRINTING_PATTERNS = ['screen print', 'silk screen', 'screen-print', 'silkscreen', 'screen printing'];
 const EMBROIDERY_PATTERNS = ['embroidery', 'embroidered', 'embroider'];
 const DIGITAL_PATTERNS = ['dtg', 'vinyl', 'heat press', 'sublimation', 'heat transfer', 'direct to garment', 'dye sublimation'];
