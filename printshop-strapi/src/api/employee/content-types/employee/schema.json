@@ -46,12 +46,9 @@
     "department": {
       "type": "enumeration",
       "enum": [
-        "screen-printing",
+        "screen_printing",
         "embroidery",
-        "dtg",
-        "finishing",
-        "shipping",
-        "design"
+        "digital"
       ]
     },
     "isActive": {

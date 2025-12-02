@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "notification_preferences",
+  "info": {
+    "singularName": "notification-preference",
+    "pluralName": "notification-preferences",
+    "displayName": "Notification Preference",
+    "description": "Customer notification preferences for multi-channel communications (email/SMS)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "customer": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::customer.customer"
+    },
+    "emailEnabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "smsEnabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "smsForPickupOnly": {
+      "type": "boolean",
+      "default": true
+    },
+    "emailAddress": {
+      "type": "email"
+    },
+    "smsPhone": {
+      "type": "string"
+    },
+    "preferences": {
+      "type": "json",
+      "default": {
+        "payment_received": { "email": true, "sms": false },
+        "garments_arrived": { "email": true, "sms": false },
+        "artwork_ready": { "email": true, "sms": false },
+        "in_production": { "email": true, "sms": false },
+        "quality_check": { "email": true, "sms": false },
+        "ready_for_pickup": { "email": true, "sms": true },
+        "shipped": { "email": true, "sms": true }
+      }
+    }
+  }
+}
