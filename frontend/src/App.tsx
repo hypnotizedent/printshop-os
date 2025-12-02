@@ -18,6 +18,14 @@ import { Portal } from "./components/portal/Portal"
 import { AuthPage } from "./components/auth/AuthPage"
 import OnlineDesignerPage from "./apps/online-designer/pages/Index"
 
+// Public pages
+import { FAQ } from "./pages/public/FAQ"
+import { Contact } from "./pages/public/Contact"
+import { ShippingInfo } from "./pages/public/ShippingInfo"
+import { Privacy } from "./pages/public/Privacy"
+import { Terms } from "./pages/public/Terms"
+import { ForgotPassword } from "./pages/auth/ForgotPassword"
+
 // Legacy imports for backward compatibility
 import OrderStatus from "./pages/OrderStatus"
 import QuoteApproval from "./pages/QuoteApproval"
@@ -90,11 +98,19 @@ function App() {
         {/* Public quote approval */}
         <Route path="/quote/:token" element={<QuoteApproval />} />
         
+        {/* Public information pages */}
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/shipping" element={<ShippingInfo />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        
         {/* ===== Login Routes ===== */}
         {/* Role-specific login pages */}
         <Route path="/login/customer" element={<CustomerLogin />} />
         <Route path="/login/employee" element={<EmployeeLogin />} />
         <Route path="/login/admin" element={<AdminLogin />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         
         {/* Legacy combined login (for backward compatibility) */}
         <Route path="/login" element={<LegacyLoginPage />} />

@@ -208,7 +208,16 @@ export const CustomerDesignSession = ({
     canvasRef.current?.uploadImage(file);
   }, []);
 
-  const handleAddText = useCallback((text: string, options?: any) => {
+  interface TextOptions {
+    fontSize?: number;
+    fontFamily?: string;
+    fill?: string;
+    fontWeight?: string | number;
+    fontStyle?: string;
+    textAlign?: string;
+  }
+
+  const handleAddText = useCallback((text: string, options?: TextOptions) => {
     canvasRef.current?.addText(text, options);
   }, []);
 

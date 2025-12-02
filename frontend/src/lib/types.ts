@@ -125,7 +125,10 @@ export interface CustomerDashboardStats {
   ordersThisMonth: number
   pendingQuotes: number
   activeJobs: number
+  activeOrders?: number      // Alias for Dashboard.tsx
+  completedOrders?: number   // For Dashboard.tsx
   totalSpentYTD: number
+  totalSpent?: number        // Alias for Dashboard.tsx
 }
 
 export interface CustomerUser {

@@ -27,7 +27,10 @@ const mockStats: CustomerDashboardStats = {
   ordersThisMonth: 12,
   pendingQuotes: 3,
   activeJobs: 2,
-  totalSpentYTD: 45234
+  activeOrders: 5,
+  completedOrders: 8,
+  totalSpentYTD: 45234,
+  totalSpent: 45234
 }
 
 const mockOrders: CustomerOrder[] = [
@@ -261,8 +264,7 @@ export function Portal() {
 
   // Handler for search button click (opens search modal or triggers search UI)
   const handleSearchClick = useCallback(() => {
-    // Currently a no-op - search UI should be implemented separately
-    console.log('Search clicked - implement search modal')
+    // TODO: Implement search modal
   }, [])
 
   const handleLogout = async () => {
