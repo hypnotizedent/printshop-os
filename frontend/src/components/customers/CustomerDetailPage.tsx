@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { 
   ArrowLeft, 
   EnvelopeSimple, 
   Phone, 
@@ -12,11 +19,15 @@ import {
   CurrencyDollar,
   Plus,
   Clock,
-  FileText
+  FileText,
+  ArrowsClockwise
 } from "@phosphor-icons/react"
+import { CustomerSegmentBadge, CustomerSegmentInfo, type CustomerSegment, segmentConfig } from "./CustomerSegmentBadge"
+import { toast } from "sonner"
 import type { Customer } from "@/lib/types"
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:1337';
+const API_SERVICE_BASE = import.meta.env.VITE_API_SERVICE_URL || 'http://localhost:3001';
 
 interface Order {
   id: string;
@@ -37,6 +48,20 @@ interface Order {
   }>;
 }
 
+interface SegmentDetails {
+  segment: CustomerSegment;
+  criteria?: {
+    totalOrders?: number;
+    ordersLast30Days?: number;
+    totalSpend?: number;
+    avgOrderValue?: number;
+    orderFrequencyPerMonth?: number;
+    repeatSimilarity?: number;
+  };
+  reason?: string;
+  detectedAt?: string;
+}
+
 interface CustomerDetailPageProps {
   customerId: string;
   onBack: () => void;
@@ -50,6 +75,76 @@ export function CustomerDetailPage({ customerId, onBack, onNewOrder, onViewOrder
   const [isLoading, setIsLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [segmentDetails, setSegmentDetails] = useState<SegmentDetails | null>(null);
+  const [segmentLoading, setSegmentLoading] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
+
+  // Fetch customer segment
+  const fetchSegment = async () => {
+    try {
+      const res = await fetch(`${API_SERVICE_BASE}/api/customers/${customerId}/segment`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          setSegmentDetails(data.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch segment:', err);
+    }
+  };
+
+  // Auto-detect segment
+  const handleDetectSegment = async () => {
+    setIsDetecting(true);
+    try {
+      const res = await fetch(`${API_SERVICE_BASE}/api/customers/${customerId}/segment/detect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autoUpdate: true }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          setSegmentDetails(data.data.details);
+          toast.success(`Segment updated to ${data.data.newSegment.toUpperCase()}`);
+        }
+      } else {
+        toast.error('Failed to detect segment');
+      }
+    } catch (err) {
+      console.error('Failed to detect segment:', err);
+      toast.error('Failed to detect segment');
+    } finally {
+      setIsDetecting(false);
+    }
+  };
+
+  // Override segment manually
+  const handleOverrideSegment = async (newSegment: CustomerSegment) => {
+    setSegmentLoading(true);
+    try {
+      const res = await fetch(`${API_SERVICE_BASE}/api/customers/${customerId}/segment`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ segment: newSegment }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          setSegmentDetails(data.data.details);
+          toast.success(`Segment manually set to ${newSegment.toUpperCase()}`);
+        }
+      } else {
+        toast.error('Failed to update segment');
+      }
+    } catch (err) {
+      console.error('Failed to override segment:', err);
+      toast.error('Failed to update segment');
+    } finally {
+      setSegmentLoading(false);
+    }
+  };
 
   // Fetch customer details
   useEffect(() => {
@@ -83,6 +178,7 @@ export function CustomerDetailPage({ customerId, onBack, onNewOrder, onViewOrder
 
     if (customerId) {
       fetchCustomer();
+      fetchSegment();
     }
   }, [customerId]);
 
@@ -218,9 +314,14 @@ export function CustomerDetailPage({ customerId, onBack, onNewOrder, onViewOrder
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground tracking-tight">
-              {customer.name}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">
+                {customer.name}
+              </h1>
+              {segmentDetails?.segment && (
+                <CustomerSegmentBadge segment={segmentDetails.segment} size="md" />
+              )}
+            </div>
             <p className="text-muted-foreground">{customer.company}</p>
           </div>
         </div>
@@ -229,6 +330,61 @@ export function CustomerDetailPage({ customerId, onBack, onNewOrder, onViewOrder
           New Order
         </Button>
       </div>
+
+      {/* Customer Segment Section */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Buildings size={20} />
+            Customer Segment
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDetectSegment}
+              disabled={isDetecting}
+              className="gap-2"
+            >
+              <ArrowsClockwise size={16} className={isDetecting ? 'animate-spin' : ''} />
+              {isDetecting ? 'Detecting...' : 'Auto-Detect'}
+            </Button>
+            <Select
+              value={segmentDetails?.segment || 'b2c'}
+              onValueChange={(value) => handleOverrideSegment(value as CustomerSegment)}
+              disabled={segmentLoading}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Override" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(segmentConfig).map(([key, config]) => (
+                  <SelectItem key={key} value={key}>
+                    {config.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        {segmentDetails ? (
+          <CustomerSegmentInfo
+            segment={segmentDetails.segment}
+            details={{
+              ...segmentDetails.criteria,
+              reason: segmentDetails.reason,
+            }}
+            autoDetected={true}
+            lastUpdate={segmentDetails.detectedAt}
+          />
+        ) : (
+          <div className="text-center py-6 text-muted-foreground">
+            <p className="mb-2">No segment detected yet</p>
+            <p className="text-sm">Click "Auto-Detect" to analyze order history</p>
+          </div>
+        )}
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
