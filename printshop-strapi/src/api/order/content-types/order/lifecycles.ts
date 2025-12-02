@@ -114,11 +114,11 @@ export default {
       }
 
       // Use strapi global to access entity service
-      const currentOrder = await strapi.entityService.findOne(
-        'api::order.order',
-        orderId as number,
-        { fields: ['status'] }
-      );
+      // documentId is a string, id is a number - handle both cases
+      const currentOrder = await strapi.documents('api::order.order').findOne({
+        documentId: typeof orderId === 'string' ? orderId : orderId.toString(),
+        fields: ['status'],
+      });
 
       if (currentOrder && state) {
         state.previousStatus = currentOrder.status;

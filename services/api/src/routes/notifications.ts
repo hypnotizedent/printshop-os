@@ -6,6 +6,7 @@
 
 import express, { Request, Response } from 'express';
 import { NotificationService, NotificationEventType } from '../services/notification.service';
+import { validatePhoneNumber, validateEmail } from '../utils/validation';
 
 const router = express.Router();
 
@@ -76,7 +77,7 @@ router.post('/preferences', async (req: Request, res: Response): Promise<void> =
     }
 
     // Validate phone number format if provided
-    if (smsPhone && !/^\+?[1-9]\d{1,14}$/.test(smsPhone.replace(/[\s-()]/g, ''))) {
+    if (smsPhone && !validatePhoneNumber(smsPhone)) {
       res.status(400).json({
         error: 'Invalid phone number format. Please use E.164 format (e.g., +15551234567)',
       });
@@ -84,7 +85,7 @@ router.post('/preferences', async (req: Request, res: Response): Promise<void> =
     }
 
     // Validate email format if provided
-    if (emailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)) {
+    if (emailAddress && !validateEmail(emailAddress)) {
       res.status(400).json({
         error: 'Invalid email address format',
       });

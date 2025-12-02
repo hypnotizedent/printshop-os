@@ -115,7 +115,7 @@ export class NotificationService {
       return eventPref.email;
     }
 
-    // Default to true for email (all events get email by default)
+    // Default to true when event preference is missing
     return true;
   }
 
@@ -221,7 +221,7 @@ export class NotificationService {
         `${env.STRAPI_URL}/api/notification-preferences`,
         {
           data: {
-            customer: { connect: [customerId] },
+            customer: customerId,
             emailEnabled: true,
             smsEnabled: false,
             smsForPickupOnly: true,
@@ -311,7 +311,7 @@ export class NotificationService {
           `${env.STRAPI_URL}/api/notification-preferences`,
           {
             data: {
-              customer: { connect: [customerId] },
+              customer: customerId,
               emailEnabled: preferences.emailEnabled ?? true,
               smsEnabled: preferences.smsEnabled ?? false,
               smsForPickupOnly: preferences.smsForPickupOnly ?? true,
