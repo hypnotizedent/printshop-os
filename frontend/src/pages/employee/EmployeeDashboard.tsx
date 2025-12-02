@@ -1,23 +1,45 @@
 /**
  * Employee Dashboard
+ * Modern design with job cards, clock in/out, and mobile-friendly layout
  * Filtered view showing ONLY jobs assigned to current employee
- * No pricing information, simplified job cards
  */
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { 
   ClipboardList, 
   CheckCircle2, 
   Clock, 
   Printer,
   QrCode,
-  AlertCircle,
-  ChevronRight
+  AlertTriangle,
+  ChevronRight,
+  Zap,
+  Camera,
+  Upload,
+  Play,
+  Pause,
+  MoreHorizontal
 } from 'lucide-react';
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 }
+};
 
 // Types
 interface EmployeeJob {
@@ -30,6 +52,7 @@ interface EmployeeJob {
   status: 'pending' | 'in_progress' | 'completed';
   priority: 'normal' | 'high' | 'urgent';
   machine?: string;
+  progress?: number;
 }
 
 interface EmployeeStats {
@@ -50,7 +73,8 @@ const mockEmployeeJobs: EmployeeJob[] = [
     dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     status: 'in_progress',
     priority: 'urgent',
-    machine: 'DTG-01'
+    machine: 'DTG-01',
+    progress: 65
   },
   {
     id: '2',
@@ -60,7 +84,8 @@ const mockEmployeeJobs: EmployeeJob[] = [
     quantity: 25,
     dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
     status: 'pending',
-    priority: 'normal'
+    priority: 'normal',
+    progress: 0
   },
   {
     id: '3',
@@ -70,7 +95,8 @@ const mockEmployeeJobs: EmployeeJob[] = [
     quantity: 100,
     dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
     status: 'pending',
-    priority: 'high'
+    priority: 'high',
+    progress: 0
   }
 ];
 
@@ -93,9 +119,9 @@ function formatDueDate(isoDate: string): string {
 // Status badge component
 function StatusBadge({ status }: { status: EmployeeJob['status'] }) {
   const config = {
-    pending: { label: 'Pending', className: 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30' },
-    in_progress: { label: 'In Progress', className: 'bg-blue-500/20 text-blue-700 border-blue-500/30' },
-    completed: { label: 'Completed', className: 'bg-green-500/20 text-green-700 border-green-500/30' }
+    pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/30' },
+    in_progress: { label: 'In Progress', className: 'bg-blue-500/10 text-blue-600 border-blue-500/30' },
+    completed: { label: 'Completed', className: 'bg-green-500/10 text-green-600 border-green-500/30' }
   };
   
   const { label, className } = config[status];
@@ -106,80 +132,120 @@ function StatusBadge({ status }: { status: EmployeeJob['status'] }) {
 function PriorityIndicator({ priority }: { priority: EmployeeJob['priority'] }) {
   if (priority === 'normal') return null;
   
-  const config = {
-    high: { label: 'High', className: 'bg-orange-500 text-white' },
-    urgent: { label: 'Urgent', className: 'bg-red-500 text-white' }
-  };
-  
-  const { label, className } = config[priority];
-  return <Badge className={className}>{label}</Badge>;
+  return (
+    <Badge className={priority === 'urgent' ? 'bg-red-500 text-white' : 'bg-amber-500 text-white'}>
+      <Zap className="w-3 h-3 mr-1 fill-current" />
+      {priority === 'urgent' ? 'Urgent' : 'High'}
+    </Badge>
+  );
 }
 
-// Job card component
-function JobCard({ job, onMarkComplete, onReportIssue }: { 
+// Modern Job card component
+function JobCard({ job, onMarkComplete, onReportIssue, onStartJob }: { 
   job: EmployeeJob; 
   onMarkComplete: (id: string) => void;
   onReportIssue: (id: string) => void;
+  onStartJob?: (id: string) => void;
 }) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-3">
-          {/* Header row */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
-              <span className="font-mono font-semibold">{job.jobNumber}</span>
-              <StatusBadge status={job.status} />
-              <PriorityIndicator priority={job.priority} />
+    <motion.div
+      variants={itemVariants}
+      className="group"
+    >
+      <Card className="overflow-hidden hover:shadow-md transition-all duration-200 border-border/50">
+        <CardContent className="p-0">
+          {/* Progress bar at top */}
+          {job.status === 'in_progress' && job.progress !== undefined && (
+            <div className="h-1 bg-muted">
+              <motion.div 
+                className="h-full bg-blue-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${job.progress}%` }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />
             </div>
-            {job.machine && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Printer className="h-4 w-4" />
-                {job.machine}
+          )}
+          
+          <div className="p-4 space-y-4">
+            {/* Header row */}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-mono font-semibold text-sm">{job.jobNumber}</span>
+                <StatusBadge status={job.status} />
+                <PriorityIndicator priority={job.priority} />
               </div>
-            )}
-          </div>
-          
-          {/* Job details */}
-          <div>
-            <p className="text-sm text-muted-foreground">Customer: {job.customerFirstName}</p>
-            <p className="font-medium mt-1">{job.itemDescription}</p>
-          </div>
-          
-          {/* Quantity and due date */}
-          <div className="flex items-center gap-4 text-sm">
-            <span className="font-semibold">Qty: {job.quantity}</span>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              Due: {formatDueDate(job.dueDate)}
+              {job.machine && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted text-xs text-muted-foreground">
+                  <Printer className="w-3.5 h-3.5" />
+                  {job.machine}
+                </div>
+              )}
+            </div>
+            
+            {/* Job details */}
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">
+                Customer: <span className="text-foreground">{job.customerFirstName}</span>
+              </p>
+              <p className="font-medium text-foreground">{job.itemDescription}</p>
+            </div>
+            
+            {/* Quantity and due date */}
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <span className="font-semibold text-primary text-xs">{job.quantity}</span>
+                </div>
+                <span className="text-muted-foreground text-xs">units</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Clock className="w-4 h-4" />
+                <span className="text-xs">{formatDueDate(job.dueDate)}</span>
+              </div>
+            </div>
+            
+            {/* Action buttons - touch friendly */}
+            <div className="flex gap-2 pt-2">
+              {job.status === 'pending' && onStartJob && (
+                <Button 
+                  size="lg" 
+                  className="flex-1 h-11"
+                  onClick={() => onStartJob(job.id)}
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Start Job
+                </Button>
+              )}
+              {job.status === 'in_progress' && (
+                <Button 
+                  size="lg" 
+                  className="flex-1 h-11"
+                  onClick={() => onMarkComplete(job.id)}
+                >
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Mark Complete
+                </Button>
+              )}
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="h-11 px-4"
+                onClick={() => onReportIssue(job.id)}
+              >
+                <AlertTriangle className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-11 px-4"
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-          
-          {/* Action buttons - touch friendly */}
-          <div className="flex gap-2 mt-2">
-            {job.status !== 'completed' && (
-              <Button 
-                size="lg" 
-                className="flex-1 h-12"
-                onClick={() => onMarkComplete(job.id)}
-              >
-                <CheckCircle2 className="mr-2 h-5 w-5" />
-                Mark Complete
-              </Button>
-            )}
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="h-12"
-              onClick={() => onReportIssue(job.id)}
-            >
-              <AlertCircle className="mr-2 h-5 w-5" />
-              Report Issue
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -192,6 +258,8 @@ export function EmployeeDashboard() {
     inProgress: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [clockTime, setClockTime] = useState<Date | null>(null);
 
   // Fetch employee jobs
   useEffect(() => {
@@ -199,10 +267,6 @@ export function EmployeeDashboard() {
       setIsLoading(true);
       try {
         // TODO: Replace with actual API call
-        // const response = await fetch(`/api/employees/${employee?.id}/jobs`);
-        // const data = await response.json();
-        
-        // For now, use mock data
         await new Promise(resolve => setTimeout(resolve, 500));
         setJobs(mockEmployeeJobs);
         
@@ -230,131 +294,191 @@ export function EmployeeDashboard() {
 
   const handleMarkComplete = (jobId: string) => {
     setJobs(prev => prev.map(job => 
-      job.id === jobId ? { ...job, status: 'completed' as const } : job
+      job.id === jobId ? { ...job, status: 'completed' as const, progress: 100 } : job
     ));
-    // TODO: API call to update job status
+  };
+
+  const handleStartJob = (jobId: string) => {
+    setJobs(prev => prev.map(job => 
+      job.id === jobId ? { ...job, status: 'in_progress' as const, progress: 5 } : job
+    ));
   };
 
   const handleReportIssue = (jobId: string) => {
-    // TODO: Open issue reporting modal
     console.log('Report issue for job:', jobId);
   };
 
   const handleScanQR = () => {
-    // TODO: Integrate with QR scanner
     console.log('Open QR scanner');
+  };
+
+  const handleClockToggle = () => {
+    if (isClockedIn) {
+      setIsClockedIn(false);
+      setClockTime(null);
+    } else {
+      setIsClockedIn(true);
+      setClockTime(new Date());
+    }
   };
 
   // Filter active jobs (not completed)
   const activeJobs = jobs.filter(j => j.status !== 'completed');
 
   return (
-    <div className="p-4 lg:p-6 lg:pt-6 pt-20 pb-24 lg:pb-6">
+    <motion.div 
+      className="p-4 lg:p-6 lg:pt-6 pt-20 pb-24 lg:pb-6 max-w-4xl mx-auto"
+      initial="hidden"
+      animate="show"
+      variants={containerVariants}
+    >
       {/* Welcome message */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">
-          Welcome, {employee?.firstName || 'Employee'}
-        </h1>
-        <p className="text-muted-foreground">
-          Here are your assigned jobs for today
-        </p>
-      </div>
+      <motion.div variants={itemVariants} className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">
+              Welcome, {employee?.firstName || 'Employee'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {activeJobs.length} jobs assigned to you
+            </p>
+          </div>
+          <Button
+            variant={isClockedIn ? "outline" : "default"}
+            size="lg"
+            className={`gap-2 ${isClockedIn ? 'border-green-500 text-green-600' : ''}`}
+            onClick={handleClockToggle}
+          >
+            {isClockedIn ? (
+              <>
+                <Pause className="w-4 h-4" />
+                Clock Out
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                Clock In
+              </>
+            )}
+          </Button>
+        </div>
+        {isClockedIn && clockTime && (
+          <Badge variant="secondary" className="mt-2 gap-1">
+            <Clock className="w-3 h-3" />
+            Clocked in at {clockTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Badge>
+        )}
+      </motion.div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-1">
-              <ClipboardList className="h-4 w-4" />
-              Assigned Jobs
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.assignedJobs}</p>
+      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <Card className="bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ClipboardList className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Assigned</span>
+            </div>
+            <p className="text-2xl font-semibold">{stats.assignedJobs}</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-1">
-              <CheckCircle2 className="h-4 w-4" />
-              Completed Today
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.completedToday}</p>
+        <Card className="bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              <span className="text-xs text-muted-foreground">Completed</span>
+            </div>
+            <p className="text-2xl font-semibold">{stats.completedToday}</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              In Progress
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.inProgress}</p>
+        <Card className="bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-blue-500" />
+              <span className="text-xs text-muted-foreground">In Progress</span>
+            </div>
+            <p className="text-2xl font-semibold">{stats.inProgress}</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-1">
-              <Printer className="h-4 w-4" />
-              Current Machine
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-bold">{stats.currentMachine || '-'}</p>
+        <Card className="bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Printer className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Machine</span>
+            </div>
+            <p className="text-lg font-semibold truncate">{stats.currentMachine || '-'}</p>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
-      {/* QR Scanner button */}
-      <div className="mb-6">
+      {/* Quick Actions */}
+      <motion.div variants={itemVariants} className="flex gap-2 mb-6">
         <Button 
           variant="outline" 
           size="lg" 
-          className="w-full lg:w-auto h-14 gap-2"
+          className="flex-1 h-12 gap-2"
           onClick={handleScanQR}
         >
-          <QrCode className="h-6 w-6" />
-          Scan Job QR Code
-          <ChevronRight className="h-5 w-5" />
+          <QrCode className="h-5 w-5" />
+          Scan Job QR
         </Button>
-      </div>
+        <Button 
+          variant="outline" 
+          size="lg" 
+          className="h-12 px-4"
+        >
+          <Upload className="h-5 w-5" />
+        </Button>
+      </motion.div>
 
       {/* Jobs list */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Your Jobs</h2>
+      <motion.div variants={itemVariants}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold">Your Jobs</h2>
+          <Button variant="ghost" size="sm" className="gap-1 text-xs">
+            <MoreHorizontal className="w-4 h-4" />
+          </Button>
+        </div>
         
         {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Loading jobs...
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-4">
+                  <div className="h-4 bg-muted rounded w-1/4 mb-3" />
+                  <div className="h-5 bg-muted rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-muted rounded w-1/2" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         ) : activeJobs.length === 0 ? (
           <Card>
-            <CardContent className="py-8 text-center">
+            <CardContent className="py-12 text-center">
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
               <p className="text-lg font-medium">All caught up!</p>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 You have no pending jobs assigned to you.
               </p>
             </CardContent>
           </Card>
         ) : (
-          activeJobs.map(job => (
-            <JobCard 
-              key={job.id} 
-              job={job} 
-              onMarkComplete={handleMarkComplete}
-              onReportIssue={handleReportIssue}
-            />
-          ))
+          <div className="space-y-3">
+            {activeJobs.map(job => (
+              <JobCard 
+                key={job.id} 
+                job={job} 
+                onMarkComplete={handleMarkComplete}
+                onReportIssue={handleReportIssue}
+                onStartJob={handleStartJob}
+              />
+            ))}
+          </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

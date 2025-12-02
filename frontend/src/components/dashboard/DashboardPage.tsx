@@ -1,12 +1,51 @@
+/**
+ * DashboardPage - Owner Portal Dashboard
+ * Modern Vercel/Linear inspired design with cards and charts
+ */
+
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { StatCard } from "./StatCard"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Package, CheckCircle, CurrencyDollar, Printer, Warning, Clock, Plus, Info, X } from "@phosphor-icons/react"
+import { 
+  Package, 
+  CheckCircle2, 
+  DollarSign, 
+  Printer, 
+  AlertTriangle, 
+  Clock, 
+  Plus, 
+  Info, 
+  X,
+  TrendingUp,
+  TrendingDown,
+  ArrowRight,
+  MoreHorizontal,
+  Users,
+  Calendar,
+  Zap
+} from "lucide-react"
 import { PaymentsSummary } from "@/components/payments"
 import type { DashboardStats, Job, Machine, MachineStatus } from "@/lib/types"
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 }
+}
 
 // Demo machine data to show when no machines are configured
 const DEMO_MACHINES: Machine[] = [
@@ -75,185 +114,299 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewO
   // Use demo machines if no machines are configured
   const displayMachines = machines.length > 0 ? machines : DEMO_MACHINES
   const isUsingDemoData = machines.length === 0
+  
   const getStatusColor = (status: string) => {
-    const colors = {
-      printing: 'bg-cyan text-white',
-      quote: 'bg-yellow/80 text-foreground',
-      design: 'bg-blue-500 text-white',
-      prepress: 'bg-purple-500 text-white',
+    const colors: Record<string, string> = {
+      printing: 'bg-blue-500 text-white',
+      quote: 'bg-amber-500 text-white',
+      design: 'bg-purple-500 text-white',
+      prepress: 'bg-violet-500 text-white',
       finishing: 'bg-orange-500 text-white',
-      completed: 'bg-green-600 text-white',
-      delivery: 'bg-cyan text-white'
+      completed: 'bg-green-500 text-white',
+      delivery: 'bg-cyan-500 text-white'
     }
-    return colors[status as keyof typeof colors] || 'bg-muted text-foreground'
+    return colors[status] || 'bg-muted text-foreground'
   }
 
   const getMachineStatusColor = (status: string) => {
-    const colors = {
-      printing: 'text-cyan',
+    const colors: Record<string, string> = {
+      printing: 'text-blue-500',
       idle: 'text-muted-foreground',
-      maintenance: 'text-yellow',
+      maintenance: 'text-amber-500',
       error: 'text-destructive',
       offline: 'text-muted-foreground'
     }
-    return colors[status as keyof typeof colors] || 'text-muted-foreground'
+    return colors[status] || 'text-muted-foreground'
+  }
+
+  const getMachineStatusBg = (status: string) => {
+    const colors: Record<string, string> = {
+      printing: 'bg-blue-500/10',
+      idle: 'bg-muted',
+      maintenance: 'bg-amber-500/10',
+      error: 'bg-destructive/10',
+      offline: 'bg-muted'
+    }
+    return colors[status] || 'bg-muted'
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div 
+      className="space-y-6"
+      initial="hidden"
+      animate="show"
+      variants={containerVariants}
+    >
+      {/* Header */}
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back! Here's your shop overview.</p>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Welcome back! Here's your shop overview.</p>
         </div>
         <Button className="gap-2" onClick={() => onNavigate('quotes')}>
-          <Plus size={18} weight="bold" />
-          New Job
+          <Plus className="w-4 h-4" />
+          New Quote
         </Button>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Active Jobs"
-          value={stats.activeJobs}
-          change={12}
-          color="primary"
-          icon={<Package size={24} weight="fill" />}
-        />
-        <StatCard
-          title="Completed Today"
-          value={stats.completedToday}
-          change={8}
-          color="cyan"
-          icon={<CheckCircle size={24} weight="fill" />}
-        />
-        <StatCard
-          title="Revenue (MTD)"
-          value={`$${stats.revenue.toLocaleString()}`}
-          change={15}
-          color="magenta"
-          icon={<CurrencyDollar size={24} weight="fill" />}
-        />
-        <StatCard
-          title="Machines Online"
-          value={`${stats.machinesOnline}/8`}
-          color="cyan"
-          icon={<Printer size={24} weight="fill" />}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-foreground">Recent Jobs</h2>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate('jobs')}>
-              View All
-            </Button>
-          </div>
-          <div className="space-y-3">
-            {recentJobs.map((job) => (
-              <div
-                key={job.id}
-                className="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
-                onClick={() => onViewOrder?.(job.id)}
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-foreground truncate">{job.title}</h3>
-                    <Badge className={getStatusColor(job.status)}>
-                      {job.status}
-                    </Badge>
-                    {job.priority === 'urgent' && (
-                      <Warning size={18} weight="fill" className="text-destructive" />
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{job.customer}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">{job.quantity} units</p>
-                  <p className="text-xs text-muted-foreground">Due: {new Date(job.dueDate).toLocaleDateString()}</p>
-                </div>
-                <div className="w-24">
-                  <Progress value={job.progress} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1 text-center">{job.progress}%</p>
-                </div>
+      {/* Stats Grid */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-card hover:bg-card/80 transition-colors">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Package className="w-5 h-5 text-primary" />
               </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-foreground">Machines</h2>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate('machines')}>
-              View All
-            </Button>
-          </div>
-          {isUsingDemoData && (
-            <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-md bg-muted/50 border border-dashed border-border">
-              <Info size={14} className="text-muted-foreground flex-shrink-0" />
-              <span className="text-xs text-muted-foreground">Demo data - configure machines to see real status</span>
+              <Badge variant="secondary" className="gap-1 text-xs">
+                <TrendingUp className="w-3 h-3" />
+                +12%
+              </Badge>
             </div>
-          )}
-          <div className="space-y-4">
-            {displayMachines.map((machine) => (
-              <div key={machine.id} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Printer size={18} weight="fill" className={getMachineStatusColor(machine.status)} />
-                    <span className="font-medium text-foreground text-sm">{machine.name}</span>
-                  </div>
-                  <span className="text-xs font-medium text-muted-foreground uppercase">
-                    {machine.status}
-                  </span>
-                </div>
-                <Progress value={machine.utilization} className="h-1.5" />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{machine.utilization}% utilization</span>
-                  {machine.currentJob && (
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} />
-                      2h left
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+            <div className="mt-3">
+              <p className="text-2xl font-semibold">{stats.activeJobs}</p>
+              <p className="text-sm text-muted-foreground">Active Jobs</p>
+            </div>
+          </CardContent>
         </Card>
+
+        <Card className="bg-card hover:bg-card/80 transition-colors">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+              </div>
+              <Badge variant="secondary" className="gap-1 text-xs">
+                <TrendingUp className="w-3 h-3" />
+                +8%
+              </Badge>
+            </div>
+            <div className="mt-3">
+              <p className="text-2xl font-semibold">{stats.completedToday}</p>
+              <p className="text-sm text-muted-foreground">Completed Today</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card hover:bg-card/80 transition-colors">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <DollarSign className="w-5 h-5 text-purple-500" />
+              </div>
+              <Badge variant="secondary" className="gap-1 text-xs">
+                <TrendingUp className="w-3 h-3" />
+                +15%
+              </Badge>
+            </div>
+            <div className="mt-3">
+              <p className="text-2xl font-semibold">${stats.revenue.toLocaleString()}</p>
+              <p className="text-sm text-muted-foreground">Revenue (MTD)</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card hover:bg-card/80 transition-colors">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="p-2 rounded-lg bg-cyan-500/10">
+                <Printer className="w-5 h-5 text-cyan-500" />
+              </div>
+              <Badge variant={stats.urgentJobs > 0 ? "destructive" : "secondary"} className="text-xs">
+                {stats.urgentJobs > 0 ? `${stats.urgentJobs} urgent` : 'All good'}
+              </Badge>
+            </div>
+            <div className="mt-3">
+              <p className="text-2xl font-semibold">{stats.machinesOnline}/8</p>
+              <p className="text-sm text-muted-foreground">Machines Online</p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Jobs */}
+        <motion.div variants={itemVariants} className="lg:col-span-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold">Recent Jobs</CardTitle>
+                  <CardDescription className="text-sm">Your latest orders and their status</CardDescription>
+                </div>
+                <Button variant="ghost" size="sm" className="gap-1" onClick={() => onNavigate('jobs')}>
+                  View All
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              <div className="space-y-2">
+                {recentJobs.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Package className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">No recent jobs</p>
+                  </div>
+                ) : (
+                  recentJobs.map((job, index) => (
+                    <motion.div
+                      key={job.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer group"
+                      onClick={() => onViewOrder?.(job.id)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium text-foreground truncate text-sm">{job.title}</h3>
+                          <Badge className={`${getStatusColor(job.status)} text-xs`}>
+                            {job.status}
+                          </Badge>
+                          {job.priority === 'urgent' && (
+                            <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{job.customer}</p>
+                      </div>
+                      <div className="text-right hidden sm:block">
+                        <p className="text-sm font-medium text-foreground">{job.quantity} units</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(job.dueDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="w-20 hidden md:block">
+                        <Progress value={job.progress} className="h-1.5" />
+                        <p className="text-xs text-muted-foreground mt-1 text-center">{job.progress}%</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Machine Status */}
+        <motion.div variants={itemVariants}>
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold">Machines</CardTitle>
+                  <CardDescription className="text-sm">Equipment status</CardDescription>
+                </div>
+                <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => onNavigate('machines')}>
+                  <MoreHorizontal className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              {isUsingDemoData && (
+                <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-md bg-muted/50 border border-dashed border-border">
+                  <Info className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                  <span className="text-xs text-muted-foreground">Demo data shown</span>
+                </div>
+              )}
+              <div className="space-y-3">
+                {displayMachines.slice(0, 4).map((machine, index) => (
+                  <motion.div 
+                    key={machine.id} 
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1.5 rounded-md ${getMachineStatusBg(machine.status)}`}>
+                          <Printer className={`w-4 h-4 ${getMachineStatusColor(machine.status)}`} />
+                        </div>
+                        <span className="font-medium text-sm">{machine.name}</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {machine.status}
+                      </Badge>
+                    </div>
+                    <Progress value={machine.utilization} className="h-1.5" />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
+                      <span>{machine.utilization}% util</span>
+                      {machine.currentJob && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          Active
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Payments Summary Widget */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
           <PaymentsSummary onViewOrder={onViewOrder} />
         </div>
-      </div>
+      </motion.div>
 
+      {/* Alerts */}
       {stats.lowStockItems > 0 && showLowStockAlert && (
-        <Card className="p-4 bg-yellow/10 border-yellow">
-          <div className="flex items-center gap-3">
-            <Warning size={24} weight="fill" className="text-yellow" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">Low Stock Alert</h3>
-              <p className="text-sm text-muted-foreground">
-                {stats.lowStockItems} items are below reorder level
-              </p>
-            </div>
-            <Button variant="outline" size="sm">
-              View Inventory
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setShowLowStockAlert(false)}
-              aria-label="Dismiss low stock alert"
-            >
-              <X size={18} />
-            </Button>
-          </div>
-        </Card>
+        <motion.div variants={itemVariants}>
+          <Card className="border-amber-500/50 bg-amber-500/5">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-500/10">
+                  <AlertTriangle className="w-5 h-5 text-amber-500" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium text-foreground text-sm">Low Stock Alert</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.lowStockItems} items are below reorder level
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" className="text-xs">
+                  View Inventory
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="w-8 h-8"
+                  onClick={() => setShowLowStockAlert(false)}
+                  aria-label="Dismiss low stock alert"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }
