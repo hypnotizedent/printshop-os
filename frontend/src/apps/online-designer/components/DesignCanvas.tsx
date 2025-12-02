@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from "react";
-import { Canvas as FabricCanvas, FabricImage, Rect, FabricText, Circle } from "fabric";
+import { Canvas as FabricCanvas, FabricImage, Rect, FabricText, Circle, FabricObject } from "fabric";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -51,7 +51,9 @@ interface HistoryState {
   json: string;
 }
 
+// Canvas configuration constants
 const MAX_HISTORY = 50;
+const MIN_IMAGE_RESOLUTION = 300; // Minimum recommended resolution in pixels
 
 export const DesignCanvas = forwardRef<DesignCanvasRef, DesignCanvasProps>(({ 
   selectedGarment, 
@@ -66,7 +68,7 @@ export const DesignCanvas = forwardRef<DesignCanvasRef, DesignCanvasProps>(({
   const [zoom, setZoom] = useState(1);
   const [history, setHistory] = useState<HistoryState[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [selectedObject, setSelectedObject] = useState<any>(null);
+  const [selectedObject, setSelectedObject] = useState<FabricObject | null>(null);
   const isLoadingRef = useRef(false);
 
   // Initialize canvas
@@ -422,15 +424,15 @@ export const DesignCanvas = forwardRef<DesignCanvasRef, DesignCanvasProps>(({
     reader.onload = (event) => {
       const imgElement = new Image();
       imgElement.onload = () => {
-        // Check resolution
-        if (imgElement.width < 300 || imgElement.height < 300) {
+        // Check resolution using configurable constant
+        if (imgElement.width < MIN_IMAGE_RESOLUTION || imgElement.height < MIN_IMAGE_RESOLUTION) {
           toast.warning("Low resolution image detected. Print quality may be affected.");
         }
 
         FabricImage.fromURL(event.target?.result as string).then((fabricImage) => {
           // Scale image to fit within print area
           const maxWidth = 250;
-          const maxHeight = 300;
+          const maxHeight = MIN_IMAGE_RESOLUTION;
           const scale = Math.min(maxWidth / imgElement.width, maxHeight / imgElement.height, 1);
           
           fabricImage.scale(scale);
@@ -439,8 +441,8 @@ export const DesignCanvas = forwardRef<DesignCanvasRef, DesignCanvasProps>(({
             top: 250 - (imgElement.height * scale) / 2,
           });
           
-          (fabricImage as any).isDesignElement = true;
-          (fabricImage as any).elementType = 'image';
+          (fabricImage as unknown as { isDesignElement: boolean }).isDesignElement = true;
+          (fabricImage as unknown as { elementType: string }).elementType = 'image';
           
           fabricCanvas.add(fabricImage);
           fabricCanvas.setActiveObject(fabricImage);

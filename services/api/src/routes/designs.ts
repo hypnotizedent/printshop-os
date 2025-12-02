@@ -4,6 +4,7 @@
  */
 
 import { Router, Request, Response } from 'express';
+import { PricingService } from '../services/pricing.service';
 
 const router = Router();
 
@@ -52,67 +53,6 @@ interface StrapiError {
     message?: string;
   };
 }
-
-// Base garment prices
-const BASE_GARMENT_PRICES: Record<string, number> = {
-  't-shirt': 19.99,
-  'hoodie': 39.99,
-  'tank-top': 16.99,
-  'long-sleeve': 24.99,
-  'polo': 29.99,
-  'sweatshirt': 34.99,
-  'hat': 24.99,
-  'jacket': 49.99,
-};
-
-// Print method pricing
-const PRINT_METHOD_PRICES: Record<string, { setup: number; perColor: number }> = {
-  'screen-print': { setup: 25, perColor: 15 },
-  'dtg': { setup: 0, perColor: 0 },
-  'embroidery': { setup: 35, perColor: 10 },
-  'heat-transfer': { setup: 15, perColor: 5 },
-  'sublimation': { setup: 10, perColor: 0 },
-};
-
-// Quantity discount tiers
-const getQuantityDiscount = (quantity: number): number => {
-  if (quantity >= 72) return -6;
-  if (quantity >= 36) return -4;
-  if (quantity >= 12) return -2;
-  return 0;
-};
-
-// Calculate pricing
-const calculatePricing = (request: QuoteRequest): PricingBreakdown => {
-  const basePrice = BASE_GARMENT_PRICES[request.garmentType] || 19.99;
-  const printPricing = PRINT_METHOD_PRICES[request.printMethod] || { setup: 0, perColor: 0 };
-  
-  const garmentCost = basePrice;
-  const printCost = request.printMethod === 'dtg' || request.printMethod === 'sublimation'
-    ? 8
-    : printPricing.perColor * Math.max(request.numColors, 1);
-  
-  const setupFee = printPricing.setup;
-  const discount = getQuantityDiscount(request.quantity);
-  const rushFee = request.rushOrder ? (garmentCost + printCost) * 0.25 : 0;
-  
-  const perUnitBeforeDiscount = garmentCost + printCost + rushFee;
-  const perUnitPrice = perUnitBeforeDiscount + discount;
-  const subtotal = perUnitPrice * request.quantity + setupFee;
-  
-  return {
-    basePrice,
-    garmentCost,
-    printCost,
-    setupFee,
-    colorFees: printPricing.perColor * Math.max(request.numColors, 1),
-    rushFee: rushFee * request.quantity,
-    discount: Math.abs(discount) * request.quantity,
-    subtotal,
-    total: subtotal,
-    perUnitPrice: perUnitPrice + (setupFee / request.quantity),
-  };
-};
 
 // Strapi URL from environment
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
@@ -271,21 +211,15 @@ quotesRouter.post('/', (req: Request, res: Response): void => {
   try {
     const quoteRequest = req.body as QuoteRequest;
     
-    // Validate required fields
-    if (!quoteRequest.garmentType) {
-      res.status(400).json({ error: 'garmentType is required' });
-      return;
-    }
-    if (!quoteRequest.printMethod) {
-      res.status(400).json({ error: 'printMethod is required' });
-      return;
-    }
-    if (!quoteRequest.quantity || quoteRequest.quantity < 1) {
-      res.status(400).json({ error: 'quantity must be at least 1' });
+    // Use centralized validation from PricingService
+    const validation = PricingService.validateRequest(quoteRequest);
+    if (!validation.valid) {
+      res.status(400).json({ error: validation.errors.join(', ') });
       return;
     }
     
-    const pricing = calculatePricing({
+    // Use centralized pricing calculation
+    const quoteResult = PricingService.generateQuote({
       garmentType: quoteRequest.garmentType,
       printMethod: quoteRequest.printMethod,
       quantity: quoteRequest.quantity,
@@ -293,12 +227,7 @@ quotesRouter.post('/', (req: Request, res: Response): void => {
       rushOrder: quoteRequest.rushOrder || false,
     });
     
-    res.json({
-      success: true,
-      quote: pricing,
-      request: quoteRequest,
-      generatedAt: new Date().toISOString(),
-    });
+    res.json(quoteResult);
   } catch (error) {
     console.error('Error calculating quote:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -310,15 +239,5 @@ quotesRouter.post('/', (req: Request, res: Response): void => {
  * Get available pricing rules and options
  */
 quotesRouter.get('/pricing-rules', (_req: Request, res: Response): void => {
-  res.json({
-    garmentPrices: BASE_GARMENT_PRICES,
-    printMethods: PRINT_METHOD_PRICES,
-    quantityTiers: [
-      { minQty: 1, maxQty: 11, discount: 0, label: 'Sample' },
-      { minQty: 12, maxQty: 35, discount: 2, label: 'Team' },
-      { minQty: 36, maxQty: 71, discount: 4, label: 'Bulk' },
-      { minQty: 72, maxQty: null, discount: 6, label: 'Wholesale' },
-    ],
-    rushOrderMultiplier: 1.25,
-  });
+  res.json(PricingService.getPricingOptions());
 });

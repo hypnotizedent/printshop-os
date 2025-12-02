@@ -34,6 +34,11 @@ export interface QuoteResult {
   generatedAt: string;
 }
 
+// Pricing configuration constants
+export const RUSH_ORDER_MULTIPLIER = 0.25; // 25% extra for rush orders
+export const DTG_FLAT_RATE = 8; // Flat rate for DTG printing
+export const SUBLIMATION_FLAT_RATE = 12; // Flat rate for sublimation
+
 // Base garment prices by type
 export const BASE_GARMENT_PRICES: Record<string, number> = {
   't-shirt': 19.99,
@@ -150,9 +155,9 @@ export class PricingService {
     // Quantity discount (per unit, negative value)
     const quantityDiscount = this.getQuantityDiscount(request.quantity);
     
-    // Rush order fee (25% extra per unit)
+    // Rush order fee using configurable multiplier
     const rushFeePerUnit = request.rushOrder 
-      ? (garmentCost + printCost) * 0.25 
+      ? (garmentCost + printCost) * RUSH_ORDER_MULTIPLIER 
       : 0;
     
     // Per unit calculations

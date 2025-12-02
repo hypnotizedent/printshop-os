@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Switch } from "@/components/ui/switch";
 import { 
   ShoppingCart, 
-  CreditCard, 
   ChevronDown, 
   ChevronUp,
   Minus, 
@@ -28,6 +27,11 @@ import {
   PRINT_METHOD_PRICES,
   QUANTITY_TIERS 
 } from "../types/database";
+
+// Pricing configuration constants
+const RUSH_ORDER_MULTIPLIER = 0.25; // 25% extra for rush orders
+const DTG_FLAT_RATE = 8; // Flat rate for DTG printing
+const SUBLIMATION_FLAT_RATE = 12; // Flat rate for sublimation
 
 interface PricingPanelProps {
   garmentType: GarmentType;
@@ -53,6 +57,13 @@ const getTierLabel = (quantity: number): string => {
   return 'Sample';
 };
 
+// Get flat rate for print method
+const getFlatRate = (method: PrintMethod): number => {
+  if (method === 'dtg') return DTG_FLAT_RATE;
+  if (method === 'sublimation') return SUBLIMATION_FLAT_RATE;
+  return 0;
+};
+
 export const PricingPanel = ({ 
   garmentType,
   printMethod,
@@ -72,8 +83,9 @@ export const PricingPanel = ({
     
     // Per unit costs
     const garmentCost = basePrice;
-    const printCost = printMethod === 'dtg' || printMethod === 'sublimation' 
-      ? 8 // Flat rate for DTG/sublimation
+    const flatRate = getFlatRate(printMethod);
+    const printCost = flatRate > 0 
+      ? flatRate 
       : printPricing.perColor * Math.max(numColors, 1);
     
     // One-time fees (divided by quantity)
@@ -83,8 +95,8 @@ export const PricingPanel = ({
     // Quantity discount
     const discount = getQuantityDiscount(quantity);
     
-    // Rush order fee (25% extra)
-    const rushFee = rushOrder ? (garmentCost + printCost) * 0.25 : 0;
+    // Rush order fee using configurable multiplier
+    const rushFee = rushOrder ? (garmentCost + printCost) * RUSH_ORDER_MULTIPLIER : 0;
     
     // Calculate totals
     const perUnitBeforeDiscount = garmentCost + printCost + rushFee;
