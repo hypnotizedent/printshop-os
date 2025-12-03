@@ -116,7 +116,7 @@ export default {
 
       // Generate JWT token using auth service
       const token = authService.generateOwnerToken({
-        id: owner.id,
+        id: Number(owner.id),
         documentId: owner.documentId,
         email: owner.email,
       });
