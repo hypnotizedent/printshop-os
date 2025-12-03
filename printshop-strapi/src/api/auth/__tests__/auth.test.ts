@@ -109,6 +109,32 @@ describe('Auth Service', () => {
     });
   });
 
+  describe('generateOwnerToken', () => {
+    it('should generate JWT token for owner', () => {
+      const owner = {
+        id: 1,
+        documentId: 'owner-1',
+        email: 'admin@example.com',
+      };
+      
+      (jwt.sign as jest.Mock).mockReturnValue('mock_owner_token');
+      
+      const result = authService.generateOwnerToken(owner);
+      
+      expect(jwt.sign).toHaveBeenCalledWith(
+        {
+          id: 1,
+          documentId: 'owner-1',
+          email: 'admin@example.com',
+          type: 'owner',
+        },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      expect(result).toBe('mock_owner_token');
+    });
+  });
+
   describe('verifyToken', () => {
     it('should verify valid token', () => {
       const mockPayload = {
@@ -270,6 +296,36 @@ describe('Auth Service', () => {
         department: 'screen-printing',
       });
       expect(result).not.toHaveProperty('pin');
+    });
+  });
+
+  describe('sanitizeOwner', () => {
+    it('should remove sensitive fields from owner data', () => {
+      const owner = {
+        id: 1,
+        documentId: 'owner-1',
+        email: 'admin@example.com',
+        name: 'Admin User',
+        passwordHash: 'secret_hash',
+        twoFactorSecret: 'secret_2fa',
+        twoFactorEnabled: true,
+        isActive: true,
+        lastLogin: '2025-12-03T12:00:00.000Z',
+      };
+      
+      const result = authService.sanitizeOwner(owner);
+      
+      expect(result).toEqual({
+        id: 1,
+        documentId: 'owner-1',
+        email: 'admin@example.com',
+        name: 'Admin User',
+        twoFactorEnabled: true,
+        isActive: true,
+        lastLogin: '2025-12-03T12:00:00.000Z',
+      });
+      expect(result).not.toHaveProperty('passwordHash');
+      expect(result).not.toHaveProperty('twoFactorSecret');
     });
   });
 });
