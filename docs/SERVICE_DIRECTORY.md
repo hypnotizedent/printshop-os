@@ -23,9 +23,9 @@
 ### Production URLs (Cloudflare Tunnel)
 | Service | Production URL |
 |---------|----------------|
-| **Frontend** | https://printshop-app.ronny.works |
-| **Strapi CMS** | https://printshop.ronny.works |
-| **API** | https://api.ronny.works |
+| **Frontend** | https://mintprints-app.ronny.works |
+| **Strapi CMS** | https://mintprints.ronny.works |
+| **API** | https://mintprints-api.ronny.works |
 
 > **Note:** See `docs/CLOUDFLARE_TUNNEL_SETUP.md` for SSL certificate limitations and tunnel configuration.
 

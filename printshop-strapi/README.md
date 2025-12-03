@@ -30,7 +30,7 @@ npm run start
    # In your .env file
    PUBLIC_URL=http://100.92.156.118:1337  # For direct IP access
    # OR
-   PUBLIC_URL=https://printshop.ronny.works  # For domain with reverse proxy
+   PUBLIC_URL=https://mintprints.ronny.works  # For domain with Cloudflare Tunnel
    ```
 
 2. **Rebuild the admin panel:**

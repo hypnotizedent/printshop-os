@@ -262,8 +262,9 @@ docker compose down               # Stop all services
 docker compose logs -f strapi     # Follow logs for specific service
 
 # Access via Tailscale (direct to docker-host)
-# Strapi: http://docker-host:1337 or https://printshop.ronny.works
-# Frontend: http://docker-host:5173 or https://app.printshop.ronny.works
+# Strapi: http://docker-host:1337 or https://mintprints.ronny.works
+# Frontend: http://docker-host:5173 or https://mintprints-app.ronny.works
+# API: http://docker-host:3001 or https://mintprints-api.ronny.works
 ```
 
 ### SSH Quick Reference

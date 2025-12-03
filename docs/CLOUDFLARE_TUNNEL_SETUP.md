@@ -8,7 +8,7 @@ This guide covers deploying PrintShop OS with the centralized Cloudflare Tunnel 
 
 ## Overview
 
-PrintShop OS uses a **centralized Cloudflare Tunnel** managed by `homelab-infrastructure/stacks/tunnel-stack/`. This provides:
+PrintShop OS uses a **centralized Cloudflare Tunnel** managed by a dedicated stack at `~/stacks/cloudflared/`. This provides:
 
 - SSL/TLS termination (HTTPS)
 - DDoS protection
@@ -22,10 +22,10 @@ PrintShop OS uses a **centralized Cloudflare Tunnel** managed by `homelab-infras
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     homelab-infrastructure                          │
-│                     stacks/tunnel-stack/                            │
+│                    ~/stacks/cloudflared/                            │
+│                   (Centralized Tunnel Stack)                        │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │                     cloudflared                              │   │
+│  │                  homelab-cloudflared                         │   │
 │  │              (Cloudflare Tunnel Container)                   │   │
 │  └───────────────────────┬─────────────────────────────────────┘   │
 │                          │                                          │
@@ -71,9 +71,11 @@ The centralized approach:
 | Component | Location | Notes |
 |-----------|----------|-------|
 | Docker Host | 100.92.156.118 (Tailscale) | Dell R730XD via Proxmox |
-| Cloudflared | homelab-infrastructure/stacks/tunnel-stack | Centralized tunnel container |
-| Tunnel Config | Cloudflare Dashboard | Not a local config file |
+| Cloudflared | `~/stacks/cloudflared/` | Centralized tunnel container |
+| Tunnel Config | Cloudflare Dashboard | Routes configured via dashboard |
+| Tunnel Stack | `~/stacks/cloudflared/docker-compose.yml` | Managed separately from PrintShop OS |
 | Tunnel Network | `tunnel_network` | External Docker network |
+| Tunnel Token | Environment variable | `CLOUDFLARE_TUNNEL_TOKEN` in cloudflared stack |
 
 ---
 
@@ -81,22 +83,40 @@ The centralized approach:
 
 ### 1. Start the Tunnel Stack
 
-The Cloudflare Tunnel is managed in `homelab-infrastructure`:
+The Cloudflare Tunnel is managed in a dedicated stack at `~/stacks/cloudflared/`:
 
 ```bash
-# Clone homelab-infrastructure (if not already)
-cd ~/stacks
-git clone https://github.com/hypnotizedent/homelab-infrastructure.git infrastructure
+# Navigate to the cloudflared stack
+cd ~/stacks/cloudflared
 
-# Start the tunnel stack
-cd ~/stacks/infrastructure/stacks/tunnel-stack
-cp .env.example .env
-# Edit .env with your CLOUDFLARE_TUNNEL_TOKEN
+# Start the tunnel stack (if not already running)
 docker compose up -d
 
 # Verify tunnel_network exists
 docker network ls | grep tunnel_network
 ```
+
+**Cloudflared Stack Configuration** (`~/stacks/cloudflared/docker-compose.yml`):
+
+```yaml
+networks:
+  tunnel_network:
+    name: tunnel_network
+    driver: bridge
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: homelab-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - tunnel_network
+```
+
+The `CLOUDFLARE_TUNNEL_TOKEN` is stored in the cloudflared stack's `.env` file or directly in `docker-compose.yml`.
 
 ### 2. Verify Tunnel is Running
 
@@ -141,9 +161,9 @@ docker compose up -d
 
 | Service | Production URL | Container:Port |
 |---------|----------------|----------------|
-| Frontend | https://printshop-app.ronny.works | printshop-frontend:3000 |
-| Strapi CMS | https://printshop.ronny.works | printshop-strapi:1337 |
-| API | https://api.ronny.works | printshop-api:3001 |
+| Frontend | https://mintprints-app.ronny.works | printshop-frontend:3000 |
+| Strapi CMS | https://mintprints.ronny.works | printshop-strapi:1337 |
+| API | https://mintprints-api.ronny.works | printshop-api:3001 |
 | Appsmith | https://appsmith.ronny.works | printshop-appsmith:80 |
 | Botpress | https://botpress.ronny.works | printshop-botpress:3000 |
 
@@ -177,9 +197,9 @@ api.printshop.ronny.works     ← Two levels deep, SSL fails
 
 ### ✅ Correct (Works)
 ```
-printshop-app.ronny.works     ← Single level, SSL works
-printshop.ronny.works         ← Single level, SSL works
-api.ronny.works               ← Single level, SSL works
+mintprints-app.ronny.works    ← Single level, SSL works
+mintprints.ronny.works        ← Single level, SSL works
+mintprints-api.ronny.works    ← Single level, SSL works
 ```
 
 ---
@@ -191,7 +211,7 @@ Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your T
 ### Frontend Route
 | Field | Value |
 |-------|-------|
-| Subdomain | `printshop-app` |
+| Subdomain | `mintprints-app` |
 | Domain | `ronny.works` |
 | Service Type | HTTP |
 | URL | `printshop-frontend:3000` |
@@ -199,7 +219,7 @@ Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your T
 ### Strapi CMS Route
 | Field | Value |
 |-------|-------|
-| Subdomain | `printshop` |
+| Subdomain | `mintprints` |
 | Domain | `ronny.works` |
 | Service Type | HTTP |
 | URL | `printshop-strapi:1337` |
@@ -207,7 +227,7 @@ Configure routes in **Cloudflare Zero Trust → Networks → Tunnels → [Your T
 ### API Route
 | Field | Value |
 |-------|-------|
-| Subdomain | `api` |
+| Subdomain | `mintprints-api` |
 | Domain | `ronny.works` |
 | Service Type | HTTP |
 | URL | `printshop-api:3001` |
@@ -346,10 +366,10 @@ When building the frontend for production, set these VITE_ variables:
 
 ```bash
 # In .env or docker-compose build args
-VITE_API_URL=https://api.ronny.works
-VITE_STRAPI_URL=https://printshop.ronny.works
-VITE_PRICING_URL=https://api.ronny.works
-VITE_WS_URL=wss://api.ronny.works
+VITE_API_URL=https://mintprints-api.ronny.works
+VITE_STRAPI_URL=https://mintprints.ronny.works
+VITE_PRICING_URL=https://mintprints-api.ronny.works
+VITE_WS_URL=wss://mintprints-api.ronny.works
 ```
 
 **Important:** VITE_ variables are baked into the static bundle at build time, not runtime.
@@ -375,9 +395,9 @@ ssh docker-host 'cd ~/stacks/printshop-os && docker compose up -d --build'
 
 ```bash
 # Test public URLs
-curl -I https://printshop-app.ronny.works
-curl -I https://printshop.ronny.works
-curl -I https://api.ronny.works/health
+curl -I https://mintprints-app.ronny.works
+curl -I https://mintprints.ronny.works
+curl -I https://mintprints-api.ronny.works/health
 ```
 
 ---
@@ -392,9 +412,9 @@ docker ps | grep printshop
 ./scripts/verify-network.sh
 
 # Test external access
-curl -I https://printshop-app.ronny.works
-curl -I https://printshop.ronny.works
-curl -I https://api.ronny.works
+curl -I https://mintprints-app.ronny.works
+curl -I https://mintprints.ronny.works
+curl -I https://mintprints-api.ronny.works
 ```
 
 ---
@@ -424,7 +444,7 @@ docker compose up -d
 ./scripts/verify-network.sh
 
 # 6. Test public access
-curl -I https://printshop-app.ronny.works
+curl -I https://mintprints-app.ronny.works
 ```
 
 ---
@@ -453,13 +473,13 @@ docker exec printshop-api wget -qO- --spider http://printshop-strapi:1337 && ech
 
 ### 4. Test External Access
 ```bash
-curl -I https://printshop-app.ronny.works
-curl -I https://printshop.ronny.works
-curl -I https://api.ronny.works/health
+curl -I https://mintprints-app.ronny.works
+curl -I https://mintprints.ronny.works
+curl -I https://mintprints-api.ronny.works/health
 ```
 
 ### 5. Browser Verification
-1. Open https://printshop-app.ronny.works in incognito/private mode
+1. Open https://mintprints-app.ronny.works in incognito/private mode
 2. Verify the page loads correctly
 3. Check browser DevTools console for errors
 
