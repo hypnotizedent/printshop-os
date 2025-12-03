@@ -187,12 +187,12 @@ These services run in the `homelab-infrastructure` repository stacks and share t
 |----------------|--------------|--------|
 | `ronny.works` | ✅ Covered | Yes |
 | `*.ronny.works` | ✅ Covered | Yes |
-| `*.printshop.ronny.works` | ❌ NOT Covered | **No** |
+| `*.mintprints.ronny.works` | ❌ NOT Covered | **No** |
 
 ### ❌ Incorrect (Won't Work)
 ```
-app.printshop.ronny.works     ← Two levels deep, SSL fails
-api.printshop.ronny.works     ← Two levels deep, SSL fails
+app.mintprints.ronny.works    ← Two levels deep, SSL fails
+api.mintprints.ronny.works    ← Two levels deep, SSL fails
 ```
 
 ### ✅ Correct (Works)
