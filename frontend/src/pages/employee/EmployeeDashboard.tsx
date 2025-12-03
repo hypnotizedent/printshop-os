@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { toast } from 'sonner';
 import { 
   ClipboardList, 
   CheckCircle2, 
@@ -305,7 +306,8 @@ export function EmployeeDashboard() {
   };
 
   const handleReportIssue = (jobId: string) => {
-    console.log('Report issue for job:', jobId);
+    // TODO: Implement issue reporting
+    toast.error('Issue reporting not yet implemented');
   };
 
   const handleScanQR = () => {

@@ -236,7 +236,7 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewO
               </Badge>
             </div>
             <div className="mt-3">
-              <p className="text-2xl font-semibold">{stats.machinesOnline}/8</p>
+              <p className="text-2xl font-semibold">{stats.machinesOnline}/{displayMachines.length}</p>
               <p className="text-sm text-muted-foreground">Machines Online</p>
             </div>
           </CardContent>
