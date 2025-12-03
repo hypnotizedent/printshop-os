@@ -1,4 +1,130 @@
-# Printavo Sync Scripts
+# PrintShop OS API Scripts
+
+This directory contains scripts for data extraction, synchronization, and management.
+
+## Table of Contents
+
+1. [Printavo Data Extraction](#printavo-data-extraction)
+   - [extract-printavo-v2.ts](#extract-printavo-v2ts)
+   - [download-printavo-files.ts](#download-printavo-filests)
+   - [sync-to-minio.ts](#sync-to-miniots)
+2. [Printavo Live Sync](#printavo-live-sync)
+   - [sync-printavo-live.ts](#sync-printavo-livets)
+3. [Batch Import](#batch-import)
+   - [batch-import.ts](#batch-importts)
+
+---
+
+## Printavo Data Extraction
+
+Scripts for complete data extraction from Printavo and archival to MinIO.
+
+### extract-printavo-v2.ts
+
+Extracts all data from Printavo using the v2 GraphQL API.
+
+**Features:**
+- Cursor-based pagination
+- Rate limiting (500ms between requests)
+- Timestamped JSON output
+- Comprehensive error handling
+
+**Usage:**
+```bash
+npm run printavo:extract
+```
+
+**Output:**
+- `data/printavo-export/v2/{timestamp}/orders.json`
+- `data/printavo-export/v2/{timestamp}/customers.json`
+- `data/printavo-export/v2/{timestamp}/quotes.json`
+- `data/printavo-export/v2/{timestamp}/products.json`
+- `data/printavo-export/v2/{timestamp}/invoices.json`
+- `data/printavo-export/v2/{timestamp}/summary.json`
+
+**Environment Variables:**
+- `PRINTAVO_EMAIL` - Printavo account email
+- `PRINTAVO_PASSWORD` - Printavo account password
+
+### download-printavo-files.ts
+
+Downloads artwork, production files, and PDFs from Printavo URLs.
+
+**Features:**
+- Parallel downloads (configurable concurrency, default: 5)
+- Checkpoint/resume support
+- Progress reporting with ETA
+- Organized file structure by order
+
+**Usage:**
+```bash
+# Use most recent extraction
+npm run printavo:download-files
+
+# Or specify extraction directory
+npm run printavo:download-files data/printavo-export/v2/2025-12-03T00-00-00
+```
+
+**Output:**
+```
+data/printavo-export/v2/{timestamp}/files/
+└── by_order/{visualId}/
+    ├── artwork/
+    ├── production/
+    └── pdfs/
+```
+
+**Environment Variables:**
+- `DOWNLOAD_CONCURRENCY` - Number of parallel downloads (default: 5)
+
+### sync-to-minio.ts
+
+Uploads extracted data and downloaded files to MinIO for long-term archival.
+
+**Features:**
+- Uploads JSON exports and files to MinIO
+- Creates searchable index files
+- Upload integrity verification
+- Progress reporting
+
+**Usage:**
+```bash
+# Use most recent extraction
+npm run printavo:sync-minio
+
+# Or specify extraction directory
+npm run printavo:sync-minio data/printavo-export/v2/2025-12-03T00-00-00
+
+# Run complete archive (extract + download + sync)
+npm run printavo:full-archive
+```
+
+**MinIO Structure:**
+```
+minio://printshop/printavo-archive/
+├── exports/{timestamp}/
+│   ├── orders.json
+│   ├── customers.json
+│   └── ...
+├── files/by_order/{visualId}/
+│   ├── artwork/
+│   ├── production/
+│   └── pdfs/
+└── index/
+    ├── archive_{timestamp}.json
+    └── latest.json
+```
+
+**Environment Variables:**
+- `MINIO_ENDPOINT` - MinIO endpoint (default: localhost:9000)
+- `MINIO_ACCESS_KEY` - MinIO access key
+- `MINIO_SECRET_KEY` - MinIO secret key
+- `MINIO_BUCKET` - MinIO bucket name (default: printshop)
+- `MINIO_USE_SSL` - Use SSL (default: false)
+
+---
+
+## Printavo Live Sync
 
 This directory contains scripts for syncing data between Printavo and Strapi.
 
