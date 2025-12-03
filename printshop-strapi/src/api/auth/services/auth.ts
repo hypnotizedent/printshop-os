@@ -19,6 +19,7 @@ function getJWTSecret(): string {
 const JWT_SECRET = getJWTSecret();
 const JWT_EXPIRES_IN_CUSTOMER = '7d';
 const JWT_EXPIRES_IN_EMPLOYEE = '12h';
+const JWT_EXPIRES_IN_OWNER = '7d';
 const BCRYPT_SALT_ROUNDS = 12;
 
 // Types
@@ -38,7 +39,14 @@ export interface EmployeeTokenPayload {
   type: 'employee';
 }
 
-export type TokenPayload = CustomerTokenPayload | EmployeeTokenPayload;
+export interface OwnerTokenPayload {
+  id: number;
+  documentId: string;
+  email: string;
+  type: 'owner';
+}
+
+export type TokenPayload = CustomerTokenPayload | EmployeeTokenPayload | OwnerTokenPayload;
 
 export interface CustomerData {
   id: number;
@@ -57,6 +65,16 @@ export interface EmployeeData {
   email?: string;
   role: string;
   department: string;
+}
+
+export interface OwnerData {
+  id: number;
+  documentId: string;
+  email: string;
+  name: string;
+  twoFactorEnabled?: boolean;
+  isActive?: boolean;
+  lastLogin?: string | null;
 }
 
 /**
@@ -111,6 +129,24 @@ export function generateEmployeeToken(employee: {
   };
   
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN_EMPLOYEE });
+}
+
+/**
+ * Generate a JWT token for an owner
+ */
+export function generateOwnerToken(owner: {
+  id: number;
+  documentId: string;
+  email: string;
+}): string {
+  const payload: OwnerTokenPayload = {
+    id: owner.id,
+    documentId: owner.documentId,
+    email: owner.email,
+    type: 'owner',
+  };
+  
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN_OWNER });
 }
 
 /**
@@ -206,11 +242,30 @@ export function sanitizeEmployee(employee: Record<string, unknown>): EmployeeDat
   };
 }
 
+/**
+ * Remove sensitive fields from owner data
+ * Returns owner data without passwordHash and twoFactorSecret
+ */
+export function sanitizeOwner(owner: Record<string, unknown>): OwnerData {
+  const { passwordHash, twoFactorSecret, ...ownerData } = owner;
+  // Return the sanitized data - required fields come from Strapi schema
+  return {
+    id: ownerData.id as number,
+    documentId: ownerData.documentId as string,
+    email: ownerData.email as string,
+    name: ownerData.name as string,
+    twoFactorEnabled: ownerData.twoFactorEnabled as boolean | undefined,
+    isActive: ownerData.isActive as boolean | undefined,
+    lastLogin: (ownerData.lastLogin as string | null | undefined) || null,
+  };
+}
+
 export default {
   hashPassword,
   verifyPassword,
   generateCustomerToken,
   generateEmployeeToken,
+  generateOwnerToken,
   verifyToken,
   isTokenExpiredError,
   extractTokenFromHeader,
@@ -219,4 +274,5 @@ export default {
   isValidPIN,
   sanitizeCustomer,
   sanitizeEmployee,
+  sanitizeOwner,
 };

@@ -47,6 +47,99 @@ const JWT_EXPIRES_IN = '7d';
 
 export default {
   /**
+   * Owner Login
+   * POST /auth/owner/login
+   */
+  async ownerLogin(ctx: Context) {
+    const { email, password, twoFactorCode } = ctx.request.body as {
+      email?: string;
+      password?: string;
+      twoFactorCode?: string;
+    };
+
+    if (!email || !password) {
+      return ctx.badRequest('Email and password are required');
+    }
+
+    try {
+      // Find owner by email
+      const owners = await strapi.documents('api::owner.owner').findMany({
+        filters: { email: email.toLowerCase() },
+        limit: 1,
+      });
+
+      const owner = owners[0];
+
+      if (!owner) {
+        return ctx.unauthorized('Invalid email or password');
+      }
+
+      // Check if owner is active
+      if (!owner.isActive) {
+        return ctx.unauthorized('Account is deactivated');
+      }
+
+      // Check if owner has a password set
+      if (!owner.passwordHash) {
+        return ctx.badRequest('Account not set up for login');
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, owner.passwordHash);
+
+      if (!isValidPassword) {
+        return ctx.unauthorized('Invalid email or password');
+      }
+
+      // Check 2FA if enabled
+      if (owner.twoFactorEnabled) {
+        if (!twoFactorCode) {
+          return ctx.badRequest('Two-factor authentication code is required');
+        }
+        
+        // Note: Actual 2FA validation would go here
+        // For now, we'll accept any 6-digit code as a placeholder
+        // In production, this should validate against owner.twoFactorSecret using speakeasy or similar
+        if (!/^\d{6}$/.test(twoFactorCode)) {
+          return ctx.badRequest('Invalid two-factor authentication code format');
+        }
+      }
+
+      // Update last login
+      await strapi.documents('api::owner.owner').update({
+        documentId: owner.documentId,
+        data: {
+          lastLogin: new Date().toISOString(),
+        },
+      });
+
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          id: owner.id,
+          documentId: owner.documentId,
+          email: owner.email,
+          type: 'owner',
+        },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+      );
+
+      // Return owner data (without sensitive fields)
+      const { passwordHash, twoFactorSecret, ...ownerData } = owner;
+
+      ctx.body = {
+        success: true,
+        token,
+        owner: ownerData,
+      };
+    } catch (error) {
+      strapi.log.error('Owner login error:', error);
+      return ctx.internalServerError('Login failed');
+    }
+  },
+
+  /**
    * Customer Login
    * POST /auth/customer/login
    */
@@ -292,7 +385,7 @@ export default {
         id: number;
         documentId: string;
         email: string;
-        type: 'customer' | 'employee';
+        type: 'customer' | 'employee' | 'owner';
         role?: string;
         department?: string;
       };
@@ -326,6 +419,21 @@ export default {
           valid: true,
           type: 'employee',
           employee: employeeData,
+        };
+      } else if (decoded.type === 'owner') {
+        const owner = await strapi.documents('api::owner.owner').findOne({
+          documentId: decoded.documentId,
+        });
+
+        if (!owner || !owner.isActive) {
+          return ctx.unauthorized('Owner not found or inactive');
+        }
+
+        const { passwordHash, twoFactorSecret, ...ownerData } = owner;
+        ctx.body = {
+          valid: true,
+          type: 'owner',
+          owner: ownerData,
         };
       } else {
         return ctx.unauthorized('Invalid token type');
