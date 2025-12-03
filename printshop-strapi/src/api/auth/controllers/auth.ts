@@ -93,16 +93,10 @@ export default {
 
       // Check 2FA if enabled
       if (owner.twoFactorEnabled) {
-        if (!twoFactorCode) {
-          return ctx.badRequest('Two-factor authentication code is required');
-        }
-        
-        // Note: Actual 2FA validation would go here
-        // For now, we'll accept any 6-digit code as a placeholder
-        // In production, this should validate against owner.twoFactorSecret using speakeasy or similar
-        if (!/^\d{6}$/.test(twoFactorCode)) {
-          return ctx.badRequest('Invalid two-factor authentication code format');
-        }
+        // TODO: Implement proper 2FA validation using speakeasy or similar library
+        // For now, 2FA is disabled by default in the Owner schema
+        // When implementing, validate against owner.twoFactorSecret
+        return ctx.badRequest('Two-factor authentication is not yet fully implemented. Please contact system administrator.');
       }
 
       // Update last login
@@ -113,7 +107,7 @@ export default {
         },
       });
 
-      // Generate JWT token
+      // Generate JWT token using auth service
       const token = jwt.sign(
         {
           id: owner.id,
@@ -125,7 +119,7 @@ export default {
         { expiresIn: JWT_EXPIRES_IN }
       );
 
-      // Return owner data (without sensitive fields)
+      // Return sanitized owner data
       const { passwordHash, twoFactorSecret, ...ownerData } = owner;
 
       ctx.body = {

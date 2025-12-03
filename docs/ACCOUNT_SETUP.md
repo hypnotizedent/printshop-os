@@ -169,24 +169,17 @@ curl -X GET https://mintprints.ronny.works/api/auth/verify \
 
 ## 🔒 Two-Factor Authentication (Owners Only)
 
-2FA is optional for owner accounts and can be enabled in the admin dashboard.
+⚠️ **Note**: 2FA is currently in development and not fully implemented.
 
-**To enable 2FA:**
-1. Login as owner
-2. Navigate to account settings
-3. Enable 2FA and scan the QR code
-4. Save the backup codes
+2FA fields are included in the Owner schema for future implementation:
+- `twoFactorEnabled` (boolean) - Currently should be set to `false`
+- `twoFactorSecret` (string) - Reserved for future use
 
-**To login with 2FA:**
-```bash
-curl -X POST https://mintprints.ronny.works/api/auth/owner/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email":"admin@mintprints.com",
-    "password":"AdminPass123!",
-    "twoFactorCode":"123456"
-  }'
-```
+**Future Implementation:**
+When fully implemented, 2FA will use TOTP (Time-based One-Time Password) with libraries like `speakeasy` and provide QR code generation for authenticator apps.
+
+**Current Behavior:**
+If `twoFactorEnabled` is set to `true`, login attempts will be rejected with a message indicating 2FA is not yet available.
 
 ## 🛠️ Troubleshooting
 
