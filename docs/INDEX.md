@@ -13,6 +13,7 @@
 | Understand the system | [ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md) |
 | Deploy to production | [DEPLOYMENT.md](DEPLOYMENT.md) |
 | Check migration status | [PRINTAVO_MIGRATION_STATUS.md](PRINTAVO_MIGRATION_STATUS.md) |
+| **Extract Printavo data** | [implementation/PRINTAVO_EXTRACTION_IMPLEMENTATION.md](implementation/PRINTAVO_EXTRACTION_IMPLEMENTATION.md) |
 | Set up supplier APIs | [SUPPLIER_INTEGRATION.md](SUPPLIER_INTEGRATION.md) |
 | Contribute code | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Track audit action items | [AUDIT_ACTION_ITEMS.md](AUDIT_ACTION_ITEMS.md) |
@@ -29,13 +30,19 @@ docs/
 ├── CLOUDFLARE_TUNNEL_SETUP.md  # External access via Cloudflare
 ├── AUDIT_ACTION_ITEMS.md       # Living audit dashboard (action items)
 ├── PRINTAVO_MIGRATION_STATUS.md # Data import progress
-├── SUPPLIER_INTEGRATION.md      # Supplier API documentation
-├── CONTRIBUTING.md              # Contribution guidelines
-├── diagrams/                    # Mermaid diagrams (.mmd)
-├── deployment/                  # Deployment guides
-│   └── disaster-recovery.md     # Backup and restore procedures
-├── setup/                       # Setup instructions
-└── ARCHIVE_*/                   # Historical documentation
+├── PRINTAVO_EXTRACTION.md      # Printavo extraction overview
+├── SUPPLIER_INTEGRATION.md     # Supplier API documentation
+├── CONTRIBUTING.md             # Contribution guidelines
+├── implementation/             # Implementation guides
+│   ├── PRINTAVO_EXTRACTION_IMPLEMENTATION.md  # Complete extraction guide
+│   ├── PRINTAVO_V2_SCHEMA_REFERENCE.md        # GraphQL schema reference
+│   ├── MINIO_STORAGE_GUIDE.md                 # MinIO configuration
+│   └── N8N_PRINTAVO_WORKFLOWS.md              # n8n workflow templates
+├── diagrams/                   # Mermaid diagrams (.mmd)
+├── deployment/                 # Deployment guides
+│   └── disaster-recovery.md    # Backup and restore procedures
+├── setup/                      # Setup instructions
+└── ARCHIVE_*/                  # Historical documentation
 ```
 
 ---
@@ -70,6 +77,40 @@ Supplier API integration documentation:
 - AS Colour (dual-auth)
 - S&S Activewear
 - SanMar (SFTP)
+
+### [Implementation Guides](implementation/)
+Complete implementation documentation for major systems:
+
+#### [PRINTAVO_EXTRACTION_IMPLEMENTATION.md](implementation/PRINTAVO_EXTRACTION_IMPLEMENTATION.md)
+Step-by-step guide for extracting all Printavo data:
+- Infrastructure setup (VM, MinIO)
+- Data extraction (GraphQL API)
+- File downloads (artwork, production files)
+- MinIO sync and verification
+- Troubleshooting and timeline
+
+#### [PRINTAVO_V2_SCHEMA_REFERENCE.md](implementation/PRINTAVO_V2_SCHEMA_REFERENCE.md)
+Complete reference of Printavo V2 GraphQL API:
+- All data types (Invoice, Customer, LineItem, etc.)
+- Field descriptions and examples
+- GraphQL queries
+- Type mappings to Strapi
+
+#### [MINIO_STORAGE_GUIDE.md](implementation/MINIO_STORAGE_GUIDE.md)
+MinIO configuration and usage:
+- Deployment and setup
+- Bucket structure
+- Access patterns (S3 API, presigned URLs)
+- n8n integration
+- Backup and security
+
+#### [N8N_PRINTAVO_WORKFLOWS.md](implementation/N8N_PRINTAVO_WORKFLOWS.md)
+Ready-to-use n8n workflow templates:
+- Query orders by customer
+- Search by date range
+- Get artwork files for orders
+- Customer analytics
+- LLM integration patterns
 
 ---
 
