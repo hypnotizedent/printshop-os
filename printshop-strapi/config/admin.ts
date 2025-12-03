@@ -10,10 +10,9 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
       salt: env('TRANSFER_TOKEN_SALT'),
     },
   },
-  // Allow admin panel access from the public URL
-  url: '/admin',
+  // Use the public URL for admin panel
+  url: env('PUBLIC_URL', 'http://localhost:1337') + '/admin',
   serveAdminPanel: true,
-  // Disable host check for reverse proxy
   watchIgnoreFiles: [
     '**/config/sync/**',
   ],
