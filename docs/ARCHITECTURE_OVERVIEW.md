@@ -58,8 +58,8 @@ All services run on `docker-host` (100.92.156.118) via Docker.
 
 | Service | Container | Port | URL | Status |
 |---------|-----------|------|-----|--------|
-| **React Frontend** | `printshop-frontend` | 3000 | `app.printshop.ronny.works` | ✅ Running |
-| **Strapi CMS** | `printshop-strapi` | 1337 | `printshop.ronny.works` | ✅ Running |
+| **React Frontend** | `printshop-frontend` | 3000 | `mintprints-app.ronny.works` | ✅ Running |
+| **Strapi CMS** | `printshop-strapi` | 1337 | `mintprints.ronny.works` | ✅ Running |
 | **PostgreSQL** | `printshop-postgres` | 5432 | Internal | ✅ Running |
 | **Redis** | `printshop-redis` | 6379 | Internal | ✅ Running |
 | **Inventory API** | `printshop-api` | 3002 | Internal | ✅ Running |
@@ -68,11 +68,11 @@ All services run on `docker-host` (100.92.156.118) via Docker.
 
 ### Access URLs
 
-| Service | Direct Access (Tailscale) | HTTPS (Traefik) |
-|---------|---------------------------|-----------------|
-| Frontend | http://100.92.156.118:3000 | https://app.printshop.ronny.works |
-| Strapi API | http://100.92.156.118:1337 | https://printshop.ronny.works |
-| Strapi Admin | http://100.92.156.118:1337/admin | https://printshop.ronny.works/admin |
+| Service | Direct Access (Tailscale) | HTTPS (Cloudflare Tunnel) |
+|---------|---------------------------|---------------------------|
+| Frontend | http://100.92.156.118:3000 | https://mintprints-app.ronny.works |
+| Strapi API | http://100.92.156.118:1337 | https://mintprints.ronny.works |
+| Strapi Admin | http://100.92.156.118:1337/admin | https://mintprints.ronny.works/admin |
 | Inventory API | http://100.92.156.118:3002 | Internal only |
 | MinIO Console | http://100.92.156.118:9001 | Internal only |
 | Traefik Dashboard | http://100.92.156.118:8080 | Internal only |
@@ -360,7 +360,7 @@ ssh docker-host 'docker logs printshop-strapi -f --tail 100'
 2. **Supplier API**: Inventory API deployed with AS Colour working (dual-auth)
 3. **Infrastructure**: Docker containers running on homelab
 4. **Frontend**: React frontend deployed (dark mode, production schedule view)
-5. **SSL/HTTPS**: Traefik + Cloudflare configured for printshop.ronny.works
+5. **SSL/HTTPS**: Cloudflare Tunnel configured for mintprints.ronny.works
 6. **Health Monitoring**: health-check.sh with auto-recovery and ntfy notifications
 
 ### In Progress 🔄

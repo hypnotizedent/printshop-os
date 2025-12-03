@@ -152,7 +152,7 @@
 ## 🔧 Infrastructure Fixes (Priority 1)
 
 ### 15. Strapi CMS Link Doesn't Load
-- **Expected URL:** http://100.92.156.118:1337 or https://printshop.ronny.works
+- **Expected URL:** http://100.92.156.118:1337 or https://mintprints.ronny.works
 - **Check:** Container running? Port accessible?
 - **Fix:** Verify DNS/Tailscale, check container logs
 

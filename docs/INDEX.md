@@ -118,9 +118,9 @@ Ready-to-use n8n workflow templates:
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| **Strapi CMS** | https://printshop.ronny.works | API & Admin |
-| **Frontend** | https://printshop-app.ronny.works | React UI |
-| **API** | https://api.ronny.works | Backend API |
+| **Strapi CMS** | https://mintprints.ronny.works | API & Admin |
+| **Frontend** | https://mintprints-app.ronny.works | React UI |
+| **API** | https://mintprints-api.ronny.works | Backend API |
 | **Inventory API** | http://docker-host:3002 | Supplier inventory |
 | **MinIO** | http://docker-host:9000 | Artwork storage |
 | **PostgreSQL** | docker-host:5432 | Database |

@@ -61,14 +61,14 @@ All stacks connect via the `homelab-network` Docker network for cross-stack comm
 
 | Subdomain | Service | Container URL |
 |-----------|---------|---------------|
-| printshop-app.ronny.works | React Frontend | http://printshop-frontend:3000 |
-| printshop.ronny.works | Strapi CMS | http://printshop-strapi:1337 |
-| api.ronny.works | Backend API | http://printshop-api:3001 |
+| mintprints-app.ronny.works | React Frontend | http://printshop-frontend:3000 |
+| mintprints.ronny.works | Strapi CMS | http://printshop-strapi:1337 |
+| mintprints-api.ronny.works | Backend API | http://printshop-api:3001 |
 | n8n.ronny.works | Workflow Automation | http://n8n:5678 |
 | grafana.ronny.works | Monitoring | http://grafana:3000 |
 | uptime.ronny.works | Status Page | http://uptime-kuma:3001 |
 
-> **Note:** Free Cloudflare SSL only covers one subdomain level. Use `printshop-app.ronny.works`, not `app.printshop.ronny.works`.
+> **Note:** Free Cloudflare SSL only covers one subdomain level. Use `mintprints-app.ronny.works`, not `app.mintprints.ronny.works`.
 
 ---
 
@@ -83,29 +83,36 @@ All stacks connect via the `homelab-network` Docker network for cross-stack comm
 
 ### Cloudflare Tunnel Network
 
-PrintShop OS uses a **centralized Cloudflare Tunnel** managed by `homelab-infrastructure/stacks/tunnel-stack/`. This must be running before starting PrintShop OS.
+PrintShop OS uses a **centralized Cloudflare Tunnel** managed by a dedicated stack at `~/stacks/cloudflared/`. This must be running before starting PrintShop OS.
 
-#### 1. Clone homelab-infrastructure (if not already)
-
-```bash
-cd ~/stacks
-git clone https://github.com/hypnotizedent/homelab-infrastructure.git infrastructure
-```
-
-#### 2. Start the tunnel stack
+#### 1. Start the tunnel stack
 
 ```bash
-cd ~/stacks/infrastructure/stacks/tunnel-stack
-cp .env.example .env
-# Edit .env with your CLOUDFLARE_TUNNEL_TOKEN
+cd ~/stacks/cloudflared
 docker compose up -d
 ```
 
-#### 3. Verify tunnel_network exists
+The tunnel stack creates the `tunnel_network` external network that PrintShop OS services connect to for public access.
+
+#### 2. Verify tunnel_network exists
 
 ```bash
 docker network ls | grep tunnel_network
 ```
+
+#### 3. Connect PrintShop OS services to tunnel_network
+
+After starting PrintShop OS, ensure services are connected to the tunnel network:
+
+```bash
+cd ~/stacks/printshop-os
+./scripts/connect-networks.sh
+```
+
+This connects the following services to `tunnel_network`:
+- `printshop-strapi` → `https://mintprints.ronny.works`
+- `printshop-frontend` → `https://mintprints-app.ronny.works`
+- `printshop-api` → `https://mintprints-api.ronny.works`
 
 For detailed tunnel configuration, see [CLOUDFLARE_TUNNEL_SETUP.md](./CLOUDFLARE_TUNNEL_SETUP.md).
 
@@ -139,9 +146,9 @@ For detailed tunnel configuration, see [CLOUDFLARE_TUNNEL_SETUP.md](./CLOUDFLARE
 
 | Service | Production URL |
 |---------|----------------|
-| Frontend | https://printshop-app.ronny.works |
-| Strapi CMS | https://printshop.ronny.works |
-| API | https://api.ronny.works |
+| Frontend | https://mintprints-app.ronny.works |
+| Strapi CMS | https://mintprints.ronny.works |
+| API | https://mintprints-api.ronny.works |
 
 ---
 
@@ -297,9 +304,9 @@ cd ~/stacks/printshop-os
 
 | Subdomain | Domain | Service URL |
 |-----------|--------|-------------|
-| printshop-app | ronny.works | http://printshop-frontend:3000 |
-| printshop | ronny.works | http://printshop-strapi:1337 |
-| api | ronny.works | http://printshop-api:3001 |
+| mintprints-app | ronny.works | http://printshop-frontend:3000 |
+| mintprints | ronny.works | http://printshop-strapi:1337 |
+| mintprints-api | ronny.works | http://printshop-api:3001 |
 
 4. **Verify connectivity** after deployment:
 
@@ -308,16 +315,17 @@ cd ~/stacks/printshop-os
 ./scripts/verify-network.sh
 
 # Test public URLs
-curl -I https://printshop-app.ronny.works
-curl -I https://printshop.ronny.works
+curl -I https://mintprints-app.ronny.works
+curl -I https://mintprints.ronny.works
+curl -I https://mintprints-api.ronny.works
 ```
 
 ### SSL Certificate Note
 
 Free Cloudflare SSL only covers **one level of subdomains**:
-- ✅ `printshop.ronny.works` (works)
-- ✅ `api.ronny.works` (works)
-- ❌ `app.printshop.ronny.works` (won't work - two levels)
+- ✅ `mintprints.ronny.works` (works)
+- ✅ `mintprints-api.ronny.works` (works)
+- ❌ `app.mintprints.ronny.works` (won't work - two levels)
 
 ---
 

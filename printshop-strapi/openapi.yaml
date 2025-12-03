@@ -55,7 +55,7 @@ servers:
     description: Development server
   - url: http://docker-host:1337
     description: Docker host
-  - url: https://printshop.ronny.works
+  - url: https://mintprints.ronny.works
     description: Production server
 
 tags:
