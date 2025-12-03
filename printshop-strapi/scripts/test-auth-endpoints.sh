@@ -313,14 +313,15 @@ main() {
     
     print_info "Checking if Strapi is accessible..."
     # Try to access the admin panel or API - more reliable than _health endpoint
-    if ! curl -sf -o /dev/null "$STRAPI_URL/admin" && ! curl -sf -o /dev/null "$STRAPI_URL/api"; then
+    if curl -sf -o /dev/null "$STRAPI_URL/admin" || curl -sf -o /dev/null "$STRAPI_URL/api"; then
+        print_pass "Strapi is accessible"
+    else
         echo -e "${RED}Error: Cannot reach Strapi at $STRAPI_URL${NC}"
         echo ""
         echo "Please ensure Strapi is running:"
         echo "  cd printshop-strapi && npm run dev"
         exit 1
     fi
-    print_pass "Strapi is accessible"
     
     # Run tests
     print_header "Running Authentication Tests"

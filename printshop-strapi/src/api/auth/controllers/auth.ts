@@ -86,7 +86,13 @@ export default {
       }
 
       // Verify password
-      const isValidPassword = await bcrypt.compare(password, owner.passwordHash);
+      let isValidPassword = false;
+      try {
+        isValidPassword = await bcrypt.compare(password, owner.passwordHash);
+      } catch (error) {
+        strapi.log.error('Password comparison error:', error);
+        return ctx.internalServerError('Authentication error');
+      }
 
       if (!isValidPassword) {
         return ctx.unauthorized('Invalid email or password');
