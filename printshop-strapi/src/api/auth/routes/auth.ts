@@ -6,6 +6,16 @@ export default {
   routes: [
     {
       method: 'POST',
+      path: '/auth/owner/login',
+      handler: 'auth.ownerLogin',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
       path: '/auth/customer/login',
       handler: 'auth.customerLogin',
       config: {

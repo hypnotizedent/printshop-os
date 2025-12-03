@@ -6,6 +6,7 @@
 import { Context } from 'koa';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import * as authService from '../services/auth';
 
 // Type declarations for Strapi custom content types
 // These are needed until proper type generation is run
@@ -46,6 +47,94 @@ const JWT_SECRET = getJWTSecret();
 const JWT_EXPIRES_IN = '7d';
 
 export default {
+  /**
+   * Owner Login
+   * POST /auth/owner/login
+   */
+  async ownerLogin(ctx: Context) {
+    const { email, password, twoFactorCode } = ctx.request.body as {
+      email?: string;
+      password?: string;
+      twoFactorCode?: string;
+    };
+
+    if (!email || !password) {
+      return ctx.badRequest('Email and password are required');
+    }
+
+    try {
+      // Find owner by email
+      const owners = await strapi.documents('api::owner.owner').findMany({
+        filters: { email: email.toLowerCase() },
+        limit: 1,
+      });
+
+      const owner = owners[0];
+
+      if (!owner) {
+        return ctx.unauthorized('Invalid email or password');
+      }
+
+      // Check if owner is active
+      if (!owner.isActive) {
+        return ctx.unauthorized('Account is deactivated');
+      }
+
+      // Check if owner has a password set
+      if (!owner.passwordHash) {
+        return ctx.badRequest('Account not set up for login');
+      }
+
+      // Verify password
+      let isValidPassword = false;
+      try {
+        isValidPassword = await bcrypt.compare(password, owner.passwordHash);
+      } catch (error) {
+        strapi.log.error('Password comparison error:', error);
+        return ctx.internalServerError('Authentication error');
+      }
+
+      if (!isValidPassword) {
+        return ctx.unauthorized('Invalid email or password');
+      }
+
+      // Check 2FA if enabled
+      if (owner.twoFactorEnabled) {
+        // TODO: Implement proper 2FA validation using speakeasy or similar library
+        // For now, 2FA is disabled by default in the Owner schema
+        // When implementing, validate against owner.twoFactorSecret
+        return ctx.badRequest('Two-factor authentication is not yet fully implemented. Please contact system administrator.');
+      }
+
+      // Update last login
+      await strapi.documents('api::owner.owner').update({
+        documentId: owner.documentId,
+        data: {
+          lastLogin: new Date().toISOString(),
+        },
+      });
+
+      // Generate JWT token using auth service
+      const token = authService.generateOwnerToken({
+        id: owner.id,
+        documentId: owner.documentId,
+        email: owner.email,
+      });
+
+      // Sanitize owner data using auth service
+      const ownerData = authService.sanitizeOwner(owner);
+
+      ctx.body = {
+        success: true,
+        token,
+        owner: ownerData,
+      };
+    } catch (error) {
+      strapi.log.error('Owner login error:', error);
+      return ctx.internalServerError('Login failed');
+    }
+  },
+
   /**
    * Customer Login
    * POST /auth/customer/login
@@ -292,7 +381,7 @@ export default {
         id: number;
         documentId: string;
         email: string;
-        type: 'customer' | 'employee';
+        type: 'customer' | 'employee' | 'owner';
         role?: string;
         department?: string;
       };
@@ -306,11 +395,11 @@ export default {
           return ctx.unauthorized('Customer not found');
         }
 
-        const { passwordHash, ...customerData } = customer;
+        const customerData = authService.sanitizeCustomer(customer);
         ctx.body = {
           valid: true,
           type: 'customer',
-          user: customerData,
+          customer: customerData,
         };
       } else if (decoded.type === 'employee') {
         const employee = await strapi.documents('api::employee.employee').findOne({
@@ -321,11 +410,26 @@ export default {
           return ctx.unauthorized('Employee not found or inactive');
         }
 
-        const { pin, ...employeeData } = employee;
+        const employeeData = authService.sanitizeEmployee(employee);
         ctx.body = {
           valid: true,
           type: 'employee',
           employee: employeeData,
+        };
+      } else if (decoded.type === 'owner') {
+        const owner = await strapi.documents('api::owner.owner').findOne({
+          documentId: decoded.documentId,
+        });
+
+        if (!owner || !owner.isActive) {
+          return ctx.unauthorized('Owner not found or inactive');
+        }
+
+        const ownerData = authService.sanitizeOwner(owner);
+        ctx.body = {
+          valid: true,
+          type: 'owner',
+          owner: ownerData,
         };
       } else {
         return ctx.unauthorized('Invalid token type');

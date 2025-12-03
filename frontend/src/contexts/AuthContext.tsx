@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.type === 'customer') {
         setUserType('customer');
-        setCustomer(data.user);
+        setCustomer(data.customer || data.user); // Support both for backward compatibility
       } else if (data.type === 'employee') {
         setUserType('employee');
         setEmployee(data.employee);
@@ -166,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
       setUserType('customer');
       clearUserState();
-      setCustomer(data.user);
+      setCustomer(data.user || data.customer); // Support both for backward compatibility
       
       return { success: true };
     } catch (err) {
@@ -199,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
       setUserType('customer');
       clearUserState();
-      setCustomer(data.user);
+      setCustomer(data.user || data.customer); // Support both for backward compatibility
       
       return { success: true };
     } catch (err) {
