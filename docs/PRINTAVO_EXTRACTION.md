@@ -22,6 +22,21 @@
 
 The Printavo Extraction System downloads EVERYTHING from Printavo and stores it in MinIO for permanent archival. This ensures a complete backup of all data before fully migrating away from Printavo.
 
+### Two Approaches Available
+
+**1. TypeScript/Node.js Approach (NEW - Recommended)**
+- Located in `services/api/scripts/`
+- Uses Printavo's v2 GraphQL API
+- Integrated with the PrintShop OS API service
+- Built-in checkpoint/resume support
+- See [TypeScript Extraction](#typescript-extraction-new) section below
+
+**2. Python Approach (Legacy)**
+- Located in `scripts/`
+- Uses web scraping for file downloads
+- Standalone scripts
+- See sections below for details
+
 ### Why This Exists
 
 - Existing scrapers only get orders/customers, missing line items, imprints, artwork files
@@ -45,7 +60,104 @@ The Printavo Extraction System downloads EVERYTHING from Printavo and stores it 
 
 ---
 
-## Quick Start
+## TypeScript Extraction (NEW)
+
+### Quick Start
+
+#### 1. Prerequisites
+
+```bash
+# Start MinIO service
+cd /path/to/printshop-os
+docker compose up -d minio
+
+# Initialize MinIO buckets
+./scripts/init-minio.sh
+
+# Set environment variables in services/api/.env
+PRINTAVO_EMAIL=your@email.com
+PRINTAVO_PASSWORD=your_password
+MINIO_ENDPOINT=localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=secure_password_change_this
+MINIO_BUCKET=printshop
+MINIO_USE_SSL=false
+```
+
+#### 2. Run Extraction
+
+```bash
+cd services/api
+
+# Option 1: Run complete archive (extract + download + upload to MinIO)
+npm run printavo:full-archive
+
+# Option 2: Run each step separately
+npm run printavo:extract           # Extract data via GraphQL API
+npm run printavo:download-files    # Download artwork/production files
+npm run printavo:sync-minio        # Upload everything to MinIO
+```
+
+#### 3. Access Results
+
+- **MinIO Console**: http://localhost:9001
+- **Local Files**: `services/api/data/printavo-export/v2/{timestamp}/`
+- **MinIO Archive**: `s3://printshop/printavo-archive/`
+
+### Features
+
+✅ **GraphQL API Integration**
+- Uses official Printavo v2 API
+- Cursor-based pagination
+- Rate limiting (500ms between requests)
+- Automatic authentication
+
+✅ **File Download System**
+- Parallel downloads (configurable concurrency, default: 5)
+- Checkpoint/resume support
+- Progress reporting with ETA
+- Organized by order: `files/{visualId}/artwork/`, `files/{visualId}/production/`, etc.
+
+✅ **MinIO Integration**
+- Automatic bucket creation
+- Upload integrity verification
+- Searchable index files
+- Presigned URL generation for temporary access
+
+### Storage Structure
+
+```
+minio://printshop/printavo-archive/
+├── exports/{timestamp}/
+│   ├── orders.json
+│   ├── customers.json
+│   ├── quotes.json
+│   ├── products.json
+│   ├── invoices.json
+│   ├── files_manifest.json
+│   └── summary.json
+│
+├── files/by_order/{visualId}/
+│   ├── artwork/
+│   │   ├── front_design.png
+│   │   └── back_design.jpg
+│   ├── production/
+│   │   ├── front.dst
+│   │   ├── back.eps
+│   │   └── sleeve.ai
+│   └── pdfs/
+│       ├── invoice.pdf
+│       ├── workorder.pdf
+│       └── packing_slip.pdf
+│
+└── index/
+    ├── archive_{timestamp}.json
+    └── latest.json
+```
+
+---
+
+## Python Extraction (Legacy)
 
 ### Prerequisites
 
