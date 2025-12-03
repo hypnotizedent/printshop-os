@@ -24,7 +24,9 @@ export class MinIOUploader {
 
   constructor(config: MinIOConfig) {
     // Parse endpoint to extract host and port
-    const [host, portStr] = config.endpoint.split(':');
+    // Remove protocol if present (e.g., http:// or https://)
+    let endpoint = config.endpoint.replace(/^https?:\/\//, '');
+    const [host, portStr] = endpoint.split(':');
     const port = config.port || (portStr ? parseInt(portStr, 10) : (config.useSSL ? 443 : 9000));
 
     this.client = new Client({

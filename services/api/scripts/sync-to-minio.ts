@@ -28,6 +28,22 @@ import 'dotenv/config';
 import { MinIOUploader, loadMinIOConfig } from '../lib/minio-client';
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+const EXPORT_FILES = [
+  'orders.json',
+  'customers.json',
+  'quotes.json',
+  'products.json',
+  'invoices.json',
+  'files_manifest.json',
+  'summary.json',
+];
+
+const FILE_SUBDIRECTORIES = ['artwork', 'production', 'pdfs'];
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -102,20 +118,10 @@ export class MinIOSync {
    */
   private async uploadExports(): Promise<IndexEntry[]> {
     console.log('📤 Uploading JSON exports...');
-    
-    const exportFiles = [
-      'orders.json',
-      'customers.json',
-      'quotes.json',
-      'products.json',
-      'invoices.json',
-      'files_manifest.json',
-      'summary.json',
-    ];
 
     const index: IndexEntry[] = [];
 
-    for (const filename of exportFiles) {
+    for (const filename of EXPORT_FILES) {
       const localPath = path.join(this.extractionDir, filename);
       
       if (!fs.existsSync(localPath)) {
@@ -181,9 +187,7 @@ export class MinIOSync {
       const orderPath = path.join(byOrderDir, orderDir);
       
       // Process each subdirectory (artwork, production, pdfs)
-      const subdirs = ['artwork', 'production', 'pdfs'];
-      
-      for (const subdir of subdirs) {
+      for (const subdir of FILE_SUBDIRECTORIES) {
         const subdirPath = path.join(orderPath, subdir);
         
         if (!fs.existsSync(subdirPath)) {
@@ -301,8 +305,7 @@ export class MinIOSync {
     let count = 0;
 
     // Count export files
-    const exportFiles = ['orders.json', 'customers.json', 'quotes.json', 'products.json', 'invoices.json', 'files_manifest.json', 'summary.json'];
-    for (const filename of exportFiles) {
+    for (const filename of EXPORT_FILES) {
       if (fs.existsSync(path.join(this.extractionDir, filename))) {
         count++;
       }

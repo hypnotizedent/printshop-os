@@ -183,8 +183,10 @@ export class PrintavoFileDownloader {
       files: [],
     };
 
-    console.log('⚠️  Note: File URL extraction from orders.json is not yet implemented.');
-    console.log('   Files should be added to files_manifest.json during extraction.');
+    console.error('\n⚠️  WARNING: File URL extraction from orders.json is not yet implemented!');
+    console.error('   This will result in NO FILES being downloaded.');
+    console.error('   The extraction script (extract-printavo-v2.ts) should generate');
+    console.error('   a files_manifest.json file containing file URLs.\n');
   }
 
   /**

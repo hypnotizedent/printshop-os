@@ -55,6 +55,8 @@ echo ""
 echo "🔧 Setting up MinIO Client..."
 
 # Install mc client if not present
+# NOTE: In production, consider using a custom MinIO image with mc pre-installed
+# or verify the download with checksums for improved security
 if ! docker exec printshop-minio which mc > /dev/null 2>&1; then
     echo "   Installing MinIO Client..."
     docker exec printshop-minio sh -c "wget -q https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc && chmod +x /usr/local/bin/mc"
