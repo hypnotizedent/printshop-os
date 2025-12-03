@@ -6,6 +6,7 @@
 import { Context } from 'koa';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import * as authService from '../services/auth';
 
 // Type declarations for Strapi custom content types
 // These are needed until proper type generation is run
@@ -108,19 +109,14 @@ export default {
       });
 
       // Generate JWT token using auth service
-      const token = jwt.sign(
-        {
-          id: owner.id,
-          documentId: owner.documentId,
-          email: owner.email,
-          type: 'owner',
-        },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
-      );
+      const token = authService.generateOwnerToken({
+        id: owner.id,
+        documentId: owner.documentId,
+        email: owner.email,
+      });
 
-      // Return sanitized owner data
-      const { passwordHash, twoFactorSecret, ...ownerData } = owner;
+      // Sanitize owner data using auth service
+      const ownerData = authService.sanitizeOwner(owner);
 
       ctx.body = {
         success: true,
@@ -423,7 +419,7 @@ export default {
           return ctx.unauthorized('Owner not found or inactive');
         }
 
-        const { passwordHash, twoFactorSecret, ...ownerData } = owner;
+        const ownerData = authService.sanitizeOwner(owner);
         ctx.body = {
           valid: true,
           type: 'owner',
