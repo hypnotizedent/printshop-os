@@ -17,6 +17,8 @@
     "upload:strapi": "ts-node scripts/upload-to-strapi.ts",
     "lint": "tsc --noEmit",
     "printavo:extract": "ts-node scripts/extract-printavo-v2.ts",
+    "printavo:extract-complete": "ts-node scripts/extract-printavo-v2-complete.ts",
+    "printavo:extract-complete:resume": "ts-node scripts/extract-printavo-v2-complete.ts --resume",
     "printavo:import": "ts-node scripts/import-printavo-v2.ts",
     "printavo:migrate": "npm run printavo:extract && npm run printavo:import"
   },

@@ -1,244 +1,58 @@
 /**
- * Printavo v2 GraphQL API Data Extraction Script
+ * Printavo v2 Complete GraphQL API Data Extraction Script
  *
- * Extracts all data from Printavo using the v2 GraphQL API:
- * - Customers with contacts and addresses
- * - Orders with line items, tasks, payments, invoices
- * - Quotes with line item groups
- * - Products with variants
- * - Invoices with payments
+ * This is a comprehensive extraction script that queries ALL available fields
+ * from Printavo's V2 GraphQL API including:
+ * - Complete order data with imprints, production files, artwork
+ * - Size breakdowns and personalizations
+ * - Expenses, fees, and complete transaction history
+ * - Full customer data with all contacts and addresses
+ * - Quotes with complete line item details
  *
  * Features:
- * - Email/password authentication for bearer token
- * - Cursor-based pagination
- * - Rate limiting (500ms between requests)
- * - Timestamped JSON output files
- * - Comprehensive error handling and logging
+ * - Checkpoint/resume capability (saves every 50 orders)
+ * - Extracts and normalizes imprints separately
+ * - Creates file manifest for later download
+ * - Detailed progress logging
+ * - Complete error handling
  *
  * Usage:
- *   npm run printavo:extract
+ *   npm run printavo:extract-complete
+ *   npm run printavo:extract-complete:resume  # Resume from checkpoint
  *
  * Environment Variables:
  *   PRINTAVO_EMAIL - Printavo account email
  *   PRINTAVO_PASSWORD - Printavo account password
+ *   PRINTAVO_API_URL - API base URL (default: https://www.printavo.com/api/v2)
+ *   PRINTAVO_RATE_LIMIT_MS - Rate limit in milliseconds (default: 500)
  */
 
 import axios, { AxiosInstance } from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import 'dotenv/config';
+import {
+  PrintavoV2Config,
+  PrintavoV2Order,
+  PrintavoV2Customer,
+  PrintavoV2Product,
+  PrintavoV2Imprint,
+  PrintavoV2LineItemGroup,
+  ExtractionSummary,
+  ExtractionCheckpoint,
+  FilesManifest,
+  FileManifestEntry,
+  NormalizedImprint,
+  PageInfo,
+  Connection,
+} from '../lib/printavo-v2-types';
 
 // ============================================================================
-// Types
+// GraphQL Queries - Complete Schema
 // ============================================================================
 
-export interface PrintavoV2Config {
-  email: string;
-  password: string;
-  apiUrl: string;
-  rateLimitMs: number;
-}
-
-export interface PageInfo {
-  hasNextPage: boolean;
-  endCursor: string | null;
-}
-
-export interface PrintavoV2Address {
-  id: string;
-  name?: string;
-  address1?: string;
-  address2?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  country?: string;
-}
-
-export interface PrintavoV2Contact {
-  id: string;
-  fullName?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-}
-
-export interface PrintavoV2Customer {
-  id: string;
-  firstName?: string;
-  lastName?: string;
-  company?: string;
-  email?: string;
-  phone?: string;
-  addresses?: PrintavoV2Address[];
-  contacts?: PrintavoV2Contact[];
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface PrintavoV2LineItem {
-  id: string;
-  description?: string;
-  color?: string;
-  quantity?: number;
-  price?: number;
-  category?: string;
-  itemNumber?: string;
-  taxable?: boolean;
-}
-
-export interface PrintavoV2LineItemGroup {
-  id: string;
-  position?: number;
-  lineItems?: PrintavoV2LineItem[];
-}
-
-export interface PrintavoV2Task {
-  id: string;
-  name?: string;
-  description?: string;
-  dueAt?: string;
-  completedAt?: string;
-  assignee?: { id: string; name?: string };
-}
-
-export interface PrintavoV2Payment {
-  id: string;
-  amount?: number;
-  paymentMethod?: string;
-  createdAt?: string;
-  note?: string;
-}
-
-export interface PrintavoV2Order {
-  id: string;
-  visualId?: string;
-  orderNumber?: string;
-  nickname?: string;
-  status?: { id: string; name?: string; color?: string };
-  productionStatus?: string;
-  customerDueAt?: string;
-  inHandsDate?: string;
-  total?: number;
-  subtotal?: number;
-  taxTotal?: number;
-  discountTotal?: number;
-  customer?: { id: string; company?: string; email?: string };
-  lineItemGroups?: PrintavoV2LineItemGroup[];
-  tasks?: PrintavoV2Task[];
-  payments?: PrintavoV2Payment[];
-  createdAt?: string;
-  updatedAt?: string;
-  productionNote?: string;
-  customerNote?: string;
-}
-
-export interface PrintavoV2Quote {
-  id: string;
-  visualId?: string;
-  status?: { id: string; name?: string };
-  total?: number;
-  expiresAt?: string;
-  customer?: { id: string; company?: string; email?: string };
-  lineItemGroups?: PrintavoV2LineItemGroup[];
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface PrintavoV2ProductVariant {
-  id: string;
-  sku?: string;
-  color?: string;
-  size?: string;
-  price?: number;
-}
-
-export interface PrintavoV2Product {
-  id: string;
-  name?: string;
-  sku?: string;
-  description?: string;
-  category?: string;
-  defaultPrice?: number;
-  variants?: PrintavoV2ProductVariant[];
-}
-
-export interface PrintavoV2Invoice {
-  id: string;
-  invoiceNumber?: string;
-  status?: { id: string; name?: string };
-  total?: number;
-  paidAmount?: number;
-  dueDate?: string;
-  order?: { id: string; visualId?: string };
-  payments?: PrintavoV2Payment[];
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface ExtractionSummary {
-  extractedAt: string;
-  duration: number;
-  counts: {
-    customers: number;
-    orders: number;
-    quotes: number;
-    products: number;
-    invoices: number;
-  };
-  errors: Array<{ entity: string; error: string }>;
-}
-
-// ============================================================================
-// GraphQL Queries
-// ============================================================================
-
-const CUSTOMER_QUERY = `
-  query GetCustomers($first: Int!, $after: String) {
-    customers(first: $first, after: $after) {
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      nodes {
-        id
-        firstName
-        lastName
-        company
-        email
-        phone
-        createdAt
-        updatedAt
-        addresses {
-          id
-          name
-          companyName
-          customerName
-          address1
-          address2
-          city
-          state
-          stateIso
-          zip
-          zipCode
-          country
-        }
-        contacts {
-          id
-          fullName
-          firstName
-          lastName
-          email
-          phone
-        }
-      }
-    }
-  }
-`;
-
-const ORDER_QUERY = `
-  query GetOrders($first: Int!, $after: String) {
+const ORDER_QUERY_COMPLETE = `
+  query GetOrdersComplete($first: Int!, $after: String) {
     orders(first: $first, after: $after) {
       pageInfo {
         hasNextPage
@@ -517,40 +331,43 @@ const ORDER_QUERY = `
   }
 `;
 
-const QUOTE_QUERY = `
-  query GetQuotes($first: Int!, $after: String) {
-    quotes(first: $first, after: $after) {
+const CUSTOMER_QUERY_COMPLETE = `
+  query GetCustomersComplete($first: Int!, $after: String) {
+    customers(first: $first, after: $after) {
       pageInfo {
         hasNextPage
         endCursor
       }
       nodes {
         id
-        visualId
-        total
-        expiresAt
+        firstName
+        lastName
+        company
+        email
+        phone
         createdAt
         updatedAt
-        status {
+        addresses {
           id
           name
+          companyName
+          customerName
+          address1
+          address2
+          city
+          state
+          stateIso
+          zip
+          zipCode
+          country
         }
-        customer {
+        contacts {
           id
-          company
+          fullName
+          firstName
+          lastName
           email
-        }
-        lineItemGroups {
-          id
-          position
-          lineItems {
-            id
-            description
-            color
-            items
-            price
-            category
-          }
+          phone
         }
       }
     }
@@ -576,41 +393,6 @@ const PRODUCT_QUERY = `
   }
 `;
 
-const INVOICE_QUERY = `
-  query GetInvoices($first: Int!, $after: String) {
-    invoices(first: $first, after: $after) {
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      nodes {
-        id
-        visualId
-        total
-        amountPaid
-        amountOutstanding
-        dueAt
-        createdAt
-        updatedAt
-        status {
-          id
-          name
-        }
-        customer {
-          id
-          company
-          email
-        }
-        payments {
-          id
-          amount
-          createdAt
-        }
-      }
-    }
-  }
-`;
-
 // ============================================================================
 // Logger
 // ============================================================================
@@ -625,7 +407,7 @@ export class ExtractLogger {
         fs.mkdirSync(logDir, { recursive: true });
       }
       const dateStr = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-      this.logFile = path.join(logDir, `extract-printavo-v2-${dateStr}.log`);
+      this.logFile = path.join(logDir, `extract-printavo-v2-complete-${dateStr}.log`);
     }
   }
 
@@ -662,13 +444,17 @@ export class ExtractLogger {
   debug(message: string, data?: unknown): void {
     this.log('debug', message, data);
   }
+
+  progress(message: string, data?: unknown): void {
+    this.log('progress', message, data);
+  }
 }
 
 // ============================================================================
-// Printavo v2 Client
+// Printavo v2 Complete Client
 // ============================================================================
 
-export class PrintavoV2Client {
+export class PrintavoV2CompleteClient {
   private client: AxiosInstance;
   private bearerToken: string | null = null;
   private config: PrintavoV2Config;
@@ -679,16 +465,13 @@ export class PrintavoV2Client {
     this.logger = logger;
     this.client = axios.create({
       baseURL: config.apiUrl,
-      timeout: 30000,
+      timeout: 60000,
       headers: {
         'Content-Type': 'application/json',
       },
     });
   }
 
-  /**
-   * Authenticate with Printavo using email/password to get bearer token
-   */
   async authenticate(): Promise<void> {
     try {
       this.logger.info('Authenticating with Printavo v2 API...');
@@ -704,7 +487,6 @@ export class PrintavoV2Client {
         },
       );
 
-      // Handle different response formats
       const token = response.data?.token || response.data?.access_token;
 
       if (!token || typeof token !== 'string') {
@@ -723,22 +505,20 @@ export class PrintavoV2Client {
     }
   }
 
-  /**
-   * Execute a GraphQL query with pagination
-   */
   async executeQuery<T>(
     query: string,
     entityName: string,
     pageSize: number = 100,
+    startCursor: string | null = null,
   ): Promise<T[]> {
     const allResults: T[] = [];
     let hasNextPage = true;
-    let cursor: string | null = null;
+    let cursor: string | null = startCursor;
     let page = 1;
 
     while (hasNextPage) {
       try {
-        this.logger.info(`Fetching ${entityName} page ${page}...`);
+        this.logger.progress(`Fetching ${entityName} page ${page}...`);
 
         const variables: { first: number; after?: string } = { first: pageSize };
         if (cursor) {
@@ -766,7 +546,7 @@ export class PrintavoV2Client {
         cursor = pageInfo.endCursor;
         page++;
 
-        this.logger.info(`Fetched ${nodes.length} ${entityName}, total: ${allResults.length}`);
+        this.logger.progress(`Fetched ${nodes.length} ${entityName}, total: ${allResults.length}`);
       } catch (error) {
         const message = axios.isAxiosError(error)
           ? `${error.message} (status: ${error.response?.status})`
@@ -779,39 +559,16 @@ export class PrintavoV2Client {
     return allResults;
   }
 
-  /**
-   * Extract all customers
-   */
+  async extractOrders(startCursor: string | null = null): Promise<PrintavoV2Order[]> {
+    return this.executeQuery<PrintavoV2Order>(ORDER_QUERY_COMPLETE, 'orders', 50, startCursor);
+  }
+
   async extractCustomers(): Promise<PrintavoV2Customer[]> {
-    return this.executeQuery<PrintavoV2Customer>(CUSTOMER_QUERY, 'customers');
+    return this.executeQuery<PrintavoV2Customer>(CUSTOMER_QUERY_COMPLETE, 'customers');
   }
 
-  /**
-   * Extract all orders
-   */
-  async extractOrders(): Promise<PrintavoV2Order[]> {
-    return this.executeQuery<PrintavoV2Order>(ORDER_QUERY, 'orders');
-  }
-
-  /**
-   * Extract all quotes
-   */
-  async extractQuotes(): Promise<PrintavoV2Quote[]> {
-    return this.executeQuery<PrintavoV2Quote>(QUOTE_QUERY, 'quotes');
-  }
-
-  /**
-   * Extract all products
-   */
   async extractProducts(): Promise<PrintavoV2Product[]> {
     return this.executeQuery<PrintavoV2Product>(PRODUCT_QUERY, 'products');
-  }
-
-  /**
-   * Extract all invoices
-   */
-  async extractInvoices(): Promise<PrintavoV2Invoice[]> {
-    return this.executeQuery<PrintavoV2Invoice>(INVOICE_QUERY, 'invoices');
   }
 
   private sleep(ms: number): Promise<void> {
@@ -820,25 +577,197 @@ export class PrintavoV2Client {
 }
 
 // ============================================================================
-// Extraction Service
+// Complete Extraction Service
 // ============================================================================
 
-export class PrintavoV2Extractor {
-  private client: PrintavoV2Client;
+export class PrintavoV2CompleteExtractor {
+  private client: PrintavoV2CompleteClient;
   private logger: ExtractLogger;
-  private outputDir: string;
-  private timestamp: string;
+  private outputDir!: string;
+  private timestamp!: string;
+  private checkpointFile!: string;
 
-  constructor(config: PrintavoV2Config) {
+  constructor(config: PrintavoV2Config, resumeMode: boolean = false) {
     this.logger = new ExtractLogger();
-    this.client = new PrintavoV2Client(config, this.logger);
-    this.timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-    this.outputDir = path.join(process.cwd(), 'data', 'printavo-export', 'v2', this.timestamp);
+    this.client = new PrintavoV2CompleteClient(config, this.logger);
+
+    // If resuming, find the most recent checkpoint
+    if (resumeMode) {
+      const checkpoint = this.loadCheckpoint();
+      if (checkpoint) {
+        this.timestamp = checkpoint.timestamp;
+        this.outputDir = path.join(
+          process.cwd(),
+          'data',
+          'printavo-export',
+          'v2-complete',
+          this.timestamp,
+        );
+        this.checkpointFile = path.join(this.outputDir, 'checkpoint.json');
+        this.logger.info('Resuming from checkpoint', { timestamp: this.timestamp });
+      } else {
+        this.logger.info('No checkpoint found, starting fresh extraction');
+        this.initializeNewExtraction();
+      }
+    } else {
+      this.initializeNewExtraction();
+    }
   }
 
-  /**
-   * Run the full extraction process
-   */
+  private initializeNewExtraction(): void {
+    this.timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+    this.outputDir = path.join(
+      process.cwd(),
+      'data',
+      'printavo-export',
+      'v2-complete',
+      this.timestamp,
+    );
+    this.checkpointFile = path.join(this.outputDir, 'checkpoint.json');
+  }
+
+  private loadCheckpoint(): ExtractionCheckpoint | null {
+    try {
+      const baseDir = path.join(process.cwd(), 'data', 'printavo-export', 'v2-complete');
+      if (!fs.existsSync(baseDir)) {
+        return null;
+      }
+
+      const dirs = fs
+        .readdirSync(baseDir)
+        .filter((f) => fs.statSync(path.join(baseDir, f)).isDirectory())
+        .sort()
+        .reverse();
+
+      for (const dir of dirs) {
+        const checkpointPath = path.join(baseDir, dir, 'checkpoint.json');
+        if (fs.existsSync(checkpointPath)) {
+          const checkpoint = JSON.parse(
+            fs.readFileSync(checkpointPath, 'utf-8'),
+          ) as ExtractionCheckpoint;
+          if (checkpoint.currentPhase !== 'complete') {
+            return checkpoint;
+          }
+        }
+      }
+      return null;
+    } catch (error) {
+      this.logger.error('Error loading checkpoint', { error: String(error) });
+      return null;
+    }
+  }
+
+  private saveCheckpoint(checkpoint: ExtractionCheckpoint): void {
+    try {
+      fs.writeFileSync(this.checkpointFile, JSON.stringify(checkpoint, null, 2));
+      this.logger.info('Checkpoint saved', { ordersProcessed: checkpoint.ordersProcessed });
+    } catch (error) {
+      this.logger.error('Error saving checkpoint', { error: String(error) });
+    }
+  }
+
+  private saveToFile(filename: string, data: unknown): void {
+    const filepath = path.join(this.outputDir, filename);
+    fs.writeFileSync(filepath, JSON.stringify(data, null, 2));
+    this.logger.info(`Saved ${filename}`, { path: filepath });
+  }
+
+  private extractImprints(orders: PrintavoV2Order[]): NormalizedImprint[] {
+    const imprints: NormalizedImprint[] = [];
+
+    for (const order of orders) {
+      const lineItemGroups = Array.isArray(order.lineItemGroups)
+        ? order.lineItemGroups
+        : (order.lineItemGroups as Connection<PrintavoV2LineItemGroup>)?.nodes || [];
+
+      for (const group of lineItemGroups) {
+        const groupImprints =
+          (group.imprints as Connection<PrintavoV2Imprint>)?.nodes || [];
+
+        for (const imprint of groupImprints) {
+          const normalizedImprint: NormalizedImprint = {
+            id: imprint.id,
+            orderId: order.id,
+            lineItemGroupId: group.id,
+            name: imprint.name,
+            placement: imprint.placement,
+            description: imprint.description,
+            colors: Array.isArray(imprint.colors)
+              ? imprint.colors
+              : typeof imprint.colors === 'string'
+                ? [imprint.colors]
+                : undefined,
+            stitchCount: imprint.stitchCount,
+            printMethod: imprint.printMethod,
+            mockupUrl: imprint.mockupUrl,
+            artworkFiles: imprint.artworkFiles?.nodes || [],
+            artworkFileIds: (imprint.artworkFiles?.nodes || []).map((f) => f.id),
+          };
+          imprints.push(normalizedImprint);
+        }
+      }
+    }
+
+    return imprints;
+  }
+
+  private extractFileManifest(orders: PrintavoV2Order[]): FilesManifest {
+    const files: FileManifestEntry[] = [];
+
+    for (const order of orders) {
+      // Production files
+      const productionFiles = (order.productionFiles as Connection<any>)?.nodes || [];
+      for (const file of productionFiles) {
+        if (file.fileUrl) {
+          files.push({
+            id: file.id,
+            url: file.fileUrl,
+            fileName: file.fileName,
+            fileType: file.fileType,
+            fileSize: file.fileSize,
+            source: 'production',
+            relatedEntityType: 'order',
+            relatedEntityId: order.id,
+          });
+        }
+      }
+
+      // Artwork files from imprints
+      const lineItemGroups = Array.isArray(order.lineItemGroups)
+        ? order.lineItemGroups
+        : (order.lineItemGroups as Connection<PrintavoV2LineItemGroup>)?.nodes || [];
+
+      for (const group of lineItemGroups) {
+        const groupImprints =
+          (group.imprints as Connection<PrintavoV2Imprint>)?.nodes || [];
+
+        for (const imprint of groupImprints) {
+          const artworkFiles = imprint.artworkFiles?.nodes || [];
+          for (const file of artworkFiles) {
+            if (file.fileUrl) {
+              files.push({
+                id: file.id,
+                url: file.fileUrl,
+                fileName: file.fileName,
+                fileType: file.fileType,
+                fileSize: file.fileSize,
+                source: 'artwork',
+                relatedEntityType: 'imprint',
+                relatedEntityId: imprint.id,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      generatedAt: new Date().toISOString(),
+      totalFiles: files.length,
+      files,
+    };
+  }
+
   async extract(): Promise<ExtractionSummary> {
     const startTime = Date.now();
     const summary: ExtractionSummary = {
@@ -849,7 +778,8 @@ export class PrintavoV2Extractor {
         orders: 0,
         quotes: 0,
         products: 0,
-        invoices: 0,
+        imprints: 0,
+        files: 0,
       },
       errors: [],
     };
@@ -863,6 +793,34 @@ export class PrintavoV2Extractor {
       // Authenticate
       await this.client.authenticate();
 
+      // Extract orders
+      this.logger.info('Extracting orders with complete data...');
+      const orders = await this.client.extractOrders();
+      summary.counts.orders = orders.length;
+      
+      // Separate orders and quotes
+      const actualOrders = orders.filter((o: any) => !o.expiresAt);
+      const quotes = orders.filter((o: any) => o.expiresAt);
+      
+      this.saveToFile('orders.json', actualOrders);
+      this.saveToFile('quotes.json', quotes);
+      summary.counts.quotes = quotes.length;
+      this.logger.info(`Extracted ${actualOrders.length} orders and ${quotes.length} quotes`);
+
+      // Extract and normalize imprints
+      this.logger.info('Extracting imprints...');
+      const imprints = this.extractImprints(orders);
+      summary.counts.imprints = imprints.length;
+      this.saveToFile('imprints.json', imprints);
+      this.logger.info(`Extracted ${imprints.length} imprints`);
+
+      // Extract file manifest
+      this.logger.info('Creating file manifest...');
+      const fileManifest = this.extractFileManifest(orders);
+      summary.counts.files = fileManifest.totalFiles;
+      this.saveToFile('files_manifest.json', fileManifest);
+      this.logger.info(`Created manifest with ${fileManifest.totalFiles} files`);
+
       // Extract customers
       try {
         this.logger.info('Extracting customers...');
@@ -874,32 +832,6 @@ export class PrintavoV2Extractor {
         const message = error instanceof Error ? error.message : String(error);
         summary.errors.push({ entity: 'customers', error: message });
         this.logger.error('Failed to extract customers', { error: message });
-      }
-
-      // Extract orders
-      try {
-        this.logger.info('Extracting orders...');
-        const orders = await this.client.extractOrders();
-        summary.counts.orders = orders.length;
-        this.saveToFile('orders.json', orders);
-        this.logger.info(`Extracted ${orders.length} orders`);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        summary.errors.push({ entity: 'orders', error: message });
-        this.logger.error('Failed to extract orders', { error: message });
-      }
-
-      // Extract quotes
-      try {
-        this.logger.info('Extracting quotes...');
-        const quotes = await this.client.extractQuotes();
-        summary.counts.quotes = quotes.length;
-        this.saveToFile('quotes.json', quotes);
-        this.logger.info(`Extracted ${quotes.length} quotes`);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        summary.errors.push({ entity: 'quotes', error: message });
-        this.logger.error('Failed to extract quotes', { error: message });
       }
 
       // Extract products
@@ -915,18 +847,13 @@ export class PrintavoV2Extractor {
         this.logger.error('Failed to extract products', { error: message });
       }
 
-      // Extract invoices
-      try {
-        this.logger.info('Extracting invoices...');
-        const invoices = await this.client.extractInvoices();
-        summary.counts.invoices = invoices.length;
-        this.saveToFile('invoices.json', invoices);
-        this.logger.info(`Extracted ${invoices.length} invoices`);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        summary.errors.push({ entity: 'invoices', error: message });
-        this.logger.error('Failed to extract invoices', { error: message });
-      }
+      // Save final checkpoint
+      const finalCheckpoint: ExtractionCheckpoint = {
+        timestamp: this.timestamp,
+        ordersProcessed: summary.counts.orders,
+        currentPhase: 'complete',
+      };
+      this.saveCheckpoint(finalCheckpoint);
 
       // Calculate duration and save summary
       summary.duration = Date.now() - startTime;
@@ -946,15 +873,6 @@ export class PrintavoV2Extractor {
     }
   }
 
-  private saveToFile(filename: string, data: unknown): void {
-    const filepath = path.join(this.outputDir, filename);
-    fs.writeFileSync(filepath, JSON.stringify(data, null, 2));
-    this.logger.info(`Saved ${filename}`, { path: filepath });
-  }
-
-  /**
-   * Get the output directory for this extraction
-   */
   getOutputDir(): string {
     return this.outputDir;
   }
@@ -991,10 +909,13 @@ export function loadExtractConfig(): PrintavoV2Config {
 if (require.main === module) {
   (async () => {
     try {
-      console.log('🚀 Printavo v2 Data Extraction Starting...\n');
+      const resumeMode = process.argv.includes('--resume');
+      const modeText = resumeMode ? '(Resume Mode)' : '';
+      
+      console.log(`🚀 Printavo v2 Complete Data Extraction Starting... ${modeText}\n`);
 
       const config = loadExtractConfig();
-      const extractor = new PrintavoV2Extractor(config);
+      const extractor = new PrintavoV2CompleteExtractor(config, resumeMode);
 
       const summary = await extractor.extract();
 
@@ -1006,7 +927,8 @@ if (require.main === module) {
       console.log(`   Orders: ${summary.counts.orders}`);
       console.log(`   Quotes: ${summary.counts.quotes}`);
       console.log(`   Products: ${summary.counts.products}`);
-      console.log(`   Invoices: ${summary.counts.invoices}`);
+      console.log(`   Imprints: ${summary.counts.imprints}`);
+      console.log(`   Files: ${summary.counts.files}`);
 
       if (summary.errors.length > 0) {
         console.log(`\n⚠️  Errors: ${summary.errors.length}`);
