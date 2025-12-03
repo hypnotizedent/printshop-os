@@ -395,11 +395,11 @@ export default {
           return ctx.unauthorized('Customer not found');
         }
 
-        const { passwordHash, ...customerData } = customer;
+        const customerData = authService.sanitizeCustomer(customer);
         ctx.body = {
           valid: true,
           type: 'customer',
-          user: customerData,
+          customer: customerData,
         };
       } else if (decoded.type === 'employee') {
         const employee = await strapi.documents('api::employee.employee').findOne({
@@ -410,7 +410,7 @@ export default {
           return ctx.unauthorized('Employee not found or inactive');
         }
 
-        const { pin, ...employeeData } = employee;
+        const employeeData = authService.sanitizeEmployee(employee);
         ctx.body = {
           valid: true,
           type: 'employee',
