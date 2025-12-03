@@ -1,8 +1,20 @@
 # Printavo Complete Extraction System
 
 > **Purpose:** Complete backup of all Printavo data before migration  
-> **Last Updated:** December 1, 2025  
+> **Last Updated:** December 3, 2025  
 > **Status:** ✅ Ready for Use
+
+---
+
+## 🚀 Quick Links
+
+**For Complete Implementation Guide, see:**  
+📘 [**PRINTAVO_EXTRACTION_IMPLEMENTATION.md**](implementation/PRINTAVO_EXTRACTION_IMPLEMENTATION.md)
+
+**Related Documentation:**
+- 📖 [Printavo V2 Schema Reference](implementation/PRINTAVO_V2_SCHEMA_REFERENCE.md)
+- 🗄️ [MinIO Storage Guide](implementation/MINIO_STORAGE_GUIDE.md)
+- 🔄 [n8n Workflow Templates](implementation/N8N_PRINTAVO_WORKFLOWS.md)
 
 ---
 
@@ -451,6 +463,46 @@ After full extraction:
 3. ⏳ Verify data integrity in MinIO
 4. ⏳ Build search/browse UI for archived data
 5. ⏳ Disconnect from Printavo
+
+---
+
+## 📚 Complete Implementation Documentation
+
+This document provides an overview and quick reference for the Printavo extraction system.
+
+**For complete step-by-step implementation instructions, see:**
+
+### [📘 PRINTAVO_EXTRACTION_IMPLEMENTATION.md](implementation/PRINTAVO_EXTRACTION_IMPLEMENTATION.md)
+Complete guide including:
+- Infrastructure setup (VM resources, MinIO deployment)
+- Phase-by-phase extraction steps
+- Verification checklist before canceling Printavo
+- Troubleshooting common issues
+- Timeline estimates (20-36 hours end-to-end)
+
+### [📖 PRINTAVO_V2_SCHEMA_REFERENCE.md](implementation/PRINTAVO_V2_SCHEMA_REFERENCE.md)
+Complete API reference:
+- All GraphQL types (Invoice, Customer, LineItem, Imprint, etc.)
+- 51+ fields per order with descriptions
+- GraphQL query examples
+- Type mappings to Strapi
+
+### [🗄️ MINIO_STORAGE_GUIDE.md](implementation/MINIO_STORAGE_GUIDE.md)
+MinIO configuration and usage:
+- Docker deployment instructions
+- Bucket structure and path conventions
+- S3 API access patterns (Python, Node.js)
+- Presigned URL generation
+- Backup and security configurations
+
+### [🔄 N8N_PRINTAVO_WORKFLOWS.md](implementation/N8N_PRINTAVO_WORKFLOWS.md)
+Ready-to-use n8n workflows:
+- Query orders by customer
+- Search by date range
+- Get artwork files for orders
+- Customer analytics dashboard
+- LLM integration for natural language queries
+- Automated daily reports
 
 ---
 
