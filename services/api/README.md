@@ -27,8 +27,14 @@ npm test:coverage    # Run tests with coverage
 
 ### Sync Operations
 ```bash
-npm run sync:printavo      # Run live Printavo sync
-npm run import:historical  # Import historical orders
+npm run sync:printavo                    # Run live Printavo sync
+npm run import:historical                # Import historical orders
+
+# Printavo V2 Data Extraction
+npm run printavo:extract                 # Basic extraction (~40% of data)
+npm run printavo:extract-complete        # Complete extraction (100% of data)
+npm run printavo:extract-complete:resume # Resume interrupted extraction
+npm run printavo:import                  # Import extracted data to Strapi
 ```
 
 ## Project Structure
@@ -110,12 +116,36 @@ Key variables:
 - `jest` - Testing framework
 - `ts-node` - Run TypeScript directly
 
+## Data Extraction
+
+The API service includes comprehensive Printavo V2 data extraction capabilities:
+
+### Complete Extraction (Recommended)
+Extracts **100%** of available data from Printavo V2 GraphQL API:
+- All order fields (40+ fields vs 15 in basic)
+- Imprints with artwork files
+- Production files
+- Line item size breakdowns and personalizations
+- Complete financial data (payments, refunds, expenses, fees)
+- Billing and shipping addresses
+- Contact and owner information
+
+See [Printavo V2 Complete Extraction Guide](./scripts/PRINTAVO_V2_COMPLETE_EXTRACTION.md) for details.
+
+### Features
+- ✅ Checkpoint/resume capability (every 50 orders)
+- ✅ Normalized imprint data extraction
+- ✅ File manifest for bulk download
+- ✅ Detailed progress logging
+- ✅ Comprehensive error handling
+
 ## Related Documentation
 
 - [Data Flow Guide](./DATA_FLOW.md)
 - [Integration Guide](./INTEGRATION_GUIDE.md)
 - [API Testing Suite](./API_TESTING_SUITE_DELIVERY.md)
 - [Quick Start](./QUICK_START.md)
+- [Printavo V2 Complete Extraction](./scripts/PRINTAVO_V2_COMPLETE_EXTRACTION.md)
 
 ## License
 
