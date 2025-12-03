@@ -118,7 +118,7 @@ All public access goes through Cloudflare Tunnel with these routes:
 | `grafana` | ronny.works | `http://grafana:3000` | Monitoring |
 | `uptime` | ronny.works | `http://uptime-kuma:3001` | Status Page |
 
-> **Note:** Free Cloudflare SSL only covers **one level** of subdomains. Use `printshop-app.ronny.works`, not `app.printshop.ronny.works`.
+> **Note:** Free Cloudflare SSL only covers **one level** of subdomains. Use `mintprints-app.ronny.works`, not `app.mintprints.ronny.works`.
 
 ---
 
@@ -168,8 +168,9 @@ ssh docker-host 'cd ~/stacks/printshop-os && docker compose up -d --build'
 ssh docker-host 'docker network connect printshop_network cloudflared'
 
 # Verify external access
-curl -I https://printshop-app.ronny.works
-curl -I https://printshop.ronny.works
+curl -I https://mintprints-app.ronny.works
+curl -I https://mintprints.ronny.works
+curl -I https://mintprints-api.ronny.works
 ```
 
 ---
@@ -199,10 +200,10 @@ curl -I https://printshop.ronny.works
 
 ```bash
 # For production with Cloudflare Tunnel
-VITE_API_URL=https://api.ronny.works
-VITE_STRAPI_URL=https://printshop.ronny.works
-VITE_PRICING_URL=https://api.ronny.works
-VITE_WS_URL=wss://api.ronny.works
+VITE_API_URL=https://mintprints-api.ronny.works
+VITE_STRAPI_URL=https://mintprints.ronny.works
+VITE_PRICING_URL=https://mintprints-api.ronny.works
+VITE_WS_URL=wss://mintprints-api.ronny.works
 ```
 
 ---

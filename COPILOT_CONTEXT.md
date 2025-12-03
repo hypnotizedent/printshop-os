@@ -190,11 +190,11 @@ VITE_STRAPI_URL=http://localhost:1337
 VITE_PRICING_URL=http://localhost:3004
 VITE_WS_URL=ws://localhost:3004
 
-# Production with Cloudflare Tunnel (example)
-VITE_API_URL=https://api.printshop.example.com
-VITE_STRAPI_URL=https://cms.printshop.example.com
-VITE_PRICING_URL=https://api.printshop.example.com
-VITE_WS_URL=wss://api.printshop.example.com
+# Production with Cloudflare Tunnel (mintprints.ronny.works)
+VITE_API_URL=https://mintprints-api.ronny.works
+VITE_STRAPI_URL=https://mintprints.ronny.works
+VITE_PRICING_URL=https://mintprints-api.ronny.works
+VITE_WS_URL=wss://mintprints-api.ronny.works
 ```
 
 **Important:** After changing VITE_* variables, rebuild the frontend:

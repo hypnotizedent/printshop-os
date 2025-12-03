@@ -776,9 +776,9 @@ All stacks share a Docker network (`homelab-network`) for cross-stack communicat
 
 | Service | URL |
 |---------|-----|
-| Frontend | https://printshop-app.ronny.works |
-| Strapi CMS | https://printshop.ronny.works |
-| API | https://api.ronny.works |
+| Frontend | https://mintprints-app.ronny.works |
+| Strapi CMS | https://mintprints.ronny.works |
+| API | https://mintprints-api.ronny.works |
 | Grafana | https://grafana.ronny.works |
 | n8n | https://n8n.ronny.works |
 
