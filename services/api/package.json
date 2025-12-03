@@ -18,7 +18,10 @@
     "lint": "tsc --noEmit",
     "printavo:extract": "ts-node scripts/extract-printavo-v2.ts",
     "printavo:import": "ts-node scripts/import-printavo-v2.ts",
-    "printavo:migrate": "npm run printavo:extract && npm run printavo:import"
+    "printavo:migrate": "npm run printavo:extract && npm run printavo:import",
+    "printavo:download-files": "ts-node scripts/download-printavo-files.ts",
+    "printavo:sync-minio": "ts-node scripts/sync-to-minio.ts",
+    "printavo:full-archive": "npm run printavo:extract && npm run printavo:download-files && npm run printavo:sync-minio"
   },
   "keywords": [
     "printshop",
@@ -67,6 +70,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.2",
+    "minio": "^7.1.3",
     "pdfkit": "^0.17.2",
     "pg": "^8.16.3",
     "qrcode": "^1.5.4",
