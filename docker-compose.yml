@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_password_change_this}
       POSTGRES_DB: ${POSTGRES_DB:-printshop}
     volumes:
-    - postgres_data:/var/lib/postgresql/data
+    - /mnt/docker/printshop-os/postgres:/var/lib/postgresql/data
     - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
     ports:
     - 5432:5432
@@ -21,13 +21,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: printshop-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
-    - redis_data:/data
+    - /mnt/docker/printshop-os/redis:/data
     ports:
     - 6379:6379
     networks:
@@ -50,7 +51,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-secure_password_change_this}
     volumes:
-    - minio_data:/data
+    - /mnt/docker/printshop-os/minio:/data
     ports:
     - 9000:9000
     - 9001:9001
@@ -68,16 +69,6 @@ services:
       retries: 3
       start_period: 30s
 
-  # ---------------------------------------------------------------------------
-  # MongoDB - For Appsmith (Replica Set Mode Required)
-  # ---------------------------------------------------------------------------
-  # IMPORTANT: Appsmith requires MongoDB to run as a replica set.
-  # First-time setup requires running: ./scripts/init-mongo-replica.sh
-  # This will:
-  #   1. Generate the mongo-keyfile for replica set authentication
-  #   2. Start MongoDB
-  #   3. Initialize the replica set
-  # ---------------------------------------------------------------------------
   mongo:
     image: mongo:6
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--keyFile", "/data/mongo-keyfile"]
@@ -88,19 +79,18 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-secure_password_change_this}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-appsmith}
     volumes:
-      - mongo_data:/data/db
+      - /mnt/docker/printshop-os/mongo:/data/db
       - ./mongo-keyfile:/data/mongo-keyfile:ro
     ports:
     - 27017:27017
     networks:
     - printshop_network
     healthcheck:
-      # Simple TCP port check - MongoDB listens on 27017 when healthy
-      # Avoids exposing credentials in process lists
       test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+
   strapi:
     build:
       context: ./printshop-strapi
@@ -122,7 +112,7 @@ services:
       API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-your-api-token-salt-change-this}
       PUBLIC_URL: ${STRAPI_PUBLIC_URL:-http://localhost:1337}
     volumes:
-    - strapi_uploads:/srv/app/public/uploads
+    - /mnt/docker/printshop-os/strapi/uploads:/srv/app/public/uploads
     ports:
     - 1337:1337
     networks:
@@ -146,6 +136,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 180s
+
   api:
     build:
       context: ./services/api
@@ -189,6 +180,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
   appsmith:
     image: appsmith/appsmith-ce:latest
     container_name: printshop-appsmith
@@ -201,7 +193,7 @@ services:
       APPSMITH_REDIS_URL: redis://redis:6379
       APPSMITH_MAIL_ENABLED: ${APPSMITH_MAIL_ENABLED:-false}
     volumes:
-    - appsmith_data:/appsmith-stacks
+    - /mnt/docker/printshop-os/appsmith:/appsmith-stacks
     ports:
     - 8080:80
     - 8443:443
@@ -225,6 +217,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 90s
+
   botpress:
     image: botpress/server:latest
     container_name: printshop-botpress
@@ -237,7 +230,7 @@ services:
       EXTERNAL_URL: ${BOTPRESS_URL:-http://localhost:3100}
       BP_MODULE_NLU_LANGUAGESOURCES: '[{"endpoint":"https://lang-01.botpress.com"}]'
     volumes:
-    - botpress_data:/botpress/data
+    - /mnt/docker/printshop-os/botpress:/botpress/data
     ports:
     - 3100:3000
     networks:
@@ -260,6 +253,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
   pricing-engine:
     build:
       context: ./services/job-estimator
@@ -285,6 +279,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+
   frontend:
     build:
       context: ./frontend
@@ -316,6 +311,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
 networks:
   printshop_network:
     driver: bridge
@@ -324,64 +320,11 @@ networks:
       config:
         - subnet: 172.21.0.0/24
 
-  # External network for Cloudflare Tunnel connectivity
-  # Created and managed by homelab-infrastructure/stacks/tunnel-stack/
   tunnel_network:
     external: true
     name: tunnel_network
-volumes:
-  postgres_data:
-    name: printshop_postgres_data
-    driver: local
-  redis_data:
-    name: printshop_redis_data
-    driver: local
-  mongo_data:
-    name: printshop_mongo_data
-    driver: local
-  strapi_data:
-    name: printshop_strapi_data
-    driver: local
-  strapi_uploads:
-    name: printshop_strapi_uploads
-    driver: local
-  appsmith_data:
-    name: printshop_appsmith_data
-    driver: local
-  botpress_data:
-    name: printshop_botpress_data
-    driver: local
-  minio_data:
-    name: printshop_minio_data
-    driver: local
 
 # =============================================================================
-# Usage Instructions
-# =============================================================================
-# FIRST-TIME SETUP:
-# 1. Copy .env.example to .env and update with your values
-# 2. Initialize MongoDB replica set: ./scripts/init-mongo-replica.sh
-# 3. Start all services: docker compose up -d
-#
-# DAILY OPERATIONS:
-# - View logs: docker compose logs -f [service-name]
-# - Stop all services: docker compose down
-# - Restart a service: docker compose restart [service-name]
-# - Remove all data: docker compose down -v
-#
-# IMPORTANT NOTES:
-# - Use 'docker compose' (space, V2) not 'docker-compose' (hyphen, V1 deprecated)
-# - Appsmith requires MongoDB replica set (initialized by init-mongo-replica.sh)
-# - Use --remove-orphans when services are removed: docker compose up -d --remove-orphans
-#
-# Service URLs (default):
-# - Strapi Admin: http://localhost:1337/admin
-# - Strapi API: http://localhost:1337/api
-# - Appsmith: http://localhost:8080
-# - Botpress: http://localhost:3100
-# - Frontend: http://localhost:5173
-# - API: http://localhost:3001
-# - Pricing Engine: http://localhost:3004
-#
-# For detailed setup instructions, see /docs/DEPLOYMENT.md
+# STORAGE: All persistent data now on ZFS via NFS mount at /mnt/docker/
+# Benefits: Compression, snapshots, checksums, 21TB capacity
 # =============================================================================
