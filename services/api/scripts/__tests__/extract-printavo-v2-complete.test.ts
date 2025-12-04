@@ -74,7 +74,7 @@ const mockFs = jest.requireMock('fs');
 describe('Printavo v2 Complete Extraction', () => {
   const mockConfig: PrintavoV2Config = {
     email: 'test@example.com',
-    password: 'testpassword',
+    token: 'test-api-token',
     apiUrl: 'https://www.printavo.com/api/v2',
     rateLimitMs: 10, // Fast for testing
   };
@@ -96,35 +96,35 @@ describe('Printavo v2 Complete Extraction', () => {
 
     it('should throw error when PRINTAVO_EMAIL is missing', () => {
       delete process.env.PRINTAVO_EMAIL;
-      process.env.PRINTAVO_PASSWORD = 'testpass';
+      process.env.PRINTAVO_TOKEN = 'test-token';
 
       expect(() => loadExtractConfig()).toThrow('PRINTAVO_EMAIL environment variable is required');
     });
 
-    it('should throw error when PRINTAVO_PASSWORD is missing', () => {
+    it('should throw error when PRINTAVO_TOKEN is missing', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      delete process.env.PRINTAVO_PASSWORD;
+      delete process.env.PRINTAVO_TOKEN;
 
       expect(() => loadExtractConfig()).toThrow(
-        'PRINTAVO_PASSWORD environment variable is required',
+        'PRINTAVO_TOKEN environment variable is required',
       );
     });
 
     it('should load configuration with default values', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      process.env.PRINTAVO_PASSWORD = 'testpass';
+      process.env.PRINTAVO_TOKEN = 'test-token';
 
       const config = loadExtractConfig();
 
       expect(config.email).toBe('test@example.com');
-      expect(config.password).toBe('testpass');
+      expect(config.token).toBe('test-token');
       expect(config.apiUrl).toBe('https://www.printavo.com/api/v2');
       expect(config.rateLimitMs).toBe(500);
     });
 
     it('should load configuration with custom values', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      process.env.PRINTAVO_PASSWORD = 'testpass';
+      process.env.PRINTAVO_TOKEN = 'test-token';
       process.env.PRINTAVO_API_URL = 'https://custom.api.com';
       process.env.PRINTAVO_RATE_LIMIT_MS = '1000';
 

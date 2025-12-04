@@ -65,7 +65,7 @@ cd services/api
 
 # Set environment variables
 export PRINTAVO_EMAIL="your_email@example.com"
-export PRINTAVO_PASSWORD="your_password"
+export PRINTAVO_TOKEN="your_api_token_here"
 
 # Run complete extraction
 npm run printavo:extract-complete
@@ -83,7 +83,7 @@ npm run printavo:extract-complete:resume
 ```bash
 # Required
 PRINTAVO_EMAIL=your_email@example.com
-PRINTAVO_PASSWORD=your_password
+PRINTAVO_TOKEN=your_api_token_here
 
 # Optional (with defaults)
 PRINTAVO_API_URL=https://www.printavo.com/api/v2
