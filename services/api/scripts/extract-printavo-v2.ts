@@ -20,7 +20,7 @@
  *
  * Environment Variables:
  *   PRINTAVO_EMAIL - Printavo account email
- *   PRINTAVO_PASSWORD - Printavo account password
+ *   PRINTAVO_TOKEN - Printavo API token (from "My Account" page)
  */
 
 import axios, { AxiosInstance } from 'axios';
@@ -34,7 +34,7 @@ import 'dotenv/config';
 
 export interface PrintavoV2Config {
   email: string;
-  password: string;
+  token: string;
   apiUrl: string;
   rateLimitMs: number;
 }
@@ -670,7 +670,6 @@ export class ExtractLogger {
 
 export class PrintavoV2Client {
   private client: AxiosInstance;
-  private bearerToken: string | null = null;
   private config: PrintavoV2Config;
   private logger: ExtractLogger;
 
@@ -682,45 +681,17 @@ export class PrintavoV2Client {
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
+        'email': config.email,
+        'token': config.token,
       },
     });
   }
 
   /**
-   * Authenticate with Printavo using email/password to get bearer token
+   * Header-based authentication - no separate auth call needed
    */
   async authenticate(): Promise<void> {
-    try {
-      this.logger.info('Authenticating with Printavo v2 API...');
-
-      const response = await axios.post(
-        `${this.config.apiUrl}/auth`,
-        {
-          email: this.config.email,
-          password: this.config.password,
-        },
-        {
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-
-      // Handle different response formats
-      const token = response.data?.token || response.data?.access_token;
-
-      if (!token || typeof token !== 'string') {
-        throw new Error('No token received from authentication response');
-      }
-
-      this.bearerToken = token;
-      this.client.defaults.headers.common['Authorization'] = `Bearer ${this.bearerToken}`;
-      this.logger.info('Authentication successful');
-    } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? `${error.message} (status: ${error.response?.status})`
-        : String(error);
-      this.logger.error('Authentication failed', { error: message });
-      throw new Error(`Authentication failed: ${message}`);
-    }
+    this.logger.info('Using header-based authentication with Printavo v2 API');
   }
 
   /**
@@ -966,19 +937,19 @@ export class PrintavoV2Extractor {
 
 export function loadExtractConfig(): PrintavoV2Config {
   const email = process.env.PRINTAVO_EMAIL;
-  const password = process.env.PRINTAVO_PASSWORD;
+  const token = process.env.PRINTAVO_TOKEN;
 
   if (!email) {
     throw new Error('PRINTAVO_EMAIL environment variable is required');
   }
 
-  if (!password) {
-    throw new Error('PRINTAVO_PASSWORD environment variable is required');
+  if (!token) {
+    throw new Error('PRINTAVO_TOKEN environment variable is required');
   }
 
   return {
     email,
-    password,
+    token,
     apiUrl: process.env.PRINTAVO_API_URL || 'https://www.printavo.com/api/v2',
     rateLimitMs: parseInt(process.env.PRINTAVO_RATE_LIMIT_MS || '500', 10),
   };

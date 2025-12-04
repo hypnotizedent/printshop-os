@@ -38,7 +38,7 @@ describe('Printavo v2 Types', () => {
     it('should define PrintavoV2Config type', () => {
       const config: PrintavoV2Config = {
         email: 'test@example.com',
-        password: 'password',
+        token: 'test-api-token',
         apiUrl: 'https://api.example.com',
         rateLimitMs: 500,
       };

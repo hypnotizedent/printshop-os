@@ -10,9 +10,10 @@ COPY tsconfig.json ./
 # Install all dependencies (including dev for building)
 RUN npm ci
 
-# Copy source files and lib directory
+# Copy source files, lib directory, and scripts
 COPY src/ ./src/
 COPY lib/ ./lib/
+COPY scripts/ ./scripts/
 
 # Build TypeScript
 RUN npm run build
@@ -31,8 +32,10 @@ COPY package*.json ./
 # Install production dependencies only
 RUN npm ci --omit=dev
 
-# Copy built files from builder stage
+# Copy built files and scripts from builder stage
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/lib ./lib
 
 # Expose port
 EXPOSE 3001
