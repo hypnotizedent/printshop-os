@@ -284,7 +284,7 @@ export function AdminLayout() {
         <AppSidebar currentPage={currentPage} onNavigate={setCurrentPage} />
         <SkipNavContent>
           <main className="flex-1 p-8 overflow-auto" role="main" aria-label="Main content">
-            <div className="max-w-[1600px] mx-auto">
+            <div className="w-full">
               {isLoading ? (
                 <PageLoading message="Loading your dashboard..." />
               ) : (

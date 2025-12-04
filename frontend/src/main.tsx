@@ -11,6 +11,14 @@ import "./main.css"
 import "./styles/theme.css"
 import "./index.css"
 
+// Re-enable transitions after styles are loaded
+window.addEventListener('load', () => {
+  // Remove the transition prevention from critical CSS
+  const style = document.createElement('style');
+  style.textContent = '* { transition: inherit !important; }';
+  document.head.appendChild(style);
+});
+
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
