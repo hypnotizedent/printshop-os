@@ -511,6 +511,153 @@ export interface ApiColorColor extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiCustomOrderCustomOrder extends Struct.CollectionTypeSchema {
+  collectionName: 'custom_orders';
+  info: {
+    description: 'Custom design orders from the online designer';
+    displayName: 'Custom Order';
+    pluralName: 'custom-orders';
+    singularName: 'custom-order';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    canvasData: Schema.Attribute.JSON;
+    color: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
+    customerEmail: Schema.Attribute.Email;
+    customerId: Schema.Attribute.String;
+    designs: Schema.Attribute.JSON & Schema.Attribute.Required;
+    designSession: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::design-session.design-session'
+    >;
+    garmentColor: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'#FFFFFF'>;
+    garmentType: Schema.Attribute.Enumeration<
+      [
+        't-shirt',
+        'hoodie',
+        'tank-top',
+        'long-sleeve',
+        'polo',
+        'sweatshirt',
+        'hat',
+        'jacket',
+      ]
+    > &
+      Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::custom-order.custom-order'
+    > &
+      Schema.Attribute.Private;
+    mockupUrl: Schema.Attribute.String;
+    notes: Schema.Attribute.Text;
+    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    pricing: Schema.Attribute.JSON & Schema.Attribute.Required;
+    printMethod: Schema.Attribute.Enumeration<
+      ['screen-print', 'dtg', 'embroidery', 'heat-transfer', 'sublimation']
+    > &
+      Schema.Attribute.DefaultTo<'screen-print'>;
+    productionFiles: Schema.Attribute.JSON;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1>;
+    rushOrder: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    sessionId: Schema.Attribute.String & Schema.Attribute.Required;
+    size: Schema.Attribute.String;
+    status: Schema.Attribute.Enumeration<
+      ['pending', 'processing', 'in-production', 'completed', 'cancelled']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiCustomerActivityCustomerActivity
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'customer_activities';
+  info: {
+    description: 'Customer account activity log';
+    displayName: 'Customer Activity';
+    pluralName: 'customer-activities';
+    singularName: 'customer-activity';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    activityType: Schema.Attribute.String & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    ipAddress: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::customer-activity.customer-activity'
+    > &
+      Schema.Attribute.Private;
+    metadata: Schema.Attribute.JSON;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiCustomerPreferenceCustomerPreference
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'customer_preferences';
+  info: {
+    description: 'Customer notification and communication preferences';
+    displayName: 'Customer Preference';
+    pluralName: 'customer-preferences';
+    singularName: 'customer-preference';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    artApproval: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customer: Schema.Attribute.Relation<'oneToOne', 'api::customer.customer'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::customer-preference.customer-preference'
+    > &
+      Schema.Attribute.Private;
+    marketingEmails: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    orderConfirmation: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
+    productionUpdates: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
+    publishedAt: Schema.Attribute.DateTime;
+    quoteReminders: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    shipmentNotifications: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
+    smsNotifications: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
   collectionName: 'customers';
   info: {
@@ -532,6 +679,7 @@ export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     email: Schema.Attribute.Email & Schema.Attribute.Required;
     jobs: Schema.Attribute.Relation<'oneToMany', 'api::job.job'>;
+    lastSegmentUpdate: Schema.Attribute.DateTime;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -545,11 +693,93 @@ export interface ApiCustomerCustomer extends Struct.CollectionTypeSchema {
     phone: Schema.Attribute.String;
     printavoId: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    segment: Schema.Attribute.Enumeration<['vip', 'b2b', 'middleman', 'b2c']> &
+      Schema.Attribute.DefaultTo<'b2c'>;
+    segmentAutoDetected: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
+    segmentDetails: Schema.Attribute.JSON;
     state: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     zipCode: Schema.Attribute.String;
+  };
+}
+
+export interface ApiDesignSessionDesignSession
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'design_sessions';
+  info: {
+    description: 'Customer design sessions for the online designer tool';
+    displayName: 'Design Session';
+    pluralName: 'design-sessions';
+    singularName: 'design-session';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    canvasData: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
+    customerEmail: Schema.Attribute.Email;
+    customerId: Schema.Attribute.String;
+    designs: Schema.Attribute.JSON & Schema.Attribute.Required;
+    garmentColor: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'#FFFFFF'>;
+    garmentSize: Schema.Attribute.Enumeration<
+      ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', 'XXXXXL']
+    > &
+      Schema.Attribute.DefaultTo<'M'>;
+    garmentType: Schema.Attribute.Enumeration<
+      [
+        't-shirt',
+        'hoodie',
+        'tank-top',
+        'long-sleeve',
+        'polo',
+        'sweatshirt',
+        'hat',
+        'jacket',
+      ]
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'t-shirt'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::design-session.design-session'
+    > &
+      Schema.Attribute.Private;
+    mockupUrl: Schema.Attribute.String;
+    notes: Schema.Attribute.Text;
+    pricing: Schema.Attribute.JSON & Schema.Attribute.Required;
+    printMethod: Schema.Attribute.Enumeration<
+      ['screen-print', 'dtg', 'embroidery', 'heat-transfer', 'sublimation']
+    > &
+      Schema.Attribute.DefaultTo<'screen-print'>;
+    productId: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<1>;
+    shareToken: Schema.Attribute.String;
+    status: Schema.Attribute.Enumeration<
+      ['draft', 'active', 'quoted', 'ordered', 'completed', 'abandoned']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'active'>;
+    thumbnailUrl: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -569,14 +799,7 @@ export interface ApiEmployeeEmployee extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     department: Schema.Attribute.Enumeration<
-      [
-        'screen-printing',
-        'embroidery',
-        'dtg',
-        'finishing',
-        'shipping',
-        'design',
-      ]
+      ['screen_printing', 'embroidery', 'digital']
     >;
     email: Schema.Attribute.Email & Schema.Attribute.Unique;
     firstName: Schema.Attribute.String & Schema.Attribute.Required;
@@ -607,6 +830,232 @@ export interface ApiEmployeeEmployee extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiFileEventFileEvent extends Struct.CollectionTypeSchema {
+  collectionName: 'file_events';
+  info: {
+    description: 'Audit log for production file movements (hot folder system)';
+    displayName: 'File Event';
+    pluralName: 'file-events';
+    singularName: 'file-event';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    destinationLocation: Schema.Attribute.String;
+    errorMessage: Schema.Attribute.Text;
+    eventType: Schema.Attribute.Enumeration<
+      [
+        'uploaded',
+        'approved',
+        'sent_to_machine',
+        'started_processing',
+        'completed',
+        'archived',
+        'error',
+        'deleted',
+      ]
+    > &
+      Schema.Attribute.Required;
+    fileName: Schema.Attribute.String & Schema.Attribute.Required;
+    filePath: Schema.Attribute.String & Schema.Attribute.Required;
+    fileSize: Schema.Attribute.BigInteger;
+    fileType: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::file-event.file-event'
+    > &
+      Schema.Attribute.Private;
+    machineId: Schema.Attribute.String;
+    machineName: Schema.Attribute.String;
+    metadata: Schema.Attribute.JSON;
+    operatorId: Schema.Attribute.String;
+    operatorName: Schema.Attribute.String;
+    orderId: Schema.Attribute.String;
+    orderNumber: Schema.Attribute.String;
+    processingDuration: Schema.Attribute.Integer;
+    publishedAt: Schema.Attribute.DateTime;
+    sourceLocation: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiImprintImprint extends Struct.CollectionTypeSchema {
+  collectionName: 'imprints';
+  info: {
+    description: 'Decoration/imprint details for line items (screen print, embroidery, etc.)';
+    displayName: 'Imprint';
+    pluralName: 'imprints';
+    singularName: 'imprint';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    artworkUrl: Schema.Attribute.String;
+    colorCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1>;
+    colors: Schema.Attribute.Text;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    decorationType: Schema.Attribute.Enumeration<
+      [
+        'Screen Print',
+        'Embroidery',
+        'DTG',
+        'DTF',
+        'Vinyl',
+        'Sublimation',
+        'Other',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'Screen Print'>;
+    description: Schema.Attribute.Text;
+    hasUnderbase: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    height: Schema.Attribute.Decimal;
+    imprintNumber: Schema.Attribute.String & Schema.Attribute.Required;
+    lineItem: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::line-item.line-item'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::imprint.imprint'
+    > &
+      Schema.Attribute.Private;
+    location: Schema.Attribute.Enumeration<
+      [
+        'Full Front',
+        'Full Back',
+        'Left Chest',
+        'Right Chest',
+        'Left Sleeve',
+        'Right Sleeve',
+        'Nape',
+        'Pocket',
+        'Left Leg',
+        'Right Leg',
+        'Other',
+      ]
+    >;
+    locationSize: Schema.Attribute.Enumeration<
+      ['Small', 'Medium', 'Large', 'Extra Large', 'Custom']
+    >;
+    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    printavoId: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    setupComplete: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    stitchCount: Schema.Attribute.Integer;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    width: Schema.Attribute.Decimal;
+  };
+}
+
+export interface ApiJobCostJobCost extends Struct.CollectionTypeSchema {
+  collectionName: 'job_costs';
+  info: {
+    description: 'Cost tracking and profit calculation for jobs';
+    displayName: 'Job Cost';
+    pluralName: 'job-costs';
+    singularName: 'job-cost';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    costEnteredAt: Schema.Attribute.DateTime;
+    costEnteredBy: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::users-permissions.user'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    job: Schema.Attribute.Relation<'oneToOne', 'api::job.job'>;
+    laborCosts: Schema.Attribute.Component<'cost.labor-cost', true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::job-cost.job-cost'
+    > &
+      Schema.Attribute.Private;
+    materialCosts: Schema.Attribute.Component<'cost.material-cost', false>;
+    overheadCost: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    overheadPercentage: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 100;
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<15>;
+    profit: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    profitMargin: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    revenue: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    supplierCosts: Schema.Attribute.Component<'cost.supplier-cost', true>;
+    totalCost: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    totalLaborCost: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    totalMaterialCost: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    totalSupplierCost: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiJobJob extends Struct.CollectionTypeSchema {
   collectionName: 'jobs';
   info: {
@@ -619,10 +1068,17 @@ export interface ApiJobJob extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    assignedEmployee: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::employee.employee'
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
+    department: Schema.Attribute.Enumeration<
+      ['screen_printing', 'embroidery', 'digital']
+    >;
     dueDate: Schema.Attribute.Date;
     jobNumber: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -630,12 +1086,78 @@ export interface ApiJobJob extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
     printavoId: Schema.Attribute.String;
+    printMethod: Schema.Attribute.String;
     productDescription: Schema.Attribute.Text;
     productionNotes: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
     quantity: Schema.Attribute.Integer;
     status: Schema.Attribute.String;
     title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiLineItemLineItem extends Struct.CollectionTypeSchema {
+  collectionName: 'line_items';
+  info: {
+    description: 'Order line items with individual size quantities - matches Printavo data model';
+    displayName: 'Line Item';
+    pluralName: 'line-items';
+    singularName: 'line-item';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    category: Schema.Attribute.String;
+    color: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    goodsStatus: Schema.Attribute.String;
+    imprints: Schema.Attribute.Relation<'oneToMany', 'api::imprint.imprint'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::line-item.line-item'
+    > &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    orderId: Schema.Attribute.BigInteger;
+    orderVisualId: Schema.Attribute.String;
+    printavoId: Schema.Attribute.String & Schema.Attribute.Unique;
+    publishedAt: Schema.Attribute.DateTime;
+    size12M: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size18M: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size24M: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size2T: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size2XL: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size3T: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size3XL: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size4T: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size4XL: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size5T: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size5XL: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    size6M: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeL: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeM: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeOther: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeS: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeXL: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeXS: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeYL: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeYM: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeYS: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeYXL: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    sizeYXS: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    styleDescription: Schema.Attribute.Text;
+    styleNumber: Schema.Attribute.String;
+    taxable: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    totalCost: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    totalQuantity: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    unitCost: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -668,7 +1190,11 @@ export interface ApiMachineMachine extends Struct.CollectionTypeSchema {
       ]
     > &
       Schema.Attribute.Required;
+    hotFolderCompleted: Schema.Attribute.String;
+    hotFolderIncoming: Schema.Attribute.String;
+    hotFolderProcessing: Schema.Attribute.String;
     lastMaintenanceDate: Schema.Attribute.Date;
+    lastSeen: Schema.Attribute.DateTime;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -681,11 +1207,12 @@ export interface ApiMachineMachine extends Struct.CollectionTypeSchema {
     manufacturer: Schema.Attribute.String;
     model: Schema.Attribute.String;
     name: Schema.Attribute.String & Schema.Attribute.Required;
+    networkAddress: Schema.Attribute.String;
     nextMaintenanceDate: Schema.Attribute.Date;
     notes: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
     status: Schema.Attribute.Enumeration<
-      ['active', 'maintenance', 'offline', 'retired']
+      ['active', 'idle', 'running', 'maintenance', 'offline', 'retired']
     > &
       Schema.Attribute.DefaultTo<'active'>;
     type: Schema.Attribute.Enumeration<
@@ -709,6 +1236,73 @@ export interface ApiMachineMachine extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiNotificationPreferenceNotificationPreference
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'notification_preferences';
+  info: {
+    description: 'Customer notification preferences for multi-channel communications (email/SMS)';
+    displayName: 'Notification Preference';
+    pluralName: 'notification-preferences';
+    singularName: 'notification-preference';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customer: Schema.Attribute.Relation<'oneToOne', 'api::customer.customer'>;
+    emailAddress: Schema.Attribute.Email;
+    emailEnabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::notification-preference.notification-preference'
+    > &
+      Schema.Attribute.Private;
+    preferences: Schema.Attribute.JSON &
+      Schema.Attribute.DefaultTo<{
+        artwork_ready: {
+          email: true;
+          sms: false;
+        };
+        garments_arrived: {
+          email: true;
+          sms: false;
+        };
+        in_production: {
+          email: true;
+          sms: false;
+        };
+        payment_received: {
+          email: true;
+          sms: false;
+        };
+        quality_check: {
+          email: true;
+          sms: false;
+        };
+        ready_for_pickup: {
+          email: true;
+          sms: true;
+        };
+        shipped: {
+          email: true;
+          sms: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    smsEnabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    smsForPickupOnly: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
+    smsPhone: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
   collectionName: 'orders';
   info: {
@@ -723,24 +1317,45 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
   attributes: {
     amountOutstanding: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     amountPaid: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    approved: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    approvedAt: Schema.Attribute.DateTime;
+    approvedBy: Schema.Attribute.String;
+    billingAddress: Schema.Attribute.JSON;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     customer: Schema.Attribute.Relation<'manyToOne', 'api::customer.customer'>;
+    customerDueDate: Schema.Attribute.Date;
     customerPO: Schema.Attribute.String;
+    deliveryMethod: Schema.Attribute.Enumeration<
+      ['pickup', 'ship', 'delivery', 'other']
+    >;
     discount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     dueDate: Schema.Attribute.Date;
+    fees: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    invoiceDate: Schema.Attribute.Date;
     items: Schema.Attribute.JSON;
     jobs: Schema.Attribute.Relation<'oneToMany', 'api::job.job'>;
+    lineItems: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::line-item.line-item'
+    >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
       Schema.Attribute.Private;
     notes: Schema.Attribute.Text;
+    orderNickname: Schema.Attribute.String;
     orderNumber: Schema.Attribute.String & Schema.Attribute.Required;
-    printavoId: Schema.Attribute.String;
+    paymentDueDate: Schema.Attribute.Date;
+    payments: Schema.Attribute.Relation<'oneToMany', 'api::payment.payment'>;
+    printavoCustomerId: Schema.Attribute.String;
+    printavoId: Schema.Attribute.String & Schema.Attribute.Unique;
+    productionDueDate: Schema.Attribute.Date;
     productionNotes: Schema.Attribute.Text;
+    publicHash: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     salesTax: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    shippingAddress: Schema.Attribute.JSON;
     status: Schema.Attribute.Enumeration<
       [
         'QUOTE',
@@ -749,6 +1364,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
         'IN_PRODUCTION',
         'COMPLETE',
         'READY_FOR_PICKUP',
+        'SHIPPED',
         'PAYMENT_NEEDED',
         'INVOICE_PAID',
         'CANCELLED',
@@ -756,6 +1372,42 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.DefaultTo<'QUOTE'>;
     totalAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    visualId: Schema.Attribute.String;
+  };
+}
+
+export interface ApiOwnerOwner extends Struct.CollectionTypeSchema {
+  collectionName: 'owners';
+  info: {
+    description: 'Shop owners with full admin access';
+    displayName: 'Owner';
+    pluralName: 'owners';
+    singularName: 'owner';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    lastLogin: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::owner.owner'> &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    passwordHash: Schema.Attribute.String & Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    twoFactorEnabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    twoFactorSecret: Schema.Attribute.String & Schema.Attribute.Private;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -791,16 +1443,27 @@ export interface ApiPaymentPayment extends Struct.CollectionTypeSchema {
     notes: Schema.Attribute.Text;
     order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
     paidAt: Schema.Attribute.DateTime;
+    paymentDate: Schema.Attribute.Date;
     paymentMethod: Schema.Attribute.Enumeration<
-      ['stripe', 'cash', 'check', 'bank_transfer', 'other']
+      [
+        'stripe',
+        'cash',
+        'check',
+        'credit_card',
+        'ach',
+        'bank_transfer',
+        'other',
+      ]
     > &
-      Schema.Attribute.DefaultTo<'stripe'>;
+      Schema.Attribute.DefaultTo<'cash'>;
     paymentType: Schema.Attribute.Enumeration<
       ['deposit', 'balance', 'full', 'refund']
     > &
       Schema.Attribute.DefaultTo<'full'>;
     publishedAt: Schema.Attribute.DateTime;
     receiptUrl: Schema.Attribute.String;
+    recordedBy: Schema.Attribute.String;
+    referenceNumber: Schema.Attribute.String;
     refundAmount: Schema.Attribute.Decimal;
     refundedAt: Schema.Attribute.DateTime;
     refundReason: Schema.Attribute.Text;
@@ -917,7 +1580,7 @@ export interface ApiPricingRulePricingRule extends Struct.CollectionTypeSchema {
 export interface ApiProductProduct extends Struct.CollectionTypeSchema {
   collectionName: 'products';
   info: {
-    description: 'Supplier products (SanMar, AS Colour, S&S Activewear)';
+    description: 'Curated supplier products catalog (Top 500). Live inventory via /api/inventory/check/:sku';
     displayName: 'Product';
     pluralName: 'products';
     singularName: 'product';
@@ -926,29 +1589,39 @@ export interface ApiProductProduct extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
-    availability: Schema.Attribute.JSON;
+    basePrice: Schema.Attribute.Decimal;
     brand: Schema.Attribute.String;
     category: Schema.Attribute.Enumeration<
       [
         't-shirts',
         'polos',
         'sweatshirts',
+        'hoodies',
         'jackets',
         'pants',
         'shorts',
         'hats',
         'bags',
         'accessories',
+        'workwear',
+        'athletic',
+        'outerwear',
+        'youth',
         'other',
       ]
     > &
       Schema.Attribute.DefaultTo<'other'>;
+    colors: Schema.Attribute.JSON;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
     images: Schema.Attribute.JSON;
     isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    isCurated: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    isFavorite: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    isTopProduct: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    lastOrderedAt: Schema.Attribute.DateTime;
     lastSyncedAt: Schema.Attribute.DateTime;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -957,20 +1630,35 @@ export interface ApiProductProduct extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    pricing: Schema.Attribute.JSON;
+    orderCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    priceBreaks: Schema.Attribute.JSON;
+    priority: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 100;
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
     publishedAt: Schema.Attribute.DateTime;
+    sizes: Schema.Attribute.JSON;
     sku: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
+    specifications: Schema.Attribute.JSON;
     supplier: Schema.Attribute.Enumeration<
       ['sanmar', 'ascolour', 'ssactivewear']
     > &
       Schema.Attribute.Required;
     supplierProductId: Schema.Attribute.String;
+    tags: Schema.Attribute.JSON;
+    topProductScore: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    totalUnitsOrdered: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    variants: Schema.Attribute.JSON;
+    usageCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
   };
 }
 
@@ -1676,11 +2364,21 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::color.color': ApiColorColor;
+      'api::custom-order.custom-order': ApiCustomOrderCustomOrder;
+      'api::customer-activity.customer-activity': ApiCustomerActivityCustomerActivity;
+      'api::customer-preference.customer-preference': ApiCustomerPreferenceCustomerPreference;
       'api::customer.customer': ApiCustomerCustomer;
+      'api::design-session.design-session': ApiDesignSessionDesignSession;
       'api::employee.employee': ApiEmployeeEmployee;
+      'api::file-event.file-event': ApiFileEventFileEvent;
+      'api::imprint.imprint': ApiImprintImprint;
+      'api::job-cost.job-cost': ApiJobCostJobCost;
       'api::job.job': ApiJobJob;
+      'api::line-item.line-item': ApiLineItemLineItem;
       'api::machine.machine': ApiMachineMachine;
+      'api::notification-preference.notification-preference': ApiNotificationPreferenceNotificationPreference;
       'api::order.order': ApiOrderOrder;
+      'api::owner.owner': ApiOwnerOwner;
       'api::payment.payment': ApiPaymentPayment;
       'api::price-calculation.price-calculation': ApiPriceCalculationPriceCalculation;
       'api::pricing-rule.pricing-rule': ApiPricingRulePricingRule;
