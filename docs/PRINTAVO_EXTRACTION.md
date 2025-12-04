@@ -1,24 +1,27 @@
-# Printavo Complete Extraction System
+# Printavo Data Extraction
 
-> **Purpose:** Complete backup of all Printavo data before migration  
-> **Last Updated:** December 3, 2025  
-> **Status:** ✅ Ready for Use
+> **⚠️ IMPORTANT: This document has been superseded**
 
----
+## 📘 See: [PRINTAVO_EXTRACTION_GUIDE.md](./PRINTAVO_EXTRACTION_GUIDE.md)
 
-## 🚀 Quick Links
+**This is the single source of truth for Printavo data extraction.**
 
-**For Complete Implementation Guide, see:**  
-📘 [**PRINTAVO_EXTRACTION_IMPLEMENTATION.md**](implementation/PRINTAVO_EXTRACTION_IMPLEMENTATION.md)
-
-**Related Documentation:**
-- 📖 [Printavo V2 Schema Reference](implementation/PRINTAVO_V2_SCHEMA_REFERENCE.md)
-- 🗄️ [MinIO Storage Guide](implementation/MINIO_STORAGE_GUIDE.md)
-- 🔄 [n8n Workflow Templates](implementation/N8N_PRINTAVO_WORKFLOWS.md)
+The new guide includes:
+- ✅ Updated authentication (header-based, no /auth endpoint)
+- ✅ TypeScript V2 GraphQL extraction (production ready)
+- ✅ Quick start commands for Docker deployment
+- ✅ Troubleshooting for common issues
+- ✅ Complete technical documentation
 
 ---
 
-## Overview
+## Legacy Information (Archived)
+
+The content below is kept for historical reference only.
+
+---
+
+## Overview (LEGACY - DO NOT USE)
 
 The Printavo Extraction System downloads EVERYTHING from Printavo and stores it in MinIO for permanent archival. This ensures a complete backup of all data before fully migrating away from Printavo.
 

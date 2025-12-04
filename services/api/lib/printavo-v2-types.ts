@@ -18,7 +18,7 @@
 
 export interface PrintavoV2Config {
   email: string;
-  password: string;
+  token: string;  // API token from Printavo → My Account → API Key
   apiUrl: string;
   rateLimitMs: number;
 }

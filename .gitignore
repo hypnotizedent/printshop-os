@@ -136,6 +136,10 @@ data/strapi-imports/
 data/assets/
 data/downloads/
 
+# Old extraction attempts - use v2-complete only
+data/raw/printavo-exports/
+data/printavo-export/v2/
+
 # CSV and Archive exports
 *.csv
 *.zip
