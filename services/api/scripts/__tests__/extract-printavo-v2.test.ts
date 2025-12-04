@@ -68,7 +68,7 @@ const mockAxios = jest.requireMock('axios') as MockAxiosInstance;
 describe('Printavo v2 Extraction', () => {
   const mockConfig: PrintavoV2Config = {
     email: 'test@example.com',
-    password: 'testpassword',
+    token: 'test-api-token',
     apiUrl: 'https://www.printavo.com/api/v2',
     rateLimitMs: 10, // Fast for testing
   };
@@ -90,35 +90,35 @@ describe('Printavo v2 Extraction', () => {
 
     it('should throw error when PRINTAVO_EMAIL is missing', () => {
       delete process.env.PRINTAVO_EMAIL;
-      process.env.PRINTAVO_PASSWORD = 'testpass';
+      process.env.PRINTAVO_TOKEN = 'testtoken';
 
       expect(() => loadExtractConfig()).toThrow('PRINTAVO_EMAIL environment variable is required');
     });
 
-    it('should throw error when PRINTAVO_PASSWORD is missing', () => {
+    it('should throw error when PRINTAVO_TOKEN is missing', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      delete process.env.PRINTAVO_PASSWORD;
+      delete process.env.PRINTAVO_TOKEN;
 
       expect(() => loadExtractConfig()).toThrow(
-        'PRINTAVO_PASSWORD environment variable is required',
+        'PRINTAVO_TOKEN environment variable is required',
       );
     });
 
     it('should load config with default values', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      process.env.PRINTAVO_PASSWORD = 'testpass';
+      process.env.PRINTAVO_TOKEN = 'testtoken';
 
       const config = loadExtractConfig();
 
       expect(config.email).toBe('test@example.com');
-      expect(config.password).toBe('testpass');
+      expect(config.token).toBe('testtoken');
       expect(config.apiUrl).toBe('https://www.printavo.com/api/v2');
       expect(config.rateLimitMs).toBe(500);
     });
 
     it('should load custom API URL from environment', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      process.env.PRINTAVO_PASSWORD = 'testpass';
+      process.env.PRINTAVO_TOKEN = 'testtoken';
       process.env.PRINTAVO_API_URL = 'https://custom.api.url';
 
       const config = loadExtractConfig();
@@ -128,7 +128,7 @@ describe('Printavo v2 Extraction', () => {
 
     it('should load custom rate limit from environment', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      process.env.PRINTAVO_PASSWORD = 'testpass';
+      process.env.PRINTAVO_TOKEN = 'testtoken';
       process.env.PRINTAVO_RATE_LIMIT_MS = '1000';
 
       const config = loadExtractConfig();
@@ -189,55 +189,16 @@ describe('Printavo v2 Extraction', () => {
     });
 
     describe('authenticate', () => {
-      it('should authenticate successfully', async () => {
-        mockAxios.post.mockResolvedValueOnce({
-          data: { token: 'test-bearer-token' },
-        });
-
+      it('should use header-based authentication', async () => {
         await client.authenticate();
 
-        expect(mockAxios.post).toHaveBeenCalledWith(
-          `${mockConfig.apiUrl}/auth`,
-          { email: mockConfig.email, password: mockConfig.password },
-          { headers: { 'Content-Type': 'application/json' } },
-        );
-      });
-
-      it('should handle authentication with access_token format', async () => {
-        mockAxios.post.mockResolvedValueOnce({
-          data: { access_token: 'test-access-token' },
-        });
-
-        await client.authenticate();
-
-        expect(mockAxios.post).toHaveBeenCalled();
-      });
-
-      it('should throw error when no token received', async () => {
-        mockAxios.post.mockResolvedValueOnce({
-          data: {},
-        });
-
-        await expect(client.authenticate()).rejects.toThrow('No token received');
-      });
-
-      it('should throw error on authentication failure', async () => {
-        const mockError = {
-          isAxiosError: true,
-          message: 'Unauthorized',
-          response: { status: 401 },
-        };
-        mockAxios.post.mockRejectedValueOnce(mockError);
-
-        await expect(client.authenticate()).rejects.toThrow('Authentication failed');
+        // No HTTP calls should be made during authentication
+        expect(mockAxios.post).not.toHaveBeenCalled();
       });
     });
 
     describe('executeQuery', () => {
       beforeEach(async () => {
-        mockAxios.post.mockResolvedValueOnce({
-          data: { token: 'test-token' },
-        });
         await client.authenticate();
       });
 
@@ -287,7 +248,7 @@ describe('Printavo v2 Extraction', () => {
         const results = await client.extractCustomers();
 
         expect(results).toHaveLength(2);
-        expect(mockAxios.post).toHaveBeenCalledTimes(3); // 1 auth + 2 pages
+        expect(mockAxios.post).toHaveBeenCalledTimes(2); // 2 pages (no auth call)
       });
 
       it('should throw error when no data returned', async () => {
@@ -318,12 +279,7 @@ describe('Printavo v2 Extraction', () => {
     });
 
     it('should return summary with counts', async () => {
-      // Mock successful auth
-      mockAxios.post.mockResolvedValueOnce({
-        data: { token: 'test-token' },
-      });
-
-      // Mock empty responses for all entities
+      // Mock empty responses for all entities (no auth call needed)
       const emptyResponse = (entityName: string) => ({
         data: {
           data: {
@@ -354,10 +310,7 @@ describe('Printavo v2 Extraction', () => {
     });
 
     it('should record errors for failed entity extraction', async () => {
-      // Mock successful auth
-      mockAxios.post.mockResolvedValueOnce({
-        data: { token: 'test-token' },
-      });
+      // No auth call needed with header-based auth
 
       // Mock failed customers, successful others
       mockAxios.post.mockRejectedValueOnce(new Error('Customer fetch failed'));

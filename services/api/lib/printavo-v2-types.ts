@@ -18,7 +18,7 @@
 
 export interface PrintavoV2Config {
   email: string;
-  password: string;
+  token: string;
   apiUrl: string;
   rateLimitMs: number;
 }
