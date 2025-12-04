@@ -333,9 +333,9 @@ export function DashboardPage({ stats, recentJobs, machines, onNavigate, onViewO
             </CardHeader>
             <CardContent className="px-4 pb-4">
               {isUsingDemoData && (
-                <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-md bg-muted/50 border border-dashed border-border">
-                  <Info className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                  <span className="text-xs text-muted-foreground">Demo data shown</span>
+                <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-md bg-amber-50 border border-amber-200 dark:bg-amber-950 dark:border-amber-800">
+                  <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                  <span className="text-xs font-medium text-amber-700 dark:text-amber-300">Demo Mode - No machines configured yet</span>
                 </div>
               )}
               <div className="space-y-3">

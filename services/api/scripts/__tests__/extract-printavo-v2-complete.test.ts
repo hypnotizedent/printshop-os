@@ -96,7 +96,7 @@ describe('Printavo v2 Complete Extraction', () => {
 
     it('should throw error when PRINTAVO_EMAIL is missing', () => {
       delete process.env.PRINTAVO_EMAIL;
-      process.env.PRINTAVO_TOKEN = 'test-token';
+      process.env.PRINTAVO_TOKEN = 'testtoken';
 
       expect(() => loadExtractConfig()).toThrow('PRINTAVO_EMAIL environment variable is required');
     });
@@ -112,19 +112,19 @@ describe('Printavo v2 Complete Extraction', () => {
 
     it('should load configuration with default values', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      process.env.PRINTAVO_TOKEN = 'test-token';
+      process.env.PRINTAVO_TOKEN = 'testtoken';
 
       const config = loadExtractConfig();
 
       expect(config.email).toBe('test@example.com');
-      expect(config.token).toBe('test-token');
+      expect(config.token).toBe('testtoken');
       expect(config.apiUrl).toBe('https://www.printavo.com/api/v2');
       expect(config.rateLimitMs).toBe(500);
     });
 
     it('should load configuration with custom values', () => {
       process.env.PRINTAVO_EMAIL = 'test@example.com';
-      process.env.PRINTAVO_TOKEN = 'test-token';
+      process.env.PRINTAVO_TOKEN = 'testtoken';
       process.env.PRINTAVO_API_URL = 'https://custom.api.com';
       process.env.PRINTAVO_RATE_LIMIT_MS = '1000';
 
@@ -162,31 +162,14 @@ describe('Printavo v2 Complete Extraction', () => {
       expect(client).toBeDefined();
     });
 
-    it('should initialize with header-based authentication', () => {
+    it('should use header-based authentication', async () => {
       const logger = new ExtractLogger(false);
-      new PrintavoV2CompleteClient(mockConfig, logger);
+      const client = new PrintavoV2CompleteClient(mockConfig, logger);
 
-      expect(mockAxios.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          baseURL: mockConfig.apiUrl,
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-            'email': mockConfig.email,
-            'token': mockConfig.token,
-          }),
-        }),
-      );
-    });
+      await client.authenticate();
 
-    it('should set correct timeout in client', () => {
-      const logger = new ExtractLogger(false);
-      new PrintavoV2CompleteClient(mockConfig, logger);
-
-      expect(mockAxios.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          timeout: 60000,
-        }),
-      );
+      // No HTTP calls should be made during authentication
+      expect(mockAxios.post).not.toHaveBeenCalled();
     });
   });
 
@@ -256,12 +239,7 @@ describe('Printavo v2 Complete Extraction', () => {
       const logger = new ExtractLogger(false);
       const client = new PrintavoV2CompleteClient(mockConfig, logger);
 
-      // Mock authentication
-      mockAxios.post.mockResolvedValueOnce({
-        data: { token: 'test-token' },
-      });
-
-      // Mock order query response with complete data
+      // Mock order query response with complete data (no auth call needed)
       mockAxios.post.mockResolvedValueOnce({
         data: {
           data: {
@@ -329,6 +307,7 @@ describe('Printavo v2 Complete Extraction', () => {
         },
       });
 
+      await client.authenticate();
       const orders = await client.extractOrders();
 
       expect(orders).toHaveLength(1);

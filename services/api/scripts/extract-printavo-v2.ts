@@ -20,7 +20,7 @@
  *
  * Environment Variables:
  *   PRINTAVO_EMAIL - Printavo account email
- *   PRINTAVO_TOKEN - Printavo API token (get from Printavo Dashboard → My Account → API Key)
+ *   PRINTAVO_TOKEN - Printavo API token (from "My Account" page)
  */
 
 import axios, { AxiosInstance } from 'axios';
@@ -34,7 +34,7 @@ import 'dotenv/config';
 
 export interface PrintavoV2Config {
   email: string;
-  token: string;  // API token from Printavo → My Account → API Key
+  token: string;
   apiUrl: string;
   rateLimitMs: number;
 }
@@ -676,8 +676,6 @@ export class PrintavoV2Client {
   constructor(config: PrintavoV2Config, logger: ExtractLogger) {
     this.config = config;
     this.logger = logger;
-    
-    // Printavo V2 uses header-based authentication on every request
     this.client = axios.create({
       baseURL: config.apiUrl,
       timeout: 30000,
@@ -687,8 +685,13 @@ export class PrintavoV2Client {
         'token': config.token,
       },
     });
-    
-    this.logger.info('Printavo V2 client initialized with header-based authentication');
+  }
+
+  /**
+   * Header-based authentication - no separate auth call needed
+   */
+  async authenticate(): Promise<void> {
+    this.logger.info('Using header-based authentication with Printavo v2 API');
   }
 
   /**
@@ -828,6 +831,9 @@ export class PrintavoV2Extractor {
         fs.mkdirSync(this.outputDir, { recursive: true });
       }
 
+      // Authenticate
+      await this.client.authenticate();
+
       // Extract customers
       try {
         this.logger.info('Extracting customers...');
@@ -938,7 +944,7 @@ export function loadExtractConfig(): PrintavoV2Config {
   }
 
   if (!token) {
-    throw new Error('PRINTAVO_TOKEN environment variable is required (get from Printavo → My Account → API Key)');
+    throw new Error('PRINTAVO_TOKEN environment variable is required');
   }
 
   return {
