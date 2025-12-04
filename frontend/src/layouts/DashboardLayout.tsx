@@ -279,20 +279,41 @@ export function DashboardLayout({
             {/* Right side actions */}
             <div className="flex items-center gap-2">
               {/* Search button */}
-              <Button variant="ghost" size="icon" className="hidden sm:flex">
-                <Search className="w-5 h-5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hidden sm:flex" disabled>
+                    <Search className="w-5 h-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Search (Coming Soon)</p>
+                </TooltipContent>
+              </Tooltip>
 
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative" aria-label="Notifications, you have unread notifications">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" aria-hidden="true" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative" aria-label="Notifications, you have unread notifications" disabled>
+                    <Bell className="w-5 h-5" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" aria-hidden="true" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Notifications (Coming Soon)</p>
+                </TooltipContent>
+              </Tooltip>
 
               {/* Help */}
-              <Button variant="ghost" size="icon" className="hidden sm:flex">
-                <HelpCircle className="w-5 h-5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hidden sm:flex" disabled>
+                    <HelpCircle className="w-5 h-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Help & Documentation (Coming Soon)</p>
+                </TooltipContent>
+              </Tooltip>
 
               {/* User menu */}
               {user && (
@@ -323,13 +344,13 @@ export function DashboardLayout({
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem disabled>
                       <User className="w-4 h-4 mr-2" />
-                      Profile
+                      Profile (Coming Soon)
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem disabled>
                       <Settings className="w-4 h-4 mr-2" />
-                      Settings
+                      Settings (Coming Soon)
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
