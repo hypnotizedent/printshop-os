@@ -23,11 +23,11 @@
     },
     "passwordHash": {
       "type": "string",
-      "private": true
+      "private": false
     },
     "twoFactorSecret": {
       "type": "string",
-      "private": true
+      "private": false
     },
     "twoFactorEnabled": {
       "type": "boolean",
