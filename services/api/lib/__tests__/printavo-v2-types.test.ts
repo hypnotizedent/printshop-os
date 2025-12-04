@@ -38,12 +38,13 @@ describe('Printavo v2 Types', () => {
     it('should define PrintavoV2Config type', () => {
       const config: PrintavoV2Config = {
         email: 'test@example.com',
-        password: 'password',
+        token: 'test-api-token',
         apiUrl: 'https://api.example.com',
         rateLimitMs: 500,
       };
 
       expect(config.email).toBe('test@example.com');
+      expect(config.token).toBe('test-api-token');
       expect(config.rateLimitMs).toBe(500);
     });
 

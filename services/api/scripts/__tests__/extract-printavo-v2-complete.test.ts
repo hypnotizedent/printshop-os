@@ -162,47 +162,30 @@ describe('Printavo v2 Complete Extraction', () => {
       expect(client).toBeDefined();
     });
 
-    it('should authenticate successfully', async () => {
+    it('should initialize with header-based authentication', () => {
       const logger = new ExtractLogger(false);
-      const client = new PrintavoV2CompleteClient(mockConfig, logger);
+      new PrintavoV2CompleteClient(mockConfig, logger);
 
-      mockAxios.post.mockResolvedValueOnce({
-        data: { token: 'test-token-123' },
-      });
-
-      await client.authenticate();
-
-      expect(mockAxios.post).toHaveBeenCalledWith(
-        `${mockConfig.apiUrl}/auth`,
-        {
-          email: mockConfig.email,
-          password: mockConfig.password,
-        },
-        {
-          headers: { 'Content-Type': 'application/json' },
-        },
+      expect(mockAxios.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseURL: mockConfig.apiUrl,
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+            'email': mockConfig.email,
+            'token': mockConfig.token,
+          }),
+        }),
       );
     });
 
-    it('should handle authentication failure', async () => {
+    it('should set correct timeout in client', () => {
       const logger = new ExtractLogger(false);
-      const client = new PrintavoV2CompleteClient(mockConfig, logger);
+      new PrintavoV2CompleteClient(mockConfig, logger);
 
-      mockAxios.post.mockRejectedValueOnce(new Error('Network error'));
-
-      await expect(client.authenticate()).rejects.toThrow('Authentication failed');
-    });
-
-    it('should handle missing token in authentication response', async () => {
-      const logger = new ExtractLogger(false);
-      const client = new PrintavoV2CompleteClient(mockConfig, logger);
-
-      mockAxios.post.mockResolvedValueOnce({
-        data: {},
-      });
-
-      await expect(client.authenticate()).rejects.toThrow(
-        'No token received from authentication response',
+      expect(mockAxios.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeout: 60000,
+        }),
       );
     });
   });
@@ -346,7 +329,6 @@ describe('Printavo v2 Complete Extraction', () => {
         },
       });
 
-      await client.authenticate();
       const orders = await client.extractOrders();
 
       expect(orders).toHaveLength(1);

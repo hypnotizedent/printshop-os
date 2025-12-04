@@ -262,7 +262,7 @@ describe('Printavo v2 Extraction', () => {
         const results = await client.extractCustomers();
 
         expect(results).toHaveLength(2);
-        expect(mockAxios.post).toHaveBeenCalledTimes(3); // 1 auth + 2 pages
+        expect(mockAxios.post).toHaveBeenCalledTimes(2); // 2 pages (auth via headers)
       });
 
       it('should throw error when no data returned', async () => {
