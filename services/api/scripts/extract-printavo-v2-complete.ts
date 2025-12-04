@@ -22,7 +22,7 @@
  *
  * Environment Variables:
  *   PRINTAVO_EMAIL - Printavo account email
- *   PRINTAVO_TOKEN - Printavo API token (get from My Account → API Key)
+ *   PRINTAVO_TOKEN - Printavo API token (get from Printavo Dashboard → My Account → API Key)
  *   PRINTAVO_API_URL - API base URL (default: https://www.printavo.com/api/v2)
  *   PRINTAVO_RATE_LIMIT_MS - Rate limit in milliseconds (default: 500)
  */

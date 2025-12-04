@@ -20,7 +20,7 @@
  *
  * Environment Variables:
  *   PRINTAVO_EMAIL - Printavo account email
- *   PRINTAVO_TOKEN - Printavo API token (get from My Account → API Key)
+ *   PRINTAVO_TOKEN - Printavo API token (get from Printavo Dashboard → My Account → API Key)
  */
 
 import axios, { AxiosInstance } from 'axios';
