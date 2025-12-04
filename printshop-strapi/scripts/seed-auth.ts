@@ -24,7 +24,7 @@ const DEFAULT_ACCOUNTS = {
     email: 'employee@mintprints.com',
     pin: '1234',
     role: 'admin',
-    department: 'screen-printing',
+    department: 'screen_printing',
   },
   customer: {
     email: 'customer@test.com',
@@ -99,7 +99,7 @@ async function seedAccounts() {
           email: DEFAULT_ACCOUNTS.employee.email,
           pin: hashedPin,
           role: DEFAULT_ACCOUNTS.employee.role as 'operator' | 'supervisor' | 'admin',
-          department: DEFAULT_ACCOUNTS.employee.department as 'screen-printing' | 'embroidery' | 'dtg' | 'finishing' | 'shipping' | 'design',
+          department: DEFAULT_ACCOUNTS.employee.department as 'screen_printing' | 'embroidery' | 'digital',
           isActive: true,
           hourlyRate: 20.0,
         },
