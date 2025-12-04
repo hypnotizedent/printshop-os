@@ -13,25 +13,50 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="/src/main.css" rel="stylesheet" />
     <style>
-        /* Prevent flash of unstyled content - set initial background */
+        /* Critical CSS - Prevent flash of unstyled content */
+        :root {
+            --background: #FFFFFF;
+            --foreground: #0A0A0A;
+            --primary: #3B82F6;
+            --card: #FFFFFF;
+            --muted: #F4F4F5;
+        }
+        
+        .dark {
+            --background: #0A0A0A;
+            --foreground: #FAFAFA;
+            --card: #18181B;
+            --muted: #27272A;
+        }
+        
         html, body, #root {
-            background-color: #fafafa;
+            background-color: var(--background);
+            color: var(--foreground);
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
-        @media (prefers-color-scheme: dark) {
-            html, body, #root {
-                background-color: #1a1a1a;
-            }
+        
+        /* Prevent pink/color flash during load */
+        body.loading * {
+            transition: none !important;
         }
-        .dark html, .dark body, .dark #root {
-            background-color: #1a1a1a;
+        
+        /* Loading spinner styles */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
+    <link href="/src/main.css" rel="stylesheet" />
 </head>
 
-<body>
+<body class="loading">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 </body>
