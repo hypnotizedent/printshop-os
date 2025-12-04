@@ -13,10 +13,8 @@ import "./index.css"
 
 // Re-enable transitions after styles are loaded
 window.addEventListener('load', () => {
-  // Remove the transition prevention from critical CSS
-  const style = document.createElement('style');
-  style.textContent = '* { transition: inherit !important; }';
-  document.head.appendChild(style);
+  // Remove the loading class to re-enable transitions
+  document.body.classList.remove('loading');
 });
 
 // Register service worker for PWA
