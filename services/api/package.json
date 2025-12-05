@@ -28,7 +28,8 @@
     "migrate:extract:incremental": "node scripts/printavo-extract.js --since",
     "migrate:import": "node scripts/strapi-import.js",
     "migrate:full": "bash scripts/migrate-printavo.sh",
-    "migrate:incremental": "bash scripts/migrate-printavo.sh --incremental"
+    "migrate:incremental": "bash scripts/migrate-printavo.sh --incremental",
+    "migrate:test": "bash scripts/test-migration.sh"
   },
   "keywords": [
     "printshop",
