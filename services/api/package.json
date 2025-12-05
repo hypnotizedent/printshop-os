@@ -23,7 +23,12 @@
     "printavo:migrate": "npm run printavo:extract && npm run printavo:import",
     "printavo:download-files": "ts-node scripts/download-printavo-files.ts",
     "printavo:sync-minio": "ts-node scripts/sync-to-minio.ts",
-    "printavo:full-archive": "npm run printavo:extract && npm run printavo:download-files && npm run printavo:sync-minio"
+    "printavo:full-archive": "npm run printavo:extract && npm run printavo:download-files && npm run printavo:sync-minio",
+    "migrate:extract": "node scripts/printavo-extract.js",
+    "migrate:extract:incremental": "node scripts/printavo-extract.js --since",
+    "migrate:import": "node scripts/strapi-import.js",
+    "migrate:full": "bash scripts/migrate-printavo.sh",
+    "migrate:incremental": "bash scripts/migrate-printavo.sh --incremental"
   },
   "keywords": [
     "printshop",
