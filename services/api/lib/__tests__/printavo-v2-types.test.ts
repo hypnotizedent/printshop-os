@@ -44,6 +44,7 @@ describe('Printavo v2 Types', () => {
       };
 
       expect(config.email).toBe('test@example.com');
+      expect(config.token).toBe('test-api-token');
       expect(config.rateLimitMs).toBe(500);
     });
 

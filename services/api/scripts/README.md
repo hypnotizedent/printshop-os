@@ -44,7 +44,7 @@ npm run printavo:extract
 
 **Environment Variables:**
 - `PRINTAVO_EMAIL` - Printavo account email
-- `PRINTAVO_PASSWORD` - Printavo account password
+- `PRINTAVO_TOKEN` - Printavo API token (get from My Account → API Key)
 
 ### download-printavo-files.ts
 

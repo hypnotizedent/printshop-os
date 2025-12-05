@@ -18,7 +18,7 @@ Create a `.env` file in `services/api/` with the following variables:
 ```bash
 # Printavo v2 API Authentication
 PRINTAVO_EMAIL=your-email@example.com
-PRINTAVO_PASSWORD=your-printavo-password
+PRINTAVO_TOKEN=your-api-token-here
 
 # Strapi API Configuration
 STRAPI_API_URL=http://localhost:1337
@@ -148,7 +148,7 @@ cat data/printavo-export/v2/{timestamp}/summary.json
 **Error:** `Authentication failed: ...`
 
 **Solutions:**
-1. Verify PRINTAVO_EMAIL and PRINTAVO_PASSWORD are correct
+1. Verify PRINTAVO_EMAIL and PRINTAVO_TOKEN are correct
 2. Ensure your Printavo account has API access
 3. Check if your account requires 2FA (not supported via API)
 

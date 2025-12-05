@@ -76,18 +76,47 @@ docker logs printshop-strapi --tail 50 -f
 ---
 
 ## Service Structure
-- ✅ **COMPLETE Printavo API extraction** - ALL accessible data exported:
-  - **12,867 orders** (61 MB) with 44,158 embedded line items (23 MB)
-  - **3,358 customers** (3.8 MB)
-  - **1,463 tasks**, 297 expenses, 105 products, 25 statuses
-  - Categories, delivery methods, payment terms, inquiries, users
-- ✅ **V2 GraphQL API tested** - Schema accessible but data queries return "Unauthorized"
-- ✅ **Comprehensive API documentation created**: `docs/reference/PRINTAVO_API.md`
-  - All V1 endpoints documented with fields and examples
-  - V2 GraphQL schema introspection results
-  - Field mapping to Strapi content types
-- ⚠️ **Imprints NOT accessible** - V1 `/lineitemgroups` returns 500, V2 unauthorized
-- 📁 **Export location**: `data/raw/printavo-exports/complete_2025-11-27_14-20-05/`
+
+### Printavo Data Extraction
+
+**Location**: `services/api/scripts/extract-printavo-v2-complete.ts`  
+**Documentation**: [docs/PRINTAVO_EXTRACTION_GUIDE.md](PRINTAVO_EXTRACTION_GUIDE.md)  
+**Status**: ✅ Production Ready
+
+**Commands:**
+```bash
+# Full V2 GraphQL extraction
+npm run printavo:extract-complete
+
+# Resume from checkpoint
+npm run printavo:extract-complete:resume
+
+# Download artwork/production files
+npm run printavo:download-files
+
+# Upload to MinIO
+npm run printavo:sync-minio
+
+# All of the above
+npm run printavo:full-archive
+```
+
+**Data Extracted:**
+- **12,867+ orders** with complete details, status, dates, notes
+- **3,358+ customers** with contacts, addresses, company info
+- **500+ quotes** with line items and pricing
+- **40,000+ imprints** with decoration details, colors, placement
+- **115,000+ artwork files** (PNG, DST, EPS, AI, PDF URLs)
+- **10,000+ production files** (production assets URLs)
+
+**Output**: `services/api/data/printavo-export/v2-complete/{timestamp}/`
+
+---
+
+### Historical Data (Archived)
+- ✅ **V1 REST API extraction complete** (archived, no longer used)
+- 📁 **Old exports**: `data/raw/printavo-exports/` (gitignored)
+- ⚠️ **Python scripts removed** - use TypeScript V2 only
 
 ### Session 11 Notes (Nov 27, 2025)
 - ✅ Admin account created and operational
