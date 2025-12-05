@@ -383,3 +383,175 @@ Batch import script for historical order data. See the file header for usage det
 
 - **Live Sync**: Use for ongoing operations to keep Strapi in sync with Printavo
 - **Batch Import**: Use for initial data migration or importing archived order data from files
+
+---
+
+## Production Migration System (NEW)
+
+**For production-ready, one-time migration with incremental sync support.**
+
+### Quick Start
+
+```bash
+# Test the migration system
+npm run migrate:test
+
+# Run full migration
+npm run migrate:full
+
+# Run incremental sync (during transition)
+npm run migrate:incremental -- --since="2025-12-04"
+```
+
+### Scripts
+
+#### `printavo-extract.js` (NEW)
+
+Clean JavaScript extraction script for production use.
+
+**Features:**
+- Extracts ALL orders with complete field data
+- Extracts ALL customers with complete data
+- Handles GraphQL complexity limits (page size: 5 for orders, 25 for customers)
+- Rate limiting (600ms delay)
+- Saves to `/app/data/printavo-final/` with timestamps
+- Incremental extraction support
+
+**Usage:**
+```bash
+# Full extraction
+node printavo-extract.js
+
+# Incremental (orders since date)
+node printavo-extract.js --since="2025-12-04"
+
+# Or via npm
+npm run migrate:extract
+```
+
+**Environment Variables:**
+- `PRINTAVO_EMAIL` - Printavo email
+- `PRINTAVO_TOKEN` - Printavo API token (from "My Account" page)
+
+#### `strapi-import.js` (NEW)
+
+Import extracted data into Strapi with relationship handling.
+
+**Features:**
+- Reads extracted JSON files
+- Imports customers first (for relationships)
+- Imports orders with customer relationships
+- Upsert logic (by printavoId)
+- Progress tracking and error logging
+- Summary report generation
+
+**Usage:**
+```bash
+# Import from specific directory
+node strapi-import.js /app/data/printavo-final/full-2025-12-04T10-30-00
+
+# Import from most recent extraction
+node strapi-import.js
+
+# Or via npm
+npm run migrate:import
+```
+
+**Environment Variables:**
+- `STRAPI_URL` - Strapi base URL
+- `STRAPI_API_TOKEN` - Strapi API token
+
+#### `migrate-printavo.sh` (NEW)
+
+Master orchestration script for complete migration.
+
+**Features:**
+- Runs extraction → validation → import → report
+- Pre-flight checks (env vars, Strapi connectivity)
+- Error handling with colored output
+- Support for incremental mode
+
+**Usage:**
+```bash
+# Full migration
+./migrate-printavo.sh
+
+# Incremental sync
+./migrate-printavo.sh --incremental --since="2025-12-04"
+
+# Or via npm
+npm run migrate:full
+npm run migrate:incremental -- --since="2025-12-04"
+```
+
+#### `test-migration.sh` (NEW)
+
+Validate migration system before running.
+
+**Tests:**
+- Script files and syntax
+- Required dependencies
+- Environment variables
+- GraphQL queries
+- System requirements
+
+**Usage:**
+```bash
+./test-migration.sh
+
+# Or via npm
+npm run migrate:test
+```
+
+#### `lib/printavo-queries.js` (NEW)
+
+GraphQL queries optimized for Printavo's complexity limits.
+
+**Contains:**
+- `ORDER_QUERY` - Full order extraction with all fields
+- `CUSTOMER_QUERY` - Customer extraction with contacts/addresses
+- `INCREMENTAL_ORDER_QUERY` - Incremental order sync
+
+### Documentation
+
+Complete migration guide: [`../PRINTAVO_MIGRATION.md`](../PRINTAVO_MIGRATION.md)
+
+**Includes:**
+- Full setup instructions
+- Environment configuration
+- Step-by-step migration process
+- Data mapping reference (Printavo → Strapi)
+- Status mapping
+- Troubleshooting guide
+- Performance metrics
+- Best practices
+
+### Comparison: Old vs New Migration
+
+| Feature | Old Scripts (TypeScript) | New Scripts (JavaScript) |
+|---------|-------------------------|-------------------------|
+| Language | TypeScript | JavaScript (production-ready) |
+| Page Size | Variable | Optimized (5 for orders, 25 for customers) |
+| Rate Limiting | 500ms | 600ms (more conservative) |
+| Output Location | `data/printavo-export/v2/` | `/app/data/printavo-final/` |
+| Incremental Support | Limited | Full support with --since flag |
+| Documentation | Technical | Production guide with troubleshooting |
+| Master Script | No | Yes (`migrate-printavo.sh`) |
+| Validation | No | Yes (`test-migration.sh`) |
+| Use Case | Development/testing | Production migration |
+
+### When to Use Which
+
+**Use NEW Production Migration System when:**
+- Performing one-time full migration from Printavo
+- Running incremental syncs during transition period
+- Need production-ready scripts with comprehensive error handling
+- Want complete documentation and troubleshooting guide
+
+**Use OLD TypeScript Scripts when:**
+- Developing or testing extraction logic
+- Need to extract additional fields not in production scripts
+- Working with development data
+- Need MinIO integration for file archival
+
+---
