@@ -140,8 +140,10 @@ echo "Testing environment configuration..."
 if [ -f "../.env" ]; then
     test_pass ".env file exists"
     
-    # Source the .env file for checking
-    export $(cat ../.env | grep -v '^#' | xargs) 2>/dev/null || true
+    # Source the .env file for checking (safely)
+    set -a
+    source ../.env 2>/dev/null || true
+    set +a
     
     if [ -n "$PRINTAVO_EMAIL" ]; then
         test_pass "PRINTAVO_EMAIL is set"
@@ -183,7 +185,7 @@ fi
 if command -v jq &> /dev/null; then
     test_pass "jq is installed"
 else
-    test_warn "jq is not installed (recommended for shell script)"
+    test_fail "jq is not installed (required for migrate-printavo.sh)"
 fi
 
 if command -v curl &> /dev/null; then

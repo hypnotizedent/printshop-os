@@ -145,8 +145,17 @@ async function extractOrders(client, outputDir, incremental = false) {
   };
   
   if (incremental && sinceDate) {
-    variables.since = new Date(sinceDate).toISOString();
-    log('info', `Extracting orders updated since: ${variables.since}`);
+    try {
+      const parsedDate = new Date(sinceDate);
+      if (isNaN(parsedDate.getTime())) {
+        throw new Error(`Invalid date format: ${sinceDate}`);
+      }
+      variables.since = parsedDate.toISOString();
+      log('info', `Extracting orders updated since: ${variables.since}`);
+    } catch (error) {
+      log('error', 'Invalid --since date format. Use YYYY-MM-DD format.');
+      throw error;
+    }
   }
 
   while (hasNextPage) {

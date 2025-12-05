@@ -131,9 +131,15 @@ validate_extraction() {
 check_strapi_connection() {
     log_info "Checking Strapi connection..."
     
+    # Use header file to avoid exposing token in process list
+    local header_file=$(mktemp)
+    echo "Authorization: Bearer $STRAPI_API_TOKEN" > "$header_file"
+    
     local response=$(curl -s -o /dev/null -w "%{http_code}" \
-        -H "Authorization: Bearer $STRAPI_API_TOKEN" \
+        -H @"$header_file" \
         "$STRAPI_URL/api/customers?pagination[limit]=1")
+    
+    rm -f "$header_file"
     
     if [ "$response" -eq 200 ] || [ "$response" -eq 404 ]; then
         log_success "Strapi is accessible"

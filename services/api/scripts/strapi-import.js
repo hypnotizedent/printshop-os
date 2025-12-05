@@ -80,10 +80,14 @@ function transformCustomer(printavoCustomer) {
                `${printavoCustomer.firstName || ''} ${printavoCustomer.lastName || ''}`.trim() ||
                'Unknown Customer';
   
+  // Generate placeholder email only if missing, using a safe format
+  const email = printavoCustomer.email || 
+                `noreply+printavo-${printavoCustomer.id}@printshop-migration.local`;
+  
   return {
     printavoId: printavoCustomer.id,
     name: name,
-    email: printavoCustomer.email || `customer-${printavoCustomer.id}@placeholder.com`,
+    email: email,
     phone: printavoCustomer.phone || null,
     company: printavoCustomer.company || null,
     notes: printavoCustomer.internalNote || null,
